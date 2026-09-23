@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 
+from app.db.tenant import ACROSS_TENANTS
 from app.models.identity import (
     Organization,
     OrganizationUser,
@@ -100,7 +101,12 @@ def test_deleting_org_removes_its_memberships(db):
     db.flush()
     db.execute(delete(Organization).where(Organization.id == org.id))
     assert (
-        db.scalars(select(OrganizationUser).where(OrganizationUser.user_id == user.id)).all() == []
+        db.scalars(
+            select(OrganizationUser)
+            .where(OrganizationUser.user_id == user.id)
+            .execution_options(**ACROSS_TENANTS)
+        ).all()
+        == []
     )
 
 

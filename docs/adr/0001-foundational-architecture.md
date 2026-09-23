@@ -21,10 +21,24 @@ KPI values and writes forecasts.
 
 - Every tenant-owned table carries a non-null `organization_id` FK to
   `organizations`, indexed (usually as the leading column of composite indexes).
-- **Enforcement layer 1 (Phase 2):** all tenant data access goes through a
-  tenant-scoped repository/session helper that injects
-  `WHERE organization_id = :current_org`. Route handlers never build raw
-  unscoped queries against tenant tables.
+- **Enforcement layer 1 (built in Phase 2, step 8 — `app/db/tenant.py`):**
+  - Tenant tables are models using `TenantScopedMixin`.
+  - Routes under `/organizations/{organization_id}/...` take the `CurrentTenant`
+    dependency, which checks active membership of an active organisation and scopes
+    the request's session with `tenant_scope()`.
+  - While scoped, a SQLAlchemy `do_orm_execute` hook adds
+    `organization_id = <tenant>` to **every** SELECT/UPDATE/DELETE touching a tenant
+    table (joins, subqueries and relationship loads included), and a `before_flush`
+    hook stamps new rows and refuses rows for another organisation.
+  - **Fail closed:** with no tenant in scope, touching a tenant table raises
+    `TenantScopeError`. Code that deliberately spans organisations (e.g. listing a
+    user's own memberships) must opt out with `.execution_options(**ACROSS_TENANTS)`
+    — grep for `ACROSS_TENANTS` to audit every such place.
+  - Background jobs (later phases) must wrap their work in `tenant_scope()` per
+    organisation.
+  - **Limit:** the hooks see ORM/Core statements only. Raw SQL strings (`text(...)`)
+    bypass them, so raw SQL against tenant tables is not allowed in application code
+    (layer 2, row-level security, will also cover that gap).
 - **Enforcement layer 2 (Phase 25 hardening, designed for now):** PostgreSQL
   Row-Level Security policies keyed off `current_setting('app.current_org')`,
   so a missed filter in application code fails closed.

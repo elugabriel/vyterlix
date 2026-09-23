@@ -158,8 +158,11 @@ GitHub Actions runs `ruff check`, `ruff format --check` and `pytest` on every pu
 
 - **Branches:** `main` is always working. Each step gets its own branch
   (e.g. `phase2-users`), merged into `main` when its tests pass.
-- **Tenant isolation:** every table holding a customer's business data has an
-  `organization_id`, and every query on it is scoped by organisation.
+- **Tenant isolation:** every table holding a customer's business data uses
+  `TenantScopedMixin`. Business endpoints live under `/organizations/{organization_id}/`
+  and take the `CurrentTenant` dependency; queries are then scoped automatically, and a
+  query on business data with no organisation in scope raises `TenantScopeError`. Only
+  use `ACROSS_TENANTS` for queries that genuinely span organisations. See ADR 0001 §2.
 - **Money:** `NUMERIC` in the database, `Decimal` in Python — never `float`.
 - **Errors:** raise `AppError` subclasses from `app.core.errors`; every error response
   uses the same `{"error": {...}}` shape.

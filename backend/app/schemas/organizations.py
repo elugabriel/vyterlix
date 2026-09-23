@@ -22,3 +22,12 @@ class OrganizationOut(BaseModel):
     status: str
     role: str  # the caller's role in this organisation: owner / manager / viewer
     created_at: datetime
+
+
+class MemberOut(BaseModel):
+    user_id: uuid.UUID
+    email: str
+    full_name: str
+    role: str
+    status: str
+    joined_at: datetime

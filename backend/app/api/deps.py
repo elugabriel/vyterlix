@@ -2,6 +2,7 @@
 
 import ipaddress
 import uuid
+from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Annotated
 
@@ -12,8 +13,10 @@ from sqlalchemy.orm import Session
 from app.core.errors import AuthenticationError, PermissionDeniedError
 from app.core.security import AccessTokenError, decode_access_token
 from app.db.session import get_db
-from app.models.identity import User
+from app.db.tenant import tenant_scope
+from app.models.identity import Organization, User
 from app.services.auth import RequestMeta
+from app.services.organizations import resolve_membership
 from app.services.sessions import load_session_user
 
 DB = Annotated[Session, Depends(get_db)]
@@ -86,3 +89,36 @@ def require_verified_user(user: Annotated[User, Depends(get_current_user)]) -> U
 CurrentPrincipal = Annotated[Principal, Depends(get_principal)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 VerifiedUser = Annotated[User, Depends(require_verified_user)]
+
+
+@dataclass(frozen=True)
+class Tenant:
+    """A verified member acting inside one organisation."""
+
+    organization: Organization
+    user: User
+    role: str  # owner / manager / viewer
+    session_id: uuid.UUID
+
+    @property
+    def organization_id(self) -> uuid.UUID:
+        return self.organization.id
+
+
+def get_tenant(
+    organization_id: uuid.UUID,
+    principal: CurrentPrincipal,
+    user: VerifiedUser,
+    db: DB,
+) -> Iterator[Tenant]:
+    """For every route under /organizations/{organization_id}/...
+
+    Checks the caller is an active member of an active organisation, then scopes the
+    whole request's database session to it (see app/db/tenant.py).
+    """
+    org, role = resolve_membership(db, user, organization_id)
+    with tenant_scope(db, org.id):
+        yield Tenant(organization=org, user=user, role=role, session_id=principal.session_id)
+
+
+CurrentTenant = Annotated[Tenant, Depends(get_tenant)]

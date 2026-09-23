@@ -3,6 +3,7 @@ import uuid
 import pytest
 from sqlalchemy import select, update
 
+from app.db.tenant import ACROSS_TENANTS
 from app.models.identity import AuditLog, Organization, OrganizationUser, Role, User
 
 URL = "/api/v1/organizations"
@@ -27,7 +28,9 @@ def test_create_organization_makes_creator_the_owner(api, db, signup):
     org = db.get(Organization, uuid.UUID(data["id"]))
     assert org.data_improvement_opt_in is False
     membership = db.scalars(
-        select(OrganizationUser).where(OrganizationUser.organization_id == org.id)
+        select(OrganizationUser)
+        .where(OrganizationUser.organization_id == org.id)
+        .execution_options(**ACROSS_TENANTS)
     ).one()
     assert membership.user_id == org.created_by_user_id
     assert membership.status == "active"
@@ -110,7 +113,9 @@ def test_new_user_has_no_organizations(api, signup):
 def test_suspended_membership_is_hidden(api, db, signup):
     auth = signup()
     org_id = create(api, auth).json()["id"]
-    db.execute(update(OrganizationUser).values(status="suspended"))
+    db.execute(
+        update(OrganizationUser).values(status="suspended").execution_options(**ACROSS_TENANTS)
+    )
     assert api.get(URL, headers=auth).json() == []
     assert api.get(f"{URL}/{org_id}", headers=auth).status_code == 404
 
