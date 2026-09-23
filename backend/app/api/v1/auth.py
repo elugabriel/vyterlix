@@ -11,6 +11,7 @@ from app.schemas.auth import (
     LoginRequest,
     MessageOut,
     RegisterRequest,
+    ResetPasswordRequest,
     TokenOut,
     UserOut,
     VerifyEmailRequest,
@@ -23,6 +24,7 @@ from app.services.auth import (
     verify_email,
 )
 from app.services.email import EmailSender, get_email_sender
+from app.services.password_reset import request_password_reset, reset_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -112,3 +114,20 @@ def refresh(response: Response, db: DB, refresh_token: RefreshCookie = None):
 def logout(response: Response, db: DB, meta: Meta, refresh_token: RefreshCookie = None) -> None:
     sessions.logout(db, refresh_token, meta)
     _clear_refresh_cookie(response)
+
+
+@router.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED, response_model=MessageOut)
+def forgot_password(body: EmailRequest, db: DB, meta: Meta, sender: Sender) -> MessageOut:
+    request_password_reset(db, body.email, sender, meta)
+    return MessageOut(
+        message="If an account exists for that email, we've sent a link to reset the password."
+    )
+
+
+@router.post("/reset-password", response_model=MessageOut)
+def reset_password_route(
+    body: ResetPasswordRequest, response: Response, db: DB, meta: Meta, sender: Sender
+) -> MessageOut:
+    reset_password(db, body.token, body.new_password, sender, meta)
+    _clear_refresh_cookie(response)  # this browser's session was revoked along with the rest
+    return MessageOut(message="Your password has been reset. Please log in with your new password.")

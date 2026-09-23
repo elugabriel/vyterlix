@@ -15,7 +15,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | −1 | Decisions before code | 18 / 20 decided |
 | 0 | Architecture + database design | In progress |
 | 1 | Project foundation | Done |
-| 2 | Authentication + multi-tenancy | **In progress — 4 of 12 steps done** |
+| 2 | Authentication + multi-tenancy | **In progress — 5 of 12 steps done** |
 | 3 | Business onboarding & profile | Not started |
 | 4 | Data import + normalisation | Not started |
 | 5 | KPI engine | Not started |
@@ -106,7 +106,7 @@ Argon2id · dev emails to log · **forgot-password always included** · unverifi
 - [x] 2. Registration — `POST /auth/register`
 - [x] 3. Email verification — `POST /auth/verify-email`, `POST /auth/resend-verification`
 - [x] 4. Login / logout / refresh — `POST /auth/login`, `/auth/refresh`, `/auth/logout`, `GET /me`; failed-login rate limiting; unverified users may log in with limited access (`VerifiedUser` dependency gates everything else)
-- [ ] 5. **Forgot password / reset password** — `POST /auth/forgot-password`, `/auth/reset-password`; no email enumeration; all sessions revoked on reset
+- [x] 5. **Forgot password / reset password** — `POST /auth/forgot-password`, `/auth/reset-password`; no email enumeration; 1-hour single-use link; all sessions revoked; lockout lifted; "password changed" alert email
 - [ ] 6. User profile — `GET`/`PATCH /me`, change password
 - [ ] 7. Organisation creation (creator becomes Owner; one user, many organisations)
 - [ ] 8. Tenant isolation at data-access layer + cross-tenant tests

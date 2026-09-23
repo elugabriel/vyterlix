@@ -25,19 +25,26 @@ def _lowercase(value: str) -> str:
 
 NormalizedEmail = Annotated[EmailStr, AfterValidator(_lowercase)]
 FullName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
+# The one password policy, shared by registration, reset and (step 6) change-password.
+# Length-based (NIST SP 800-63B): no composition rules, spaces allowed.
+NewPassword = Annotated[str, Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)]
+EmailedToken = Annotated[str, Field(min_length=20, max_length=200)]
+
+
+def password_matches_email(password: str, email: str) -> bool:
+    return password.strip().lower() == email.lower()
 
 
 class RegisterRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     email: NormalizedEmail
-    # Length-based policy (NIST SP 800-63B): no composition rules, spaces allowed.
-    password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
+    password: NewPassword
     full_name: FullName
 
     @model_validator(mode="after")
     def _password_not_email(self) -> "RegisterRequest":
-        if self.password.strip().lower() == self.email:
+        if password_matches_email(self.password, self.email):
             raise ValueError("Password must not be the same as your email address")
         return self
 
@@ -45,7 +52,14 @@ class RegisterRequest(BaseModel):
 class VerifyEmailRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    token: str = Field(min_length=20, max_length=200)
+    token: EmailedToken
+
+
+class ResetPasswordRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    token: EmailedToken
+    new_password: NewPassword
 
 
 class EmailRequest(BaseModel):
