@@ -12,6 +12,7 @@ dependencies = [
     "alembic>=1.13",
     "argon2-cffi>=23.1",
     "email-validator>=2.1",
+    "pyjwt>=2.9",
 ]
 
 [project.optional-dependencies]

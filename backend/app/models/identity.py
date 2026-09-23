@@ -200,3 +200,19 @@ class AuditLog(UUIDPrimaryKeyMixin, Base):
     user_agent: Mapped[str | None] = mapped_column(String(500))
     details: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class LoginAttempt(UUIDPrimaryKeyMixin, Base):
+    """Every login attempt, for failed-login rate limiting. Emails are stored normalised,
+    including for unknown accounts, so attacks on non-existent emails are limited too."""
+
+    __tablename__ = "login_attempts"
+    __table_args__ = (
+        Index("ix_login_attempts_email_created", "email", "created_at"),
+        Index("ix_login_attempts_ip_created", "ip_address", "created_at"),
+    )
+
+    email: Mapped[str] = mapped_column(String(320))
+    ip_address: Mapped[str | None] = mapped_column(INET)
+    succeeded: Mapped[bool] = mapped_column(Boolean)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

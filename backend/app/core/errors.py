@@ -88,3 +88,13 @@ def register_exception_handlers(app: FastAPI) -> None:
     async def _unhandled(_: Request, exc: Exception):
         logger.exception("unhandled_exception")
         return error_response(500, "internal_error", "An unexpected error occurred")
+
+
+class AuthenticationError(AppError):
+    status_code = 401
+    code = "not_authenticated"
+
+
+class TooManyRequestsError(AppError):
+    status_code = 429
+    code = "too_many_requests"

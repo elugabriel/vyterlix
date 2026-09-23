@@ -180,7 +180,7 @@ def test_resend_for_deactivated_account_sends_nothing(api, db, outbox):
 
 def test_console_email_backend_is_refused_in_prod():
     with pytest.raises(ValidationError, match="Console email backend"):
-        Settings(env="prod", _env_file=None)
+        Settings(env="prod", jwt_secret="x" * 40, _env_file=None)
 
 
 def test_console_sender_writes_the_email_to_the_log(caplog):

@@ -54,6 +54,14 @@ class EmailRequest(BaseModel):
     email: NormalizedEmail
 
 
+class LoginRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    email: NormalizedEmail
+    # No minimum here: old accounts may pre-date today's rules. Max stops huge hash inputs.
+    password: str = Field(min_length=1, max_length=PASSWORD_MAX_LENGTH)
+
+
 class MessageOut(BaseModel):
     message: str
 
@@ -74,3 +82,10 @@ class UserOut(BaseModel):
             email_verified=user.email_verified_at is not None,
             created_at=user.created_at,
         )
+
+
+class TokenOut(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int  # seconds
+    user: UserOut

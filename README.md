@@ -4,6 +4,7 @@ Business-intelligence and decision-support platform for SMEs (Dolaris Limited).
 
 - **Backend:** Python 3.11 · FastAPI · SQLAlchemy 2 · Alembic · PostgreSQL 17
 - **Frontend:** plain HTML/CSS/JavaScript (no framework, no build step, no Node)
+- Build progress is tracked in [`docs/CHECKLIST.md`](docs/CHECKLIST.md) — tick items in the same commit as the work.
 - Architecture decisions live in [`docs/adr/`](docs/adr/) — read
   [ADR 0001](docs/adr/0001-foundational-architecture.md) before adding tables.
 
@@ -116,6 +117,11 @@ All backend settings come from `VYTERLIX_*` environment variables or `backend/.e
 | `VYTERLIX_EMAIL_FROM` | `Vyterlix <no-reply@vyterlix.com>` | Sender address. |
 | `VYTERLIX_EMAIL_VERIFICATION_TTL_HOURS` | `24` | How long a verification link works. |
 | `VYTERLIX_TOKEN_RESEND_COOLDOWN_SECONDS` | `60` | Minimum gap between "send another link" emails. |
+| `VYTERLIX_JWT_SECRET` | dev-only value | Signs access tokens. **Must** be a random 32+ char value in staging/prod (they refuse to start otherwise). |
+| `VYTERLIX_ACCESS_TOKEN_TTL_MINUTES` | `15` | Access token lifetime. |
+| `VYTERLIX_REFRESH_TOKEN_TTL_DAYS` | `30` | How long a login lasts without activity. |
+| `VYTERLIX_COOKIE_SECURE` | `true` | Refresh cookie is HTTPS-only (browsers treat `http://localhost` as secure). |
+| `VYTERLIX_LOGIN_MAX_FAILURES_PER_EMAIL` / `_PER_IP` | `5` / `20` | Failed logins allowed per `VYTERLIX_LOGIN_FAILURE_WINDOW_MINUTES` (`15`). |
 
 **Emails in development:** nothing is actually sent. Look in the API terminal for a log
 line with `"msg": "email.console"` — the link (e.g. to verify an email) is in its `body`.

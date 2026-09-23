@@ -4,6 +4,9 @@ from typing import Literal
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Known, public value: fine for local dev and tests, refused in staging/prod.
+DEV_JWT_SECRET = "dev-only-insecure-jwt-secret-change-me"
+
 
 class Settings(BaseSettings):
     """Runtime configuration. Every field can be set via a VYTERLIX_* env var or backend/.env."""
@@ -27,10 +30,31 @@ class Settings(BaseSettings):
     # Minimum gap between "send me another link" emails to the same account.
     token_resend_cooldown_seconds: int = 60
 
+    # Sessions. Access tokens are short-lived JWTs kept in page memory; the refresh token
+    # lives in an httpOnly cookie and is stored hashed in user_sessions.
+    jwt_secret: str = DEV_JWT_SECRET
+    access_token_ttl_minutes: int = 15
+    refresh_token_ttl_days: int = 30
+    # Browsers treat http://localhost as secure, so this can stay on in dev too.
+    cookie_secure: bool = True
+
+    # Failed-login limits within a rolling window.
+    login_failure_window_minutes: int = 15
+    login_max_failures_per_email: int = 5
+    login_max_failures_per_ip: int = 20
+
     @model_validator(mode="after")
     def _no_wildcard_cors_outside_dev(self) -> "Settings":
         if self.env in ("staging", "prod") and "*" in self.cors_origins:
             raise ValueError("Wildcard CORS origin is not allowed in staging/prod")
+        return self
+
+    @model_validator(mode="after")
+    def _real_jwt_secret_outside_dev(self) -> "Settings":
+        if self.env in ("staging", "prod") and (
+            self.jwt_secret == DEV_JWT_SECRET or len(self.jwt_secret) < 32
+        ):
+            raise ValueError("Set VYTERLIX_JWT_SECRET to a random value of 32+ characters")
         return self
 
     @model_validator(mode="after")

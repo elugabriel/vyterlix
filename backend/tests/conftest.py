@@ -100,4 +100,5 @@ def api(app, db, outbox) -> TestClient:
     """HTTP client whose requests use the rolled-back test session and the test outbox."""
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_email_sender] = lambda: outbox
-    return TestClient(app, raise_server_exceptions=False)
+    # https so the Secure refresh cookie round-trips like it does in a real browser.
+    return TestClient(app, base_url="https://testserver", raise_server_exceptions=False)
