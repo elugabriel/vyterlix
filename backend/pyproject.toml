@@ -42,5 +42,5 @@ known-first-party = ["app"]
 known-third-party = ["alembic"]
 
 [tool.ruff.lint.per-file-ignores]
-# Generated migrations always import op/sa even when unused.
-"alembic/versions/*" = ["F401"]
+# Generated migrations: always import op/sa even when unused, and have long lines.
+"alembic/versions/*" = ["F401", "E501"]

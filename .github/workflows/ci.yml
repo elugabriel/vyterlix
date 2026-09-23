@@ -16,6 +16,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Start PostgreSQL (preinstalled on the runner)
+        run: |
+          sudo systemctl start postgresql.service
+          sudo -u postgres psql -c "CREATE USER vyterlix WITH PASSWORD 'vyterlix';"
+          sudo -u postgres psql -c "CREATE DATABASE vyterlix_test OWNER vyterlix;"
       - run: pip install -e ".[dev]"
       - run: ruff check .
       - run: ruff format --check .

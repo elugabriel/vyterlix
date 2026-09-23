@@ -7,7 +7,10 @@ from app.core.config import get_settings
 from app.models import Base
 
 config = context.config
-config.set_main_option("sqlalchemy.url", get_settings().database_url)
+# Callers (e.g. the test suite) may pass their own URL; otherwise use app settings.
+# "%" is escaped because Alembic config values go through configparser interpolation.
+if not config.get_main_option("sqlalchemy.url"):
+    config.set_main_option("sqlalchemy.url", get_settings().database_url.replace("%", "%%"))
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
