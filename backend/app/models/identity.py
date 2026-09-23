@@ -133,7 +133,7 @@ class OrganizationUser(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, B
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("roles.id", ondelete="RESTRICT"))
     status: Mapped[str] = mapped_column(String(20), server_default="active")
     # Manager "remit" (KPI categories / business units they may act on). Defined in step 9.
-    scope: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    scope: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True))
     invited_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL")
     )
@@ -198,5 +198,5 @@ class AuditLog(UUIDPrimaryKeyMixin, Base):
     target_id: Mapped[str | None] = mapped_column(String(64))
     ip_address: Mapped[str | None] = mapped_column(INET)
     user_agent: Mapped[str | None] = mapped_column(String(500))
-    details: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    details: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

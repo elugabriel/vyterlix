@@ -10,6 +10,7 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
+from app.db.session import get_db
 from app.main import create_app
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
@@ -24,9 +25,19 @@ def settings() -> Settings:
     return Settings(env="test", _env_file=None)
 
 
+def _no_real_database():
+    raise RuntimeError(
+        "Test tried to use the real database. Request the `api` or `db` fixture instead."
+    )
+    yield  # pragma: no cover
+
+
 @pytest.fixture
 def app(settings):
-    return create_app(settings)
+    app = create_app(settings)
+    # Guard: tests must never reach the dev database configured in backend/.env.
+    app.dependency_overrides[get_db] = _no_real_database
+    return app
 
 
 @pytest.fixture
@@ -69,3 +80,10 @@ def db(db_engine):
         session.close()
         outer.rollback()
         conn.close()
+
+
+@pytest.fixture
+def api(app, db) -> TestClient:
+    """HTTP client whose requests use the rolled-back test session."""
+    app.dependency_overrides[get_db] = lambda: db
+    return TestClient(app, raise_server_exceptions=False)

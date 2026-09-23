@@ -50,7 +50,11 @@ Create the app's database user and database (asks for your `postgres` admin pass
 ```bash
 psql -U postgres -c "CREATE USER vyterlix WITH PASSWORD 'vyterlix';"
 psql -U postgres -c "CREATE DATABASE vyterlix OWNER vyterlix;"
+psql -U postgres -c "CREATE DATABASE vyterlix_test OWNER vyterlix;"
 ```
+
+`vyterlix` is your dev database. `vyterlix_test` is used only by the test suite, which
+migrates it automatically and rolls back every test — tests never touch dev data.
 
 ### 2. Backend environment
 
