@@ -163,6 +163,10 @@ GitHub Actions runs `ruff check`, `ruff format --check` and `pytest` on every pu
   and take the `CurrentTenant` dependency; queries are then scoped automatically, and a
   query on business data with no organisation in scope raises `TenantScopeError`. Only
   use `ACROSS_TENANTS` for queries that genuinely span organisations. See ADR 0001 §2.
+- **Permissions:** guard business endpoints with
+  `Depends(require_permission(Perm.X))` (codes in `app/core/permissions.py`, role →
+  permission mapping in the database). Anything acting on a KPI area must also check
+  `tenant.can(perm, category)` so Managers stay within their remit.
 - **Money:** `NUMERIC` in the database, `Decimal` in Python — never `float`.
 - **Errors:** raise `AppError` subclasses from `app.core.errors`; every error response
   uses the same `{"error": {...}}` shape.

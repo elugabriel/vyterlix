@@ -11,10 +11,12 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.core.errors import AuthenticationError, PermissionDeniedError
+from app.core.permissions import KpiCategory, Perm
 from app.core.security import AccessTokenError, decode_access_token
 from app.db.session import get_db
 from app.db.tenant import tenant_scope
 from app.models.identity import Organization, User
+from app.schemas.organizations import Remit
 from app.services.auth import RequestMeta
 from app.services.organizations import resolve_membership
 from app.services.sessions import load_session_user
@@ -98,11 +100,29 @@ class Tenant:
     organization: Organization
     user: User
     role: str  # owner / manager / viewer
+    permissions: frozenset[str]
+    remit: Remit | None  # Managers only; None means no restriction
     session_id: uuid.UUID
 
     @property
     def organization_id(self) -> uuid.UUID:
         return self.organization.id
+
+    def has(self, permission: Perm) -> bool:
+        return permission in self.permissions
+
+    def within_remit(self, category: KpiCategory) -> bool:
+        """Owners act on everything; a Manager only on the KPI categories in their remit."""
+        if self.role == "owner" or self.remit is None or self.remit.kpi_categories is None:
+            return True
+        return category in self.remit.kpi_categories
+
+    def can(self, permission: Perm, category: KpiCategory | None = None) -> bool:
+        """Has the permission, and (if a category is given) it's within their remit.
+
+        Recommendation/action endpoints (Phase 9-10) must pass the category they touch.
+        """
+        return self.has(permission) and (category is None or self.within_remit(category))
 
 
 def get_tenant(
@@ -116,9 +136,29 @@ def get_tenant(
     Checks the caller is an active member of an active organisation, then scopes the
     whole request's database session to it (see app/db/tenant.py).
     """
-    org, role = resolve_membership(db, user, organization_id)
-    with tenant_scope(db, org.id):
-        yield Tenant(organization=org, user=user, role=role, session_id=principal.session_id)
+    m = resolve_membership(db, user, organization_id)
+    with tenant_scope(db, m.organization.id):
+        yield Tenant(
+            organization=m.organization,
+            user=user,
+            role=m.role,
+            permissions=m.permissions,
+            remit=m.remit,
+            session_id=principal.session_id,
+        )
 
 
 CurrentTenant = Annotated[Tenant, Depends(get_tenant)]
+
+
+def require_permission(permission: Perm):
+    """Route guard: `tenant: Annotated[Tenant, Depends(require_permission(Perm.X))]`."""
+
+    def _check(tenant: CurrentTenant) -> Tenant:
+        if not tenant.has(permission):
+            raise PermissionDeniedError(
+                "Your role doesn't allow this", details={"required_permission": permission}
+            )
+        return tenant
+
+    return _check

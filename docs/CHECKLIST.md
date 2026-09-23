@@ -15,7 +15,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | −1 | Decisions before code | 18 / 20 decided |
 | 0 | Architecture + database design | In progress |
 | 1 | Project foundation | Done |
-| 2 | Authentication + multi-tenancy | **In progress — 8 of 12 steps done** |
+| 2 | Authentication + multi-tenancy | **In progress — 9 of 12 steps done** |
 | 3 | Business onboarding & profile | Not started |
 | 4 | Data import + normalisation | Not started |
 | 5 | KPI engine | Not started |
@@ -110,7 +110,7 @@ Argon2id · dev emails to log · **forgot-password always included** · unverifi
 - [x] 6. User profile — `GET`/`PATCH /me` (name), `POST /me/change-password` (needs current password; keeps this device, logs out others; cancels open reset links; counts toward login lockout; alert email)
 - [x] 7. Organisation creation — `POST /organizations` (verified users only; creator becomes Owner), `GET /organizations` (mine, with my role), `GET /organizations/{id}` (non-members get 404)
 - [x] 8. Tenant isolation at data-access layer + cross-tenant tests — `app/db/tenant.py` (automatic scoping + fail-closed guard), `CurrentTenant` dependency, `GET /organizations/{id}/members`; mutation-tested
-- [ ] 9. Role/permission enforcement (`require_permission`), Manager remit structure
+- [x] 9. Role/permission enforcement — `require_permission(Perm.X)` (DB-driven), `PATCH /organizations/{id}` (org.manage), `PATCH /organizations/{id}/members/{user_id}` role + remit (members.manage), never-lose-the-last-owner rule, Manager remit by KPI category (`tenant.can(perm, category)`)
 - [ ] 10. Invitations (invite by email + role, accept, expire, revoke)
 - [ ] 11. Audit logging across all auth-sensitive actions
 - [ ] 12. Frontend pages: register, login, verify email, forgot/reset password, create business, accept invite; shared `js/auth.js`
