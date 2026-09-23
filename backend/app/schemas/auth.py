@@ -42,6 +42,22 @@ class RegisterRequest(BaseModel):
         return self
 
 
+class VerifyEmailRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    token: str = Field(min_length=20, max_length=200)
+
+
+class EmailRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    email: NormalizedEmail
+
+
+class MessageOut(BaseModel):
+    message: str
+
+
 class UserOut(BaseModel):
     id: uuid.UUID
     email: str

@@ -111,6 +111,14 @@ All backend settings come from `VYTERLIX_*` environment variables or `backend/.e
 | `VYTERLIX_LOG_LEVEL` | `INFO` | Logs are JSON, one line per event. |
 | `VYTERLIX_DATABASE_URL` | local `vyterlix` DB | SQLAlchemy URL, `postgresql+psycopg://…` |
 | `VYTERLIX_CORS_ORIGINS` | `["http://localhost:5500","http://127.0.0.1:5500"]` | JSON list. `*` is rejected in staging/prod. |
+| `VYTERLIX_FRONTEND_BASE_URL` | `http://localhost:5500` | Used to build links in emails. |
+| `VYTERLIX_EMAIL_BACKEND` | `console` | `console` logs emails instead of sending them. Refused in `prod`. |
+| `VYTERLIX_EMAIL_FROM` | `Vyterlix <no-reply@vyterlix.com>` | Sender address. |
+| `VYTERLIX_EMAIL_VERIFICATION_TTL_HOURS` | `24` | How long a verification link works. |
+| `VYTERLIX_TOKEN_RESEND_COOLDOWN_SECONDS` | `60` | Minimum gap between "send another link" emails. |
+
+**Emails in development:** nothing is actually sent. Look in the API terminal for a log
+line with `"msg": "email.console"` — the link (e.g. to verify an email) is in its `body`.
 
 The frontend's API address is set in [`frontend/js/config.js`](frontend/js/config.js).
 Each environment's deployment replaces that one file.

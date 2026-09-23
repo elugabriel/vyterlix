@@ -5,8 +5,21 @@ from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.schemas.auth import RegisterRequest, UserOut
-from app.services.auth import RequestMeta, register_user
+from app.schemas.auth import (
+    EmailRequest,
+    MessageOut,
+    RegisterRequest,
+    UserOut,
+    VerifyEmailRequest,
+)
+from app.services.auth import (
+    RequestMeta,
+    register_user,
+    resend_verification,
+    send_verification_email,
+    verify_email,
+)
+from app.services.email import EmailSender, get_email_sender
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -29,8 +42,32 @@ def register(
     body: RegisterRequest,
     db: Annotated[Session, Depends(get_db)],
     meta: Annotated[RequestMeta, Depends(request_meta)],
+    sender: Annotated[EmailSender, Depends(get_email_sender)],
 ) -> UserOut:
     user = register_user(
         db, email=body.email, password=body.password, full_name=body.full_name, meta=meta
     )
+    send_verification_email(db, user, sender, meta)
     return UserOut.from_user(user)
+
+
+@router.post("/verify-email", response_model=UserOut)
+def verify_email_route(
+    body: VerifyEmailRequest,
+    db: Annotated[Session, Depends(get_db)],
+    meta: Annotated[RequestMeta, Depends(request_meta)],
+) -> UserOut:
+    return UserOut.from_user(verify_email(db, body.token, meta))
+
+
+@router.post(
+    "/resend-verification", status_code=status.HTTP_202_ACCEPTED, response_model=MessageOut
+)
+def resend_verification_route(
+    body: EmailRequest,
+    db: Annotated[Session, Depends(get_db)],
+    meta: Annotated[RequestMeta, Depends(request_meta)],
+    sender: Annotated[EmailSender, Depends(get_email_sender)],
+) -> MessageOut:
+    resend_verification(db, body.email, sender, meta)
+    return MessageOut(message="If that account still needs verifying, we've sent a new link to it.")

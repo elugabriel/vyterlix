@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.core.config import Settings
 from app.db.session import get_db
 from app.main import create_app
+from app.services.email import EmailMessage, get_email_sender
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 TEST_DATABASE_URL = os.environ.get(
@@ -82,8 +83,21 @@ def db(db_engine):
         conn.close()
 
 
+class Outbox(list):
+    """Collects emails instead of sending them."""
+
+    def send(self, message: EmailMessage) -> None:
+        self.append(message)
+
+
 @pytest.fixture
-def api(app, db) -> TestClient:
-    """HTTP client whose requests use the rolled-back test session."""
+def outbox() -> Outbox:
+    return Outbox()
+
+
+@pytest.fixture
+def api(app, db, outbox) -> TestClient:
+    """HTTP client whose requests use the rolled-back test session and the test outbox."""
     app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_email_sender] = lambda: outbox
     return TestClient(app, raise_server_exceptions=False)
