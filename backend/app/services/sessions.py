@@ -44,7 +44,7 @@ def _invalid_credentials() -> AuthenticationError:
     return AuthenticationError("Incorrect email or password", code="invalid_credentials")
 
 
-def _check_rate_limits(db: Session, email: str, ip_address: str | None) -> None:
+def check_login_rate_limits(db: Session, email: str, ip_address: str | None) -> None:
     settings = get_settings()
     since = func.now() - timedelta(minutes=settings.login_failure_window_minutes)
     failures = select(func.count()).where(
@@ -82,7 +82,7 @@ def _start_session(db: Session, user: User, meta: RequestMeta) -> IssuedTokens:
 
 def login(db: Session, email: str, password: str, meta: RequestMeta) -> IssuedTokens:
     """`email` must already be normalised. Unverified users may log in (limited access)."""
-    _check_rate_limits(db, email, meta.ip_address)
+    check_login_rate_limits(db, email, meta.ip_address)
 
     user = db.scalar(select(User).where(User.email == email))
     if user is None:

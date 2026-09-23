@@ -15,7 +15,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | −1 | Decisions before code | 18 / 20 decided |
 | 0 | Architecture + database design | In progress |
 | 1 | Project foundation | Done |
-| 2 | Authentication + multi-tenancy | **In progress — 5 of 12 steps done** |
+| 2 | Authentication + multi-tenancy | **In progress — 6 of 12 steps done** |
 | 3 | Business onboarding & profile | Not started |
 | 4 | Data import + normalisation | Not started |
 | 5 | KPI engine | Not started |
@@ -107,7 +107,7 @@ Argon2id · dev emails to log · **forgot-password always included** · unverifi
 - [x] 3. Email verification — `POST /auth/verify-email`, `POST /auth/resend-verification`
 - [x] 4. Login / logout / refresh — `POST /auth/login`, `/auth/refresh`, `/auth/logout`, `GET /me`; failed-login rate limiting; unverified users may log in with limited access (`VerifiedUser` dependency gates everything else)
 - [x] 5. **Forgot password / reset password** — `POST /auth/forgot-password`, `/auth/reset-password`; no email enumeration; 1-hour single-use link; all sessions revoked; lockout lifted; "password changed" alert email
-- [ ] 6. User profile — `GET`/`PATCH /me`, change password
+- [x] 6. User profile — `GET`/`PATCH /me` (name), `POST /me/change-password` (needs current password; keeps this device, logs out others; cancels open reset links; counts toward login lockout; alert email)
 - [ ] 7. Organisation creation (creator becomes Owner; one user, many organisations)
 - [ ] 8. Tenant isolation at data-access layer + cross-tenant tests
 - [ ] 9. Role/permission enforcement (`require_permission`), Manager remit structure
@@ -453,3 +453,4 @@ Prove the whole loop on one fake retail business before building further.
 | Refresh-token reuse detection (revoke whole session if an old token is replayed) | Rotation already makes old tokens useless | L1 |
 | Clean-up job for old `login_attempts` / expired sessions / used tokens | Tables grow slowly; needs the background-job runner | Phase 11 |
 | Email-based lockout can be triggered by an attacker (15-min lockout of a victim) | Standard trade-off; mitigated by forgot-password + short window | L1 review |
+| Change email address (verify the new address before switching, alert the old one) | Needs its own verified flow; not required for MVP sign-up | Before L6 (UAT) |

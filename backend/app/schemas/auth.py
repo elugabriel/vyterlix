@@ -76,6 +76,30 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=PASSWORD_MAX_LENGTH)
 
 
+class UpdateProfileRequest(BaseModel):
+    """Only fields the user may change themselves. Email changes need re-verification
+    and are handled separately (not yet built)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    full_name: FullName | None = None
+
+    @model_validator(mode="after")
+    def _something_to_change(self) -> "UpdateProfileRequest":
+        if not self.model_fields_set:
+            raise ValueError("Provide at least one field to update")
+        if "full_name" in self.model_fields_set and self.full_name is None:
+            raise ValueError("full_name cannot be empty")
+        return self
+
+
+class ChangePasswordRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    current_password: str = Field(min_length=1, max_length=PASSWORD_MAX_LENGTH)
+    new_password: NewPassword
+
+
 class MessageOut(BaseModel):
     message: str
 

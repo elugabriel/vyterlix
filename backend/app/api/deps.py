@@ -1,6 +1,8 @@
 """Shared FastAPI dependencies: who is calling, and are they allowed in."""
 
 import ipaddress
+import uuid
+from dataclasses import dataclass
 from typing import Annotated
 
 from fastapi import Depends, Request
@@ -40,10 +42,18 @@ _TOKEN_MESSAGES = {
 }
 
 
-def get_current_user(
+@dataclass(frozen=True)
+class Principal:
+    """The caller: which user, on which session (device)."""
+
+    user: User
+    session_id: uuid.UUID
+
+
+def get_principal(
     db: DB,
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
-) -> User:
+) -> Principal:
     """Any logged-in user, verified or not (limited access)."""
     if credentials is None:
         raise AuthenticationError("Please log in to continue")
@@ -57,7 +67,11 @@ def get_current_user(
         raise AuthenticationError(
             "Your session has ended. Please log in again.", code="session_ended"
         )
-    return user
+    return Principal(user=user, session_id=session_id)
+
+
+def get_current_user(principal: Annotated[Principal, Depends(get_principal)]) -> User:
+    return principal.user
 
 
 def require_verified_user(user: Annotated[User, Depends(get_current_user)]) -> User:
@@ -69,5 +83,6 @@ def require_verified_user(user: Annotated[User, Depends(get_current_user)]) -> U
     return user
 
 
+CurrentPrincipal = Annotated[Principal, Depends(get_principal)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 VerifiedUser = Annotated[User, Depends(require_verified_user)]

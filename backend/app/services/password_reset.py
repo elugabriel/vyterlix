@@ -118,7 +118,11 @@ def reset_password(
         details={"sessions_revoked": revoked},
     )
     db.commit()
+    send_password_changed_alert(sender, user, logged_out="on all devices")
 
+
+def send_password_changed_alert(sender: EmailSender, user: User, *, logged_out: str) -> None:
+    """Security alert after any password change, so the owner hears about one they didn't make."""
     sender.send(
         EmailMessage(
             to=user.email,
@@ -126,7 +130,7 @@ def reset_password(
             body=(
                 f"Hi {user.full_name},\n\n"
                 "The password for your Vyterlix account was just changed, and you've been "
-                "logged out on all devices.\n\n"
+                f"logged out {logged_out}.\n\n"
                 "If this was you, there's nothing else to do. If it wasn't, reset your "
                 f"password now at {get_settings().frontend_base_url}/forgot-password.html "
                 "and contact support."
