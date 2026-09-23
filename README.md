@@ -168,6 +168,9 @@ GitHub Actions runs `ruff check`, `ruff format --check` and `pytest` on every pu
   `Depends(require_permission(Perm.X))` (codes in `app/core/permissions.py`, role →
   permission mapping in the database). Anything acting on a KPI area must also check
   `tenant.can(perm, category)` so Managers stay within their remit.
+- **Audit trail:** record every security- or business-sensitive action with
+  `record_audit(db, AuditAction.X, ...)` (add new names to `AuditAction`; never put
+  secrets in `details`). `audit_logs` is append-only, enforced by a database trigger.
 - **Money:** `NUMERIC` in the database, `Decimal` in Python — never `float`.
 - **Errors:** raise `AppError` subclasses from `app.core.errors`; every error response
   uses the same `{"error": {...}}` shape.

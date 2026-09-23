@@ -25,7 +25,7 @@ from app.models.identity import (
 )
 from app.schemas.invitations import InvitationOut, InvitationPreviewOut, InvitationStatus
 from app.schemas.organizations import OrganizationOut, Remit
-from app.services.audit import record_audit
+from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
 from app.services.email import EmailMessage, EmailSender
 
@@ -113,7 +113,7 @@ def create_invitation(
     db.flush()
     record_audit(
         db,
-        "invitation.created",
+        AuditAction.INVITATION_CREATED,
         actor_user_id=inviter.id,
         organization_id=org.id,
         target_type="invitation",
@@ -165,7 +165,7 @@ def revoke_invitation(
         inv.revoked_at = func.now()
         record_audit(
             db,
-            "invitation.revoked",
+            AuditAction.INVITATION_REVOKED,
             actor_user_id=actor.id,
             organization_id=org.id,
             target_type="invitation",
@@ -220,8 +220,21 @@ def accept_invitation(
         raise _invalid_invitation()
     if inv.email != user.email:
         # A forwarded link must not let someone else in. The link stays usable.
-        invited_email = inv.email  # read before rollback expires the row
-        db.rollback()
+        # Read before rollback expires the row.
+        invited_email, org_id, invitation_id = inv.email, inv.organization_id, inv.id
+        db.rollback()  # leaves the link usable for the right person
+        record_audit(
+            db,
+            AuditAction.INVITATION_ACCEPT_REJECTED,
+            actor_user_id=user.id,
+            organization_id=org_id,
+            target_type="invitation",
+            target_id=invitation_id,
+            ip_address=meta.ip_address,
+            user_agent=meta.user_agent,
+            details={"reason": "email_mismatch"},
+        )
+        db.commit()
         raise PermissionDeniedError(
             f"This invitation was sent to a different email address. Log in as {invited_email} "
             "to accept it.",
@@ -253,7 +266,7 @@ def accept_invitation(
             user.email_verified_at = func.now()  # opening the emailed link proves they own it
         record_audit(
             db,
-            "invitation.accepted",
+            AuditAction.INVITATION_ACCEPTED,
             actor_user_id=user.id,
             organization_id=org.id,
             target_type="invitation",

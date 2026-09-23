@@ -10,7 +10,7 @@ from app.core.errors import AppError, NotFoundError
 from app.db.tenant import ACROSS_TENANTS
 from app.models.identity import Organization, OrganizationUser, Role, User
 from app.schemas.organizations import MemberOut, OrganizationOut, Remit
-from app.services.audit import record_audit
+from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
 
 
@@ -51,7 +51,7 @@ def create_organization(db: Session, user: User, name: str, meta: RequestMeta) -
     )
     record_audit(
         db,
-        "organization.created",
+        AuditAction.ORGANIZATION_CREATED,
         actor_user_id=user.id,
         organization_id=org.id,
         target_type="organization",
@@ -135,7 +135,7 @@ def rename_organization(db: Session, org: Organization, actor: User, name: str, 
         org.name = name
         record_audit(
             db,
-            "organization.updated",
+            AuditAction.ORGANIZATION_UPDATED,
             actor_user_id=actor.id,
             organization_id=org.id,
             target_type="organization",
@@ -207,7 +207,7 @@ def update_member(
     if details:
         record_audit(
             db,
-            "member.updated",
+            AuditAction.MEMBER_UPDATED,
             actor_user_id=actor.id,
             organization_id=organization_id,
             target_type="user",

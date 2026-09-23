@@ -199,7 +199,11 @@ class AuditLog(UUIDPrimaryKeyMixin, Base):
     ip_address: Mapped[str | None] = mapped_column(INET)
     user_agent: Mapped[str | None] = mapped_column(String(500))
     details: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # clock_timestamp(), not now(): several entries written in one transaction must keep
+    # their real order (now() is the transaction's start time, identical for all of them).
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.clock_timestamp()
+    )
 
 
 class LoginAttempt(UUIDPrimaryKeyMixin, Base):

@@ -26,7 +26,7 @@ from app.core.security import (
     verify_password,
 )
 from app.models.identity import LoginAttempt, User, UserSession
-from app.services.audit import record_audit
+from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
 
 
@@ -44,20 +44,34 @@ def _invalid_credentials() -> AuthenticationError:
     return AuthenticationError("Incorrect email or password", code="invalid_credentials")
 
 
-def check_login_rate_limits(db: Session, email: str, ip_address: str | None) -> None:
+def check_login_rate_limits(db: Session, email: str, meta: RequestMeta) -> None:
     settings = get_settings()
     since = func.now() - timedelta(minutes=settings.login_failure_window_minutes)
     failures = select(func.count()).where(
         LoginAttempt.succeeded.is_(False), LoginAttempt.created_at > since
     )
-    too_many = db.scalar(failures.where(LoginAttempt.email == email)) >= (
+    reason = None
+    if db.scalar(failures.where(LoginAttempt.email == email)) >= (
         settings.login_max_failures_per_email
-    )
-    if not too_many and ip_address is not None:
-        too_many = db.scalar(failures.where(LoginAttempt.ip_address == ip_address)) >= (
-            settings.login_max_failures_per_ip
+    ):
+        reason = "email_limit"
+    elif (
+        meta.ip_address is not None
+        and db.scalar(failures.where(LoginAttempt.ip_address == meta.ip_address))
+        >= settings.login_max_failures_per_ip
+    ):
+        reason = "ip_limit"
+    if reason:
+        # The clearest sign of password guessing, so it's always audited.
+        record_audit(
+            db,
+            AuditAction.AUTH_LOGIN_BLOCKED,
+            actor_user_id=db.scalar(select(User.id).where(User.email == email)),
+            ip_address=meta.ip_address,
+            user_agent=meta.user_agent,
+            details={"reason": reason},
         )
-    if too_many:
+        db.commit()
         raise TooManyRequestsError(
             "Too many failed login attempts. Please wait a few minutes, "
             "or reset your password if you've forgotten it.",
@@ -82,7 +96,7 @@ def _start_session(db: Session, user: User, meta: RequestMeta) -> IssuedTokens:
 
 def login(db: Session, email: str, password: str, meta: RequestMeta) -> IssuedTokens:
     """`email` must already be normalised. Unverified users may log in (limited access)."""
-    check_login_rate_limits(db, email, meta.ip_address)
+    check_login_rate_limits(db, email, meta)
 
     user = db.scalar(select(User).where(User.email == email))
     if user is None:
@@ -95,7 +109,7 @@ def login(db: Session, email: str, password: str, meta: RequestMeta) -> IssuedTo
     if not ok:
         record_audit(
             db,
-            "auth.login_failed",
+            AuditAction.AUTH_LOGIN_FAILED,
             actor_user_id=user.id if user else None,
             ip_address=meta.ip_address,
             user_agent=meta.user_agent,
@@ -105,6 +119,14 @@ def login(db: Session, email: str, password: str, meta: RequestMeta) -> IssuedTo
         raise _invalid_credentials()
 
     if not user.is_active:
+        record_audit(
+            db,
+            AuditAction.AUTH_LOGIN_FAILED,
+            actor_user_id=user.id,
+            ip_address=meta.ip_address,
+            user_agent=meta.user_agent,
+            details={"reason": "account_disabled"},
+        )
         db.commit()
         raise AppError("This account has been disabled", code="account_disabled", status_code=403)
 
@@ -114,7 +136,7 @@ def login(db: Session, email: str, password: str, meta: RequestMeta) -> IssuedTo
     tokens = _start_session(db, user, meta)
     record_audit(
         db,
-        "auth.login_succeeded",
+        AuditAction.AUTH_LOGIN_SUCCEEDED,
         actor_user_id=user.id,
         target_type="session",
         target_id=tokens.session_id,
@@ -166,7 +188,7 @@ def logout(db: Session, raw_refresh: str | None, meta: RequestMeta) -> None:
     session.revoked_at = func.now()
     record_audit(
         db,
-        "auth.logout",
+        AuditAction.AUTH_LOGOUT,
         actor_user_id=session.user_id,
         target_type="session",
         target_id=session.id,

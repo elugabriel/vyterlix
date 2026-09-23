@@ -10,7 +10,7 @@ from app.core.config import get_settings
 from app.core.errors import AppError, ConflictError
 from app.core.security import hash_password
 from app.models.identity import User
-from app.services.audit import record_audit
+from app.services.audit import AuditAction, record_audit
 from app.services.email import EmailMessage, EmailSender
 from app.services.tokens import consume_token, issue_token, seconds_since_last_token
 
@@ -47,7 +47,7 @@ def register_user(
 
     record_audit(
         db,
-        "user.registered",
+        AuditAction.USER_REGISTERED,
         actor_user_id=user.id,
         target_type="user",
         target_id=user.id,
@@ -103,7 +103,7 @@ def verify_email(db: Session, raw_token: str, meta: RequestMeta) -> User:
         user.email_verified_at = func.now()
     record_audit(
         db,
-        "user.email_verified",
+        AuditAction.USER_EMAIL_VERIFIED,
         actor_user_id=user.id,
         target_type="user",
         target_id=user.id,

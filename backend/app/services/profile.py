@@ -9,7 +9,7 @@ from app.core.errors import AppError
 from app.core.security import hash_password, verify_password
 from app.models.identity import LoginAttempt, User, UserSession, UserToken
 from app.schemas.auth import password_matches_email
-from app.services.audit import record_audit
+from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
 from app.services.email import EmailSender
 from app.services.password_reset import PASSWORD_RESET, send_password_changed_alert
@@ -24,7 +24,7 @@ def update_profile(db: Session, user: User, changes: dict, meta: RequestMeta) ->
     if changed:
         record_audit(
             db,
-            "user.profile_updated",
+            AuditAction.USER_PROFILE_UPDATED,
             actor_user_id=user.id,
             target_type="user",
             target_id=user.id,
@@ -48,12 +48,12 @@ def change_password(
 ) -> None:
     # Wrong current passwords count toward the login lockout, so a stolen access token
     # can't be used to guess the password here instead of on /auth/login.
-    check_login_rate_limits(db, user.email, meta.ip_address)
+    check_login_rate_limits(db, user.email, meta)
     if not verify_password(user.password_hash, current_password):
         db.add(LoginAttempt(email=user.email, ip_address=meta.ip_address, succeeded=False))
         record_audit(
             db,
-            "user.password_change_failed",
+            AuditAction.USER_PASSWORD_CHANGE_FAILED,
             actor_user_id=user.id,
             ip_address=meta.ip_address,
             user_agent=meta.user_agent,
@@ -98,7 +98,7 @@ def change_password(
     )
     record_audit(
         db,
-        "user.password_changed",
+        AuditAction.USER_PASSWORD_CHANGED,
         actor_user_id=user.id,
         target_type="user",
         target_id=user.id,

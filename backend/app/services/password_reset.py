@@ -15,7 +15,7 @@ from app.core.errors import AppError
 from app.core.security import hash_password
 from app.models.identity import LoginAttempt, User, UserSession
 from app.schemas.auth import password_matches_email
-from app.services.audit import record_audit
+from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
 from app.services.email import EmailMessage, EmailSender
 from app.services.tokens import consume_token, issue_token, seconds_since_last_token
@@ -47,7 +47,7 @@ def request_password_reset(db: Session, email: str, sender: EmailSender, meta: R
     )
     record_audit(
         db,
-        "auth.password_reset_requested",
+        AuditAction.AUTH_PASSWORD_RESET_REQUESTED,
         actor_user_id=user.id,
         target_type="user",
         target_id=user.id,
@@ -109,7 +109,7 @@ def reset_password(
     )
     record_audit(
         db,
-        "auth.password_reset",
+        AuditAction.AUTH_PASSWORD_RESET,
         actor_user_id=user.id,
         target_type="user",
         target_id=user.id,

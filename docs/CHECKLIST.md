@@ -15,7 +15,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | −1 | Decisions before code | 18 / 20 decided |
 | 0 | Architecture + database design | In progress |
 | 1 | Project foundation | Done |
-| 2 | Authentication + multi-tenancy | **In progress — 10 of 12 steps done** |
+| 2 | Authentication + multi-tenancy | **In progress — 11 of 12 steps done** |
 | 3 | Business onboarding & profile | Not started |
 | 4 | Data import + normalisation | Not started |
 | 5 | KPI engine | Not started |
@@ -112,7 +112,7 @@ Argon2id · dev emails to log · **forgot-password always included** · unverifi
 - [x] 8. Tenant isolation at data-access layer + cross-tenant tests — `app/db/tenant.py` (automatic scoping + fail-closed guard), `CurrentTenant` dependency, `GET /organizations/{id}/members`; mutation-tested
 - [x] 9. Role/permission enforcement — `require_permission(Perm.X)` (DB-driven), `PATCH /organizations/{id}` (org.manage), `PATCH /organizations/{id}/members/{user_id}` role + remit (members.manage), never-lose-the-last-owner rule, Manager remit by KPI category (`tenant.can(perm, category)`)
 - [x] 10. Invitations — invite by email + role/remit (owner), list with status, revoke, preview, accept (logged-in account email must match; accepting verifies the email; 7-day single-use link; re-invite replaces old link)
-- [ ] 11. Audit logging across all auth-sensitive actions
+- [x] 11. Audit logging — all 18 sensitive actions audited via `AuditAction` (gaps closed: blocked logins, disabled-account logins, wrong-account invitation use); append-only enforced by a DB trigger; real write times (`clock_timestamp()`); `GET /organizations/{id}/audit-log` for owners (new `audit.view` permission)
 - [ ] 12. Frontend pages: register, login, verify email, forgot/reset password, create business, accept invite; shared `js/auth.js`
 
 ## Phase 3: Business onboarding & profile
@@ -456,3 +456,6 @@ Prove the whole loop on one fake retail business before building further.
 | Change email address (verify the new address before switching, alert the old one) | Needs its own verified flow; not required for MVP sign-up | Before L6 (UAT) |
 | Limit on businesses one user can create | Abuse guard; ties into plan/tier limits | Phase 16 (billing) |
 | Limit on pending invitations per business / invite rate | Abuse guard against using invites to send spam | Phase 16 / L1 |
+| **UK GDPR erasure vs audit trail:** audit `details` can hold email addresses and survive account deletion — decide what to anonymise vs keep (legal basis), and build retention clean-up using `vyterlix.allow_audit_delete` | Needs a legal/retention decision | L1 (before launch) |
+| Audit-row volume from repeated blocked logins | Edge rate limiting will absorb it | L1 / L3 |
+| "My security activity" page for users (their own logins, password changes) | Nice to have | Post-MVP |

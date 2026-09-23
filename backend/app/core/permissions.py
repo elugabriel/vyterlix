@@ -1,6 +1,6 @@
 """Permission codes and the Manager "remit".
 
-Codes must match the rows seeded in the `permissions` table (migration 538284f717b1);
+Codes must match the rows seeded in the `permissions` table (migrations 538284f717b1, cee5c110fba7);
 tests/test_permissions.py fails if they drift apart. Which role holds which permission
 lives in the database (`role_permissions`), not here.
 """
@@ -16,6 +16,7 @@ class Perm(StrEnum):
     INSIGHTS_VIEW = "insights.view"
     RECOMMENDATIONS_ACTION = "recommendations.action"
     ACTIONS_MANAGE = "actions.manage"
+    AUDIT_VIEW = "audit.view"
 
 
 class KpiCategory(StrEnum):
