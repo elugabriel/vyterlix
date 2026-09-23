@@ -102,3 +102,31 @@ def api(app, db, outbox) -> TestClient:
     app.dependency_overrides[get_email_sender] = lambda: outbox
     # https so the Secure refresh cookie round-trips like it does in a real browser.
     return TestClient(app, base_url="https://testserver", raise_server_exceptions=False)
+
+
+TEST_PASSWORD = "correct horse battery"
+
+
+@pytest.fixture
+def signup(api, db, outbox):
+    """Register + log in a user; returns their Authorization header.
+
+    `verified=True` (default) marks the email verified, as most features require it.
+    """
+    from sqlalchemy import func, update
+
+    from app.models.identity import User
+
+    def _signup(email: str = "owner@acme.co.uk", *, verified: bool = True) -> dict[str, str]:
+        res = api.post(
+            "/api/v1/auth/register",
+            json={"email": email, "password": TEST_PASSWORD, "full_name": email.split("@")[0]},
+        )
+        assert res.status_code == 201, res.text
+        if verified:
+            db.execute(update(User).where(User.email == email).values(email_verified_at=func.now()))
+        res = api.post("/api/v1/auth/login", json={"email": email, "password": TEST_PASSWORD})
+        assert res.status_code == 200, res.text
+        return {"Authorization": f"Bearer {res.json()['access_token']}"}
+
+    return _signup
