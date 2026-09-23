@@ -216,3 +216,42 @@ class LoginAttempt(UUIDPrimaryKeyMixin, Base):
     ip_address: Mapped[str | None] = mapped_column(INET)
     succeeded: Mapped[bool] = mapped_column(Boolean)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class OrganizationInvitation(UUIDPrimaryKeyMixin, TenantScopedMixin, Base):
+    """An emailed invitation to join an organisation with a given role (and Manager remit).
+
+    The raw token only exists in the email; we store its SHA-256 hash. Status is derived:
+    accepted / revoked / expired / pending.
+    """
+
+    __tablename__ = "organization_invitations"
+    __table_args__ = (
+        CheckConstraint("email = lower(email)", name="email_lowercase"),
+        # At most one open invitation per email per organisation.
+        Index(
+            "uq_organization_invitations_open_email",
+            "organization_id",
+            "email",
+            unique=True,
+            postgresql_where=text("accepted_at IS NULL AND revoked_at IS NULL"),
+        ),
+    )
+
+    email: Mapped[str] = mapped_column(String(320))
+    role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("roles.id", ondelete="RESTRICT"))
+    scope: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True))
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    invited_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    accepted_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    role: Mapped[Role] = relationship()
+    organization: Mapped[Organization] = relationship()

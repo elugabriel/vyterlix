@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     email_from: str = "Vyterlix <no-reply@vyterlix.com>"
     email_verification_ttl_hours: int = 24
     password_reset_ttl_minutes: int = 60
+    invitation_ttl_days: int = 7
     # Minimum gap between "send me another link" emails to the same account.
     token_resend_cooldown_seconds: int = 60
 

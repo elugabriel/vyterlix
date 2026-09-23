@@ -15,7 +15,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | −1 | Decisions before code | 18 / 20 decided |
 | 0 | Architecture + database design | In progress |
 | 1 | Project foundation | Done |
-| 2 | Authentication + multi-tenancy | **In progress — 9 of 12 steps done** |
+| 2 | Authentication + multi-tenancy | **In progress — 10 of 12 steps done** |
 | 3 | Business onboarding & profile | Not started |
 | 4 | Data import + normalisation | Not started |
 | 5 | KPI engine | Not started |
@@ -111,7 +111,7 @@ Argon2id · dev emails to log · **forgot-password always included** · unverifi
 - [x] 7. Organisation creation — `POST /organizations` (verified users only; creator becomes Owner), `GET /organizations` (mine, with my role), `GET /organizations/{id}` (non-members get 404)
 - [x] 8. Tenant isolation at data-access layer + cross-tenant tests — `app/db/tenant.py` (automatic scoping + fail-closed guard), `CurrentTenant` dependency, `GET /organizations/{id}/members`; mutation-tested
 - [x] 9. Role/permission enforcement — `require_permission(Perm.X)` (DB-driven), `PATCH /organizations/{id}` (org.manage), `PATCH /organizations/{id}/members/{user_id}` role + remit (members.manage), never-lose-the-last-owner rule, Manager remit by KPI category (`tenant.can(perm, category)`)
-- [ ] 10. Invitations (invite by email + role, accept, expire, revoke)
+- [x] 10. Invitations — invite by email + role/remit (owner), list with status, revoke, preview, accept (logged-in account email must match; accepting verifies the email; 7-day single-use link; re-invite replaces old link)
 - [ ] 11. Audit logging across all auth-sensitive actions
 - [ ] 12. Frontend pages: register, login, verify email, forgot/reset password, create business, accept invite; shared `js/auth.js`
 
@@ -455,3 +455,4 @@ Prove the whole loop on one fake retail business before building further.
 | Email-based lockout can be triggered by an attacker (15-min lockout of a victim) | Standard trade-off; mitigated by forgot-password + short window | L1 review |
 | Change email address (verify the new address before switching, alert the old one) | Needs its own verified flow; not required for MVP sign-up | Before L6 (UAT) |
 | Limit on businesses one user can create | Abuse guard; ties into plan/tier limits | Phase 16 (billing) |
+| Limit on pending invitations per business / invite rate | Abuse guard against using invites to send spam | Phase 16 / L1 |
