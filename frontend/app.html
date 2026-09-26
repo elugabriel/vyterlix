@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Your businesses · Vyterlix</title>
+  <link rel="stylesheet" href="css/base.css">
+  <script src="js/config.js"></script>
+  <script type="module" src="js/pages/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="app.html">Vyterlix</a>
+    <div class="topbar-user">
+      <span id="user-name" class="muted"></span>
+      <button id="logout" type="button" class="secondary">Log out</button>
+    </div>
+  </header>
+  <main class="container stack">
+    <div id="verify-banner" class="message message-info" hidden>
+      <p id="verify-text" style="margin-top:0"></p>
+      <button id="resend" type="button" class="secondary">Resend verification email</button>
+    </div>
+    <div id="message" class="message" role="alert" hidden></div>
+
+    <section class="card">
+      <h2 style="margin-top:0">Your businesses</h2>
+      <ul id="orgs" class="org-list"></ul>
+      <p id="orgs-empty" class="muted" hidden>You don't belong to any business yet.</p>
+    </section>
+
+    <section class="card">
+      <h2 style="margin-top:0">Create a business</h2>
+      <form id="create-form" novalidate>
+        <div class="field">
+          <label for="name">Business name</label>
+          <input id="name" name="name" type="text" required>
+        </div>
+        <button type="submit">Create business</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

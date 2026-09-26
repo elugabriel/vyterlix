@@ -45,3 +45,88 @@ body {
 .muted { color: var(--muted); }
 .status-ok { color: var(--ok); }
 .status-bad { color: var(--bad); }
+
+/* --- layout ---------------------------------------------------------------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.brand { font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: 0.02em; }
+.topbar-user { display: flex; align-items: center; gap: 12px; }
+
+.auth-page { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+.auth-card { width: 100%; max-width: 420px; }
+.auth-card h1 { margin-top: 0; font-size: 1.5rem; }
+.auth-links { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.95rem; }
+
+/* --- forms ----------------------------------------------------------------- */
+
+form .field { margin-bottom: 16px; }
+label { display: block; font-weight: 600; margin-bottom: 6px; }
+input[type="text"], input[type="email"], input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+input[aria-invalid="true"] { border-color: var(--bad); }
+.hint { margin: 6px 0 0; font-size: 0.875rem; color: var(--muted); }
+.field-error { margin: 6px 0 0; font-size: 0.875rem; color: var(--bad); }
+
+button, .button {
+  display: inline-block;
+  padding: 10px 16px;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+}
+button.secondary, .button.secondary {
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+button:disabled { opacity: 0.6; cursor: wait; }
+.full { width: 100%; }
+a { color: var(--accent); }
+
+/* --- messages --------------------------------------------------------------- */
+
+.message { padding: 12px 14px; border-radius: 8px; margin-bottom: 16px; border: 1px solid; }
+.message-error { color: var(--bad); border-color: var(--bad); background: color-mix(in srgb, var(--bad) 8%, transparent); }
+.message-success { color: var(--ok); border-color: var(--ok); background: color-mix(in srgb, var(--ok) 8%, transparent); }
+.message-info { color: var(--text); border-color: var(--border); background: var(--bg); }
+
+/* --- lists ----------------------------------------------------------------- */
+
+.org-list { list-style: none; padding: 0; margin: 0 0 16px; }
+.org-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.badge {
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  text-transform: capitalize;
+}
+.stack > * + * { margin-top: 16px; }

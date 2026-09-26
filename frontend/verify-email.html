@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Verify email · Vyterlix</title>
+  <link rel="stylesheet" href="css/base.css">
+  <script src="js/config.js"></script>
+  <script type="module" src="js/pages/verify-email.js"></script>
+</head>
+<body>
+  <main class="auth-page">
+    <section class="card auth-card">
+      <h1>Verify your email</h1>
+      <div id="message" class="message" role="alert" hidden></div>
+      <form id="resend-form" novalidate hidden>
+        <p class="muted">Didn't get the email, or the link expired? We'll send a new one.</p>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" required>
+        </div>
+        <button type="submit" class="full">Send a new link</button>
+      </form>
+      <div class="auth-links"><a href="app.html">Go to Vyterlix</a></div>
+    </section>
+  </main>
+</body>
+</html>

@@ -28,7 +28,9 @@ vyterlix/
 │   ├── css/
 │   └── js/
 │       ├── config.js      # API base URL — loaded first on every page
-│       ├── api.js         # shared API client (use this, not raw fetch)
+│       ├── auth.js        # session: in-memory access token, auto-refresh, `api` client
+│       ├── api.js         # low-level fetch wrapper (pages use `api` from auth.js)
+│       ├── ui.js          # forms, messages, one-time tokens from links
 │       ├── dom.js         # safe DOM helpers (escapeHtml, el)
 │       └── pages/         # one script per HTML page
 └── docs/adr/              # architecture decision records
@@ -97,9 +99,19 @@ cd backend
 python -m http.server 5500 --directory frontend
 ```
 
-Open http://localhost:5500 — the page should show **API status: online**. If it shows
-"unreachable", check the API is running and that `http://localhost:5500` is in
-`VYTERLIX_CORS_ORIGINS`.
+Open http://localhost:5500 — you'll land on the login page. Pages:
+
+| Page | What it's for |
+|---|---|
+| `register.html` / `login.html` | Create an account (logs straight in) / log in |
+| `app.html` | Your businesses; create a business (needs a verified email) |
+| `verify-email.html` | Opened from the verification email; can resend the link |
+| `forgot-password.html` / `reset-password.html` | Request a reset link / choose a new password from it |
+| `accept-invite.html` | Opened from an invitation email |
+
+Emails aren't sent in development: copy the link from the API terminal (`"email.console"`).
+If pages say they can't reach Vyterlix, check the API is running and that
+`http://localhost:5500` is in `VYTERLIX_CORS_ORIGINS`.
 
 ## Configuration
 
