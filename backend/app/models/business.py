@@ -254,3 +254,38 @@ class BusinessBenchmark(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     source: Mapped[str] = mapped_column(String(200))
     source_url: Mapped[str | None] = mapped_column(String(500))
     notes: Mapped[str | None] = mapped_column(Text)
+
+
+LIST_KINDS = ("offering", "sales_channel", "customer_type", "cost_category")
+
+
+class BusinessListItem(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base):
+    """A business's own lists: what it sells (offerings), where it sells (sales channels),
+    who it sells to (customer types) and what it spends on (cost categories).
+
+    Imported data will point at these items (Phase 4), so they are archived, never deleted.
+    """
+
+    __tablename__ = "business_list_items"
+    __table_args__ = (
+        CheckConstraint(_one_of("kind", LIST_KINDS), name="kind_valid"),
+        # "Cost of sales" (UK term for COGS) only means something for cost categories.
+        CheckConstraint(
+            "kind = 'cost_category' OR is_cost_of_sales IS NULL", name="cost_of_sales_only_costs"
+        ),
+        CheckConstraint("length(trim(name)) > 0", name="name_not_blank"),
+        # One "Website" per list, whatever the capitals (archived items included).
+        Index(
+            "uq_business_list_items_name",
+            "organization_id",
+            "kind",
+            text("lower(name)"),
+            unique=True,
+        ),
+    )
+
+    kind: Mapped[str] = mapped_column(String(20))
+    name: Mapped[str] = mapped_column(String(100))
+    is_active: Mapped[bool] = mapped_column(Boolean, server_default=text("true"))
+    sort_order: Mapped[int | None] = mapped_column(SmallInteger)
+    is_cost_of_sales: Mapped[bool | None] = mapped_column(Boolean)

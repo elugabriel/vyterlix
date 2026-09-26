@@ -47,6 +47,8 @@ class AuditAction(StrEnum):
     BUSINESS_PROFILE_UPDATED = "business.profile_updated"
     GOAL_CREATED = "goal.created"
     GOAL_UPDATED = "goal.updated"
+    LIST_ITEM_ADDED = "business.list_item_added"
+    LIST_ITEM_UPDATED = "business.list_item_updated"
 
 
 def record_audit(
