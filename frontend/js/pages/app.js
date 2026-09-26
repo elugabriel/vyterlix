@@ -20,7 +20,12 @@ document.getElementById("logout").addEventListener("click", async () => {
 function renderOrgs(orgs) {
   orgList.replaceChildren(
     ...orgs.map((org) =>
-      el("li", {}, el("span", {}, org.name), el("span", { class: "badge" }, org.role)),
+      el(
+        "li",
+        {},
+        el("a", { href: `business.html?org=${org.id}` }, org.name),
+        el("span", { class: "badge" }, org.role),
+      ),
     ),
   );
   orgsEmpty.hidden = orgs.length > 0;
@@ -63,7 +68,6 @@ if (user.email_verified) {
 
 bindForm(createForm, message, async ({ name }) => {
   const org = await api.post("/organizations", { name });
-  createForm.reset();
-  showMessage(message, "success", `Created ${org.name}.`);
-  await loadOrgs();
+  // Straight into setting it up.
+  location.assign(`onboarding.html?org=${org.id}`);
 });

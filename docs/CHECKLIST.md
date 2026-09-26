@@ -16,7 +16,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 0 | Architecture + database design | In progress |
 | 1 | Project foundation | Done |
 | 2 | Authentication + multi-tenancy | Done |
-| 3 | Business onboarding & profile | **In progress — 8 of 9 steps done** |
+| 3 | Business onboarding & profile | Done |
 | 4 | Data import + normalisation | Not started |
 | 5 | KPI engine | Not started |
 | 6 | Business health engine | Not started |
@@ -145,7 +145,7 @@ Decisions (confirmed 2026-09-26):
 - [x] 6. Business settings + notification preferences — `GET/PATCH /organizations/{id}/settings` (UK defaults; week start + quiet hours editable by owners; time zone/locale/currency fixed); `GET/PATCH …/notification-preferences` (each member's own, per business; email / in-app / push per alert type; defaults all on; security email + in-app can't be switched off, enforced in the database too)
 - [x] 7. Benchmark storage — staff CSV loader `python -m app.cli.benchmarks load` (all-or-nothing, row-numbered errors, dry run, re-load updates, source required, UK regions only); `GET /benchmarks` (verified users, read-only); `GET /organizations/{id}/benchmarks` closest match per KPI (SIC → region → size → whole UK) with `matched_on`; empty until real UK sources are chosen
 - [x] 8. Onboarding progress — `GET /organizations/{id}/onboarding` (9 sections, status worked out from real data, counts, `next_section`, `ready_for_dashboard`); `POST …/skip` (optional sections only) and `POST …/complete` (needs the required section; audited once)
-- [ ] 9. Frontend: onboarding wizard + business settings page
+- [x] 9. Frontend — `onboarding.html` (9-step wizard: progress bar, step list with status, save and continue, skip, finish; reused as the editor for each section), `business.html` (setup checklist with edit links, business settings, my notifications grid with security locked), businesses list links + create-then-onboard; UK formatting (£, dd/mm/yyyy, UK regions); `frontend/serve.py` no-cache dev server; full journey tested in a real browser
 
 ## Phase 4: Data import + normalisation
 
@@ -477,3 +477,5 @@ Prove the whole loop on one fake retail business before building further.
 | Content-Security-Policy and other security headers on the frontend host | Set at the web server/CDN | L1 / L4 |
 | Two tabs refreshing at the same instant can log one out (refresh token rotates) | Rare; fix with a short reuse grace window | L1 |
 | Frontend screens for members, roles, invitations and audit log (API exists) | Belongs with the business screens | Phase 3 / Core UX |
+| **Browser caching of JS/CSS in production** (stale code after a deploy: seen in dev with the plain Python server) | Needs cache headers or versioned file names at the web host | L4 |
+| Manage members/roles and view the audit log from `business.html` (currently only invite in the wizard) | APIs exist; screens not built yet | Core UX |

@@ -31,6 +31,10 @@ vyterlix/
 │       ├── auth.js        # session: in-memory access token, auto-refresh, `api` client
 │       ├── api.js         # low-level fetch wrapper (pages use `api` from auth.js)
 │       ├── ui.js          # forms, messages, one-time tokens from links
+│       ├── forms.js       # form control builders (field, select, checkbox…)
+│       ├── format.js      # UK formats: £, dd/mm/yyyy, UK regions
+│       ├── business.js    # pages inside one business (?org=)
+│       ├── onboarding-sections.js  # the forms for each setup section
 │       ├── dom.js         # safe DOM helpers (escapeHtml, el)
 │       └── pages/         # one script per HTML page
 └── docs/adr/              # architecture decision records
@@ -95,8 +99,11 @@ cd backend
 
 **Terminal 2 — frontend** (http://localhost:5500):
 
+`serve.py` is a plain-Python static server that tells the browser not to cache, so
+changed `.js`/`.css` files are picked up on the next page load.
+
 ```bash
-python -m http.server 5500 --directory frontend
+python frontend/serve.py
 ```
 
 Open http://localhost:5500 — you'll land on the login page. Pages:
@@ -108,6 +115,8 @@ Open http://localhost:5500 — you'll land on the login page. Pages:
 | `verify-email.html` | Opened from the verification email; can resend the link |
 | `forgot-password.html` / `reset-password.html` | Request a reset link / choose a new password from it |
 | `accept-invite.html` | Opened from an invitation email |
+| `onboarding.html?org=…` | Setting up a business step by step; also where each section is edited later |
+| `business.html?org=…` | A business's setup checklist, business settings and your notification choices |
 
 Emails aren't sent in development: copy the link from the API terminal (`"email.console"`).
 If pages say they can't reach Vyterlix, check the API is running and that

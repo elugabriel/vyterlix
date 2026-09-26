@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Set up your business · Vyterlix</title>
+  <link rel="stylesheet" href="css/base.css">
+  <script src="js/config.js"></script>
+  <script type="module" src="js/pages/onboarding.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="app.html">Vyterlix</a>
+    <div class="topbar-user">
+      <span id="user-name" class="muted"></span>
+      <button id="logout" type="button" class="secondary">Log out</button>
+    </div>
+  </header>
+  <main class="container stack">
+    <p><a href="app.html">← Your businesses</a></p>
+    <h1 id="org-name">Set up your business</h1>
+    <div class="progress-row">
+      <progress id="progress" max="9" value="0"></progress>
+      <span id="progress-text" class="muted"></span>
+    </div>
+    <div id="message" class="message" role="alert" hidden></div>
+    <div class="wizard">
+      <nav aria-label="Setup steps"><ol id="steps" class="steps"></ol></nav>
+      <section id="panel" class="card" aria-live="polite"></section>
+    </div>
+    <p class="hint">* needed before you can use the dashboard. Everything else can wait.</p>
+  </main>
+</body>
+</html>

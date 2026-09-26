@@ -54,7 +54,11 @@ export function bindForm(form, messageBox, handler) {
     try {
       await handler(Object.fromEntries(new FormData(form)));
     } catch (err) {
-      if (!(err instanceof ApiError)) throw err;
+      if (!(err instanceof ApiError)) {
+        // A bug, not the user's fault: tell them something went wrong instead of doing nothing.
+        showMessage(messageBox, "error", "Something went wrong. Please try again.");
+        throw err;
+      }
       const onFields = err.code === "validation_error" && showFieldErrors(form, err.details);
       showMessage(messageBox, "error", onFields ? "Please fix the highlighted fields." : err.message);
     } finally {

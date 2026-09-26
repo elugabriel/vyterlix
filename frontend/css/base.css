@@ -130,3 +130,63 @@ a { color: var(--accent); }
   text-transform: capitalize;
 }
 .stack > * + * { margin-top: 16px; }
+
+/* --- Phase 3: onboarding wizard and business page -------------------------------- */
+
+select, input[type="number"], input[type="date"], input[type="time"] {
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+fieldset { border: 0; padding: 0; margin: 0 0 16px; }
+legend { font-weight: 600; margin-bottom: 6px; }
+.row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+.check { display: flex; align-items: center; gap: 8px; font-weight: 400; margin-bottom: 8px; }
+.check input { width: auto; }
+.checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px 16px; margin-bottom: 16px; }
+.subform { border-top: 1px solid var(--border); padding-top: 16px; margin: 16px 0; }
+.subform h3 { margin-top: 0; font-size: 1.05rem; }
+.skip { margin-left: 8px; }
+
+.progress-row { display: flex; align-items: center; gap: 12px; }
+progress { flex: 1; height: 10px; accent-color: var(--accent); }
+
+.wizard { display: grid; grid-template-columns: 260px 1fr; gap: 20px; align-items: start; }
+@media (max-width: 760px) { .wizard { grid-template-columns: 1fr; } }
+.steps { list-style: none; margin: 0; padding: 0; }
+.step {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-weight: 500;
+  text-align: left;
+}
+.steps li.current .step { background: var(--surface); border-color: var(--accent); }
+.status-done { color: var(--ok); border-color: var(--ok); }
+.status-skipped { color: var(--muted); }
+.status-to_do { color: var(--warn); border-color: var(--warn); }
+
+.item-list { list-style: none; padding: 0; margin: 0 0 8px; }
+.item-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+table.grid { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+table.grid th, table.grid td { padding: 8px; border-bottom: 1px solid var(--border); text-align: center; }
+table.grid th[scope="row"], table.grid thead th:first-child { text-align: left; font-weight: 500; }
+.badge[class*="status-"] { text-transform: none; }  /* "To do", not "To Do" */

@@ -80,3 +80,13 @@ def test_access_token_lives_only_in_auth_module_memory():
     for script in SCRIPTS:
         if script.name != "auth.js":
             assert "access_token" not in script.read_text(encoding="utf-8"), script.name
+
+
+def test_every_api_method_the_pages_call_exists():
+    """Catches calls like api.put(...) when the client has no put() (a real bug, once)."""
+    client = (FRONTEND / "js" / "api.js").read_text(encoding="utf-8")
+    provided = set(re.findall(r"^\s+(\w+): \(path", client, re.MULTILINE))
+    assert {"get", "post", "put", "patch", "delete"} <= provided
+    for script in SCRIPTS:
+        for method in re.findall(r"\bapi\.(\w+)\(", script.read_text(encoding="utf-8")):
+            assert method in provided, f"{script.name} calls api.{method}(), which doesn't exist"
