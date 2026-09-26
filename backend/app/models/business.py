@@ -26,6 +26,7 @@ from sqlalchemy import (
     UniqueConstraint,
     text,
 )
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TenantScopedMixin, TimestampMixin, UUIDPrimaryKeyMixin
@@ -137,6 +138,10 @@ class BusinessProfile(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Ba
     vat_number: Mapped[str | None] = mapped_column(String(14))
 
     onboarding_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Optional onboarding sections the owner chose to skip for now (see services/onboarding.py).
+    onboarding_skipped: Mapped[list[str]] = mapped_column(
+        ARRAY(String(30)), server_default=text("'{}'")
+    )
 
 
 class BusinessSettings(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base):

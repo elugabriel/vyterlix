@@ -10,6 +10,7 @@ from app.api.v1 import (
     health,
     invitations,
     me,
+    onboarding,
     organizations,
     seasons,
     settings,
@@ -31,3 +32,4 @@ api_router.include_router(business_lists.router)
 api_router.include_router(seasons.router)
 api_router.include_router(settings.router)
 api_router.include_router(benchmarks.router)
+api_router.include_router(onboarding.router)
