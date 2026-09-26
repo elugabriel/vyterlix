@@ -289,3 +289,42 @@ class BusinessListItem(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, B
     is_active: Mapped[bool] = mapped_column(Boolean, server_default=text("true"))
     sort_order: Mapped[int | None] = mapped_column(SmallInteger)
     is_cost_of_sales: Mapped[bool | None] = mapped_column(Boolean)
+
+
+# The alert types from the PRD. Phase 14's notification engine delivers by these.
+NOTIFICATION_CATEGORIES = (
+    "sales",
+    "financial",
+    "customer",
+    "inventory",
+    "marketing",
+    "forecast",
+    "action",
+    "data",
+    "security",
+)
+
+
+class NotificationPreference(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base):
+    """How one person wants one kind of alert delivered, within one organisation.
+
+    No row means the defaults (everything on). Security alerts can't be switched off for
+    email or in-app: critical security messages are non-suppressible (PRD).
+    """
+
+    __tablename__ = "notification_preferences"
+    __table_args__ = (
+        UniqueConstraint("organization_id", "user_id", "category"),
+        CheckConstraint(_one_of("category", NOTIFICATION_CATEGORIES), name="category_valid"),
+        CheckConstraint(
+            "category <> 'security' OR (email AND in_app)", name="security_always_delivered"
+        ),
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    category: Mapped[str] = mapped_column(String(20))
+    email: Mapped[bool] = mapped_column(Boolean, server_default=text("true"))
+    in_app: Mapped[bool] = mapped_column(Boolean, server_default=text("true"))
+    push: Mapped[bool] = mapped_column(Boolean, server_default=text("true"))

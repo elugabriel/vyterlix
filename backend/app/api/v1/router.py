@@ -11,6 +11,7 @@ from app.api.v1 import (
     me,
     organizations,
     seasons,
+    settings,
 )
 
 api_router = APIRouter(prefix="/api/v1")
@@ -27,3 +28,4 @@ api_router.include_router(goals.router)
 api_router.include_router(business_lists.suggestions_router)
 api_router.include_router(business_lists.router)
 api_router.include_router(seasons.router)
+api_router.include_router(settings.router)

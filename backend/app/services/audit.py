@@ -51,6 +51,7 @@ class AuditAction(StrEnum):
     LIST_ITEM_UPDATED = "business.list_item_updated"
     SEASON_CREATED = "season.created"
     SEASON_UPDATED = "season.updated"
+    SETTINGS_UPDATED = "business.settings_updated"
 
 
 def record_audit(
