@@ -42,6 +42,9 @@ class AuditAction(StrEnum):
     INVITATION_REVOKED = "invitation.revoked"
     INVITATION_ACCEPTED = "invitation.accepted"
     INVITATION_ACCEPT_REJECTED = "invitation.accept_rejected"
+    # Business profile
+    BUSINESS_PROFILE_CREATED = "business.profile_created"
+    BUSINESS_PROFILE_UPDATED = "business.profile_updated"
 
 
 def record_audit(

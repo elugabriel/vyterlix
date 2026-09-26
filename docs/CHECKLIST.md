@@ -16,7 +16,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 0 | Architecture + database design | In progress |
 | 1 | Project foundation | Done |
 | 2 | Authentication + multi-tenancy | Done |
-| 3 | Business onboarding & profile | **In progress — 1 of 9 steps done** |
+| 3 | Business onboarding & profile | **In progress — 2 of 9 steps done** |
 | 4 | Data import + normalisation | Not started |
 | 5 | KPI engine | Not started |
 | 6 | Business health engine | Not started |
@@ -138,7 +138,7 @@ Decisions (confirmed 2026-09-26):
   *detects* seasonality and *suggests* it for the user to confirm (never applied silently).
 
 - [x] 1. Tables + migration: `industries` (14 seeded), business_profiles, business_settings, business_goals, business_seasons, business_benchmarks — UK-first rules enforced as database constraints (GBP, GB, UK postcode/region/SIC/VAT formats, Europe/London, en-GB, real financial-year start dates); business tables automatically tenant-scoped
-- [ ] 2. Business profile API (name, industry, size, country, currency, model, years operating, team size, fiscal-year start)
+- [x] 2. Business profile API — `GET /industries`; `GET/PUT/PATCH /organizations/{id}/profile` (read: any member; change: org.manage); UK input tidying in `app/core/uk.py` (postcodes, GB VAT numbers, UK dates); years operating derived from year founded; audited
 - [ ] 3. Business goals (type, target KPI/value/date, priority)
 - [ ] 4. Products/services, sales channels, customer types, major cost categories
 - [ ] 5. Seasonality (peak/quiet periods)
