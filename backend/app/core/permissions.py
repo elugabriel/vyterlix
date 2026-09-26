@@ -1,8 +1,8 @@
 """Permission codes and the Manager "remit".
 
-Codes must match the rows seeded in the `permissions` table (migrations 538284f717b1, cee5c110fba7);
-tests/test_permissions.py fails if they drift apart. Which role holds which permission
-lives in the database (`role_permissions`), not here.
+Codes must match the rows migrations seed into the `permissions` table (each new
+permission gets its own migration); tests/test_permissions.py fails if they drift apart.
+Which role holds which permission lives in the database (`role_permissions`), not here.
 """
 
 from enum import StrEnum
@@ -17,6 +17,7 @@ class Perm(StrEnum):
     RECOMMENDATIONS_ACTION = "recommendations.action"
     ACTIONS_MANAGE = "actions.manage"
     AUDIT_VIEW = "audit.view"
+    GOALS_MANAGE = "goals.manage"
 
 
 class KpiCategory(StrEnum):

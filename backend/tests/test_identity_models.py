@@ -38,7 +38,12 @@ def test_system_roles_are_seeded_with_expected_permissions(db):
         for code in ("owner", "manager", "viewer")
     }
     assert perms["viewer"] == {"insights.view"}
-    assert perms["manager"] == {"insights.view", "recommendations.action", "actions.manage"}
+    assert perms["manager"] == {
+        "insights.view",
+        "recommendations.action",
+        "actions.manage",
+        "goals.manage",
+    }
     assert perms["owner"] >= perms["manager"] | {
         "org.manage",
         "billing.manage",
