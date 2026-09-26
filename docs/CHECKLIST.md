@@ -16,7 +16,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 0 | Architecture + database design | In progress |
 | 1 | Project foundation | Done |
 | 2 | Authentication + multi-tenancy | Done |
-| 3 | Business onboarding & profile | **In progress — 4 of 9 steps done** |
+| 3 | Business onboarding & profile | **In progress — 5 of 9 steps done** |
 | 4 | Data import + normalisation | Not started |
 | 5 | KPI engine | Not started |
 | 6 | Business health engine | Not started |
@@ -141,7 +141,7 @@ Decisions (confirmed 2026-09-26):
 - [x] 2. Business profile API — `GET /industries`; `GET/PUT/PATCH /organizations/{id}/profile` (read: any member; change: org.manage); UK input tidying in `app/core/uk.py` (postcodes, GB VAT numbers, UK dates); years operating derived from year founded; audited
 - [x] 3. Business goals — `GET/POST /organizations/{id}/goals`, `GET/PATCH …/goals/{goal_id}` (close via status achieved/abandoned); new `goals.manage` permission (owner + manager); each goal type maps to a KPI area and Managers are held to their remit; exact £ (pence) / % / count targets; target dates not in the past (UK date); audited
 - [x] 4. Business lists — offerings (products/services), sales channels, customer types, cost categories in one `business_list_items` table; `GET /business-list-suggestions` (UK starting points); `GET/POST /organizations/{id}/lists/{kind}`, `…/bulk`, `PATCH …/{item_id}`; names unique per list ignoring capitals (DB index); archive instead of delete; cost categories flag "cost of sales" for gross profit
-- [ ] 5. Seasonality (peak/quiet periods)
+- [x] 5. Seasonality — `GET/POST /organizations/{id}/seasons`, `PATCH …/{season_id}` (edit, confirm, dismiss, restore), `GET …/seasons/on?date=` (default today, UK); yearly periods that may cross New Year; UK labels ("1 Dec – 5 Jan"); detected seasons arrive as suggestions and never apply until confirmed; `seasons_on()` ready for alerts
 - [ ] 6. Business settings + notification preferences (timezone, week start, quiet hours, channels)
 - [ ] 7. Benchmark storage (by industry/size/region; empty until sectors known)
 - [ ] 8. Onboarding progress tracking
