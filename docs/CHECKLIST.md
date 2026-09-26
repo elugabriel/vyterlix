@@ -16,7 +16,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 0 | Architecture + database design | In progress |
 | 1 | Project foundation | Done |
 | 2 | Authentication + multi-tenancy | Done |
-| 3 | Business onboarding & profile | Not started |
+| 3 | Business onboarding & profile | **In progress — 1 of 9 steps done** |
 | 4 | Data import + normalisation | Not started |
 | 5 | KPI engine | Not started |
 | 6 | Business health engine | Not started |
@@ -43,6 +43,16 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | L7 | Post-launch operations | Not started |
 
 ---
+
+## Standing rule: UK-first (confirmed 2026-09-26)
+
+Everything defaults to the UK, in every phase:
+- **Currency:** GBP (£) only at launch. The `currency` column stays (multi-currency-ready schema) but only GBP is accepted.
+- **Location:** country GB; UK nations/regions (England's regions, Scotland, Wales, Northern Ireland), UK towns/cities, UK postcodes (format-validated).
+- **Time and format:** Europe/London time zone (BST handled), dates dd/mm/yyyy, weeks start Monday, £1,234.56 numbers, +44 phone numbers.
+- **Language:** British English in the UI and emails (organisation, colour, analyse…).
+- **Tax and classification:** UK VAT rates (20% / 5% / 0%), UK SIC 2007 codes, financial-year start configurable (common: 1 April; the UK tax year starts 6 April).
+- **Data:** seed lists, sample datasets and benchmarks use UK examples.
 
 ## Phase −1: Decisions before code
 
@@ -119,11 +129,15 @@ Argon2id · dev emails to log · **forgot-password always included** · unverifi
 
 **Done when:** a user can set up a full business profile, goals and preferences.
 
-Decisions needed: industry list (recommend short own list + optional SIC code) · which
-fields are mandatory (recommend name, industry, currency, fiscal-year start) · detect
-seasonality from data later (recommend yes).
+Decisions (confirmed 2026-09-26):
+- **Industry:** a short Vyterlix list (code + label, stored as data so it can grow) plus an
+  optional UK SIC 2007 code for precision later.
+- **Required before the dashboard:** business name, industry, currency, financial-year start.
+  Everything else can be skipped and completed later (onboarding progress shows what's left).
+- **Seasonality:** entered by the user now; once sales data exists (Phase 4+), Vyterlix also
+  *detects* seasonality and *suggests* it for the user to confirm (never applied silently).
 
-- [ ] 1. Tables + migration: business_profiles, business_goals, business_seasons, business_settings, business_benchmarks
+- [x] 1. Tables + migration: `industries` (14 seeded), business_profiles, business_settings, business_goals, business_seasons, business_benchmarks — UK-first rules enforced as database constraints (GBP, GB, UK postcode/region/SIC/VAT formats, Europe/London, en-GB, real financial-year start dates); business tables automatically tenant-scoped
 - [ ] 2. Business profile API (name, industry, size, country, currency, model, years operating, team size, fiscal-year start)
 - [ ] 3. Business goals (type, target KPI/value/date, priority)
 - [ ] 4. Products/services, sales channels, customer types, major cost categories
