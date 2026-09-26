@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.api.v1 import (
     audit,
     auth,
+    benchmarks,
     business,
     business_lists,
     goals,
@@ -29,3 +30,4 @@ api_router.include_router(business_lists.suggestions_router)
 api_router.include_router(business_lists.router)
 api_router.include_router(seasons.router)
 api_router.include_router(settings.router)
+api_router.include_router(benchmarks.router)

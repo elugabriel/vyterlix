@@ -61,6 +61,8 @@ GOAL_TYPES = (
 )
 GOAL_STATUSES = ("active", "achieved", "abandoned")
 TARGET_UNITS = ("gbp", "percent", "count")
+# Units a benchmark figure can be in, e.g. stock turnover is a ratio, debtor days are days.
+BENCHMARK_UNITS = ("gbp", "percent", "count", "ratio", "days")
 SEASON_SOURCES = ("user", "detected")
 # "suggested" = detected from data, waiting for the user to confirm (never applied silently).
 SEASON_STATUSES = ("active", "suggested", "dismissed")
@@ -229,6 +231,8 @@ class BusinessBenchmark(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         CheckConstraint(_one_of("region", UK_REGIONS), name="region_valid"),
         CheckConstraint(_one_of("size_band", BUSINESS_SIZES), name="size_band_valid"),
         CheckConstraint("sic_code ~ '^[0-9]{5}$'", name="sic_code_format"),
+        CheckConstraint(_one_of("unit", BENCHMARK_UNITS), name="unit_valid"),
+        CheckConstraint("length(trim(source)) > 0", name="source_required"),
         # One figure per KPI per year per segment; NULL segment parts count as "all".
         Index(
             "uq_business_benchmarks_segment",
