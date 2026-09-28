@@ -17,7 +17,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 1 | Project foundation | Done |
 | 2 | Authentication + multi-tenancy | Done |
 | 3 | Business onboarding & profile | Done |
-| 4 | Data import + normalisation | Not started |
+| 4 | Data import + normalisation | **In progress — Part A step 1 of 9 done** |
 | 5 | KPI engine | Not started |
 | 6 | Business health engine | Not started |
 | 7 | Diagnostic engine | Not started |
@@ -93,7 +93,7 @@ Everything defaults to the UK, in every phase:
 - [x] FastAPI project structure
 - [x] Static frontend structure (plain HTML/CSS/JS, `css/`, `js/`, `js/pages/`)
 - [x] CORS allow-list; wildcard refused in staging/prod
-- [x] Local static server documented (`python -m http.server 5500`)
+- [x] Local static server documented (`python frontend/serve.py`: no-cache dev server, since Phase 3)
 - [~] PostgreSQL — dev + test done → staging/prod moved to **L3**
 - [x] Per-environment config (`VYTERLIX_*`, `.env`)
 - [x] Frontend `config.js` for API base URL
@@ -149,7 +149,19 @@ Decisions (confirmed 2026-09-26):
 
 ## Phase 4: Data import + normalisation
 
-- [ ] Tables: customers, products, sales, sale_items, expenses, inventory, inventory_transactions, suppliers, data_sources, data_imports, data_import_rows, data_quality_issues
+Decisions (confirmed 2026-09-28):
+- **File storage:** dev = a local folder outside the repo; production = UK-hosted storage (chosen in L3).
+- **Original files:** kept 90 days, then deleted automatically (UK GDPR minimisation); imported records stay.
+- **Limits:** 25 MB and 250,000 rows per file.
+- **Rows with errors:** always preview first; then import the valid rows, skip the rest, and offer a downloadable list of problems.
+- **VAT:** each import asks whether amounts include VAT (default yes for consumer sales); revenue is stored **excluding** VAT, with VAT kept alongside (ADR 0001 §4).
+- **Excel:** modern `.xlsx` only; choose the sheet when there's more than one.
+- **Sample data:** no real customer files yet, so an obviously fake UK retail dataset is created for testing and the milestone (clearly labelled, never mixed with real data).
+- **Part B (connectors), decide later:** background jobs via a PostgreSQL-backed queue (recommended: no Redis/Docker needed); Dolaris registers developer apps with Xero, Shopify and Google.
+
+
+- [x] Trading data tables (step 1): customers, suppliers, products, sales, sale_lines, expenses, stock_movements — tenant-scoped; same-business links enforced by composite (organization_id, id) foreign keys; GBP only, net + VAT = gross exactly, UK VAT rates, refunds/credits as negative kinds, stock direction by kind; source + source_ref stop double imports; unknown cost of goods allowed (reported later, never guessed)
+- [ ] Import tracking tables (step 2): data_sources, data_imports, data_import_rows, data_quality_issues + file storage
 - [ ] CSV upload
 - [ ] Excel upload
 - [ ] Column-mapping UI

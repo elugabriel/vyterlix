@@ -283,6 +283,8 @@ class BusinessListItem(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, B
             "kind = 'cost_category' OR is_cost_of_sales IS NULL", name="cost_of_sales_only_costs"
         ),
         CheckConstraint("length(trim(name)) > 0", name="name_not_blank"),
+        # Target for same-business links from trading data (app/models/data.py).
+        UniqueConstraint("organization_id", "id", name="uq_business_list_items_org_id"),
         # One "Website" per list, whatever the capitals (archived items included).
         Index(
             "uq_business_list_items_name",
