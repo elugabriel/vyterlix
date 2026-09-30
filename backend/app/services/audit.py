@@ -53,6 +53,9 @@ class AuditAction(StrEnum):
     SEASON_UPDATED = "season.updated"
     SETTINGS_UPDATED = "business.settings_updated"
     ONBOARDING_COMPLETED = "business.onboarding_completed"
+    # Data imports
+    IMPORT_UPLOADED = "import.uploaded"
+    IMPORT_UPDATED = "import.updated"
 
 
 def record_audit(

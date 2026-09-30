@@ -13,6 +13,9 @@ dependencies = [
     "argon2-cffi>=23.1",
     "email-validator>=2.1",
     "pyjwt>=2.9",
+    "python-multipart>=0.0.9",  # file uploads
+    "openpyxl>=3.1",  # reading .xlsx uploads
+    "defusedxml>=0.7",  # makes openpyxl refuse XML entity attacks in uploaded workbooks
     "tzdata>=2024.1",  # Europe/London rules on Windows, which has no system tz database
 ]
 

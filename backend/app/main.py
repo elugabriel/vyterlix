@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.core.config import Settings, get_settings
 from app.core.errors import register_exception_handlers
+from app.core.limits import BodySizeLimitMiddleware
 from app.core.logging import RequestContextMiddleware, configure_logging
 
 
@@ -27,6 +28,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
         expose_headers=["X-Request-ID"],
     )
+    # Refuse oversized request bodies before they are read (uploads get their own limit).
+    app.add_middleware(BodySizeLimitMiddleware, upload_limit=settings.max_upload_bytes)
     # Added last = outermost, so every response (incl. CORS preflight) gets a request ID.
     app.add_middleware(RequestContextMiddleware)
 
