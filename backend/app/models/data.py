@@ -10,7 +10,8 @@ Rules, enforced by the database:
 - Money is NUMERIC in GBP, stored excluding VAT with the VAT alongside (ADR 0001 §4), and
   gross = net + VAT exactly. Refunds and credits are negative rows of their own kind.
 - Every row records where it came from (source + source_ref), so the same sale or
-  expense can't be imported twice from the same source.
+  expense can't be imported twice from the same source, and the import that created it
+  (import_id), so an import can be undone exactly.
 """
 
 import uuid
@@ -56,10 +57,12 @@ def _tenant_fk(column: str, target: str, *, ondelete: str | None = None) -> Fore
 
 
 class DataOriginMixin:
-    """Where a record came from, and its id there (used to stop double imports)."""
+    """Where a record came from, its id there (used to stop double imports), and the
+    import that created it (NULL for manual entry)."""
 
     source: Mapped[str] = mapped_column(String(20), server_default="manual")
     source_ref: Mapped[str | None] = mapped_column(String(200))
+    import_id: Mapped[uuid.UUID | None] = mapped_column()
 
 
 def _origin_rules(table: str) -> tuple:
@@ -76,6 +79,9 @@ def _origin_rules(table: str) -> tuple:
         ),
         # Composite target for same-business links from other tables.
         UniqueConstraint("organization_id", "id", name=f"uq_{table}_org_id"),
+        # An import can't be deleted while its records exist: undo removes them first.
+        _tenant_fk("import_id", "data_imports"),
+        Index(f"ix_{table}_org_import", "organization_id", "import_id"),
     )
 
 

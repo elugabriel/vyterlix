@@ -13,6 +13,7 @@ from app.core.config import Settings
 from app.db.session import get_db
 from app.main import create_app
 from app.services.email import EmailMessage, get_email_sender
+from app.services.storage import LocalFileStorage, get_file_storage
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 TEST_DATABASE_URL = os.environ.get(
@@ -33,11 +34,16 @@ def _no_real_database():
     yield  # pragma: no cover
 
 
+def _no_real_upload_folder():
+    raise RuntimeError("Test tried to use the real upload folder. Request `api` or `storage`.")
+
+
 @pytest.fixture
 def app(settings):
     app = create_app(settings)
     # Guard: tests must never reach the dev database configured in backend/.env.
     app.dependency_overrides[get_db] = _no_real_database
+    app.dependency_overrides[get_file_storage] = _no_real_upload_folder
     return app
 
 
@@ -96,10 +102,17 @@ def outbox() -> Outbox:
 
 
 @pytest.fixture
-def api(app, db, outbox) -> TestClient:
-    """HTTP client whose requests use the rolled-back test session and the test outbox."""
+def storage(tmp_path) -> LocalFileStorage:
+    """Uploaded files go to a temporary folder, deleted after the test run."""
+    return LocalFileStorage(tmp_path / "uploads")
+
+
+@pytest.fixture
+def api(app, db, outbox, storage) -> TestClient:
+    """HTTP client using the rolled-back test session, test outbox and temp upload folder."""
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_email_sender] = lambda: outbox
+    app.dependency_overrides[get_file_storage] = lambda: storage
     # https so the Secure refresh cookie round-trips like it does in a real browser.
     return TestClient(app, base_url="https://testserver", raise_server_exceptions=False)
 

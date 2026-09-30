@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic import model_validator
@@ -31,6 +32,13 @@ class Settings(BaseSettings):
     invitation_ttl_days: int = 7
     # Minimum gap between "send me another link" emails to the same account.
     token_resend_cooldown_seconds: int = 60
+
+    # Data imports (decisions 2026-09-28). Uploaded files live outside the repo; in
+    # production this becomes UK-hosted storage (L3).
+    upload_dir: str = str(Path(__file__).resolve().parents[4] / "vyterlix-uploads")
+    max_upload_bytes: int = 25 * 1024 * 1024
+    max_upload_rows: int = 250_000
+    upload_retention_days: int = 90  # originals deleted after this; imported records stay
 
     # Sessions. Access tokens are short-lived JWTs kept in page memory; the refresh token
     # lives in an httpOnly cookie and is stored hashed in user_sessions.
