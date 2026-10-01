@@ -368,3 +368,110 @@ def test_a_workbook_that_understates_its_own_size_is_still_read_in_full():
     out.seek(0)
     p = inspect_file(out, "excel", max_rows=MAX)
     assert p.row_count == 10
+
+
+# --- streaming every row --------------------------------------------------
+
+
+def stream(source, stream_obj, **kw):
+    with file_reader.open_rows(stream_obj, source, max_rows=kw.pop("max_rows", MAX), **kw) as rows:
+        return rows.headers, list(rows.rows)
+
+
+def test_csv_rows_are_numbered_by_their_line_in_the_file():
+    text = 'Date,Note\n1/1,a\n\n2/1,"two\nlines"\n3/1,c\n'
+    headers, rows = stream("csv", csv_bytes(text))
+    assert headers == ["Date", "Note"]
+    assert rows == [(2, ["1/1", "a"]), (4, ["2/1", "two\nlines"]), (6, ["3/1", "c"])]
+
+
+def test_streamed_headings_match_the_upload_preview_exactly():
+    text = "Total,,total,Total ,Date\n1,2,3,4,5\n"
+    assert stream("csv", csv_bytes(text))[0] == read_csv(text).headers
+
+
+def test_streamed_rows_match_the_upload_sample():
+    text = "A,B,C\n1\n\n1,2,3,4\n x ,y,z\n"
+    _, rows = stream("csv", csv_bytes(text))
+    assert [cells for _, cells in rows] == read_csv(text).sample_rows
+
+
+def test_streaming_with_headings_on_a_later_row():
+    text = "Report\nDate,Total\n1/1,5\n"
+    headers, rows = stream("csv", csv_bytes(text), header_row=2)
+    assert headers == ["Date", "Total"] and rows == [(3, ["1/1", "5"])]
+
+
+def test_streaming_a_windows_1252_file():
+    _, rows = stream("csv", csv_bytes("Item,Price\nCafé,£3.20\n", "cp1252"))
+    assert rows == [(2, ["Café", "£3.20"])]
+
+
+def test_streaming_enforces_the_row_limit():
+    text = "N\n" + "\n".join(str(i) for i in range(1, 12)) + "\n"
+    with pytest.raises(UnreadableFileError) as caught:
+        stream("csv", csv_bytes(text), max_rows=10)
+    assert caught.value.code == "too_many_rows"
+
+
+def test_streaming_refuses_what_the_preview_refuses():
+    with pytest.raises(UnreadableFileError) as caught:
+        stream("csv", io.BytesIO(b"%PDF-1.7 whatever"))
+    assert caught.value.code == "unsupported_file_type"
+    with pytest.raises(UnreadableFileError) as caught:
+        stream("csv", csv_bytes("A\n1\n"), header_row=0)
+    assert caught.value.code == "bad_header_row"
+
+
+def test_streaming_bad_text_is_an_error_not_a_crash():
+    with pytest.raises(UnreadableFileError) as caught:
+        stream("csv", io.BytesIO(b"A,B\n1,2\n3,\x81\x8d\n"))
+    assert caught.value.code == "bad_encoding"
+
+
+def test_excel_rows_are_numbered_by_their_row_in_the_sheet():
+    rows = [["Date", "Total"], ["1/1", 5], [None, None], [datetime(2026, 9, 28), 6.5]]
+    headers, got = stream("excel", workbook({"S": rows}))
+    assert headers == ["Date", "Total"]
+    assert got == [(2, ["1/1", "5"]), (4, ["2026-09-28", "6.5"])]
+
+
+def test_excel_streaming_needs_a_sheet_when_there_are_several():
+    sheets = {"A": [["x"], [1]], "B": [["y"], [2]]}
+    with pytest.raises(UnreadableFileError) as caught:
+        stream("excel", workbook(sheets))
+    assert caught.value.code == "choose_sheet_first"
+    assert stream("excel", workbook(sheets), sheet_name="B") == (["y"], [(2, ["2"])])
+    with pytest.raises(UnreadableFileError) as caught:
+        stream("excel", workbook(sheets), sheet_name="C")
+    assert caught.value.code == "unknown_sheet"
+
+
+def test_excel_streaming_with_headings_on_a_later_row():
+    rows = [["Report"], ["Date", "Total"], ["1/1", 5]]
+    assert stream("excel", workbook({"S": rows}), header_row=2) == (
+        ["Date", "Total"],
+        [(3, ["1/1", "5"])],
+    )
+
+
+def test_excel_streaming_trusts_the_rows_not_the_declared_size():
+    import re
+
+    raw = workbook({"S": [["A"], *[[i] for i in range(1, 11)]]}).getvalue()
+    out = io.BytesIO()
+    with zipfile.ZipFile(io.BytesIO(raw)) as src, zipfile.ZipFile(out, "w") as dst:
+        for item in src.infolist():
+            data = src.read(item.filename)
+            if item.filename == "xl/worksheets/sheet1.xml":
+                data = re.sub(rb'<dimension ref="[^"]*"', b'<dimension ref="A1:A3"', data)
+            dst.writestr(item, data)
+    out.seek(0)
+    assert len(stream("excel", out)[1]) == 10
+
+
+def test_excel_streaming_row_limit():
+    rows = [["N"], *[[i] for i in range(11)]]
+    with pytest.raises(UnreadableFileError) as caught:
+        stream("excel", workbook({"S": rows}), max_rows=10)
+    assert caught.value.code == "too_many_rows"

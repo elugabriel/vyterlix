@@ -24,7 +24,7 @@ from app.schemas.import_mapping import (
 from app.services import import_fields as fields
 from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
-from app.services.imports import EDITABLE, get_record, read_preview
+from app.services.imports import EDITABLE, clear_validation, get_record, read_preview
 from app.services.storage import FileStorage
 
 
@@ -151,8 +151,7 @@ def save_mapping(
     data_import.column_mapping = mapping
     data_import.options = options
     data_import.status = "mapped"
-    # Anything validated under an earlier mapping is out of date.
-    data_import.valid_count = data_import.invalid_count = data_import.duplicate_count = 0
+    clear_validation(db, data_import)  # results under an earlier mapping are out of date
     if source is not None:
         data_import.data_source_id = source.id
     record_audit(

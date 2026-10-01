@@ -135,6 +135,8 @@ class DataImport(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base):
     duplicate_count: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     imported_count: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     error_message: Mapped[str | None] = mapped_column(String(500))  # why it failed
+    # What validation found (problems by kind, totals, warnings). NULL until validated.
+    validation_summary: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True))
 
     uploaded_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL")

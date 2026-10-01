@@ -285,3 +285,19 @@ def test_products_need_the_vat_answer_only_when_a_price_is_mapped():
 
 def test_answers_can_be_deferred_when_only_the_shape_is_wanted():
     assert check_mapping("sales", GOOD, {}, HEADERS, require_answers=False) == []
+
+
+@pytest.mark.parametrize(
+    ("dataset", "heading"),
+    [
+        ("sales", "Receipt No"),
+        ("sales", "Receipt No."),
+        ("sales", "Transaction Number"),
+        ("sales", "Sale ID"),
+        ("sales", "Invoice ID"),
+        ("expenses", "Bill No"),
+        ("expenses", "Ref No"),
+    ],
+)
+def test_common_names_for_a_reference_column_are_recognised(dataset, heading):
+    assert suggest_mapping(dataset, ["Date", heading]).get("reference") == heading

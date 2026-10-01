@@ -20,6 +20,7 @@ import csv
 import io
 import zipfile
 from collections.abc import Iterable, Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import date, datetime, time
 from decimal import Decimal
@@ -320,3 +321,119 @@ def inspect_file(
     return _read_excel(
         stream, sheet_name=sheet_name, header_row=header_row, max_rows=max_rows, count=count
     )
+
+
+# --- every row, for validation and import ---------------------------------------------------------
+
+
+@dataclass
+class FileRows:
+    headers: list[str]
+    # (row number as the user sees it in their file, one text value per heading)
+    # Blank rows are skipped. Reading stops with an error past the row limit.
+    rows: Iterator[tuple[int, list[str]]]
+
+
+def _limited(
+    numbered: Iterator[tuple[int, Iterable[object]]], width: int, max_rows: int
+) -> Iterator[tuple[int, list[str]]]:
+    count = 0
+    for number, row in numbered:
+        cells = [_text(c) for c in list(row)[:width]]
+        if not any(c.strip() for c in cells):
+            continue
+        count += 1
+        if count > max_rows:
+            raise _fail(
+                f"That file has more than {max_rows:,} rows. Split it into smaller files.",
+                "too_many_rows",
+            )
+        yield number, cells + [""] * (width - len(cells))
+
+
+@contextmanager
+def open_rows(
+    stream: BinaryIO,
+    source: str,
+    *,
+    sheet_name: str | None = None,
+    header_row: int = 1,
+    max_rows: int,
+) -> Iterator[FileRows]:
+    """Stream a stored upload's rows. Same checks and heading clean-up as inspect_file, so
+    headings match the ones the person mapped. Use as a context manager."""
+    if not 1 <= header_row <= MAX_HEADER_ROW:
+        raise _fail(f"The header row must be between 1 and {MAX_HEADER_ROW}.", "bad_header_row")
+    check_content(stream, source)
+    opener = _open_csv_rows if source == "csv" else _open_excel_rows
+    with opener(stream, sheet_name=sheet_name, header_row=header_row, max_rows=max_rows) as rows:
+        yield rows
+
+
+@contextmanager
+def _open_csv_rows(stream, *, sheet_name, header_row, max_rows) -> Iterator[FileRows]:
+    encoding = _detect_encoding(stream)
+    text = io.TextIOWrapper(stream, encoding=encoding, newline="")
+    try:
+        try:
+            lines = text.readlines(64 * 1024)
+            if len(lines) < header_row:
+                raise _fail(f"The file has no row {header_row} to use as the column headings.")
+            delimiter = _detect_delimiter(lines[header_row - 1])
+            text.seek(0)
+            reader = csv.reader(text, delimiter=delimiter, strict=False)
+            header_cells = _skip(reader, header_row)
+            if header_cells is None:
+                raise _fail(f"The file has no row {header_row} to use as the column headings.")
+            headers = _clean_headers(header_cells)
+        except UnicodeDecodeError:
+            raise _fail("Some characters in that file can't be read.", "bad_encoding") from None
+        except csv.Error as exc:
+            raise _fail(f"That file isn't valid CSV ({exc}).") from None
+
+        def numbered() -> Iterator[tuple[int, list[str]]]:
+            try:
+                while True:
+                    first_line = reader.line_num + 1  # a quoted cell can span several lines
+                    record = next(reader, None)
+                    if record is None:
+                        return
+                    yield first_line, record
+            except UnicodeDecodeError:
+                raise _fail("Some characters in that file can't be read.", "bad_encoding") from None
+            except csv.Error as exc:
+                raise _fail(f"That file isn't valid CSV ({exc}).") from None
+
+        yield FileRows(headers, _limited(numbered(), len(headers), max_rows))
+    finally:
+        text.detach()
+
+
+@contextmanager
+def _open_excel_rows(stream, *, sheet_name, header_row, max_rows) -> Iterator[FileRows]:
+    import openpyxl
+
+    _check_workbook_zip(stream)
+    try:
+        book = openpyxl.load_workbook(stream, read_only=True, data_only=True)
+    except Exception:
+        raise _fail("That Excel file couldn't be opened. It may be damaged.") from None
+    try:
+        sheets = [s.title for s in book.worksheets if s.sheet_state == "visible"]
+        if sheet_name is None and len(sheets) == 1:
+            sheet_name = sheets[0]
+        if sheet_name is None:
+            raise _fail("Choose which sheet to read.", "choose_sheet_first")
+        if sheet_name not in sheets:
+            raise _fail(f"That workbook has no sheet called '{sheet_name}'.", "unknown_sheet")
+        sheet = book[sheet_name]
+        sheet.reset_dimensions()
+        rows = sheet.iter_rows(values_only=True)
+        header_cells = _skip(rows, header_row)
+        if header_cells is None:
+            raise _fail(f"Sheet '{sheet_name}' has no row {header_row} to use as headings.")
+        headers = _clean_headers(header_cells)
+        numbered = ((header_row + i, row) for i, row in enumerate(rows, start=1))
+        yield FileRows(headers, _limited(numbered, len(headers), max_rows))
+    finally:
+        book.close()

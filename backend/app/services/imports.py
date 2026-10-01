@@ -13,12 +13,12 @@ import uuid
 from pathlib import PurePosixPath
 from typing import BinaryIO
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.errors import AppError, ConflictError, NotFoundError
-from app.models.imports import FILE_SUFFIXES, DataImport
+from app.models.imports import FILE_SUFFIXES, DataImport, DataImportRow
 from app.schemas.imports import (
     EarlierUploadOut,
     ImportDetailOut,
@@ -159,6 +159,13 @@ def upload_import(
     )
 
 
+def clear_validation(db: Session, data_import: DataImport) -> None:
+    """Forget the results of an earlier check (they no longer match the file or mapping)."""
+    db.execute(delete(DataImportRow).where(DataImportRow.import_id == data_import.id))
+    data_import.validation_summary = None
+    data_import.valid_count = data_import.invalid_count = data_import.duplicate_count = 0
+
+
 def get_record(db: Session, import_id: uuid.UUID) -> DataImport:
     data_import = db.get(DataImport, import_id)  # scoped: another business's id is "not found"
     if data_import is None:
@@ -234,6 +241,7 @@ def update_import(
     data_import.header_row = header_row
     _apply_counts(data_import, preview)
     data_import.column_mapping = {}  # a different sheet or header row means different columns
+    clear_validation(db, data_import)
     data_import.status = "uploaded"
     record_audit(
         db,

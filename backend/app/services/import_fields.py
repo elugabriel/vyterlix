@@ -110,7 +110,15 @@ SALES = (
         "ref",
         "receipt",
         "receipt number",
+        "receipt no",
+        "receipt id",
         "transaction id",
+        "transaction no",
+        "transaction number",
+        "sale id",
+        "sale number",
+        "ref no",
+        "invoice id",
         "id",
     ),
     _f(
@@ -274,6 +282,10 @@ EXPENSES = (
         "reference",
         "ref",
         "bill number",
+        "bill no",
+        "bill id",
+        "invoice id",
+        "ref no",
         "id",
     ),
     _f(
@@ -527,6 +539,16 @@ STOCK_MOVEMENTS = (
         "cost price",
     ),
     _f("notes", "Notes", "Anything else worth keeping.", "text", "notes", "note", "comment"),
+    _f(
+        "reference",
+        "Movement reference",
+        _REFERENCE_HELP,
+        "text",
+        "reference",
+        "ref",
+        "movement id",
+        "id",
+    ),
 )
 
 DATASET_FIELDS: dict[str, tuple[ImportField, ...]] = {

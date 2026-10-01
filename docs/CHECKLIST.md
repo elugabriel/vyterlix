@@ -17,7 +17,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 1 | Project foundation | Done |
 | 2 | Authentication + multi-tenancy | Done |
 | 3 | Business onboarding & profile | Done |
-| 4 | Data import + normalisation | **In progress — Part A step 4 of 9 done** |
+| 4 | Data import + normalisation | **In progress — Part A step 5 of 9 done** |
 | 5 | KPI engine | Not started |
 | 6 | Business health engine | Not started |
 | 7 | Diagnostic engine | Not started |
@@ -165,9 +165,9 @@ Decisions (confirmed 2026-09-28):
 - [x] CSV upload (step 3): `POST /organizations/{id}/imports` (multipart; needs `data.manage`); UTF-8 or Windows-1252, comma/semicolon/tab/pipe, headings on any row 1-100; preview (headings, 20 sample rows, row count); same-file warning; 25 MB / 250,000 row limits refused before reading; refused uploads leave no file or record; `GET` list/one, `PATCH` sheet/header row
 - [x] Excel upload (step 3): `.xlsx` only; sheet chooser for multi-sheet workbooks (hidden sheets skipped); old `.xls`, macro and password-protected workbooks refused with advice; zip-bomb and wrong-size-workbook protection
 - [ ] Column-mapping UI (backend done in step 4: `GET/PUT /organizations/{id}/imports/{id}/mapping`, `GET /organizations/{id}/data-sources`; suggestions from a saved mapping or well-known column names, never guessed loosely; every import must answer "do amounts include VAT?" and, with no VAT column, which UK rate; mappings can be saved by name and are offered for the next similar file; the page itself is step 9)
-- [ ] Validation on import
-- [ ] Duplicate detection
-- [ ] Error reporting on failed rows
+- [x] Validation on import (step 5): `POST .../imports/{id}/validate` checks every row against the saved mapping: UK dates (day first; US-style and impossible dates refused), pounds-only amounts (`£1,234.50`, `(12.50)`, `-12.50`; a comma used for pence is refused, never read as 450), UK VAT rates only, VAT split to the penny so net + VAT = gross, refunds/credits as negatives, emails, UK postcodes, stock-movement direction; all problems in a row reported together; nothing is imported by checking. Results kept per row (only mapped columns, so unrelated personal data in the file isn't copied); summary with totals, date range and warnings (no reference column, no cost of goods, mapping looks wrong)
+- [x] Duplicate detection (step 5): by order/invoice/receipt number within the file and against what is already stored from the same source; customers by email, suppliers by name, products by code; an identical repeated row is a duplicate, the same reference with different details is a problem to settle; rows with no reference are never treated as repeats
+- [x] Error reporting on failed rows (step 5): `GET .../rows?status=invalid|duplicate` (paged), `GET .../problems.csv` download (Excel-safe, formula-injection protected, column order as on the mapping screen)
 - [ ] Import history
 - [ ] Manual data entry (system works with zero integrations)
 - [ ] Normalisation onto the canonical transaction model
@@ -489,5 +489,7 @@ Prove the whole loop on one fake retail business before building further.
 | Content-Security-Policy and other security headers on the frontend host | Set at the web server/CDN | L1 / L4 |
 | Two tabs refreshing at the same instant can log one out (refresh token rotates) | Rare; fix with a short reuse grace window | L1 |
 | Frontend screens for members, roles, invitations and audit log (API exists) | Belongs with the business screens | Phase 3 / Core UX |
+| **Very large files are checked inside the web request** (about 18 seconds per 50,000 rows, so roughly 90 s at the 250,000-row limit: too slow for a browser or proxy timeout) | Needs the PostgreSQL-backed background job queue planned for Part B | Phase 4 Part B (before the upload page ships for big files) |
+| **Orders with one row per product line** (the same order number on several rows with different products) are reported as a conflict, not combined into one sale with lines | Needs a "group rows by order" option in the mapping | Phase 4 (after the milestone), or when a real file needs it |
 | **Browser caching of JS/CSS in production** (stale code after a deploy: seen in dev with the plain Python server) | Needs cache headers or versioned file names at the web host | L4 |
 | Manage members/roles and view the audit log from `business.html` (currently only invite in the wizard) | APIs exist; screens not built yet | Core UX |

@@ -1,14 +1,22 @@
 import uuid
 from typing import Annotated
+from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
 
 from app.api.deps import DB, Meta, Tenant, require_permission
 from app.core.permissions import Perm
 from app.models.imports import DATASETS
 from app.schemas.import_mapping import DataSourceOut, MappingIn, MappingOut
+from app.schemas.import_validation import RowsOut, ValidationOut
 from app.schemas.imports import ImportDetailOut, ImportOut, ImportPatch, ImportUploadedOut
 from app.services.import_mapping import get_mapping, list_sources, save_mapping
+from app.services.import_validation import (
+    get_validation,
+    list_rows,
+    problems_csv,
+    validate_import,
+)
 from app.services.imports import get_import, list_imports, update_import, upload_import
 from app.services.storage import FileStorage, get_file_storage
 
@@ -84,3 +92,39 @@ def save_mapping_(
 def list_data_sources(tenant: DataManager, db: DB):
     """Mappings saved under a name, e.g. "Till export"."""
     return list_sources(db)
+
+
+@router.post("/{import_id}/validate", response_model=ValidationOut)
+def validate(import_id: uuid.UUID, tenant: DataManager, db: DB, storage: Storage, meta: Meta):
+    """Check every row using the saved column mapping. Nothing is imported: this says how many
+    rows are fine, which have problems, and which are repeats."""
+    return validate_import(db, storage, tenant, import_id, meta)
+
+
+@router.get("/{import_id}/validation", response_model=ValidationOut)
+def validation(import_id: uuid.UUID, tenant: DataManager, db: DB):
+    return get_validation(db, import_id)
+
+
+@router.get("/{import_id}/rows", response_model=RowsOut)
+def rows(
+    import_id: uuid.UUID,
+    tenant: DataManager,
+    db: DB,
+    status: Annotated[str | None, Query(pattern="^(valid|invalid|duplicate)$")] = None,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+    offset: Annotated[int, Query(ge=0)] = 0,
+):
+    """The checked rows (the mapped columns only) with their problems, filtered by outcome."""
+    return list_rows(db, import_id, status=status, limit=limit, offset=offset)
+
+
+@router.get("/{import_id}/problems.csv")
+def problems(import_id: uuid.UUID, tenant: DataManager, db: DB):
+    """Download the rows that can't be imported, with what is wrong with each one."""
+    filename, text = problems_csv(db, import_id)
+    return Response(
+        content=text.encode("utf-8"),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}"},
+    )
