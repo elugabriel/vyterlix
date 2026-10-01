@@ -17,7 +17,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 1 | Project foundation | Done |
 | 2 | Authentication + multi-tenancy | Done |
 | 3 | Business onboarding & profile | Done |
-| 4 | Data import + normalisation | **In progress — Part A step 3 of 9 done** |
+| 4 | Data import + normalisation | **In progress — Part A step 4 of 9 done** |
 | 5 | KPI engine | Not started |
 | 6 | Business health engine | Not started |
 | 7 | Diagnostic engine | Not started |
@@ -164,7 +164,7 @@ Decisions (confirmed 2026-09-28):
 - [x] Import tracking tables (step 2): data_sources, data_imports, data_import_rows, data_quality_issues + file storage (records carry `import_id` for undo; local storage outside the repo; `python -m app.cli.uploads purge` deletes originals after 90 days and clears raw row copies)
 - [x] CSV upload (step 3): `POST /organizations/{id}/imports` (multipart; needs `data.manage`); UTF-8 or Windows-1252, comma/semicolon/tab/pipe, headings on any row 1-100; preview (headings, 20 sample rows, row count); same-file warning; 25 MB / 250,000 row limits refused before reading; refused uploads leave no file or record; `GET` list/one, `PATCH` sheet/header row
 - [x] Excel upload (step 3): `.xlsx` only; sheet chooser for multi-sheet workbooks (hidden sheets skipped); old `.xls`, macro and password-protected workbooks refused with advice; zip-bomb and wrong-size-workbook protection
-- [ ] Column-mapping UI
+- [ ] Column-mapping UI (backend done in step 4: `GET/PUT /organizations/{id}/imports/{id}/mapping`, `GET /organizations/{id}/data-sources`; suggestions from a saved mapping or well-known column names, never guessed loosely; every import must answer "do amounts include VAT?" and, with no VAT column, which UK rate; mappings can be saved by name and are offered for the next similar file; the page itself is step 9)
 - [ ] Validation on import
 - [ ] Duplicate detection
 - [ ] Error reporting on failed rows

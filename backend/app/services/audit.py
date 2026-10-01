@@ -56,6 +56,7 @@ class AuditAction(StrEnum):
     # Data imports
     IMPORT_UPLOADED = "import.uploaded"
     IMPORT_UPDATED = "import.updated"
+    IMPORT_MAPPED = "import.mapped"
 
 
 def record_audit(

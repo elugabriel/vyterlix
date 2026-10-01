@@ -159,14 +159,14 @@ def upload_import(
     )
 
 
-def _get(db: Session, import_id: uuid.UUID) -> DataImport:
+def get_record(db: Session, import_id: uuid.UUID) -> DataImport:
     data_import = db.get(DataImport, import_id)  # scoped: another business's id is "not found"
     if data_import is None:
         raise NotFoundError("Import not found")
     return data_import
 
 
-def _read_preview(
+def read_preview(
     storage: FileStorage, data_import: DataImport, *, count: bool
 ) -> FilePreview | None:
     if data_import.file_deleted_at is not None or not storage.exists(data_import.storage_key):
@@ -188,8 +188,8 @@ def list_imports(db: Session, limit: int = 50) -> list[ImportOut]:
 
 
 def get_import(db: Session, storage: FileStorage, import_id: uuid.UUID) -> ImportDetailOut:
-    data_import = _get(db, import_id)
-    preview = _read_preview(storage, data_import, count=False)
+    data_import = get_record(db, import_id)
+    preview = read_preview(storage, data_import, count=False)
     if preview is not None and not preview.needs_sheet:
         preview.row_count = data_import.row_count  # counted at upload; don't re-count
     return ImportDetailOut(
@@ -207,7 +207,7 @@ def update_import(
     meta: RequestMeta,
 ) -> ImportDetailOut:
     """Choose the Excel sheet and/or the header row, then re-read the file."""
-    data_import = _get(db, import_id)
+    data_import = get_record(db, import_id)
     if data_import.status not in EDITABLE:
         raise ConflictError(
             "This import has already run, so it can't be changed", code="not_editable"
