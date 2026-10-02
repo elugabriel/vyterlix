@@ -17,8 +17,8 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 1 | Project foundation | Done |
 | 2 | Authentication + multi-tenancy | Done |
 | 3 | Business onboarding & profile | Done |
-| 4 | Data import + normalisation | **In progress — Part A and the milestone are done; job queue (step 10) and integration framework (step 11) done; real connectors (Xero, Shopify, WooCommerce, Google Analytics) remain** |
-| 5 | KPI engine | Not started |
+| 4 | Data import + normalisation | **Part A, milestone, job queue (10) and integration framework (11) done; real connectors (Xero, Shopify, WooCommerce, Google Analytics) remain** |
+| 5 | KPI engine | **In progress — step 1 done (engine, financial and sales KPIs, Key figures page); customer, inventory and breakdown KPIs next** |
 | 6 | Business health engine | Not started |
 | 7 | Diagnostic engine | Not started |
 | 8 | Forecasting engine | Not started |
@@ -189,16 +189,19 @@ Decisions (confirmed 2026-09-28):
 
 ## Phase 5: KPI / business intelligence engine
 
-- [ ] Tables: kpi_definitions, kpi_values, kpi_calculation_runs
-- [ ] KPI engine as a service (not in route handlers)
-- [ ] KPI definitions stored as data, not hard-coded
-- [ ] Financial: revenue, gross/net profit & margin, operating expenses, cash position/runway
-- [ ] Sales: growth rate, AOV, sales by channel/product
+Design (Phase 5 step 1): small SQL **measures** in code (`app/kpi/measures.py`: revenue, cogs, operating expenses, sales count...), and **KPI definitions as data** (`kpi_definitions`: name, plain-English meaning, unit, formula such as `(revenue - cogs) / revenue * 100`, which way is better, which records it needs). Formulas are parsed with a strict whitelist (`app/kpi/expression.py`: numbers, measure names, + - * /, `prev()` and `yoy()`; nothing else can run). A new KPI that recombines existing measures is a new row, not a code change. Conventions are written at the top of `measures.py`: money is net of VAT; refunds are negative sales and give their cost back; running costs exclude categories marked "cost of sales" (the stock bought is already in cost of goods sold, so profit is not counted twice).
+
+- [x] Tables: kpi_definitions (global, 15 seeded), kpi_values (per business, period, with previous value, change, completeness, data quality and the inputs it came from), kpi_calculation_runs (who, when, how it went)
+- [x] KPI engine as a service (`app/services/kpi.py`, not in route handlers); runs as the `kpi.calculate` background job, queued automatically after every import or undo, or by the owner (`POST /kpis/calculate`); a broken formula is skipped, not fatal; a KPI that cannot be worked out says so (`no_data` / `undefined`) instead of showing a made-up number
+- [x] KPI definitions stored as data, not hard-coded
+- [x] Financial: revenue, takings incl. VAT, cost of goods sold, gross profit and margin, running costs, net profit and margin, stock bought. **Not yet:** cash position and runway (need bank or accounting data: the Xero connector)
+- [x] Sales: sales count, average sale, items sold, refund rate, growth on the previous period, comparison with the same period last year. **Not yet:** sales by channel and by product (breakdowns, not single numbers: next step)
 - [ ] Customer: active count, new/returning, repeat rate, churn, retention, CAC, CLV
-- [ ] Marketing: spend, conversion rate, ROAS/CAC by channel, traffic
+- [ ] Marketing: spend, conversion rate, ROAS/CAC by channel, traffic (needs the Google Analytics connector and ad spend data)
 - [ ] Inventory: stock level, turnover, stockout rate, COGS, fast/slow movers, dead stock
-- [ ] KPI history storage
-- [ ] Period-over-period comparison
+- [x] KPI history storage (every period kept; history endpoint, 24 periods by default)
+- [x] Period-over-period comparison (previous period and change on every value; weeks, months, quarters and years supported by the engine; the page uses months)
+- [x] Key figures page (`kpis.html`): everyone can look; the owner can recalculate; shows change since last month, data quality warnings, a chart and the figures behind each number. Verified against the demo year to the penny
 
 ## Phase 6: Business health engine
 

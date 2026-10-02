@@ -2,6 +2,7 @@
 the totals the generator worked out come out the other end."""
 
 import uuid
+from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -9,8 +10,10 @@ from sqlalchemy import func, select
 
 from app.db.tenant import tenant_scope
 from app.demo import milestone
+from app.models.business import BusinessListItem
 from app.models.data import Customer, Expense, Product, Sale, SaleLine, StockMovement
-from app.services import jobs
+from app.models.identity import User
+from app.services import jobs, kpi
 
 ORGS = "/api/v1/organizations"
 D = Decimal
@@ -68,8 +71,13 @@ def run_job(api, db, storage, org_id, auth, import_id, action):
         f"{ORGS}/{org_id}/imports/{import_id}/jobs", json={"action": action}, headers=auth
     )
     assert res.status_code == 202, res.text
-    job = jobs.work_once(db, "milestone-worker", storage=storage)
-    assert job is not None and job.status == "succeeded", (action, job.error_message)
+    wanted = res.json()["id"]
+    while True:  # an import also queues a KPI recalculation, which may be next in line
+        job = jobs.work_once(db, "milestone-worker", storage=storage)
+        assert job is not None, "the queue ran dry before the job ran"
+        if str(job.id) == wanted:
+            break
+    assert job.status == "succeeded", (action, job.error_message)
     return job
 
 
@@ -197,6 +205,41 @@ def test_a_whole_year_arrives_with_exactly_the_expected_totals(api, db, storage,
             )
         }
         assert closing == expected["stock"]["closing"]
+
+    # the KPI engine, run on the whole year, agrees with the generator's own totals
+    with tenant_scope(db, uuid.UUID(org_id)):
+        stock_category = db.scalars(
+            select(BusinessListItem).where(BusinessListItem.name == "Stock")
+        ).one()
+        stock_category.is_cost_of_sales = True  # what the owner says in onboarding
+        db.flush()
+        owner = db.scalars(select(User).where(User.email == "owner@fakeham.co.uk")).one()
+        run = kpi.calculate(db, jobs.JobTenant(uuid.UUID(org_id), owner), today=date(2026, 10, 2))
+    assert run.status == "succeeded" and run.period_from == date(2025, 10, 1)
+    revenue = api.get(f"{ORGS}/{org_id}/kpis/revenue?limit=24", headers=auth).json()["values"]
+    assert revenue[-1]["is_complete"] is False and revenue[-1]["value"] == "0.00"  # October 2026
+    finished = [v for v in revenue if v["is_complete"]]
+    assert {v["period_start"][:7]: v["value"] for v in finished} == {
+        month: pence(figures["net"]) for month, figures in expected["sales"]["months"].items()
+    }
+    opex = api.get(f"{ORGS}/{org_id}/kpis/operating_expenses?limit=24", headers=auth).json()[
+        "values"
+    ]
+    bought = api.get(f"{ORGS}/{org_id}/kpis/stock_purchases?limit=24", headers=auth).json()[
+        "values"
+    ]
+    spent = {v["period_start"][:7]: D(v["value"]) for v in opex if v["is_complete"]}
+    for v in bought:
+        if v["is_complete"]:
+            spent[v["period_start"][:7]] += D(v["value"])
+    assert {m: pence(t) for m, t in spent.items()} == {
+        m: pence(f["net"]) for m, f in expected["expenses"]["months"].items()
+    }  # running costs + stock bought = every expense, none lost and none counted twice
+    year_profit = sum(
+        D(v["value"])
+        for v in api.get(f"{ORGS}/{org_id}/kpis/net_profit?limit=24", headers=auth).json()["values"]
+    )
+    assert D("0") < year_profit < D(expected["sales"]["net"]) * D("0.25")  # a thin, real profit
 
     # the data-quality screen agrees this is a healthy, complete year
     quality = api.get(f"{ORGS}/{org_id}/data-quality", headers=auth).json()

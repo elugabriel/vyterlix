@@ -94,7 +94,8 @@ function renderData(orgId, role) {
     el(
       "div",
       { class: "actions", style: "margin-top:0" },
-      el("a", { class: "button", href: `data.html?org=${orgId}` }, "Data overview"),
+      el("a", { class: "button", href: `kpis.html?org=${orgId}` }, "Key figures"),
+      el("a", { class: manager ? "button secondary" : "button", href: `data.html?org=${orgId}` }, "Data overview"),
       ...(manager
         ? [
             el("a", { class: "button secondary", href: `import.html?org=${orgId}` }, "Upload a file"),

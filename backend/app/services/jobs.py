@@ -100,6 +100,7 @@ def enqueue(
     subject_id: uuid.UUID,
     meta: RequestMeta,
     max_attempts: int = 3,
+    payload: dict | None = None,
 ) -> Job:
     """Queue a job. Refused with 409 if the same subject already has one queued or running."""
     if kind not in HANDLERS:
@@ -109,7 +110,7 @@ def enqueue(
         subject_type=subject_type,
         subject_id=subject_id,
         requested_by_user_id=tenant.user.id,
-        payload={"ip_address": meta.ip_address, "user_agent": meta.user_agent},
+        payload={"ip_address": meta.ip_address, "user_agent": meta.user_agent, **(payload or {})},
         max_attempts=max_attempts,
         created_at=_now(),  # not the database's now(), which is frozen within a transaction
         run_after=_now(),

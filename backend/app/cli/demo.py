@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_sessionmaker
 from app.db.tenant import ACROSS_TENANTS, tenant_scope
 from app.demo import milestone
+from app.models.business import BusinessListItem
 from app.models.identity import Organization, OrganizationUser, Role, User
 from app.models.imports import DataImport
 from app.schemas.import_mapping import MappingIn, MappingOptions
@@ -107,6 +108,16 @@ def load_year(
                 )
             done = run_import(db, tenant, uploaded.id, meta)
             say(f"  {filename}: {done.data_import.imported_count:,} rows imported")
+        # What an owner says in onboarding: buying stock is a "cost of sales", not a running cost
+        # (the goods are already counted as cost of goods sold), so profit isn't counted twice.
+        stock = db.scalars(
+            select(BusinessListItem).where(
+                BusinessListItem.kind == "cost_category", BusinessListItem.name == "Stock"
+            )
+        ).first()
+        if stock is not None:
+            stock.is_cost_of_sales = True
+            db.commit()
     say("Done. Open the business in the browser to see it.")
 
 

@@ -1,0 +1,96 @@
+// Showing KPI values: formatting by unit, period names, change arrows and a tiny chart.
+// The API sends numbers as decimal strings, already rounded for their unit.
+
+import { el } from "./dom.js";
+import { gbp, MONTHS, ukDate } from "./format.js";
+
+const SVG = "http://www.w3.org/2000/svg";
+
+function svg(tag, attrs = {}, ...children) {
+  const node = document.createElementNS(SVG, tag);
+  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
+  node.append(...children);
+  return node;
+}
+
+/** "140.00" + "gbp" -> "£140.00"; "60.00" + "percent" -> "60.0%"; counts get thousands commas. */
+export function formatValue(value, unit) {
+  if (value === null || value === undefined) return "–";
+  const n = Number(value);
+  if (unit === "gbp") return gbp(n);
+  if (unit === "percent") return `${n.toLocaleString("en-GB", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+  return n.toLocaleString("en-GB", { maximumFractionDigits: 2 });
+}
+
+/** "2026-02-01" + "month" -> "February 2026"; weeks -> "week of 09/03/2026". */
+export function periodLabel(start, granularity) {
+  const [y, m] = start.split("-").map(Number);
+  if (granularity === "month") return `${MONTHS[m - 1]} ${y}`;
+  if (granularity === "quarter") return `Q${Math.floor((m - 1) / 3) + 1} ${y}`;
+  if (granularity === "year") return String(y);
+  return `week of ${ukDate(start)}`;
+}
+
+/** What changed since the previous period, in words: "up 50.0% on the month before". */
+export function changeText(value, unit, granularity) {
+  if (value.status !== "ok" || value.previous_value === null) return null;
+  const before = { month: "the month before", week: "the week before", quarter: "the quarter before", year: "the year before" }[granularity];
+  if (unit === "percent") {
+    const points = Number(value.value) - Number(value.previous_value);
+    if (points === 0) return { sign: 0, text: `no change on ${before}` };
+    return { sign: Math.sign(points), text: `${points > 0 ? "up" : "down"} ${Math.abs(points).toFixed(1)} points on ${before}` };
+  }
+  if (value.change_pct === null) return { sign: 0, text: `was ${formatValue(value.previous_value, unit)} ${before}` };
+  const pct = Number(value.change_pct);
+  if (pct === 0) return { sign: 0, text: `no change on ${before}` };
+  return { sign: Math.sign(pct), text: `${pct > 0 ? "up" : "down"} ${Math.abs(pct).toFixed(1)}% on ${before}` };
+}
+
+/** CSS class for a change: green when it is the good direction, red when not, grey otherwise. */
+export function changeClass(sign, direction) {
+  if (sign === 0 || direction === "neutral") return "muted";
+  return (sign > 0) === (direction === "up_good") ? "status-ok" : "status-bad";
+}
+
+/** Why a KPI shows no number, in plain words. */
+export function missingText(value) {
+  if (value.status === "no_data") return "Needs records you haven't added yet.";
+  return "Can't be worked out for this period (for example, nothing was sold).";
+}
+
+/** A small bar chart of a KPI over time (finished periods solid, the one in progress faded). */
+export function barChart(values, unit, label) {
+  const shown = values.filter((v) => v.status === "ok");
+  const width = 560;
+  const height = 120;
+  if (!shown.length) return el("p", { class: "muted" }, "No figures to chart yet.");
+  const numbers = shown.map((v) => Number(v.value));
+  const max = Math.max(0, ...numbers);
+  const min = Math.min(0, ...numbers);
+  const span = max - min || 1;
+  const gap = 4;
+  const barWidth = Math.max(4, (width - gap * (shown.length - 1)) / shown.length);
+  const zero = height - ((0 - min) / span) * (height - 8);
+  const bars = shown.map((v, i) => {
+    const n = Number(v.value);
+    const y = height - ((n - min) / span) * (height - 8);
+    const top = Math.min(y, zero);
+    const bar = svg("rect", {
+      x: i * (barWidth + gap),
+      y: top,
+      width: barWidth,
+      height: Math.max(1, Math.abs(zero - y)),
+      class: v.is_complete ? "bar" : "bar bar-partial",
+      rx: 2,
+    });
+    bar.append(svg("title", {}, `${v.period_start}: ${formatValue(v.value, unit)}`));
+    return bar;
+  });
+  const chart = svg(
+    "svg",
+    { viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": label, class: "chart", preserveAspectRatio: "none" },
+    svg("line", { x1: 0, x2: width, y1: zero, y2: zero, class: "axis" }),
+    ...bars,
+  );
+  return el("div", { class: "chart-box" }, chart);
+}

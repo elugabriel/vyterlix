@@ -13,6 +13,7 @@ from app.api.v1 import (
     integrations,
     invitations,
     jobs,
+    kpis,
     me,
     onboarding,
     organizations,
@@ -42,6 +43,7 @@ api_router.include_router(imports.router)
 api_router.include_router(imports.sources_router)
 api_router.include_router(jobs.router)
 api_router.include_router(integrations.router)
+api_router.include_router(kpis.router)
 api_router.include_router(trading.sales_router)
 api_router.include_router(trading.expenses_router)
 api_router.include_router(trading.customers_router)

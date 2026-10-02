@@ -153,6 +153,7 @@ def test_the_whole_flow_runs_in_the_background(api, db, business, storage):
     assert got["status"] == "succeeded"
     assert got["result"]["created"]["sales"] == 3
     assert import_row(db, import_id).status == "imported"
+    assert work(db, storage).kind == "kpi.calculate"  # the import queued a KPI refresh
 
     job = start(api, business, import_id, "undo").json()
     work(db, storage)

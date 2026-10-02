@@ -261,3 +261,17 @@ input[type="file"] { width: 100%; padding: 8px 0; }
 .connection details { margin: 8px 0; }
 .connection summary { cursor: pointer; color: var(--muted); }
 .connection ul { margin: 8px 0 8px 20px; padding: 0; }
+
+/* Key figures */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.kpi { border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; background: var(--bg); }
+.kpi-name { font-weight: 600; margin-bottom: 4px; }
+.kpi-value { font-size: 1.7rem; font-weight: 700; line-height: 1.2; }
+.kpi details { margin-top: 10px; }
+.kpi summary { cursor: pointer; color: var(--muted); font-size: 0.875rem; }
+.chart-box { margin: 10px 0; }
+.chart { width: 100%; height: 120px; display: block; }
+.chart .bar { fill: var(--accent); }
+.chart .bar-partial { opacity: 0.45; }
+.chart .axis { stroke: var(--border); stroke-width: 1; }
+.kpi:has(details[open]) { grid-column: 1 / -1; }  /* an opened figure gets the full width */

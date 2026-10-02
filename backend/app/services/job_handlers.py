@@ -1,12 +1,18 @@
 """What each kind of job does. Importing this module registers them (see services/jobs.py)."""
 
+import logging
+
 from pydantic import BaseModel
 
+from app.core.errors import ConflictError
 from app.core.permissions import Perm
+from app.services import kpi
 from app.services.import_runner import run_import, undo_import
 from app.services.import_validation import validate_import
 from app.services.integrations import run_sync
-from app.services.jobs import JobContext, register
+from app.services.jobs import JobContext, enqueue, register
+
+logger = logging.getLogger("vyterlix.jobs")
 
 # What the API accepts as an "action" on an import, and the job kind that runs it.
 IMPORT_ACTIONS = {
@@ -23,16 +29,51 @@ def validate(ctx: JobContext) -> BaseModel:
     )
 
 
+def _refresh_kpis_later(ctx: JobContext) -> None:
+    """The business's data just changed, so its KPIs are out of date: queue a recalculation.
+    Best effort: it must never make the import or undo that already succeeded look failed."""
+    try:
+        enqueue(
+            ctx.db,
+            ctx.tenant,
+            kind="kpi.calculate",
+            subject_type="organization",
+            subject_id=ctx.tenant.organization_id,
+            meta=ctx.meta,
+            payload={"trigger": "import"},
+        )
+    except ConflictError:
+        pass  # one is already waiting to run; it will see this change too
+    except Exception:
+        logger.warning("Could not queue a KPI recalculation", exc_info=True)
+
+
 @register("import.run", Perm.DATA_MANAGE)
 def import_rows(ctx: JobContext) -> BaseModel:
-    return run_import(ctx.db, ctx.tenant, ctx.job.subject_id, ctx.meta, progress=ctx.progress)
+    result = run_import(ctx.db, ctx.tenant, ctx.job.subject_id, ctx.meta, progress=ctx.progress)
+    _refresh_kpis_later(ctx)
+    return result
 
 
 @register("import.undo", Perm.DATA_MANAGE)
 def undo(ctx: JobContext) -> BaseModel:
-    return undo_import(ctx.db, ctx.tenant, ctx.job.subject_id, ctx.meta)
+    result = undo_import(ctx.db, ctx.tenant, ctx.job.subject_id, ctx.meta)
+    _refresh_kpis_later(ctx)
+    return result
 
 
 @register("integration.sync", Perm.DATA_MANAGE)
 def sync_integration(ctx: JobContext) -> dict:
     return run_sync(ctx)
+
+
+@register("kpi.calculate", Perm.DATA_MANAGE)
+def calculate_kpis(ctx: JobContext) -> BaseModel:
+    payload = ctx.job.payload
+    return kpi.calculate(
+        ctx.db,
+        ctx.tenant,
+        granularity=payload.get("granularity", "month"),
+        trigger=payload.get("trigger", "manual"),
+        job_id=ctx.job.id,
+    )

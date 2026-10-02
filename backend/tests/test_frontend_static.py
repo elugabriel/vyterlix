@@ -92,7 +92,7 @@ def test_every_api_method_the_pages_call_exists():
             assert method in provided, f"{script.name} calls api.{method}(), which doesn't exist"
 
 
-@pytest.mark.parametrize("name", ["data", "imports", "import", "entry", "connections"])
+@pytest.mark.parametrize("name", ["data", "imports", "import", "entry", "connections", "kpis"])
 def test_data_pages_start_last_so_their_constants_are_ready(name):
     """A top-level `await start()` before later `const`s run makes a reload crash with
     "Cannot access ... before initialization" (found in a real browser)."""
