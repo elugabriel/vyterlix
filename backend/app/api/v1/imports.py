@@ -8,9 +8,11 @@ from app.api.deps import DB, Meta, Tenant, require_permission
 from app.core.permissions import Perm
 from app.models.imports import DATASETS
 from app.schemas.import_mapping import DataSourceOut, MappingIn, MappingOut
+from app.schemas.import_results import ImportResultOut, RecordsOut, UndoResultOut
 from app.schemas.import_validation import RowsOut, ValidationOut
 from app.schemas.imports import ImportDetailOut, ImportOut, ImportPatch, ImportUploadedOut
 from app.services.import_mapping import get_mapping, list_sources, save_mapping
+from app.services.import_runner import records_of, run_import, undo_import
 from app.services.import_validation import (
     get_validation,
     list_rows,
@@ -46,8 +48,19 @@ def upload(
 
 
 @router.get("", response_model=list[ImportOut])
-def list_(tenant: DataManager, db: DB, limit: Annotated[int, Query(ge=1, le=100)] = 50):
-    return list_imports(db, limit)
+def list_(
+    tenant: DataManager,
+    db: DB,
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+    offset: Annotated[int, Query(ge=0)] = 0,
+    status: Annotated[
+        str | None,
+        Query(pattern="^(uploaded|mapped|validated|importing|imported|failed|undone)$"),
+    ] = None,
+    dataset: Annotated[str | None, Query(pattern=f"^({'|'.join(DATASETS)})$")] = None,
+):
+    """The import history, newest first, optionally only one status or kind of file."""
+    return list_imports(db, limit, offset=offset, status=status, dataset=dataset)
 
 
 @router.get("/{import_id}", response_model=ImportDetailOut)
@@ -111,7 +124,9 @@ def rows(
     import_id: uuid.UUID,
     tenant: DataManager,
     db: DB,
-    status: Annotated[str | None, Query(pattern="^(valid|invalid|duplicate)$")] = None,
+    status: Annotated[
+        str | None, Query(pattern="^(valid|invalid|duplicate|imported|skipped)$")
+    ] = None,
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ):
@@ -128,3 +143,21 @@ def problems(import_id: uuid.UUID, tenant: DataManager, db: DB):
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}"},
     )
+
+
+@router.post("/{import_id}/import", response_model=ImportResultOut)
+def run(import_id: uuid.UUID, tenant: DataManager, db: DB, meta: Meta):
+    """Create the business's records from the rows that passed checking. All or nothing."""
+    return run_import(db, tenant, import_id, meta)
+
+
+@router.post("/{import_id}/undo", response_model=UndoResultOut)
+def undo(import_id: uuid.UUID, tenant: DataManager, db: DB, meta: Meta):
+    """Remove everything this import created. All or nothing."""
+    return undo_import(db, tenant, import_id, meta)
+
+
+@router.get("/{import_id}/records", response_model=RecordsOut)
+def records(import_id: uuid.UUID, tenant: DataManager, db: DB):
+    """How many records of each kind this import currently has in the business's data."""
+    return records_of(db, import_id)

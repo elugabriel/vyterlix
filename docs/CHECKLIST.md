@@ -12,12 +12,12 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 
 | Phase | Name | Status |
 |---|---|---|
-| −1 | Decisions before code | 18 / 20 decided |
+| −1 | Decisions before code | 20 / 23 decided |
 | 0 | Architecture + database design | In progress |
 | 1 | Project foundation | Done |
 | 2 | Authentication + multi-tenancy | Done |
 | 3 | Business onboarding & profile | Done |
-| 4 | Data import + normalisation | **In progress — Part A step 5 of 9 done** |
+| 4 | Data import + normalisation | **In progress — Part A step 6 of 9 done** |
 | 5 | KPI engine | Not started |
 | 6 | Business health engine | Not started |
 | 7 | Diagnostic engine | Not started |
@@ -33,7 +33,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 15 | Reporting | Not started |
 | 16 | Subscription / billing | Not started |
 | 17 | Admin portal | Not started |
-| 18 | Mobile apps | Not started |
+| 18 | Mobile apps (iOS + Android, Flutter) | **Confirmed in scope** — not started |
 | L1 | Security & privacy hardening | Not started |
 | L2 | Automated QA & testing | Ongoing |
 | L3 | Production infrastructure | Not started |
@@ -76,6 +76,9 @@ Everything defaults to the UK, in every phase:
 - [x] "Critical" alerts — only security messages are un-suppressible
 - [ ] **Launch tiers & feature gating** — £99 / £199 / £299 / Corporate as placeholders; confirm before launch
 - [x] Payment gateway — Stripe primary, Paystack secondary, pluggable per organisation
+- [x] **Mobile apps will be built** (decided 2026-10-01): iOS and Android, alongside the web app, on the one shared backend. Required by the SLA (clause 3.2) and proposal
+- [x] **Mobile technology: Flutter** (decided 2026-10-01), as in the proposal: Dart, one codebase for iOS and Android. This is the only part of the project not written in Python (the backend and web app stay Python / plain HTML-JS; still no Node). iOS builds need a Mac with Xcode (or a cloud macOS build service) and an Apple Developer account: plan this under L5
+- [ ] **Mobile scope and timing in writing** — SLA says native iOS + Android; proposal's mid-project milestone is "feature-complete Web/Android/iOS apps ready for UAT"; the SLA timetable puts different work in Week 3. Agree the exact meaning with Dolaris and sign it (SLA clause 12.1) — it also decides when the 30% milestone payment falls due
 
 ## Phase 0: Architecture + database design
 
@@ -168,9 +171,10 @@ Decisions (confirmed 2026-09-28):
 - [x] Validation on import (step 5): `POST .../imports/{id}/validate` checks every row against the saved mapping: UK dates (day first; US-style and impossible dates refused), pounds-only amounts (`£1,234.50`, `(12.50)`, `-12.50`; a comma used for pence is refused, never read as 450), UK VAT rates only, VAT split to the penny so net + VAT = gross, refunds/credits as negatives, emails, UK postcodes, stock-movement direction; all problems in a row reported together; nothing is imported by checking. Results kept per row (only mapped columns, so unrelated personal data in the file isn't copied); summary with totals, date range and warnings (no reference column, no cost of goods, mapping looks wrong)
 - [x] Duplicate detection (step 5): by order/invoice/receipt number within the file and against what is already stored from the same source; customers by email, suppliers by name, products by code; an identical repeated row is a duplicate, the same reference with different details is a problem to settle; rows with no reference are never treated as repeats
 - [x] Error reporting on failed rows (step 5): `GET .../rows?status=invalid|duplicate` (paged), `GET .../problems.csv` download (Excel-safe, formula-injection protected, column order as on the mapping screen)
-- [ ] Import history
+- [x] Import history (step 6): `GET .../imports` newest first with who uploaded, status, counts and times; filter by status or kind of file, paged; `GET .../imports/{id}/records` shows what an import currently has in the data; undone imports stay in the history
+- [x] Import and undo (step 6): `POST .../imports/{id}/import` creates the records from the valid rows (all or nothing; one transaction; locked so it can't run twice); sales also get a line when the row says what was sold; customers, products, suppliers, sales channels and cost categories are found by email/code/name or created once; anything added since checking that is already there is skipped. `POST .../imports/{id}/undo` removes everything the import created in dependency order (all or nothing); refused with a clear message if later data depends on it (undo the later import first); sales channels and cost categories are the business's own lists and stay. Measured on the real server: 50,000 rows import in about 60 s and undo in about 6 s
 - [ ] Manual data entry (system works with zero integrations)
-- [ ] Normalisation onto the canonical transaction model
+- [x] Normalisation onto the canonical transaction model (step 6): imported rows become sales, sale lines, expenses, customers, suppliers, products and stock movements in GBP, net + VAT = gross, with the import that made them and where they came from
 - [ ] Data-quality scoring per source/period
 - [ ] Integration framework: abstraction, OAuth/token handling, encrypted credentials, sync status, last successful sync, sync errors, re-authentication, permission summary, provenance
 - [ ] Connector: **Xero** (accounting)
@@ -361,12 +365,37 @@ Prove the whole loop on one fake retail business before building further.
 
 ## Phase 18: Mobile apps
 
-- [ ] Flutter app (iOS + Android, one codebase)
+Confirmed in scope (2026-10-01). iOS and Android, one shared backend, same permissions and
+tenant rules as the web app. UK-first applies here too: £ only, dd/mm/yyyy, Monday-first
+weeks, Europe/London, en-GB wording.
+
+**Before building (backend prerequisites: the API is browser-shaped today)**
+
+- [ ] Mobile sign-in: today the refresh token lives in an httpOnly browser cookie. Phones need the refresh token returned in the response body (for clients that ask for it) and kept in the phone's secure storage (iOS Keychain / Android Keystore), still rotating and revocable per device
+- [ ] Per-device sessions: name each session ("Jo's iPhone"), show and revoke them in settings
+- [ ] Email links (verify email, reset password, accept invitation) open the app when installed: universal links (iOS) and app links (Android), falling back to the web pages
+- [ ] Forgot-password in the app (standing rule: every client has it)
+- [ ] API versioning and a minimum-supported-app-version check, so an old app can be told to update
+- [ ] Push token registration endpoints (device, platform, last seen) and the sending side (with Phase 14)
+- [ ] Rate limits and error messages checked for mobile (flaky connections, retries are safe: idempotent where it matters)
+
+**The app**
+
+- [ ] Flutter project set up in the repo (`mobile/`): Dart tooling installed, lint + tests in CI, Android build in CI, iOS build on a macOS runner
+- [ ] Sign-in, sign-up, verify email, forgot/reset password, biometric unlock (Face ID / fingerprint) after first sign-in
+- [ ] Business switcher (a person can belong to several businesses)
 - [ ] Dashboard (read-only health + KPIs)
-- [ ] Alerts
+- [ ] Alerts and in-app notification list
+- [ ] Recommendations: view, approve / reject (Owner; Manager within remit; Viewer read-only)
+- [ ] Actions and follow-up: mark done, add outcome
 - [ ] AI consultation
-- [ ] Recommendation approve/reject
-- [ ] Push notifications
+- [ ] Data: upload a CSV/Excel file from the phone (share sheet / file picker), see checking results, import and undo; quick manual entry of a sale or expense
+- [ ] Push notifications (with Phase 14), with per-category preferences
+- [ ] Offline and poor-signal behaviour: last-known data shown with its age, clear "couldn't reach Vyterlix" states, no silent data loss
+- [ ] Secure by default: nothing sensitive in logs or screenshots-in-switcher, certificate pinning decision, jailbreak/root decision, app data cleared on sign-out
+- [ ] Accessibility (text size, screen readers, contrast) and dark mode
+- [ ] Mobile testing: real iOS and Android devices, small and large screens, slow network, interrupted uploads
+- [ ] Store release work is tracked under L5 (accounts, signing, listings, privacy labels, TestFlight / internal testing)
 
 ---
 
@@ -428,6 +457,7 @@ Prove the whole loop on one fake retail business before building further.
 
 ## L5: App store release
 
+- [ ] Mac / cloud macOS access for iOS builds (Xcode is macOS-only; the dev machine is Windows)
 - [ ] Android: Play developer account, signing, package, listing, privacy info, internal testing, submission
 - [ ] iOS: Apple developer account, signing, metadata, privacy info, TestFlight, submission
 
@@ -489,7 +519,9 @@ Prove the whole loop on one fake retail business before building further.
 | Content-Security-Policy and other security headers on the frontend host | Set at the web server/CDN | L1 / L4 |
 | Two tabs refreshing at the same instant can log one out (refresh token rotates) | Rare; fix with a short reuse grace window | L1 |
 | Frontend screens for members, roles, invitations and audit log (API exists) | Belongs with the business screens | Phase 3 / Core UX |
-| **Very large files are checked inside the web request** (about 18 seconds per 50,000 rows, so roughly 90 s at the 250,000-row limit: too slow for a browser or proxy timeout) | Needs the PostgreSQL-backed background job queue planned for Part B | Phase 4 Part B (before the upload page ships for big files) |
+| **Very large files are checked and imported inside the web request** (measured: 50,000 rows take about 17 s to check and 60 s to import, so about 5 minutes to import at the 250,000-row limit: too slow for a browser or proxy timeout) | Needs the PostgreSQL-backed background job queue planned for Part B | Phase 4 Part B (before the upload page ships for big files) |
 | **Orders with one row per product line** (the same order number on several rows with different products) are reported as a conflict, not combined into one sale with lines | Needs a "group rows by order" option in the mapping | Phase 4 (after the milestone), or when a real file needs it |
+| **Mobile-ready API** (device sessions, refresh token in secure storage, app links, push tokens, minimum app version) | Listed under Phase 18; do not build the web-only shortcuts deeper (e.g. cookie-only refresh) without a mobile path | Phase 18 (design check at Phase 14) |
+| **Statistics after bulk loads:** a bulk import leaves Postgres thinking the tables are nearly empty, which made undo take minutes and imports erratic; the import now refreshes statistics (ANALYZE) as it grows and before an undo. Any future bulk loader (connectors, Part B) must do the same, and production should check autovacuum settings | Found by timing a 50,000-row run on the real server | Phase 4 Part B / L3 |
 | **Browser caching of JS/CSS in production** (stale code after a deploy: seen in dev with the plain Python server) | Needs cache headers or versioned file names at the web host | L4 |
 | Manage members/roles and view the audit log from `business.html` (currently only invite in the wizard) | APIs exist; screens not built yet | Core UX |

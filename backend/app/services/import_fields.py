@@ -188,13 +188,13 @@ SALES = (
     _f(
         "cost",
         "Cost of goods",
-        "What the goods cost you (excluding VAT). Leave unmapped if unknown.",
+        "The total cost to you of the goods on this row (excluding VAT). "
+        "Leave unmapped if unknown.",
         "money",
         "cost",
         "cost of goods",
         "cogs",
         "cost price",
-        "unit cost",
     ),
     _f(
         "discount",

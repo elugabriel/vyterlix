@@ -99,6 +99,7 @@ class Customer(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigi
     __table_args__ = (
         *_origin_rules("customers"),
         _tenant_fk("customer_type_id", "business_list_items"),
+        Index("ix_customers_org_type", "organization_id", "customer_type_id"),
         CheckConstraint("email = lower(email)", name="email_lowercase"),
         CheckConstraint(f"postcode ~ '{UK_POSTCODE_REGEX}'", name="postcode_format"),
     )
@@ -126,6 +127,7 @@ class Product(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigin
     __table_args__ = (
         *_origin_rules("products"),
         _tenant_fk("offering_id", "business_list_items"),
+        Index("ix_products_org_offering", "organization_id", "offering_id"),
         CheckConstraint("length(trim(name)) > 0", name="name_not_blank"),
         CheckConstraint("unit_price_ex_vat >= 0", name="unit_price_not_negative"),
         CheckConstraint("unit_cost >= 0", name="unit_cost_not_negative"),
@@ -166,6 +168,9 @@ class Sale(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOriginMix
         ),
         CheckConstraint("discount_amount >= 0", name="discount_not_negative"),
         Index("ix_sales_org_date", "organization_id", "sold_on"),
+        # Foreign-key lookups: without these, deleting a customer or channel scans every sale.
+        Index("ix_sales_org_customer", "organization_id", "customer_id"),
+        Index("ix_sales_org_channel", "organization_id", "sales_channel_id"),
     )
 
     kind: Mapped[str] = mapped_column(String(10), server_default="sale")
@@ -189,6 +194,10 @@ class SaleLine(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base):
         UniqueConstraint("organization_id", "id", name="uq_sale_lines_org_id"),
         _tenant_fk("sale_id", "sales", ondelete="CASCADE"),
         _tenant_fk("product_id", "products"),
+        # Which import created the line. Duplicates sales.import_id on purpose: counting and
+        # removing a big import's lines by joining to sales can be planned very badly (minutes).
+        _tenant_fk("import_id", "data_imports"),
+        Index("ix_sale_lines_org_import", "organization_id", "import_id"),
         CheckConstraint("quantity <> 0", name="quantity_not_zero"),
         CheckConstraint("unit_price_ex_vat >= 0", name="unit_price_not_negative"),
         CheckConstraint("discount_amount >= 0", name="discount_not_negative"),
@@ -200,6 +209,7 @@ class SaleLine(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base):
 
     sale_id: Mapped[uuid.UUID] = mapped_column()
     product_id: Mapped[uuid.UUID | None] = mapped_column()
+    import_id: Mapped[uuid.UUID | None] = mapped_column()
     description: Mapped[str | None] = mapped_column(String(300))
     quantity: Mapped[Decimal] = mapped_column(Quantity)  # negative on refunds
     unit_price_ex_vat: Mapped[Decimal | None] = mapped_column(Money)
@@ -224,6 +234,8 @@ class Expense(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigin
             name="sign_matches_kind",
         ),
         Index("ix_expenses_org_date", "organization_id", "spent_on"),
+        Index("ix_expenses_org_supplier", "organization_id", "supplier_id"),
+        Index("ix_expenses_org_category", "organization_id", "cost_category_id"),
     )
 
     kind: Mapped[str] = mapped_column(String(10), server_default="expense")
@@ -255,6 +267,7 @@ class StockMovement(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Data
         ),
         CheckConstraint("unit_cost >= 0", name="unit_cost_not_negative"),
         Index("ix_stock_movements_org_product_date", "organization_id", "product_id", "moved_on"),
+        Index("ix_stock_movements_org_sale_line", "organization_id", "sale_line_id"),
     )
 
     product_id: Mapped[uuid.UUID] = mapped_column()

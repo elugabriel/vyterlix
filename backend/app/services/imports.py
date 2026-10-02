@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.errors import AppError, ConflictError, NotFoundError
+from app.models.identity import User
 from app.models.imports import FILE_SUFFIXES, DataImport, DataImportRow
 from app.schemas.imports import (
     EarlierUploadOut,
@@ -189,9 +190,34 @@ def read_preview(
         )
 
 
-def list_imports(db: Session, limit: int = 50) -> list[ImportOut]:
-    rows = db.scalars(select(DataImport).order_by(DataImport.created_at.desc()).limit(limit))
-    return [ImportOut.model_validate(r) for r in rows]
+def _with_names(db: Session, outs: list[ImportOut]) -> list[ImportOut]:
+    ids = {o.uploaded_by_user_id for o in outs if o.uploaded_by_user_id}
+    names = (
+        dict(db.execute(select(User.id, User.full_name).where(User.id.in_(ids))).all())
+        if ids
+        else {}
+    )
+    for out in outs:
+        out.uploaded_by_name = names.get(out.uploaded_by_user_id)
+    return outs
+
+
+def list_imports(
+    db: Session,
+    limit: int = 50,
+    *,
+    offset: int = 0,
+    status: str | None = None,
+    dataset: str | None = None,
+) -> list[ImportOut]:
+    """The business's import history, newest first."""
+    query = select(DataImport).order_by(DataImport.created_at.desc(), DataImport.id)
+    if status:
+        query = query.where(DataImport.status == status)
+    if dataset:
+        query = query.where(DataImport.dataset == dataset)
+    rows = db.scalars(query.limit(limit).offset(offset))
+    return _with_names(db, [ImportOut.model_validate(r) for r in rows])
 
 
 def get_import(db: Session, storage: FileStorage, import_id: uuid.UUID) -> ImportDetailOut:
@@ -199,8 +225,9 @@ def get_import(db: Session, storage: FileStorage, import_id: uuid.UUID) -> Impor
     preview = read_preview(storage, data_import, count=False)
     if preview is not None and not preview.needs_sheet:
         preview.row_count = data_import.row_count  # counted at upload; don't re-count
+    out = _with_names(db, [ImportOut.model_validate(data_import)])[0]
     return ImportDetailOut(
-        **ImportOut.model_validate(data_import).model_dump(),
+        **out.model_dump(),
         preview=_preview_out(preview) if preview else None,
     )
 

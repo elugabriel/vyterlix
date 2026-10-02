@@ -58,6 +58,8 @@ class AuditAction(StrEnum):
     IMPORT_UPDATED = "import.updated"
     IMPORT_MAPPED = "import.mapped"
     IMPORT_VALIDATED = "import.validated"
+    IMPORT_COMPLETED = "import.completed"
+    IMPORT_UNDONE = "import.undone"
 
 
 def record_audit(

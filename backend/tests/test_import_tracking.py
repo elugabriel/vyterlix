@@ -326,3 +326,29 @@ def test_same_file_uploaded_twice_is_findable(db, org_a):
     saved(db, an_import(created_at=datetime.now(UTC) - timedelta(days=3)))
     saved(db, an_import())
     assert db.scalar(select(func.count()).where(DataImport.file_sha256 == SHA)) == 2
+
+
+def test_sale_lines_record_the_import_that_created_them(db, org_a):
+    from app.models.data import SaleLine
+
+    imp = saved(db, an_import())
+    sale = saved(db, a_sale(import_id=imp.id))
+    line = saved(
+        db, SaleLine(sale_id=sale.id, quantity=D("1"), net_amount=D("10"), import_id=imp.id)
+    )
+    assert line.import_id == imp.id
+
+
+def test_a_sale_line_cannot_claim_another_businesss_import(db, orgs):
+    from app.models.data import SaleLine
+
+    a, b = orgs
+    with tenant_scope(db, b):
+        theirs = saved(db, an_import())
+    with tenant_scope(db, a):
+        sale = saved(db, a_sale())
+        rejected(
+            db,
+            SaleLine(sale_id=sale.id, quantity=D("1"), net_amount=D("1"), import_id=theirs.id),
+            "fk_sale_lines_organization_id_data_imports",
+        )

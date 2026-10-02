@@ -24,6 +24,7 @@ class ImportOut(BaseModel):
     duplicate_count: int
     imported_count: int
     uploaded_by_user_id: uuid.UUID | None
+    uploaded_by_name: str | None = None
     created_at: datetime
     imported_at: datetime | None
     undone_at: datetime | None

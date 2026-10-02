@@ -57,7 +57,7 @@ _SAME_THING_KEYS = ("name", "email")
 # --- spotting repeats ----------------------------------------
 
 
-def _existing(db: Session, dataset: str, source: str, keys: set[tuple[str, str]]) -> set:
+def existing_keys(db: Session, dataset: str, source: str, keys: set[tuple[str, str]]) -> set:
     """Which of these keys already exist in the business's data."""
     found: set[tuple[str, str]] = set()
     by_kind: dict[str, set[str]] = defaultdict(set)
@@ -257,7 +257,7 @@ def _validate(
             if not batch:
                 return
             keys = {o.key for _, _, o in batch if o.key is not None and o.ok}
-            existing = _existing(db, dataset, data_import.source, keys) if keys else set()
+            existing = existing_keys(db, dataset, data_import.source, keys) if keys else set()
             saved = _classify(batch, existing, first_seen, tally)
             db.execute(
                 insert(DataImportRow),
@@ -378,7 +378,7 @@ def _safe_cell(value: str) -> str:
 
 
 def problems_csv(db: Session, import_id: uuid.UUID) -> tuple[str, str]:
-    """(filename, CSV text) of the rows that can't be imported, with what is wrong with each.
+    """(filename, CSV text) of the rows that were skipped, with what is wrong with each.
     Opens in Excel; fix the cells and upload it as a new file."""
     data_import = get_record(db, import_id)
     if data_import.validation_summary is None:
@@ -396,7 +396,10 @@ def problems_csv(db: Session, import_id: uuid.UUID) -> tuple[str, str]:
     writer.writerow(["Row", "Status", "Problems", *map(_safe_cell, headers)])
     rows = db.scalars(
         select(DataImportRow)
-        .where(DataImportRow.import_id == data_import.id, DataImportRow.status != "valid")
+        .where(
+            DataImportRow.import_id == data_import.id,
+            DataImportRow.status.in_(("invalid", "duplicate")),
+        )
         .order_by(DataImportRow.row_number)
     )
     for row in rows:

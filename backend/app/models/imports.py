@@ -111,6 +111,7 @@ class DataImport(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base):
         # "You uploaded this exact file on 3 May": warn before importing it twice.
         Index("ix_data_imports_org_sha256", "organization_id", "file_sha256"),
         Index("ix_data_imports_org_created", "organization_id", "created_at"),
+        Index("ix_data_imports_org_source", "organization_id", "data_source_id"),
     )
 
     data_source_id: Mapped[uuid.UUID | None] = mapped_column()

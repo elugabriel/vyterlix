@@ -43,7 +43,7 @@ class ValidationOut(BaseModel):
 
 class RowOut(BaseModel):
     row_number: int
-    status: Literal["valid", "invalid", "duplicate"]
+    status: Literal["valid", "invalid", "duplicate", "imported", "skipped"]
     errors: list[dict[str, Any]]
     raw: dict[str, str]  # only the columns that were mapped
 
