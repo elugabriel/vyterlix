@@ -17,7 +17,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 1 | Project foundation | Done |
 | 2 | Authentication + multi-tenancy | Done |
 | 3 | Business onboarding & profile | Done |
-| 4 | Data import + normalisation | **In progress — Part A step 6 of 9 done** |
+| 4 | Data import + normalisation | **In progress — Part A step 7 of 9 done** |
 | 5 | KPI engine | Not started |
 | 6 | Business health engine | Not started |
 | 7 | Diagnostic engine | Not started |
@@ -173,7 +173,7 @@ Decisions (confirmed 2026-09-28):
 - [x] Error reporting on failed rows (step 5): `GET .../rows?status=invalid|duplicate` (paged), `GET .../problems.csv` download (Excel-safe, formula-injection protected, column order as on the mapping screen)
 - [x] Import history (step 6): `GET .../imports` newest first with who uploaded, status, counts and times; filter by status or kind of file, paged; `GET .../imports/{id}/records` shows what an import currently has in the data; undone imports stay in the history
 - [x] Import and undo (step 6): `POST .../imports/{id}/import` creates the records from the valid rows (all or nothing; one transaction; locked so it can't run twice); sales also get a line when the row says what was sold; customers, products, suppliers, sales channels and cost categories are found by email/code/name or created once; anything added since checking that is already there is skipped. `POST .../imports/{id}/undo` removes everything the import created in dependency order (all or nothing); refused with a clear message if later data depends on it (undo the later import first); sales channels and cost categories are the business's own lists and stay. Measured on the real server: 50,000 rows import in about 60 s and undo in about 6 s
-- [ ] Manual data entry (system works with zero integrations)
+- [x] Manual data entry (step 7): the system works with no files and no integrations. Owners and Managers (`data.manage`) can create, read, correct and delete, by hand: sales (with optional line detail that must add up), expenses, customers, suppliers, products and stock movements; `GET .../products/{id}/stock` gives stock on hand for any day. Amounts are entered positive with a kind (sale/refund, expense/credit), the VAT question is always answered (rate or amount, includes VAT or not), UK VAT rates only, money returned in pounds and pence. Customers/suppliers/products in use are archived, not deleted; every write is audited without personal details; each write is all-or-nothing. The VAT arithmetic is shared with the file import (`services/money.py`) so the two always agree. Records that came from a file can be corrected too and keep their source
 - [x] Normalisation onto the canonical transaction model (step 6): imported rows become sales, sale lines, expenses, customers, suppliers, products and stock movements in GBP, net + VAT = gross, with the import that made them and where they came from
 - [ ] Data-quality scoring per source/period
 - [ ] Integration framework: abstraction, OAuth/token handling, encrypted credentials, sync status, last successful sync, sync errors, re-authentication, permission summary, provenance

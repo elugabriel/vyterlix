@@ -60,6 +60,10 @@ class AuditAction(StrEnum):
     IMPORT_VALIDATED = "import.validated"
     IMPORT_COMPLETED = "import.completed"
     IMPORT_UNDONE = "import.undone"
+    # Records typed in or corrected by hand
+    RECORD_CREATED = "record.created"
+    RECORD_UPDATED = "record.updated"
+    RECORD_DELETED = "record.deleted"
 
 
 def record_audit(

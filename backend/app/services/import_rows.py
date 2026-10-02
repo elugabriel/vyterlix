@@ -19,6 +19,7 @@ from typing import Any
 from app.models.data import STOCK_MOVEMENT_KINDS
 from app.services import import_fields as fields
 from app.services import value_parsers as vp
+from app.services.money import VatError, vat_split
 from app.services.value_parsers import CellError
 
 _TOTALS_DATASETS = ("sales", "expenses")
@@ -103,41 +104,32 @@ def _split_vat(
 ) -> tuple[Decimal, Decimal, Decimal] | None:
     """(net, vat, gross) with the sign of the amount, or None if VAT can't be worked out."""
     sign = -1 if amount < 0 else 1
-    shown = abs(amount)
     inclusive = bool(options.get("vat_inclusive"))
 
-    vat_cell = row.cell("vat_amount")
-    if row.mapped("vat_amount") and vat_cell:
+    vat = rate = None
+    if row.mapped("vat_amount") and row.cell("vat_amount"):
         vat = row.read("vat_amount", vp.parse_money)
         if vat is None:
             return None
         vat = abs(vat)
-        net = shown - vat if inclusive else shown
-        gross = shown if inclusive else shown + vat
-        if net < 0:
-            row.error("vat_amount", "vat_exceeds_amount", "The VAT is more than the amount.")
+    elif row.mapped("vat_rate") and row.cell("vat_rate"):
+        rate = row.read("vat_rate", vp.parse_vat_rate)
+        if rate is None:
             return None
+    elif options.get("default_vat_rate") is not None:
+        rate = Decimal(options["default_vat_rate"])
     else:
-        rate = None
-        if row.mapped("vat_rate") and row.cell("vat_rate"):
-            rate = row.read("vat_rate", vp.parse_vat_rate)
-            if rate is None:
-                return None
-        elif options.get("default_vat_rate") is not None:
-            rate = Decimal(options["default_vat_rate"])
-        else:
-            row.error(
-                "vat_amount",
-                "vat_missing",
-                "There is no VAT on this row and no VAT rate was chosen for the file.",
-            )
-            return None
-        if inclusive:
-            net = vp.round_pennies(shown / (1 + rate / 100))
-            vat, gross = shown - net, shown
-        else:
-            vat = vp.round_pennies(shown * rate / 100)
-            net, gross = shown, shown + vat
+        row.error(
+            "vat_amount",
+            "vat_missing",
+            "There is no VAT on this row and no VAT rate was chosen for the file.",
+        )
+        return None
+    try:
+        net, vat, gross = vat_split(abs(amount), includes_vat=inclusive, rate=rate, vat_amount=vat)
+    except VatError as exc:
+        row.error("vat_amount", exc.code, exc.message)
+        return None
     return sign * net, sign * vat, sign * gross
 
 

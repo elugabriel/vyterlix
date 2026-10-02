@@ -15,6 +15,7 @@ from app.api.v1 import (
     organizations,
     seasons,
     settings,
+    trading,
 )
 
 api_router = APIRouter(prefix="/api/v1")
@@ -36,3 +37,9 @@ api_router.include_router(benchmarks.router)
 api_router.include_router(onboarding.router)
 api_router.include_router(imports.router)
 api_router.include_router(imports.sources_router)
+api_router.include_router(trading.sales_router)
+api_router.include_router(trading.expenses_router)
+api_router.include_router(trading.customers_router)
+api_router.include_router(trading.suppliers_router)
+api_router.include_router(trading.products_router)
+api_router.include_router(trading.stock_router)
