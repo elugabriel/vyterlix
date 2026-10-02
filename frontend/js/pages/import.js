@@ -11,14 +11,17 @@ import {
   datasetLabel,
   describeCounts,
   guard,
+  jobProgress,
   number,
   problemsFilename,
   requireDataManager,
+  runJob,
   saveBlob,
   statusBadge,
   put,
   table,
   uuidFromParam,
+  waitForJob,
 } from "../data.js";
 import { el } from "../dom.js";
 import { gbp, ukDate } from "../format.js";
@@ -64,7 +67,28 @@ async function start({ org }) {
     return;
   }
   imp = await guard(message, () => api.get(`${base}/${importId}`));
-  if (imp) await render();
+  if (!imp) return;
+  await resumeRunningJob();
+  await render();
+}
+
+/** If this upload has a job queued or running (the page was reloaded), wait for it first. */
+async function resumeRunningJob() {
+  const jobs = await guard(message, () => api.get(`${base}/${imp.id}/jobs`));
+  const active = jobs?.find((j) => j.status === "queued" || j.status === "running");
+  if (!active) return;
+  const verb = { "import.validate": "Checking", "import.run": "Importing", "import.undo": "Undoing" }[active.kind] ?? "Working";
+  const progress = jobProgress(verb);
+  content.replaceChildren(el("section", { class: "card" }, el("h2", { style: "margin-top:0" }, `${verb} your file`), progress.node));
+  try {
+    const done = await waitForJob(orgId, active, progress);
+    if (done.kind === "import.run" || done.kind === "import.undo") result = done.result;
+    validation = null;
+  } catch (err) {
+    if (!(err instanceof ApiError)) throw err;
+    showMessage(message, "error", err.message);
+  }
+  await refreshImport();
 }
 
 // --- the page as a whole ------------------------------------------------------------------------
@@ -338,18 +362,22 @@ async function mappedPanel() {
     view = "map";
     await render();
   });
+  const progress = jobProgress("Checking every row");
+  progress.node.hidden = true;
   check.addEventListener("click", async () => {
     check.disabled = change.disabled = true;
-    check.textContent = "Checking every row…";
+    showMessage(box, "info", "");
+    progress.node.hidden = false;
     try {
-      validation = await api.post(`${base}/${imp.id}/validate`);
+      await runJob(orgId, imp.id, "validate", progress);
+      validation = null; // read fresh by the next panel
       await refreshImport();
       await render();
     } catch (err) {
       if (!(err instanceof ApiError)) throw err;
       showMessage(box, "error", err.message);
+      progress.node.hidden = true;
       check.disabled = change.disabled = false;
-      check.textContent = "Check my data";
     }
   });
   const vat = m.options.vat_inclusive === undefined ? null : m.options.vat_inclusive ? "Amounts include VAT." : "Amounts are before VAT.";
@@ -361,6 +389,7 @@ async function mappedPanel() {
     vat ? el("p", { class: "muted" }, vat + (m.options.default_vat_rate ? ` VAT rate ${m.options.default_vat_rate}%.` : "")) : null,
     el("p", { class: "muted" }, "Next we check every row. Nothing is added to your data yet."),
     box,
+    progress.node,
     el("div", { class: "actions" }, check, change),
   );
 }
@@ -371,6 +400,8 @@ async function checkPanel() {
   validation ??= await api.get(`${base}/${imp.id}/validation`);
   const v = validation;
   const box = el("div", { class: "message", role: "alert", hidden: true });
+  const progress = jobProgress("Importing");
+  progress.node.hidden = true;
   const tile = (value, label) => el("div", { class: "tile" }, el("span", { class: "big" }, number(value)), el("span", { class: "label" }, label));
   const card = el(
     "section",
@@ -398,22 +429,24 @@ async function checkPanel() {
       ),
     );
   }
-  card.append(box);
+  card.append(box, progress.node);
 
   const actions = el("div", { class: "actions" });
   const doImport = el("button", { type: "button", disabled: !v.can_import }, `Import ${number(v.valid)} rows`);
   doImport.addEventListener("click", async () => {
     doImport.disabled = true;
-    doImport.textContent = "Importing… big files can take a minute";
+    showMessage(box, "info", "");
+    progress.node.hidden = false;
     try {
-      result = await api.post(`${base}/${imp.id}/import`);
+      const job = await runJob(orgId, imp.id, "import", progress);
+      result = job.result;
       imp = { ...imp, ...result.data_import };
       await render();
     } catch (err) {
       if (!(err instanceof ApiError)) throw err;
       showMessage(box, "error", err.message);
+      progress.node.hidden = true;
       doImport.disabled = false;
-      doImport.textContent = `Import ${number(v.valid)} rows`;
     }
   });
   const change = el("button", { type: "button", class: "secondary" }, "Change the matching");
@@ -504,6 +537,7 @@ async function donePanel() {
 function undoSection() {
   const box = el("div", { class: "message", role: "alert", hidden: true });
   const holder = el("div", { class: "subform" });
+  const undoProgress = jobProgress("Undoing");
   const ask = el("button", { type: "button", class: "secondary" }, "Undo this import");
   function showAsk() {
     holder.replaceChildren(el("h3", {}, "Made a mistake?"), el("p", { class: "muted" }, "Undo removes everything this import added. Your other data is not touched."), ask);
@@ -516,7 +550,7 @@ function undoSection() {
       yes.disabled = no.disabled = true;
       yes.textContent = "Undoing…";
       try {
-        result = await api.post(`${base}/${imp.id}/undo`);
+        result = (await runJob(orgId, imp.id, "undo", undoProgress)).result;
         imp = { ...imp, ...result.data_import };
         await render();
       } catch (err) {
@@ -526,7 +560,7 @@ function undoSection() {
         yes.textContent = "Yes, undo it";
       }
     });
-    holder.replaceChildren(el("p", {}, "Are you sure? This takes out everything this import added."), el("div", { class: "actions" }, yes, no));
+    holder.replaceChildren(el("p", {}, "Are you sure? This takes out everything this import added."), el("div", { class: "actions" }, yes, no), undoProgress.node);
   });
   showAsk();
   return el("div", {}, box, holder);

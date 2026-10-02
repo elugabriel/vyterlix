@@ -143,3 +143,31 @@ def signup(api, db, outbox):
         return {"Authorization": f"Bearer {res.json()['access_token']}"}
 
     return _signup
+
+
+@pytest.fixture
+def business(api, db, signup):
+    """Two businesses (org ids) and logins: owner/viewer of Acme, owner of Rival."""
+    import uuid
+
+    from sqlalchemy import select
+
+    from app.models.identity import OrganizationUser, Role, User
+
+    ORGS = "/api/v1/organizations"
+    auth = {
+        "owner": signup("owner@acme.co.uk"),
+        "viewer": signup("viewer@acme.co.uk"),
+        "other": signup("owner@rival.co.uk"),
+    }
+    org_id = api.post(ORGS, json={"name": "Acme"}, headers=auth["owner"]).json()["id"]
+    other_org = api.post(ORGS, json={"name": "Rival"}, headers=auth["other"]).json()["id"]
+    db.add(
+        OrganizationUser(
+            organization_id=uuid.UUID(org_id),
+            user_id=db.scalars(select(User.id).where(User.email == "viewer@acme.co.uk")).one(),
+            role_id=db.scalars(select(Role.id).where(Role.code == "viewer")).first(),
+        )
+    )
+    db.flush()
+    return org_id, other_org, auth

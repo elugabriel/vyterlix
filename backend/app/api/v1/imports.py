@@ -5,6 +5,8 @@ from urllib.parse import quote
 from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
 
 from app.api.deps import DB, Meta, Tenant, require_permission
+from app.core.config import get_settings
+from app.core.errors import ConflictError
 from app.core.permissions import Perm
 from app.models.imports import DATASETS
 from app.schemas.import_mapping import DataSourceOut, MappingIn, MappingOut
@@ -19,7 +21,7 @@ from app.services.import_validation import (
     problems_csv,
     validate_import,
 )
-from app.services.imports import get_import, list_imports, update_import, upload_import
+from app.services.imports import get_import, get_record, list_imports, update_import, upload_import
 from app.services.storage import FileStorage, get_file_storage
 
 router = APIRouter(prefix="/organizations/{organization_id}/imports", tags=["imports"])
@@ -29,6 +31,16 @@ sources_router = APIRouter(prefix="/organizations/{organization_id}/data-sources
 DataManager = Annotated[Tenant, Depends(require_permission(Perm.DATA_MANAGE))]
 Storage = Annotated[FileStorage, Depends(get_file_storage)]
 Dataset = Annotated[str, Form(pattern=f"^({'|'.join(DATASETS)})$")]
+
+
+def _small_enough_to_run_now(db, import_id: uuid.UUID) -> None:
+    """Big files go through the background worker (POST .../jobs), never a web request."""
+    limit = get_settings().max_inline_rows
+    if get_record(db, import_id).row_count > limit:
+        raise ConflictError(
+            f"This file has more than {limit:,} rows, so it is processed in the background.",
+            code="use_background_job",
+        )
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=ImportUploadedOut)
@@ -110,7 +122,9 @@ def list_data_sources(tenant: DataManager, db: DB):
 @router.post("/{import_id}/validate", response_model=ValidationOut)
 def validate(import_id: uuid.UUID, tenant: DataManager, db: DB, storage: Storage, meta: Meta):
     """Check every row using the saved column mapping. Nothing is imported: this says how many
-    rows are fine, which have problems, and which are repeats."""
+    rows are fine, which have problems, and which are repeats. Files over `max_inline_rows`
+    must use the background job (POST .../jobs) instead."""
+    _small_enough_to_run_now(db, import_id)
     return validate_import(db, storage, tenant, import_id, meta)
 
 
@@ -147,7 +161,9 @@ def problems(import_id: uuid.UUID, tenant: DataManager, db: DB):
 
 @router.post("/{import_id}/import", response_model=ImportResultOut)
 def run(import_id: uuid.UUID, tenant: DataManager, db: DB, meta: Meta):
-    """Create the business's records from the rows that passed checking. All or nothing."""
+    """Create the business's records from the rows that passed checking. All or nothing.
+    Files over `max_inline_rows` must use the background job (POST .../jobs) instead."""
+    _small_enough_to_run_now(db, import_id)
     return run_import(db, tenant, import_id, meta)
 
 

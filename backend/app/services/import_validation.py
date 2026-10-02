@@ -17,6 +17,7 @@ import io
 import re
 import uuid
 from collections import defaultdict
+from collections.abc import Callable
 from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Any
@@ -217,6 +218,7 @@ def _validate(
     meta: RequestMeta,
     *,
     today: date | None = None,
+    progress: Callable[[int, int], None] | None = None,
 ) -> ValidationOut:
     data_import = get_record(db, import_id)
     if data_import.status == "uploaded":
@@ -233,6 +235,7 @@ def _validate(
     clear_validation(db, data_import)
     total = 0
     mapped_headers = list(dict.fromkeys(mapping.values()))
+    expected = data_import.row_count  # counted when the file was uploaded
 
     with (
         storage.open(data_import.storage_key) as stream,
@@ -268,6 +271,8 @@ def _validate(
             )
             total += len(batch)
             batch.clear()
+            if progress is not None:
+                progress(total, max(expected, total))
 
         for row_number, cells in source.rows:
             raw = {h: cells[position[h]] for h in mapped_headers}
@@ -309,10 +314,14 @@ def validate_import(
     meta: RequestMeta,
     *,
     today: date | None = None,
+    progress: Callable[[int, int], None] | None = None,
 ) -> ValidationOut:
-    """Check every row. All or nothing: if anything goes wrong, the earlier results stay."""
+    """Check every row. All or nothing: if anything goes wrong, the earlier results stay.
+
+    `progress(rows_done, rows_expected)` is called after each batch (used by the worker).
+    """
     try:
-        return _validate(db, storage, tenant, import_id, meta, today=today)
+        return _validate(db, storage, tenant, import_id, meta, today=today, progress=progress)
     except BaseException:
         db.rollback()
         raise

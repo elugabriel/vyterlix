@@ -11,6 +11,7 @@ from app.api.v1 import (
     health,
     imports,
     invitations,
+    jobs,
     me,
     onboarding,
     organizations,
@@ -38,6 +39,7 @@ api_router.include_router(benchmarks.router)
 api_router.include_router(onboarding.router)
 api_router.include_router(imports.router)
 api_router.include_router(imports.sources_router)
+api_router.include_router(jobs.router)
 api_router.include_router(trading.sales_router)
 api_router.include_router(trading.expenses_router)
 api_router.include_router(trading.customers_router)

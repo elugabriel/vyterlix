@@ -2,6 +2,7 @@
 // a table builder and a few display helpers. Everything is built with el(), never innerHTML.
 
 import { ApiError } from "./api.js";
+import { api } from "./auth.js";
 import { el } from "./dom.js";
 import { showMessage } from "./ui.js";
 
@@ -137,6 +138,57 @@ export function problemsFilename(original) {
 export function uuidFromParam(name) {
   const id = new URLSearchParams(location.search).get(name) ?? "";
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ? id : null;
+}
+
+// --- background jobs -------------------------------------------------------------------------------
+// Checking, importing and undoing run in the background worker; the page starts a job and polls it.
+
+const QUEUE_PATIENCE_MS = 15_000; // queued this long: the worker is probably not running
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** A progress bar plus a sentence. `update(job, waitedMs)` redraws it. */
+export function jobProgress(verb) {
+  const bar = el("progress", { max: 100, "aria-label": `${verb} progress` });
+  const text = el("p", { class: "muted", role: "status" }, "Starting…");
+  function update(job, waited) {
+    if (job.status === "queued") {
+      bar.removeAttribute("value");
+      text.textContent =
+        waited > QUEUE_PATIENCE_MS
+          ? "Still waiting for the background worker. If this carries on, the worker may not be running."
+          : "Waiting for the background worker…";
+      return;
+    }
+    if (job.percent === null || job.percent === undefined) {
+      bar.removeAttribute("value");
+      text.textContent = `${verb}…`;
+      return;
+    }
+    bar.value = job.percent;
+    const rows = job.progress_total ? ` (${number(job.progress_done)} of ${number(job.progress_total)} rows)` : "";
+    text.textContent = `${verb}… ${job.percent}%${rows}`;
+  }
+  return { node: el("div", { class: "job-progress" }, el("div", { class: "progress-row" }, bar), text), update };
+}
+
+/** Poll a job until it finishes. Returns the finished job; throws ApiError if it failed. */
+export async function waitForJob(orgId, job, progress) {
+  const started = Date.now();
+  while (job.status === "queued" || job.status === "running") {
+    progress?.update(job, Date.now() - started);
+    await wait(Date.now() - started > 30_000 ? 2000 : 1000);
+    job = await api.get(`/organizations/${orgId}/jobs/${job.id}`);
+  }
+  if (job.status === "failed") {
+    throw new ApiError(200, job.error_code ?? "job_failed", job.error_message ?? "This did not finish. Please try again.");
+  }
+  return job;
+}
+
+/** Start a background job on an upload ("validate", "import" or "undo") and wait for it. */
+export async function runJob(orgId, importId, action, progress) {
+  const job = await api.post(`/organizations/${orgId}/imports/${importId}/jobs`, { action });
+  return waitForJob(orgId, job, progress);
 }
 
 /** A bar for a 0-100 score, with its number as text so it's readable without colour. */

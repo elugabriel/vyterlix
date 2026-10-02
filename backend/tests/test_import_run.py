@@ -18,7 +18,7 @@ from app.models.data import (
     StockMovement,
     Supplier,
 )
-from app.models.identity import AuditLog, OrganizationUser, Role, User
+from app.models.identity import AuditLog
 from app.models.imports import DataImport, DataImportRow, DataSource
 from app.services import import_records, import_runner
 from app.services.import_rows import RowOutcome
@@ -28,26 +28,6 @@ D = Decimal
 INC = {"vat_inclusive": True}
 SALES_MAP = {"sold_on": "Date", "amount": "Total", "vat_amount": "VAT", "reference": "Order"}
 ROWS = ("28/09/2026,1001,12.00,2.00", "29/09/2026,1002,24.00,4.00", "30/09/2026,1003,6.00,1.00")
-
-
-@pytest.fixture
-def business(api, db, signup):
-    auth = {
-        "owner": signup("owner@acme.co.uk"),
-        "viewer": signup("viewer@acme.co.uk"),
-        "other": signup("owner@rival.co.uk"),
-    }
-    org_id = api.post(ORGS, json={"name": "Acme"}, headers=auth["owner"]).json()["id"]
-    other_org = api.post(ORGS, json={"name": "Rival"}, headers=auth["other"]).json()["id"]
-    db.add(
-        OrganizationUser(
-            organization_id=uuid.UUID(org_id),
-            user_id=db.scalars(select(User.id).where(User.email == "viewer@acme.co.uk")).one(),
-            role_id=db.scalars(select(Role.id).where(Role.code == "viewer")).first(),
-        )
-    )
-    db.flush()
-    return org_id, other_org, auth
 
 
 def base(business, import_id, org=0):

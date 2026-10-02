@@ -9,6 +9,7 @@ The session must be scoped to the organisation (CurrentTenant).
 
 import uuid
 from collections import Counter
+from collections.abc import Callable
 from datetime import UTC, date, datetime
 
 from sqlalchemy import func, select, text, update
@@ -82,9 +83,11 @@ def run_import(
     meta: RequestMeta,
     *,
     today: date | None = None,
+    progress: Callable[[int, int], None] | None = None,
 ) -> ImportResultOut:
+    """`progress(rows_done, rows_to_do)` is called after each batch (used by the worker)."""
     try:
-        return _run(db, tenant, import_id, meta, today)
+        return _run(db, tenant, import_id, meta, today, progress)
     except IntegrityError as exc:
         db.rollback()
         raise ConflictError(
@@ -98,7 +101,7 @@ def run_import(
         raise
 
 
-def _run(db, tenant, import_id, meta, today) -> ImportResultOut:
+def _run(db, tenant, import_id, meta, today, progress=None) -> ImportResultOut:
     data_import = _locked(db, import_id)
     if data_import.status == "imported":
         raise ConflictError("This import has already been done", code="already_imported")
@@ -167,6 +170,8 @@ def _run(db, tenant, import_id, meta, today) -> ImportResultOut:
         for row in batch:
             db.expunge(row)  # keep memory flat on big files
         batches += 1
+        if progress is not None:
+            progress(imported + skipped_duplicates + skipped_invalid, data_import.valid_count)
         if _grown_enough_to_replan(batches):
             refresh_statistics(db)
 

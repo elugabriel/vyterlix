@@ -40,6 +40,13 @@ class Settings(BaseSettings):
     max_upload_rows: int = 250_000
     upload_retention_days: int = 90  # originals deleted after this; imported records stay
 
+    # Background jobs (Phase 4 step 10). Files bigger than this are checked and imported by the
+    # worker, never inside a web request.
+    max_inline_rows: int = 5_000
+    job_stale_after_seconds: int = 900  # a running job silent this long lost its worker
+    job_retry_delay_seconds: int = 30  # grows with each attempt
+    job_keep_days: int = 30  # finished jobs are pruned after this
+
     # Sessions. Access tokens are short-lived JWTs kept in page memory; the refresh token
     # lives in an httpOnly cookie and is stored hashed in user_sessions.
     jwt_secret: str = DEV_JWT_SECRET

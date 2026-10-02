@@ -84,7 +84,7 @@ cd backend
 
 ## Running locally
 
-Use two terminals.
+Use three terminals (two if you are not uploading files).
 
 **Terminal 1 — API** (http://localhost:8000):
 
@@ -106,6 +106,16 @@ changed `.js`/`.css` files are picked up on the next page load.
 python frontend/serve.py
 ```
 
+**Terminal 3 — background worker** (checks, imports and undoes uploaded files):
+
+```bash
+cd backend
+.venv/Scripts/python -m app.cli.worker run
+```
+
+Without it the upload page shows "Waiting for the background worker…" and nothing happens.
+`python -m app.cli.worker status` counts jobs by state; `prune` deletes old finished ones.
+
 Open http://localhost:5500 — you'll land on the login page. Pages:
 
 | Page | What it's for |
@@ -117,6 +127,10 @@ Open http://localhost:5500 — you'll land on the login page. Pages:
 | `accept-invite.html` | Opened from an invitation email |
 | `onboarding.html?org=…` | Setting up a business step by step; also where each section is edited later |
 | `business.html?org=…` | A business's setup checklist, business settings and your notification choices |
+| `data.html?org=…` | Data overview: quality score, what to fix first, month by month |
+| `import.html?org=…` | Upload a CSV or Excel file: match columns, check, import, undo (needs the worker) |
+| `imports.html?org=…` | Import history |
+| `entry.html?org=…` | Type in a sale, expense, customer, supplier, product or stock change |
 
 Emails aren't sent in development: copy the link from the API terminal (`"email.console"`).
 If pages say they can't reach Vyterlix, check the API is running and that
