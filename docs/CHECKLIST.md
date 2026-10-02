@@ -17,7 +17,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 1 | Project foundation | Done |
 | 2 | Authentication + multi-tenancy | Done |
 | 3 | Business onboarding & profile | Done |
-| 4 | Data import + normalisation | **In progress — Part A done (steps 1-9), job queue (10), integration framework (11); milestone dataset + real connectors next** |
+| 4 | Data import + normalisation | **In progress — Part A and the milestone are done; job queue (step 10) and integration framework (step 11) done; real connectors (Xero, Shopify, WooCommerce, Google Analytics) remain** |
 | 5 | KPI engine | Not started |
 | 6 | Business health engine | Not started |
 | 7 | Diagnostic engine | Not started |
@@ -182,6 +182,8 @@ Decisions (confirmed 2026-09-28):
 - [ ] Connector: **Shopify**
 - [ ] Connector: **WooCommerce**
 - [ ] Connector: **Google Analytics**
+
+- [x] **Phase 4 milestone (done)**: a whole fake UK business year goes through the real pipeline and exactly the expected totals come out. `app/demo/milestone.py` invents a small bakery (1 Oct 2025 to 30 Sep 2026: 15,864 sales, 103 expenses, 400 customers, 12 products, 1,489 stock movements; about £102k sales, a thin profit, a Christmas peak and a January dip, a few refunds, no gaps) and works out every total as it goes; `tests/test_milestone_dataset.py` uploads, matches, checks and imports all five files through the real API and the background worker and compares sales, VAT, cost of goods, expenses (per month), customers, stock on hand and the data-quality score (100) to the penny. `python -m app.cli.demo load|clear|files` puts the year into (or takes it out of) a business whose name ends "(demo data)" (31 s); it refuses any other business.
 
 **Done when:** Sales/Expenses/Customers/Inventory CSVs become normalised records.
 

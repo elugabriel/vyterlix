@@ -116,6 +116,23 @@ cd backend
 Connections need it too. Without it the upload and connection pages show "Waiting for the background worker…" and nothing happens.
 `python -m app.cli.worker status` counts jobs by state; `prune` deletes old finished ones.
 
+### Fake demo data
+
+To try the screens with a full year of believable (invented) UK trading, create a business whose
+name ends with `(demo data)` and load it:
+
+```bash
+cd backend
+.venv/Scripts/python -m app.cli.demo load --org <business id>    # about 30 seconds
+.venv/Scripts/python -m app.cli.demo clear --org <business id>   # takes it all out again
+.venv/Scripts/python -m app.cli.demo files --out ../demo-files   # just the CSVs, to upload by hand
+```
+
+It is a small bakery, 1 October 2025 to 30 September 2026. Everything is fake (example.com emails,
+unassigned ZZ postcodes) and the command refuses any business not marked as demo data. The
+"up to date" part of the data-quality score fades a week or so after 30 September 2026, as it
+would for real data that stopped arriving.
+
 Open http://localhost:5500 — you'll land on the login page. Pages:
 
 | Page | What it's for |
