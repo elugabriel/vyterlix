@@ -6,6 +6,7 @@ from app.api.v1 import (
     benchmarks,
     business,
     business_lists,
+    data_quality,
     goals,
     health,
     imports,
@@ -43,3 +44,4 @@ api_router.include_router(trading.customers_router)
 api_router.include_router(trading.suppliers_router)
 api_router.include_router(trading.products_router)
 api_router.include_router(trading.stock_router)
+api_router.include_router(data_quality.router)

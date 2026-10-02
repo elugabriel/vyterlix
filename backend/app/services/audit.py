@@ -64,6 +64,7 @@ class AuditAction(StrEnum):
     RECORD_CREATED = "record.created"
     RECORD_UPDATED = "record.updated"
     RECORD_DELETED = "record.deleted"
+    DATA_QUALITY_REFRESHED = "quality.refreshed"
 
 
 def record_audit(
