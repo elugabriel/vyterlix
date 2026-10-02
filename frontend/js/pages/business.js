@@ -81,14 +81,14 @@ function renderSetup(orgId, isOwner, state, profile) {
 }
 
 function renderData(orgId, role) {
-  const manager = role !== "viewer";
+  const manager = role === "owner"; // the API only lets owners add or change data
   document.getElementById("data").replaceChildren(
     el("h2", {}, "Your data"),
     el(
       "p",
       { class: "muted" },
       manager
-        ? "Bring in your sales, costs, customers and stock from a spreadsheet, or type them in. See how complete your data is."
+        ? "Bring in your sales, costs, customers and stock from a spreadsheet or another system, or type them in. See how complete your data is."
         : "See how complete your business's data is.",
     ),
     el(
@@ -100,6 +100,7 @@ function renderData(orgId, role) {
             el("a", { class: "button secondary", href: `import.html?org=${orgId}` }, "Upload a file"),
             el("a", { class: "button secondary", href: `entry.html?org=${orgId}` }, "Type in data"),
             el("a", { class: "button secondary", href: `imports.html?org=${orgId}` }, "Import history"),
+            el("a", { class: "button secondary", href: `connections.html?org=${orgId}` }, "Connections"),
           ]
         : []),
     ),

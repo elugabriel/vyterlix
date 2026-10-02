@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from app.core.permissions import Perm
 from app.services.import_runner import run_import, undo_import
 from app.services.import_validation import validate_import
+from app.services.integrations import run_sync
 from app.services.jobs import JobContext, register
 
 # What the API accepts as an "action" on an import, and the job kind that runs it.
@@ -30,3 +31,8 @@ def import_rows(ctx: JobContext) -> BaseModel:
 @register("import.undo", Perm.DATA_MANAGE)
 def undo(ctx: JobContext) -> BaseModel:
     return undo_import(ctx.db, ctx.tenant, ctx.job.subject_id, ctx.meta)
+
+
+@register("integration.sync", Perm.DATA_MANAGE)
+def sync_integration(ctx: JobContext) -> dict:
+    return run_sync(ctx)

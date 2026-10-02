@@ -45,6 +45,12 @@ export function ukDate(iso) {
   return `${d}/${m}/${y}`;
 }
 
+/** An ISO timestamp as UK local time: "02/10/2026, 19:30". */
+export function ukDateTime(iso) {
+  if (!iso) return "";
+  return new Date(iso).toLocaleString("en-GB", { timeZone: "Europe/London", dateStyle: "short", timeStyle: "short" });
+}
+
 export function regionName(code) {
   return UK_REGIONS.find(([c]) => c === code)?.[1] ?? "";
 }

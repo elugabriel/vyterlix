@@ -65,6 +65,10 @@ class AuditAction(StrEnum):
     RECORD_UPDATED = "record.updated"
     RECORD_DELETED = "record.deleted"
     DATA_QUALITY_REFRESHED = "quality.refreshed"
+    # Connections to other systems. Never log tokens or keys in `details`.
+    INTEGRATION_CONNECTED = "integration.connected"
+    INTEGRATION_DISCONNECTED = "integration.disconnected"
+    INTEGRATION_REAUTH_NEEDED = "integration.reauth_needed"
 
 
 def record_audit(

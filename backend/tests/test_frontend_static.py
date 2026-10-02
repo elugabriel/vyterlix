@@ -92,7 +92,7 @@ def test_every_api_method_the_pages_call_exists():
             assert method in provided, f"{script.name} calls api.{method}(), which doesn't exist"
 
 
-@pytest.mark.parametrize("name", ["data", "imports", "import", "entry"])
+@pytest.mark.parametrize("name", ["data", "imports", "import", "entry", "connections"])
 def test_data_pages_start_last_so_their_constants_are_ready(name):
     """A top-level `await start()` before later `const`s run makes a reload crash with
     "Cannot access ... before initialization" (found in a real browser)."""
@@ -101,3 +101,13 @@ def test_data_pages_start_last_so_their_constants_are_ready(name):
     after = source[start:]
     assert not re.search(r"^(const|let|class) ", after, re.MULTILINE), name
     assert not re.search(r"^function ", after, re.MULTILINE), name
+
+
+def test_the_connection_callback_page_runs_last_and_clears_the_address_bar():
+    """The provider's one-time code arrives in the address; it must be removed straight away."""
+    source = (FRONTEND / "js" / "pages" / "integrations-callback.js").read_text(encoding="utf-8")
+    run = source.index("await finish()")
+    after = source[run:]
+    assert not re.search(r"^(const|let|class|function) ", after, re.MULTILINE)
+    body = source[source.index("async function finish()") : run]
+    assert body.index("history.replaceState") < body.index("api.post")

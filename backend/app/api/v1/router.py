@@ -10,6 +10,7 @@ from app.api.v1 import (
     goals,
     health,
     imports,
+    integrations,
     invitations,
     jobs,
     me,
@@ -40,6 +41,7 @@ api_router.include_router(onboarding.router)
 api_router.include_router(imports.router)
 api_router.include_router(imports.sources_router)
 api_router.include_router(jobs.router)
+api_router.include_router(integrations.router)
 api_router.include_router(trading.sales_router)
 api_router.include_router(trading.expenses_router)
 api_router.include_router(trading.customers_router)

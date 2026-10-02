@@ -17,6 +17,7 @@ dependencies = [
     "openpyxl>=3.1",  # reading .xlsx uploads
     "defusedxml>=0.7",  # makes openpyxl refuse XML entity attacks in uploaded workbooks
     "tzdata>=2024.1",  # Europe/London rules on Windows, which has no system tz database
+    "cryptography>=43",  # encrypts the keys that let us read a connected system (Fernet)
 ]
 
 [project.optional-dependencies]

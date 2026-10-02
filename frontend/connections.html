@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Connections · Vyterlix</title>
+  <link rel="stylesheet" href="css/base.css">
+  <script src="js/config.js"></script>
+  <script type="module" src="js/pages/connections.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="app.html">Vyterlix</a>
+    <div class="topbar-user">
+      <span id="user-name" class="muted"></span>
+      <button id="logout" type="button" class="secondary">Log out</button>
+    </div>
+  </header>
+  <main class="container stack">
+    <h1><span id="org-name">Business</span> <span class="muted">· Connections</span></h1>
+    <div id="nav"></div>
+    <div id="message" class="message" role="alert" hidden></div>
+    <div id="content" class="stack"></div>
+  </main>
+</body>
+</html>

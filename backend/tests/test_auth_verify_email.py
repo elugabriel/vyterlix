@@ -179,8 +179,12 @@ def test_resend_for_deactivated_account_sends_nothing(api, db, outbox):
 
 
 def test_console_email_backend_is_refused_in_prod():
+    from cryptography.fernet import Fernet
+
+    # Real secrets, so the email backend is the only thing wrong.
+    secrets = {"jwt_secret": "x" * 40, "encryption_key": Fernet.generate_key().decode()}
     with pytest.raises(ValidationError, match="Console email backend"):
-        Settings(env="prod", jwt_secret="x" * 40, _env_file=None)
+        Settings(env="prod", _env_file=None, **secrets)
 
 
 def test_console_sender_writes_the_email_to_the_log(caplog):

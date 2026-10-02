@@ -72,17 +72,24 @@ export function dataNav(orgId, active) {
     link("upload", "import.html", "Upload a file"),
     link("history", "imports.html", "Import history"),
     link("entry", "entry.html", "Type in data"),
+    link("connections", "connections.html", "Connections"),
   );
 }
 
-/** Viewers can read the quality score but not manage data. Shows why and returns false. */
+/**
+ * Only the business owner can add or change data (the API refuses everyone else), so say so
+ * instead of showing buttons that fail. Others can still see the data overview.
+ */
 export function requireDataManager(org, message) {
-  if (org.role === "viewer") {
-    showMessage(message, "info", "Only owners and managers can add or change data. You can still see the data overview.");
+  if (org.role !== "owner") {
+    showMessage(message, "info", "Only the business owner can add or change data. You can still see the data overview.");
     return false;
   }
   return true;
 }
+
+// Remembers which business a "connect" was started for, across the trip to the other system.
+export const CONNECTING_KEY = "vyterlix.connecting"; // not secret: just a business id
 
 /** parent.append(...) that skips empty values (append(null) would print the word "null"). */
 export function put(parent, ...children) {

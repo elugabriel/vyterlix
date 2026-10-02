@@ -113,7 +113,7 @@ cd backend
 .venv/Scripts/python -m app.cli.worker run
 ```
 
-Without it the upload page shows "Waiting for the background worker…" and nothing happens.
+Connections need it too. Without it the upload and connection pages show "Waiting for the background worker…" and nothing happens.
 `python -m app.cli.worker status` counts jobs by state; `prune` deletes old finished ones.
 
 Open http://localhost:5500 — you'll land on the login page. Pages:
@@ -131,6 +131,7 @@ Open http://localhost:5500 — you'll land on the login page. Pages:
 | `import.html?org=…` | Upload a CSV or Excel file: match columns, check, import, undo (needs the worker) |
 | `imports.html?org=…` | Import history |
 | `entry.html?org=…` | Type in a sale, expense, customer, supplier, product or stock change |
+| `connections.html?org=…` | Connect another system (shows what will be read first), update it, disconnect (needs the worker). Only a practice "Sandbox" provider exists until the real connectors are built |
 
 Emails aren't sent in development: copy the link from the API terminal (`"email.console"`).
 If pages say they can't reach Vyterlix, check the API is running and that
@@ -155,6 +156,7 @@ All backend settings come from `VYTERLIX_*` environment variables or `backend/.e
 | `VYTERLIX_INVITATION_TTL_DAYS` | `7` | How long a team invitation link works. |
 | `VYTERLIX_TOKEN_RESEND_COOLDOWN_SECONDS` | `60` | Minimum gap between "send another link" emails (verification and password reset). |
 | `VYTERLIX_JWT_SECRET` | dev-only value | Signs access tokens. **Must** be a random 32+ char value in staging/prod (they refuse to start otherwise). |
+| `VYTERLIX_ENCRYPTION_KEY` | dev-only value | Encrypts the tokens that let Vyterlix read a connected system. **Must** be a Fernet key in staging/prod (`python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`). Losing it means every connection must be signed in again; to rotate, put the new key here and the old one in `VYTERLIX_PREVIOUS_ENCRYPTION_KEYS` (a JSON list). |
 | `VYTERLIX_ACCESS_TOKEN_TTL_MINUTES` | `15` | Access token lifetime. |
 | `VYTERLIX_REFRESH_TOKEN_TTL_DAYS` | `30` | How long a login lasts without activity. |
 | `VYTERLIX_COOKIE_SECURE` | `true` | Refresh cookie is HTTPS-only (browsers treat `http://localhost` as secure). |

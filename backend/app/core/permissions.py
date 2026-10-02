@@ -18,6 +18,7 @@ class Perm(StrEnum):
     ACTIONS_MANAGE = "actions.manage"
     AUDIT_VIEW = "audit.view"
     GOALS_MANAGE = "goals.manage"
+    INTEGRATIONS_MANAGE = "integrations.manage"
 
 
 class KpiCategory(StrEnum):

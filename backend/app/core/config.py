@@ -1,3 +1,4 @@
+import base64
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
@@ -7,6 +8,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Known, public value: fine for local dev and tests, refused in staging/prod.
 DEV_JWT_SECRET = "dev-only-insecure-jwt-secret-change-me"
+# Same idea for the key that encrypts stored connection credentials (a Fernet key is 32 bytes,
+# url-safe base64). Public, so refused in staging/prod.
+DEV_ENCRYPTION_KEY = base64.urlsafe_b64encode(b"dev-only-insecure-fernet-key-000").decode()
 
 
 class Settings(BaseSettings):
@@ -47,6 +51,16 @@ class Settings(BaseSettings):
     job_retry_delay_seconds: int = 30  # grows with each attempt
     job_keep_days: int = 30  # finished jobs are pruned after this
 
+    # Connections to other systems (Xero, Shopify...). Their tokens are stored encrypted with
+    # this key. To rotate: put the new key first and keep the old ones in `previous_...`; every
+    # token is re-encrypted with the new key the next time it is saved.
+    encryption_key: str = DEV_ENCRYPTION_KEY
+    previous_encryption_keys: list[str] = []
+    oauth_state_ttl_minutes: int = 10  # how long a "connect" attempt stays valid
+    token_refresh_margin_seconds: int = 120  # refresh access tokens this long before they expire
+    # Where a provider sends the person back after they approve access (a frontend page).
+    integration_callback_path: str = "/integrations-callback.html"
+
     # Sessions. Access tokens are short-lived JWTs kept in page memory; the refresh token
     # lives in an httpOnly cookie and is stored hashed in user_sessions.
     jwt_secret: str = DEV_JWT_SECRET
@@ -72,6 +86,12 @@ class Settings(BaseSettings):
             self.jwt_secret == DEV_JWT_SECRET or len(self.jwt_secret) < 32
         ):
             raise ValueError("Set VYTERLIX_JWT_SECRET to a random value of 32+ characters")
+        return self
+
+    @model_validator(mode="after")
+    def _real_encryption_key_outside_dev(self) -> "Settings":
+        if self.env in ("staging", "prod") and self.encryption_key == DEV_ENCRYPTION_KEY:
+            raise ValueError("Set VYTERLIX_ENCRYPTION_KEY (a Fernet key) outside dev")
         return self
 
     @model_validator(mode="after")
