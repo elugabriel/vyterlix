@@ -1,0 +1,13 @@
+﻿Name,SKU,Price,Cost,VAT rate,Category
+Demo Sourdough Loaf,DEMO-001,£4.20,£1.10,0%,Bread
+Demo Seeded Batch,DEMO-002,£3.60,£0.95,0%,Bread
+Demo Baguette,DEMO-003,£2.10,£0.55,0%,Bread
+Demo Croissant,DEMO-004,£1.90,£0.48,0%,Pastry
+Demo Pain au Chocolat,DEMO-005,£2.20,£0.60,0%,Pastry
+Demo Cinnamon Swirl,DEMO-006,£2.60,£0.70,20%,Pastry
+Demo Victoria Sponge Slice,DEMO-007,£3.10,£0.85,20%,Cakes
+Demo Lemon Drizzle Slice,DEMO-008,£3.10,£0.80,20%,Cakes
+Demo Birthday Cake,DEMO-009,£28.00,£7.50,20%,Cakes
+Demo Flat White,DEMO-010,£2.90,£0.45,20%,Drinks
+Demo Filter Coffee,DEMO-011,£2.20,£0.30,20%,Drinks
+Demo Sausage Roll (hot),DEMO-012,£2.50,£0.90,20%,Hot food

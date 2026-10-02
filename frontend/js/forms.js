@@ -32,7 +32,11 @@ export function select(name, options, { selected = "", placeholder = null, ...at
     placeholder !== null ? el("option", { value: "" }, placeholder) : null,
     ...options.map(([value, label]) => el("option", { value: String(value) }, label)),
   );
-  node.value = selected === null || selected === undefined ? "" : String(selected);
+  const chosen = selected === null || selected === undefined ? "" : String(selected);
+  // With no starting choice and no placeholder, a select shows its first option, as a browser
+  // would (assigning "" would leave nothing selected and the form would send an empty value).
+  if (chosen === "" && placeholder === null && options.length) node.value = String(options[0][0]);
+  else node.value = chosen;
   return node;
 }
 

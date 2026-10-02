@@ -26,14 +26,18 @@ export function createApiClient({
 }) {
   const root = String(baseUrl ?? "").replace(/\/+$/, "");
 
-  async function request(method, path, { body, auth = true, retry = true } = {}) {
-    const headers = { Accept: "application/json" };
+  // body: JSON to send. form: a FormData (file upload; the browser sets the multipart
+  // header). blob: true to get a file back (a download) instead of JSON.
+  async function request(method, path, { body, form, blob = false, auth = true, retry = true } = {}) {
+    const headers = { Accept: blob ? "*/*" : "application/json" };
     const token = auth ? getAccessToken() : null;
     if (token) headers.Authorization = `Bearer ${token}`;
     // "include" lets the browser send/receive the httpOnly refresh cookie; the API's
     // CORS allow-list decides which frontend origins may do this.
     const init = { method, headers, credentials: "include" };
-    if (body !== undefined) {
+    if (form !== undefined) {
+      init.body = form;
+    } else if (body !== undefined) {
       headers["Content-Type"] = "application/json";
       init.body = JSON.stringify(body);
     }
@@ -45,12 +49,15 @@ export function createApiClient({
       throw new ApiError(0, "network_error", "Could not reach Vyterlix. Check your connection and try again.");
     }
 
-    const data = res.status === 204 ? null : await res.json().catch(() => null);
-    if (res.ok) return data;
+    if (res.ok) {
+      if (blob) return res.blob();
+      return res.status === 204 ? null : await res.json().catch(() => null);
+    }
 
+    const data = await res.json().catch(() => null);
     const e = data?.error ?? {};
     if (res.status === 401 && e.code === "token_expired" && retry && onExpired && (await onExpired())) {
-      return request(method, path, { body, auth, retry: false });
+      return request(method, path, { body, form, blob, auth, retry: false });
     }
     throw new ApiError(
       res.status,
@@ -67,5 +74,7 @@ export function createApiClient({
     put: (path, body, opts) => request("PUT", path, { ...opts, body }),
     patch: (path, body, opts) => request("PATCH", path, { ...opts, body }),
     delete: (path, opts) => request("DELETE", path, opts),
+    postForm: (path, form, opts) => request("POST", path, { ...opts, form }),
+    getBlob: (path, opts) => request("GET", path, { ...opts, blob: true }),
   };
 }

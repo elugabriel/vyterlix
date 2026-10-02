@@ -37,6 +37,15 @@ function friendlyValidation(detail) {
   if (detail.type === "value_error" && String(detail.msg).includes("email")) {
     return "Enter a valid email address.";
   }
+  // The common ones, in words a business owner would use.
+  if (["decimal_parsing", "decimal_type", "float_parsing", "int_parsing", "int_type"].includes(detail.type)) {
+    return "Enter a number, for example 12.50.";
+  }
+  if (detail.type === "missing") return "This is needed.";
+  if (detail.type.startsWith("date")) return "Enter a real date.";
+  if (detail.type === "greater_than" && detail.ctx?.gt !== undefined) return `Must be more than ${detail.ctx.gt}.`;
+  if (detail.type === "greater_than_equal" && detail.ctx?.ge !== undefined) return `Must be ${detail.ctx.ge} or more.`;
+  if (detail.type === "less_than" || detail.type === "less_than_equal") return "That number is too large.";
   return String(detail.msg ?? "Invalid value").replace(/^Value error, /, "");
 }
 

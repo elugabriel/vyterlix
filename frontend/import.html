@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="no-referrer">
-  <title>Business · Vyterlix</title>
+  <title>Upload a file · Vyterlix</title>
   <link rel="stylesheet" href="css/base.css">
   <script src="js/config.js"></script>
-  <script type="module" src="js/pages/business.js"></script>
+  <script type="module" src="js/pages/import.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -18,13 +18,10 @@
     </div>
   </header>
   <main class="container stack">
-    <p><a href="app.html">← Your businesses</a></p>
-    <h1><span id="org-name">Business</span> <span id="org-role" class="badge"></span></h1>
+    <h1><span id="org-name">Business</span> <span class="muted">· Upload a file</span></h1>
+    <div id="nav"></div>
     <div id="message" class="message" role="alert" hidden></div>
-    <section id="setup" class="card"></section>
-    <section id="data" class="card"></section>
-    <section id="settings" class="card"></section>
-    <section id="notifications" class="card"></section>
+    <div id="content" class="stack"></div>
   </main>
 </body>
 </html>

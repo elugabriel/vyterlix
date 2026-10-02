@@ -1,0 +1,25 @@
+﻿Date,Supplier,Description,Category,Net,VAT,Invoice No
+16/06/2026,Demo Landlord Ltd,Shop rent,Rent,"£1,400.00",£0.00,DEMO-INV-0001
+04/06/2026,Demo Flour Mill,Flour and yeast,Stock,£595.58,£119.12,DEMO-INV-0002
+03/06/2026,Demo Dairy Co,Butter and milk,Stock,£327.75,£65.55,DEMO-INV-0003
+03/06/2026,Demo Power Supplier,Electricity and gas,Utilities,£422.02,£84.40,DEMO-INV-0004
+19/06/2026,Demo Packaging,Bags and boxes,,£97.96,£19.59,DEMO-INV-0005
+02/06/2026,Demo Payroll Service,Wages,Wages,"£2,850.00",£0.00,DEMO-INV-0006
+26/07/2026,Demo Landlord Ltd,Shop rent,Rent,"£1,400.00",£0.00,DEMO-INV-0007
+12/07/2026,Demo Flour Mill,Flour and yeast,Stock,£644.10,£128.82,DEMO-INV-0008
+12/07/2026,Demo Dairy Co,Butter and milk,Stock,£334.67,£66.93,DEMO-INV-0009
+15/07/2026,Demo Power Supplier,Electricity and gas,Utilities,£414.29,£82.86,DEMO-INV-0010
+23/07/2026,Demo Packaging,Bags and boxes,,£97.28,£19.46,DEMO-INV-0011
+24/07/2026,Demo Payroll Service,Wages,Wages,"£2,850.00",£0.00,DEMO-INV-0012
+15/08/2026,Demo Landlord Ltd,Shop rent,Rent,"£1,400.00",£0.00,DEMO-INV-0013
+08/08/2026,Demo Flour Mill,Flour and yeast,Stock,£583.50,£116.70,DEMO-INV-0014
+05/08/2026,Demo Dairy Co,Butter and milk,Stock,£365.45,£73.09,DEMO-INV-0015
+21/08/2026,Demo Power Supplier,Electricity and gas,Utilities,£438.07,£87.61,DEMO-INV-0016
+25/08/2026,Demo Packaging,Bags and boxes,,£103.39,£20.68,DEMO-INV-0017
+05/08/2026,Demo Payroll Service,Wages,Wages,"£2,850.00",£0.00,DEMO-INV-0018
+25/09/2026,Demo Landlord Ltd,Shop rent,Rent,"£1,400.00",£0.00,DEMO-INV-0019
+14/09/2026,Demo Flour Mill,Flour and yeast,Stock,£632.38,£126.48,DEMO-INV-0020
+26/09/2026,Demo Dairy Co,Butter and milk,Stock,£333.87,£66.77,DEMO-INV-0021
+16/09/2026,Demo Power Supplier,Electricity and gas,Utilities,£428.13,£85.63,DEMO-INV-0022
+19/09/2026,Demo Packaging,Bags and boxes,,£90.08,£18.02,DEMO-INV-0023
+10/09/2026,Demo Payroll Service,Wages,Wages,"£2,850.00",£0.00,DEMO-INV-0024

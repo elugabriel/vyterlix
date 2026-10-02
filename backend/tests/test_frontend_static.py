@@ -90,3 +90,14 @@ def test_every_api_method_the_pages_call_exists():
     for script in SCRIPTS:
         for method in re.findall(r"\bapi\.(\w+)\(", script.read_text(encoding="utf-8")):
             assert method in provided, f"{script.name} calls api.{method}(), which doesn't exist"
+
+
+@pytest.mark.parametrize("name", ["data", "imports", "import", "entry"])
+def test_data_pages_start_last_so_their_constants_are_ready(name):
+    """A top-level `await start()` before later `const`s run makes a reload crash with
+    "Cannot access ... before initialization" (found in a real browser)."""
+    source = (FRONTEND / "js" / "pages" / f"{name}.js").read_text(encoding="utf-8")
+    start = source.index("await start(opened)")
+    after = source[start:]
+    assert not re.search(r"^(const|let|class) ", after, re.MULTILINE), name
+    assert not re.search(r"^function ", after, re.MULTILINE), name

@@ -37,6 +37,7 @@ async function start({ org }) {
     }),
   ]);
   renderSetup(orgId, isOwner, onboarding, profile);
+  renderData(orgId, org.role);
   await renderSettings(orgId, isOwner);
   await renderNotifications(orgId);
 }
@@ -76,6 +77,32 @@ function renderSetup(orgId, isOwner, state, profile) {
     ...(!state.ready_for_dashboard && isOwner
       ? [el("a", { class: "button", href: `onboarding.html?org=${orgId}` }, "Continue setting up")]
       : []),
+  );
+}
+
+function renderData(orgId, role) {
+  const manager = role !== "viewer";
+  document.getElementById("data").replaceChildren(
+    el("h2", {}, "Your data"),
+    el(
+      "p",
+      { class: "muted" },
+      manager
+        ? "Bring in your sales, costs, customers and stock from a spreadsheet, or type them in. See how complete your data is."
+        : "See how complete your business's data is.",
+    ),
+    el(
+      "div",
+      { class: "actions", style: "margin-top:0" },
+      el("a", { class: "button", href: `data.html?org=${orgId}` }, "Data overview"),
+      ...(manager
+        ? [
+            el("a", { class: "button secondary", href: `import.html?org=${orgId}` }, "Upload a file"),
+            el("a", { class: "button secondary", href: `entry.html?org=${orgId}` }, "Type in data"),
+            el("a", { class: "button secondary", href: `imports.html?org=${orgId}` }, "Import history"),
+          ]
+        : []),
+    ),
   );
 }
 

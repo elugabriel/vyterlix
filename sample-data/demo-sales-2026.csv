@@ -1,0 +1,2053 @@
+﻿Date,Receipt No,Item,Qty,Customer Email,Channel,Total (inc VAT),VAT,Cost
+01/01/2026,DEMO-000001,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,£1.40
+01/01/2026,DEMO-000002,Demo Flat White,2,,Website,£6.96,£1.16,
+01/01/2026,DEMO-000003,Demo Flat White,2,demo007@example.com,Website,£6.96,£1.16,£0.90
+01/01/2026,DEMO-000004,Demo Sourdough Loaf,3,demo023@example.com,Shop,£12.60,£0.00,£3.30
+01/01/2026,DEMO-000005,Demo Victoria Sponge Slice,3,demo036@example.com,Market stall,£11.16,£1.86,£2.55
+01/01/2026,DEMO-000006,Demo Pain au Chocolat,1,,Market stall,£2.20,£0.00,
+01/01/2026,DEMO-000007,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+02/01/2026,DEMO-000008,Demo Flat White,2,,Market stall,£6.96,£1.16,£0.90
+02/01/2026,DEMO-000009,Demo Lemon Drizzle Slice,2,demo031@example.com,Market stall,£7.44,£1.24,£1.60
+02/01/2026,DEMO-000010,Demo Birthday Cake,1,,Market stall,£33.60,£5.60,
+02/01/2026,DEMO-000011,Demo Filter Coffee,1,demo015@example.com,Shop,£2.64,£0.44,£0.30
+02/01/2026,DEMO-000012,Demo Filter Coffee,3,,Market stall,£7.92,£1.32,£0.90
+02/01/2026,DEMO-000013,Demo Pain au Chocolat,2,,Market stall,£4.40,£0.00,
+02/01/2026,DEMO-000014,Demo Sausage Roll (hot),2,demo018@example.com,Shop,£6.00,£1.00,£1.80
+02/01/2026,DEMO-000015,Demo Sourdough Loaf,1,,Market stall,£4.20,£0.00,£1.10
+02/01/2026,DEMO-000016,Demo Lemon Drizzle Slice,1,,Market stall,£3.72,£0.62,£0.80
+02/01/2026,DEMO-000017,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,
+02/01/2026,DEMO-000018,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+02/01/2026,DEMO-000019,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+03/01/2026,DEMO-000020,Demo Lemon Drizzle Slice,1,demo029@example.com,Shop,£3.72,£0.62,
+03/01/2026,DEMO-000021,Demo Seeded Batch,1,,Market stall,£3.60,£0.00,£0.95
+03/01/2026,DEMO-000022,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+03/01/2026,DEMO-000023,Demo Filter Coffee,3,,Market stall,£7.92,£1.32,£0.90
+03/01/2026,DEMO-000024,Demo Lemon Drizzle Slice,3,demo038@example.com,Shop,£11.16,£1.86,£2.40
+03/01/2026,DEMO-000025,Demo Flat White,3,,Shop,£10.44,£1.74,£1.35
+03/01/2026,DEMO-000026,Demo Flat White,1,demo013@example.com,Website,£3.48,£0.58,£0.45
+03/01/2026,DEMO-000027,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+03/01/2026,DEMO-000028,Demo Sourdough Loaf,1,demo021@example.com,Shop,£4.20,£0.00,£1.10
+03/01/2026,DEMO-000029,Demo Lemon Drizzle Slice,2,demo034@example.com,Shop,£7.44,£1.24,
+05/01/2026,DEMO-000030,Demo Flat White,1,,Market stall,£3.48,£0.58,£0.45
+05/01/2026,DEMO-000031,Demo Victoria Sponge Slice,1,demo035@example.com,Shop,£3.72,£0.62,
+05/01/2026,DEMO-000032,Demo Lemon Drizzle Slice,3,,Shop,£11.16,£1.86,
+05/01/2026,DEMO-000033,Demo Filter Coffee,2,,Shop,£5.28,£0.88,
+05/01/2026,DEMO-000034,Demo Baguette,3,demo027@example.com,Shop,£6.30,£0.00,£1.65
+05/01/2026,DEMO-000035,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,£0.85
+05/01/2026,DEMO-000036,Demo Pain au Chocolat,2,demo034@example.com,Market stall,£4.40,£0.00,£1.20
+05/01/2026,DEMO-000037,Demo Pain au Chocolat,1,,Website,£2.20,£0.00,£0.60
+05/01/2026,DEMO-000038,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+05/01/2026,DEMO-000039,Demo Sourdough Loaf,1,,Market stall,£4.20,£0.00,£1.10
+05/01/2026,DEMO-000040,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+05/01/2026,DEMO-000041,Demo Flat White,1,demo017@example.com,Shop,£3.48,£0.58,£0.45
+06/01/2026,DEMO-000042,Demo Baguette,1,,Shop,£2.10,£0.00,
+06/01/2026,DEMO-000043,Demo Filter Coffee,3,,Shop,£7.92,£1.32,£0.90
+06/01/2026,DEMO-000044,Demo Pain au Chocolat,1,demo017@example.com,Website,£2.20,£0.00,£0.60
+06/01/2026,DEMO-000045,Demo Sourdough Loaf,1,demo036@example.com,Market stall,£4.20,£0.00,£1.10
+06/01/2026,DEMO-000046,Demo Cinnamon Swirl,1,,Market stall,£3.12,£0.52,£0.70
+06/01/2026,DEMO-000047,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+06/01/2026,DEMO-000048,Demo Filter Coffee,1,,Website,£2.64,£0.44,£0.30
+06/01/2026,DEMO-000049,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,
+06/01/2026,DEMO-000050,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,
+06/01/2026,DEMO-000051,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,
+06/01/2026,DEMO-000052,Demo Croissant,2,demo008@example.com,Shop,£3.80,£0.00,
+06/01/2026,DEMO-000053,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+07/01/2026,DEMO-000054,Demo Victoria Sponge Slice,2,demo027@example.com,Shop,£7.44,£1.24,£1.70
+07/01/2026,DEMO-000055,Demo Baguette,1,,Market stall,£2.10,£0.00,£0.55
+07/01/2026,DEMO-000056,Demo Victoria Sponge Slice,1,demo035@example.com,Website,£3.72,£0.62,£0.85
+07/01/2026,DEMO-000057,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+07/01/2026,DEMO-000058,Demo Baguette,2,,Shop,£4.20,£0.00,
+07/01/2026,DEMO-000059,Demo Cinnamon Swirl,3,demo001@example.com,Shop,£9.36,£1.56,
+08/01/2026,DEMO-000060,Demo Sourdough Loaf,1,,Website,£4.20,£0.00,
+08/01/2026,DEMO-000061,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+08/01/2026,DEMO-000062,Demo Croissant,1,,Website,£1.90,£0.00,£0.48
+08/01/2026,DEMO-000063,Demo Filter Coffee,2,demo032@example.com,Shop,£5.28,£0.88,£0.60
+08/01/2026,DEMO-000064,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,
+08/01/2026,DEMO-000065,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+08/01/2026,DEMO-000066,Demo Sourdough Loaf,2,,Market stall,£8.40,£0.00,
+08/01/2026,DEMO-000067,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,
+08/01/2026,DEMO-000068,Demo Birthday Cake,1,demo017@example.com,Shop,£33.60,£5.60,
+08/01/2026,DEMO-000069,Demo Sourdough Loaf,3,demo019@example.com,Shop,£12.60,£0.00,
+08/01/2026,DEMO-000070,Demo Birthday Cake,1,demo001@example.com,Market stall,£33.60,£5.60,
+08/01/2026,DEMO-000071,Demo Filter Coffee,2,,Market stall,£5.28,£0.88,£0.60
+08/01/2026,DEMO-000072,Demo Baguette,3,,Shop,£6.30,£0.00,£1.65
+09/01/2026,DEMO-000073,Demo Seeded Batch,2,,Shop,£7.20,£0.00,
+09/01/2026,DEMO-000074,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+09/01/2026,DEMO-000075,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+09/01/2026,DEMO-000076,Demo Victoria Sponge Slice,1,demo032@example.com,Shop,£3.72,£0.62,£0.85
+09/01/2026,DEMO-000077,Demo Birthday Cake,2,,Market stall,£67.20,£11.20,£15.00
+09/01/2026,DEMO-000078,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,
+10/01/2026,DEMO-000079,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+10/01/2026,DEMO-000080,Demo Sausage Roll (hot),3,demo030@example.com,Shop,£9.00,£1.50,£2.70
+10/01/2026,DEMO-000081,Demo Sausage Roll (hot),1,,Market stall,£3.00,£0.50,£0.90
+10/01/2026,DEMO-000082,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,
+10/01/2026,DEMO-000083,Demo Victoria Sponge Slice,1,demo029@example.com,Shop,£3.72,£0.62,£0.85
+10/01/2026,DEMO-000084,Demo Baguette,2,,Market stall,£4.20,£0.00,£1.10
+10/01/2026,DEMO-000085,Demo Seeded Batch,1,demo002@example.com,Market stall,£3.60,£0.00,£0.95
+10/01/2026,DEMO-000086,Demo Sausage Roll (hot),1,,Website,£3.00,£0.50,£0.90
+10/01/2026,DEMO-000087,Demo Filter Coffee,3,,Shop,£7.92,£1.32,£0.90
+10/01/2026,DEMO-000088,Demo Victoria Sponge Slice,1,demo012@example.com,Shop,£3.72,£0.62,£0.85
+12/01/2026,DEMO-000089,Demo Birthday Cake,3,,Website,£100.80,£16.80,£22.50
+12/01/2026,DEMO-000090,Demo Lemon Drizzle Slice,2,demo008@example.com,Shop,£7.44,£1.24,£1.60
+12/01/2026,DEMO-000091,Demo Cinnamon Swirl,1,,Market stall,£3.12,£0.52,
+12/01/2026,DEMO-000092,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+12/01/2026,DEMO-000093,Demo Seeded Batch,1,,Market stall,£3.60,£0.00,£0.95
+12/01/2026,DEMO-000094,Demo Filter Coffee,1,demo034@example.com,Market stall,£2.64,£0.44,£0.30
+12/01/2026,DEMO-000095,Demo Birthday Cake,1,demo012@example.com,Market stall,£33.60,£5.60,£7.50
+12/01/2026,DEMO-000096,Demo Sausage Roll (hot),2,,Shop,£6.00,£1.00,
+12/01/2026,DEMO-000097,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+12/01/2026,DEMO-000098,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+13/01/2026,DEMO-000099,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+13/01/2026,DEMO-000100,Demo Croissant,2,demo033@example.com,Market stall,£3.80,£0.00,£0.96
+13/01/2026,DEMO-000101,Demo Pain au Chocolat,2,,Market stall,£4.40,£0.00,
+13/01/2026,DEMO-000102,Demo Cinnamon Swirl,2,demo036@example.com,Shop,£6.24,£1.04,£1.40
+13/01/2026,DEMO-000103,Demo Pain au Chocolat,2,demo039@example.com,Shop,£4.40,£0.00,£1.20
+13/01/2026,DEMO-000104,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+13/01/2026,DEMO-000105,Demo Birthday Cake,1,,Website,£33.60,£5.60,£7.50
+13/01/2026,DEMO-000106,Demo Baguette,2,demo026@example.com,Market stall,£4.20,£0.00,
+13/01/2026,DEMO-000107,Demo Flat White,3,,Shop,£10.44,£1.74,£1.35
+13/01/2026,DEMO-000108,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,
+14/01/2026,DEMO-000109,Demo Pain au Chocolat,1,demo035@example.com,Shop,£2.20,£0.00,£0.60
+14/01/2026,DEMO-000110,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+14/01/2026,DEMO-000111,Demo Victoria Sponge Slice,3,,Shop,£11.16,£1.86,
+14/01/2026,DEMO-000112,Demo Croissant,2,,Website,£3.80,£0.00,£0.96
+14/01/2026,DEMO-000113,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+14/01/2026,DEMO-000114,Demo Seeded Batch,1,,Shop,£3.60,£0.00,
+15/01/2026,DEMO-000115,Demo Sourdough Loaf,1,demo028@example.com,Shop,£4.20,£0.00,
+15/01/2026,DEMO-000116,Demo Baguette,1,demo011@example.com,Market stall,£2.10,£0.00,
+15/01/2026,DEMO-000117,Demo Victoria Sponge Slice,3,,Shop,£11.16,£1.86,
+15/01/2026,DEMO-000118,Demo Filter Coffee,3,,Shop,£7.92,£1.32,
+15/01/2026,DEMO-000119,Demo Croissant,3,demo040@example.com,Shop,£5.70,£0.00,
+15/01/2026,DEMO-000120,Demo Seeded Batch,1,,Website,£3.60,£0.00,£0.95
+15/01/2026,DEMO-000121,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+15/01/2026,DEMO-000122,Demo Pain au Chocolat,3,,Shop,£6.60,£0.00,£1.80
+15/01/2026,DEMO-000123,Demo Cinnamon Swirl,2,demo015@example.com,Shop,£6.24,£1.04,£1.40
+15/01/2026,DEMO-000124,Demo Lemon Drizzle Slice,2,,Market stall,£7.44,£1.24,£1.60
+15/01/2026,DEMO-000125,Demo Cinnamon Swirl,1,,Market stall,£3.12,£0.52,£0.70
+16/01/2026,DEMO-000126,Demo Birthday Cake,1,demo003@example.com,Shop,£33.60,£5.60,£7.50
+16/01/2026,DEMO-000127,Demo Birthday Cake,2,,Market stall,£67.20,£11.20,£15.00
+16/01/2026,DEMO-000128,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,£1.60
+16/01/2026,DEMO-000129,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+16/01/2026,DEMO-000130,Demo Sourdough Loaf,3,,Shop,£12.60,£0.00,
+16/01/2026,DEMO-000131,Demo Sausage Roll (hot),1,demo030@example.com,Shop,£3.00,£0.50,£0.90
+16/01/2026,DEMO-000132,Demo Victoria Sponge Slice,1,demo032@example.com,Shop,£3.72,£0.62,
+16/01/2026,DEMO-000133,Demo Flat White,1,,Market stall,£3.48,£0.58,
+16/01/2026,DEMO-000134,Demo Victoria Sponge Slice,2,demo003@example.com,Market stall,£7.44,£1.24,£1.70
+16/01/2026,DEMO-000135,Demo Lemon Drizzle Slice,1,demo028@example.com,Market stall,£3.72,£0.62,
+16/01/2026,DEMO-000136,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+16/01/2026,DEMO-000137,Demo Flat White,1,,Website,£3.48,£0.58,£0.45
+16/01/2026,DEMO-000138,Demo Victoria Sponge Slice,1,demo001@example.com,Shop,£3.72,£0.62,
+16/01/2026,DEMO-000139,Demo Croissant,1,,Shop,£1.90,£0.00,
+17/01/2026,DEMO-000140,Demo Pain au Chocolat,1,,Market stall,£2.20,£0.00,£0.60
+17/01/2026,DEMO-000141,Demo Seeded Batch,2,,Website,£7.20,£0.00,£1.90
+17/01/2026,DEMO-000142,Demo Birthday Cake,3,,Shop,£100.80,£16.80,
+17/01/2026,DEMO-000143,Demo Filter Coffee,3,demo005@example.com,Shop,£7.92,£1.32,£0.90
+17/01/2026,DEMO-000144,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+17/01/2026,DEMO-000145,Demo Seeded Batch,3,,Market stall,£10.80,£0.00,£2.85
+17/01/2026,DEMO-000146,Demo Birthday Cake,1,demo035@example.com,Website,£33.60,£5.60,£7.50
+19/01/2026,DEMO-000147,Demo Seeded Batch,1,,Website,£3.60,£0.00,£0.95
+19/01/2026,DEMO-000148,Demo Filter Coffee,2,,Market stall,£5.28,£0.88,£0.60
+19/01/2026,DEMO-000149,Demo Cinnamon Swirl,2,demo006@example.com,Shop,£6.24,£1.04,£1.40
+19/01/2026,DEMO-000150,Demo Cinnamon Swirl,1,,Market stall,£3.12,£0.52,£0.70
+19/01/2026,DEMO-000151,Demo Croissant,2,,Shop,£3.80,£0.00,£0.96
+19/01/2026,DEMO-000152,Demo Lemon Drizzle Slice,2,demo032@example.com,Website,£7.44,£1.24,£1.60
+19/01/2026,DEMO-000153,Demo Filter Coffee,2,demo038@example.com,Shop,£5.28,£0.88,
+19/01/2026,DEMO-000154,Demo Filter Coffee,1,demo020@example.com,Market stall,£2.64,£0.44,£0.30
+19/01/2026,DEMO-000155,Demo Filter Coffee,2,demo035@example.com,Shop,£5.28,£0.88,£0.60
+19/01/2026,DEMO-000156,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+19/01/2026,DEMO-000157,Demo Croissant,3,,Market stall,£5.70,£0.00,
+19/01/2026,DEMO-000158,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+19/01/2026,DEMO-000159,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+20/01/2026,DEMO-000160,Demo Filter Coffee,-3,demo021@example.com,Website,£-7.92,£-1.32,£0.90
+20/01/2026,DEMO-000161,Demo Seeded Batch,2,demo020@example.com,Shop,£7.20,£0.00,£1.90
+20/01/2026,DEMO-000162,Demo Lemon Drizzle Slice,3,,Shop,£11.16,£1.86,£2.40
+20/01/2026,DEMO-000163,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+20/01/2026,DEMO-000164,Demo Sausage Roll (hot),2,demo007@example.com,Shop,£6.00,£1.00,£1.80
+20/01/2026,DEMO-000165,Demo Victoria Sponge Slice,1,demo040@example.com,Market stall,£3.72,£0.62,£0.85
+20/01/2026,DEMO-000166,Demo Pain au Chocolat,2,demo029@example.com,Shop,£4.40,£0.00,£1.20
+20/01/2026,DEMO-000167,Demo Baguette,2,,Shop,£4.20,£0.00,
+20/01/2026,DEMO-000168,Demo Baguette,2,,Website,£4.20,£0.00,£1.10
+20/01/2026,DEMO-000169,Demo Filter Coffee,1,,Market stall,£2.64,£0.44,
+20/01/2026,DEMO-000170,Demo Cinnamon Swirl,2,,Market stall,£6.24,£1.04,£1.40
+20/01/2026,DEMO-000171,Demo Birthday Cake,1,,Shop,£33.60,£5.60,
+21/01/2026,DEMO-000172,Demo Victoria Sponge Slice,2,demo040@example.com,Shop,£7.44,£1.24,£1.70
+21/01/2026,DEMO-000173,Demo Croissant,2,,Shop,£3.80,£0.00,£0.96
+21/01/2026,DEMO-000174,Demo Seeded Batch,1,demo011@example.com,Website,£3.60,£0.00,£0.95
+21/01/2026,DEMO-000175,Demo Birthday Cake,1,,Shop,£33.60,£5.60,£7.50
+21/01/2026,DEMO-000176,Demo Croissant,2,,Shop,£3.80,£0.00,£0.96
+21/01/2026,DEMO-000177,Demo Victoria Sponge Slice,1,demo005@example.com,Shop,£3.72,£0.62,
+21/01/2026,DEMO-000178,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+21/01/2026,DEMO-000179,Demo Birthday Cake,2,demo016@example.com,Shop,£67.20,£11.20,£15.00
+21/01/2026,DEMO-000180,Demo Lemon Drizzle Slice,2,,Market stall,£7.44,£1.24,
+21/01/2026,DEMO-000181,Demo Victoria Sponge Slice,1,demo005@example.com,Website,£3.72,£0.62,£0.85
+21/01/2026,DEMO-000182,Demo Lemon Drizzle Slice,1,demo004@example.com,Website,£3.72,£0.62,£0.80
+22/01/2026,DEMO-000183,Demo Victoria Sponge Slice,3,,Website,£11.16,£1.86,
+22/01/2026,DEMO-000184,Demo Seeded Batch,1,demo039@example.com,Shop,£3.60,£0.00,£0.95
+22/01/2026,DEMO-000185,Demo Pain au Chocolat,2,demo005@example.com,Website,£4.40,£0.00,£1.20
+22/01/2026,DEMO-000186,Demo Filter Coffee,1,demo040@example.com,Market stall,£2.64,£0.44,£0.30
+22/01/2026,DEMO-000187,Demo Pain au Chocolat,1,demo027@example.com,Shop,£2.20,£0.00,£0.60
+22/01/2026,DEMO-000188,Demo Sourdough Loaf,2,demo017@example.com,Shop,£8.40,£0.00,£2.20
+22/01/2026,DEMO-000189,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,£2.70
+22/01/2026,DEMO-000190,Demo Pain au Chocolat,1,demo013@example.com,Market stall,£2.20,£0.00,£0.60
+23/01/2026,DEMO-000191,Demo Sausage Roll (hot),1,demo022@example.com,Website,£3.00,£0.50,
+23/01/2026,DEMO-000192,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+23/01/2026,DEMO-000193,Demo Victoria Sponge Slice,3,demo001@example.com,Shop,£11.16,£1.86,£2.55
+23/01/2026,DEMO-000194,Demo Victoria Sponge Slice,3,,Shop,£11.16,£1.86,£2.55
+23/01/2026,DEMO-000195,Demo Victoria Sponge Slice,2,,Market stall,£7.44,£1.24,£1.70
+23/01/2026,DEMO-000196,Demo Birthday Cake,1,demo020@example.com,Shop,£33.60,£5.60,£7.50
+23/01/2026,DEMO-000197,Demo Sourdough Loaf,1,demo024@example.com,Market stall,£4.20,£0.00,£1.10
+23/01/2026,DEMO-000198,Demo Birthday Cake,2,,Market stall,£67.20,£11.20,£15.00
+23/01/2026,DEMO-000199,Demo Sourdough Loaf,1,demo005@example.com,Shop,£4.20,£0.00,
+23/01/2026,DEMO-000200,Demo Seeded Batch,2,demo029@example.com,Market stall,£7.20,£0.00,
+23/01/2026,DEMO-000201,Demo Sausage Roll (hot),1,demo024@example.com,Market stall,£3.00,£0.50,
+24/01/2026,DEMO-000202,Demo Croissant,1,,Market stall,£1.90,£0.00,£0.48
+24/01/2026,DEMO-000203,Demo Baguette,2,,Market stall,£4.20,£0.00,£1.10
+24/01/2026,DEMO-000204,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,£1.70
+24/01/2026,DEMO-000205,Demo Seeded Batch,1,,Market stall,£3.60,£0.00,£0.95
+24/01/2026,DEMO-000206,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+24/01/2026,DEMO-000207,Demo Sourdough Loaf,1,demo005@example.com,Shop,£4.20,£0.00,£1.10
+24/01/2026,DEMO-000208,Demo Cinnamon Swirl,2,demo022@example.com,Shop,£6.24,£1.04,£1.40
+24/01/2026,DEMO-000209,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+24/01/2026,DEMO-000210,Demo Lemon Drizzle Slice,2,demo010@example.com,Shop,£7.44,£1.24,
+24/01/2026,DEMO-000211,Demo Birthday Cake,1,,Website,£33.60,£5.60,£7.50
+24/01/2026,DEMO-000212,Demo Cinnamon Swirl,1,demo005@example.com,Market stall,£3.12,£0.52,£0.70
+24/01/2026,DEMO-000213,Demo Baguette,2,,Shop,£4.20,£0.00,
+24/01/2026,DEMO-000214,Demo Birthday Cake,1,demo003@example.com,Shop,£33.60,£5.60,£7.50
+26/01/2026,DEMO-000215,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,
+26/01/2026,DEMO-000216,Demo Croissant,1,,Shop,£1.90,£0.00,
+26/01/2026,DEMO-000217,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+26/01/2026,DEMO-000218,Demo Seeded Batch,1,demo013@example.com,Market stall,£3.60,£0.00,£0.95
+26/01/2026,DEMO-000219,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+26/01/2026,DEMO-000220,Demo Seeded Batch,1,demo022@example.com,Market stall,£3.60,£0.00,£0.95
+26/01/2026,DEMO-000221,Demo Sausage Roll (hot),2,,Website,£6.00,£1.00,£1.80
+26/01/2026,DEMO-000222,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+27/01/2026,DEMO-000223,Demo Birthday Cake,1,,Market stall,£33.60,£5.60,£7.50
+27/01/2026,DEMO-000224,Demo Seeded Batch,3,demo030@example.com,Shop,£10.80,£0.00,
+27/01/2026,DEMO-000225,Demo Filter Coffee,2,,Website,£5.28,£0.88,£0.60
+27/01/2026,DEMO-000226,Demo Seeded Batch,3,,Shop,£10.80,£0.00,
+27/01/2026,DEMO-000227,Demo Seeded Batch,1,demo014@example.com,Website,£3.60,£0.00,£0.95
+27/01/2026,DEMO-000228,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+27/01/2026,DEMO-000229,Demo Baguette,2,demo013@example.com,Market stall,£4.20,£0.00,
+27/01/2026,DEMO-000230,Demo Pain au Chocolat,1,demo028@example.com,Market stall,£2.20,£0.00,£0.60
+27/01/2026,DEMO-000231,Demo Victoria Sponge Slice,1,demo014@example.com,Market stall,£3.72,£0.62,£0.85
+28/01/2026,DEMO-000232,Demo Sausage Roll (hot),2,,Shop,£6.00,£1.00,
+28/01/2026,DEMO-000233,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,
+28/01/2026,DEMO-000234,Demo Birthday Cake,1,demo030@example.com,Shop,£33.60,£5.60,
+28/01/2026,DEMO-000235,Demo Croissant,3,,Website,£5.70,£0.00,
+28/01/2026,DEMO-000236,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+28/01/2026,DEMO-000237,Demo Sausage Roll (hot),1,,Website,£3.00,£0.50,£0.90
+28/01/2026,DEMO-000238,Demo Cinnamon Swirl,3,,Market stall,£9.36,£1.56,
+28/01/2026,DEMO-000239,Demo Victoria Sponge Slice,3,,Shop,£11.16,£1.86,£2.55
+28/01/2026,DEMO-000240,Demo Seeded Batch,3,demo021@example.com,Market stall,£10.80,£0.00,
+28/01/2026,DEMO-000241,Demo Cinnamon Swirl,1,demo019@example.com,Shop,£3.12,£0.52,£0.70
+28/01/2026,DEMO-000242,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+28/01/2026,DEMO-000243,Demo Birthday Cake,1,demo026@example.com,Shop,£33.60,£5.60,£7.50
+28/01/2026,DEMO-000244,Demo Flat White,1,demo036@example.com,Shop,£3.48,£0.58,£0.45
+28/01/2026,DEMO-000245,Demo Seeded Batch,1,demo021@example.com,Shop,£3.60,£0.00,
+29/01/2026,DEMO-000246,Demo Sourdough Loaf,2,,Website,£8.40,£0.00,£2.20
+29/01/2026,DEMO-000247,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+29/01/2026,DEMO-000248,Demo Sourdough Loaf,1,demo033@example.com,Website,£4.20,£0.00,£1.10
+29/01/2026,DEMO-000249,Demo Lemon Drizzle Slice,3,,Website,£11.16,£1.86,
+29/01/2026,DEMO-000250,Demo Seeded Batch,1,demo001@example.com,Shop,£3.60,£0.00,£0.95
+29/01/2026,DEMO-000251,Demo Sourdough Loaf,1,demo020@example.com,Shop,£4.20,£0.00,
+30/01/2026,DEMO-000252,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+30/01/2026,DEMO-000253,Demo Victoria Sponge Slice,2,demo038@example.com,Shop,£7.44,£1.24,
+30/01/2026,DEMO-000254,Demo Sourdough Loaf,1,demo033@example.com,Shop,£4.20,£0.00,£1.10
+30/01/2026,DEMO-000255,Demo Baguette,2,demo022@example.com,Website,£4.20,£0.00,£1.10
+30/01/2026,DEMO-000256,Demo Flat White,3,demo039@example.com,Market stall,£10.44,£1.74,
+30/01/2026,DEMO-000257,Demo Seeded Batch,3,,Shop,£10.80,£0.00,£2.85
+30/01/2026,DEMO-000258,Demo Lemon Drizzle Slice,3,demo036@example.com,Shop,£11.16,£1.86,£2.40
+30/01/2026,DEMO-000259,Demo Baguette,2,demo019@example.com,Website,£4.20,£0.00,£1.10
+30/01/2026,DEMO-000260,Demo Sourdough Loaf,3,demo035@example.com,Shop,£12.60,£0.00,
+31/01/2026,DEMO-000261,Demo Victoria Sponge Slice,2,demo026@example.com,Website,£7.44,£1.24,£1.70
+31/01/2026,DEMO-000262,Demo Victoria Sponge Slice,2,demo030@example.com,Shop,£7.44,£1.24,
+31/01/2026,DEMO-000263,Demo Pain au Chocolat,2,demo011@example.com,Website,£4.40,£0.00,£1.20
+31/01/2026,DEMO-000264,Demo Pain au Chocolat,1,demo010@example.com,Market stall,£2.20,£0.00,
+31/01/2026,DEMO-000265,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+31/01/2026,DEMO-000266,Demo Sourdough Loaf,2,demo020@example.com,Shop,£8.40,£0.00,
+02/02/2026,DEMO-000267,Demo Sourdough Loaf,3,,Website,£12.60,£0.00,£3.30
+02/02/2026,DEMO-000268,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+02/02/2026,DEMO-000269,Demo Sourdough Loaf,2,demo034@example.com,Market stall,£8.40,£0.00,
+02/02/2026,DEMO-000270,Demo Filter Coffee,2,demo030@example.com,Market stall,£5.28,£0.88,£0.60
+02/02/2026,DEMO-000271,Demo Sourdough Loaf,1,demo012@example.com,Website,£4.20,£0.00,
+02/02/2026,DEMO-000272,Demo Flat White,1,,Website,£3.48,£0.58,£0.45
+02/02/2026,DEMO-000273,Demo Birthday Cake,1,demo033@example.com,Shop,£33.60,£5.60,£7.50
+02/02/2026,DEMO-000274,Demo Seeded Batch,3,demo007@example.com,Shop,£10.80,£0.00,£2.85
+03/02/2026,DEMO-000275,Demo Cinnamon Swirl,2,demo014@example.com,Market stall,£6.24,£1.04,£1.40
+03/02/2026,DEMO-000276,Demo Victoria Sponge Slice,3,demo017@example.com,Shop,£11.16,£1.86,£2.55
+03/02/2026,DEMO-000277,Demo Baguette,2,demo021@example.com,Shop,£4.20,£0.00,£1.10
+03/02/2026,DEMO-000278,Demo Seeded Batch,1,demo004@example.com,Website,£3.60,£0.00,
+03/02/2026,DEMO-000279,Demo Croissant,3,,Website,£5.70,£0.00,£1.44
+03/02/2026,DEMO-000280,Demo Seeded Batch,3,,Shop,£10.80,£0.00,
+03/02/2026,DEMO-000281,Demo Croissant,3,,Shop,£5.70,£0.00,£1.44
+03/02/2026,DEMO-000282,Demo Flat White,2,demo007@example.com,Shop,£6.96,£1.16,
+03/02/2026,DEMO-000283,Demo Pain au Chocolat,1,demo002@example.com,Shop,£2.20,£0.00,£0.60
+03/02/2026,DEMO-000284,Demo Baguette,-1,,Shop,£-2.10,£-0.00,£0.55
+03/02/2026,DEMO-000285,Demo Cinnamon Swirl,3,,Market stall,£9.36,£1.56,£2.10
+03/02/2026,DEMO-000286,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+03/02/2026,DEMO-000287,Demo Seeded Batch,2,,Market stall,£7.20,£0.00,£1.90
+03/02/2026,DEMO-000288,Demo Victoria Sponge Slice,3,demo009@example.com,Shop,£11.16,£1.86,
+04/02/2026,DEMO-000289,Demo Baguette,1,,Website,£2.10,£0.00,
+04/02/2026,DEMO-000290,Demo Croissant,2,,Website,£3.80,£0.00,
+04/02/2026,DEMO-000291,Demo Victoria Sponge Slice,1,demo011@example.com,Shop,£3.72,£0.62,£0.85
+04/02/2026,DEMO-000292,Demo Victoria Sponge Slice,2,demo009@example.com,Website,£7.44,£1.24,£1.70
+04/02/2026,DEMO-000293,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,£0.85
+04/02/2026,DEMO-000294,Demo Filter Coffee,2,demo026@example.com,Shop,£5.28,£0.88,
+04/02/2026,DEMO-000295,Demo Pain au Chocolat,3,demo004@example.com,Shop,£6.60,£0.00,£1.80
+04/02/2026,DEMO-000296,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+05/02/2026,DEMO-000297,Demo Sourdough Loaf,1,demo033@example.com,Website,£4.20,£0.00,£1.10
+05/02/2026,DEMO-000298,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+05/02/2026,DEMO-000299,Demo Sourdough Loaf,2,demo019@example.com,Website,£8.40,£0.00,£2.20
+05/02/2026,DEMO-000300,Demo Flat White,1,demo012@example.com,Shop,£3.48,£0.58,£0.45
+05/02/2026,DEMO-000301,Demo Cinnamon Swirl,2,,Website,£6.24,£1.04,
+05/02/2026,DEMO-000302,Demo Victoria Sponge Slice,3,demo038@example.com,Website,£11.16,£1.86,£2.55
+05/02/2026,DEMO-000303,Demo Cinnamon Swirl,1,demo036@example.com,Market stall,£3.12,£0.52,£0.70
+05/02/2026,DEMO-000304,Demo Baguette,1,,Shop,£2.10,£0.00,
+05/02/2026,DEMO-000305,Demo Baguette,1,demo037@example.com,Shop,£2.10,£0.00,£0.55
+05/02/2026,DEMO-000306,Demo Croissant,3,,Shop,£5.70,£0.00,
+05/02/2026,DEMO-000307,Demo Sourdough Loaf,1,,Website,£4.20,£0.00,£1.10
+05/02/2026,DEMO-000308,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+06/02/2026,DEMO-000309,Demo Lemon Drizzle Slice,1,,Market stall,£3.72,£0.62,£0.80
+06/02/2026,DEMO-000310,Demo Baguette,2,,Market stall,£4.20,£0.00,£1.10
+06/02/2026,DEMO-000311,Demo Baguette,1,,Shop,£2.10,£0.00,
+06/02/2026,DEMO-000312,Demo Pain au Chocolat,1,demo028@example.com,Website,£2.20,£0.00,£0.60
+06/02/2026,DEMO-000313,Demo Pain au Chocolat,1,demo031@example.com,Website,£2.20,£0.00,£0.60
+06/02/2026,DEMO-000314,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,£1.60
+07/02/2026,DEMO-000315,Demo Pain au Chocolat,2,,Website,£4.40,£0.00,£1.20
+07/02/2026,DEMO-000316,Demo Baguette,3,,Market stall,£6.30,£0.00,£1.65
+07/02/2026,DEMO-000317,Demo Flat White,1,demo028@example.com,Website,£3.48,£0.58,£0.45
+07/02/2026,DEMO-000318,Demo Birthday Cake,2,,Website,£67.20,£11.20,£15.00
+07/02/2026,DEMO-000319,Demo Seeded Batch,1,demo037@example.com,Shop,£3.60,£0.00,
+07/02/2026,DEMO-000320,Demo Sausage Roll (hot),2,,Shop,£6.00,£1.00,£1.80
+07/02/2026,DEMO-000321,Demo Filter Coffee,3,,Shop,£7.92,£1.32,£0.90
+07/02/2026,DEMO-000322,Demo Lemon Drizzle Slice,1,demo037@example.com,Market stall,£3.72,£0.62,£0.80
+07/02/2026,DEMO-000323,Demo Croissant,2,demo021@example.com,Shop,£3.80,£0.00,£0.96
+07/02/2026,DEMO-000324,Demo Victoria Sponge Slice,1,demo001@example.com,Shop,£3.72,£0.62,
+09/02/2026,DEMO-000325,Demo Pain au Chocolat,1,demo037@example.com,Website,£2.20,£0.00,
+09/02/2026,DEMO-000326,Demo Cinnamon Swirl,3,,Shop,£9.36,£1.56,£2.10
+09/02/2026,DEMO-000327,Demo Sourdough Loaf,2,demo019@example.com,Market stall,£8.40,£0.00,
+09/02/2026,DEMO-000328,Demo Seeded Batch,1,demo024@example.com,Website,£3.60,£0.00,
+09/02/2026,DEMO-000329,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+09/02/2026,DEMO-000330,Demo Lemon Drizzle Slice,2,demo040@example.com,Website,£7.44,£1.24,£1.60
+09/02/2026,DEMO-000331,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+10/02/2026,DEMO-000332,Demo Pain au Chocolat,1,,Website,£2.20,£0.00,£0.60
+10/02/2026,DEMO-000333,Demo Cinnamon Swirl,3,,Shop,£9.36,£1.56,£2.10
+10/02/2026,DEMO-000334,Demo Sourdough Loaf,3,,Shop,£12.60,£0.00,£3.30
+10/02/2026,DEMO-000335,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+10/02/2026,DEMO-000336,Demo Birthday Cake,3,,Shop,£100.80,£16.80,
+10/02/2026,DEMO-000337,Demo Flat White,2,,Shop,£6.96,£1.16,
+10/02/2026,DEMO-000338,Demo Croissant,2,demo037@example.com,Website,£3.80,£0.00,£0.96
+10/02/2026,DEMO-000339,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+10/02/2026,DEMO-000340,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+10/02/2026,DEMO-000341,Demo Cinnamon Swirl,2,demo025@example.com,Shop,£6.24,£1.04,£1.40
+11/02/2026,DEMO-000342,Demo Birthday Cake,1,,Shop,£33.60,£5.60,
+11/02/2026,DEMO-000343,Demo Baguette,2,demo034@example.com,Website,£4.20,£0.00,
+11/02/2026,DEMO-000344,Demo Sausage Roll (hot),1,demo014@example.com,Shop,£3.00,£0.50,£0.90
+11/02/2026,DEMO-000345,Demo Lemon Drizzle Slice,1,demo027@example.com,Website,£3.72,£0.62,£0.80
+11/02/2026,DEMO-000346,Demo Filter Coffee,2,demo014@example.com,Shop,£5.28,£0.88,£0.60
+11/02/2026,DEMO-000347,Demo Seeded Batch,2,,Shop,£7.20,£0.00,
+11/02/2026,DEMO-000348,Demo Sausage Roll (hot),1,demo013@example.com,Market stall,£3.00,£0.50,£0.90
+11/02/2026,DEMO-000349,Demo Birthday Cake,3,,Shop,£100.80,£16.80,£22.50
+11/02/2026,DEMO-000350,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,£2.70
+11/02/2026,DEMO-000351,Demo Filter Coffee,3,,Market stall,£7.92,£1.32,
+11/02/2026,DEMO-000352,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+12/02/2026,DEMO-000353,Demo Pain au Chocolat,3,,Website,£6.60,£0.00,
+12/02/2026,DEMO-000354,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,£1.40
+12/02/2026,DEMO-000355,Demo Sausage Roll (hot),2,,Shop,£6.00,£1.00,£1.80
+12/02/2026,DEMO-000356,Demo Baguette,2,demo022@example.com,Market stall,£4.20,£0.00,£1.10
+12/02/2026,DEMO-000357,Demo Sourdough Loaf,1,,Market stall,£4.20,£0.00,
+12/02/2026,DEMO-000358,Demo Filter Coffee,2,demo033@example.com,Website,£5.28,£0.88,
+12/02/2026,DEMO-000359,Demo Birthday Cake,1,demo008@example.com,Website,£33.60,£5.60,£7.50
+12/02/2026,DEMO-000360,Demo Flat White,2,demo032@example.com,Shop,£6.96,£1.16,
+12/02/2026,DEMO-000361,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,£1.70
+12/02/2026,DEMO-000362,Demo Filter Coffee,2,,Website,£5.28,£0.88,
+12/02/2026,DEMO-000363,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+13/02/2026,DEMO-000364,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+13/02/2026,DEMO-000365,Demo Lemon Drizzle Slice,2,demo018@example.com,Shop,£7.44,£1.24,
+13/02/2026,DEMO-000366,Demo Croissant,1,demo009@example.com,Market stall,£1.90,£0.00,£0.48
+13/02/2026,DEMO-000367,Demo Sourdough Loaf,1,demo034@example.com,Shop,£4.20,£0.00,£1.10
+13/02/2026,DEMO-000368,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,
+13/02/2026,DEMO-000369,Demo Cinnamon Swirl,2,,Website,£6.24,£1.04,£1.40
+13/02/2026,DEMO-000370,Demo Flat White,2,,Market stall,£6.96,£1.16,£0.90
+14/02/2026,DEMO-000371,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+14/02/2026,DEMO-000372,Demo Seeded Batch,3,demo021@example.com,Market stall,£10.80,£0.00,£2.85
+14/02/2026,DEMO-000373,Demo Croissant,2,demo031@example.com,Shop,£3.80,£0.00,£0.96
+14/02/2026,DEMO-000374,Demo Lemon Drizzle Slice,1,demo006@example.com,Shop,£3.72,£0.62,£0.80
+14/02/2026,DEMO-000375,Demo Pain au Chocolat,1,,Market stall,£2.20,£0.00,
+14/02/2026,DEMO-000376,Demo Lemon Drizzle Slice,2,demo017@example.com,Shop,£7.44,£1.24,£1.60
+14/02/2026,DEMO-000377,Demo Pain au Chocolat,1,demo012@example.com,Market stall,£2.20,£0.00,£0.60
+14/02/2026,DEMO-000378,Demo Baguette,1,demo008@example.com,Shop,£2.10,£0.00,
+14/02/2026,DEMO-000379,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+16/02/2026,DEMO-000380,Demo Seeded Batch,3,demo031@example.com,Shop,£10.80,£0.00,£2.85
+16/02/2026,DEMO-000381,Demo Pain au Chocolat,1,,Website,£2.20,£0.00,£0.60
+16/02/2026,DEMO-000382,Demo Baguette,3,demo010@example.com,Shop,£6.30,£0.00,
+16/02/2026,DEMO-000383,Demo Sausage Roll (hot),3,demo005@example.com,Shop,£9.00,£1.50,£2.70
+16/02/2026,DEMO-000384,Demo Filter Coffee,3,demo040@example.com,Shop,£7.92,£1.32,
+16/02/2026,DEMO-000385,Demo Birthday Cake,1,,Shop,£33.60,£5.60,
+16/02/2026,DEMO-000386,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+16/02/2026,DEMO-000387,Demo Birthday Cake,2,demo021@example.com,Shop,£67.20,£11.20,£15.00
+16/02/2026,DEMO-000388,Demo Seeded Batch,3,,Shop,£10.80,£0.00,£2.85
+16/02/2026,DEMO-000389,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+16/02/2026,DEMO-000390,Demo Lemon Drizzle Slice,1,demo035@example.com,Market stall,£3.72,£0.62,£0.80
+16/02/2026,DEMO-000391,Demo Croissant,1,demo022@example.com,Shop,£1.90,£0.00,£0.48
+16/02/2026,DEMO-000392,Demo Flat White,1,demo033@example.com,Shop,£3.48,£0.58,£0.45
+16/02/2026,DEMO-000393,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+17/02/2026,DEMO-000394,Demo Seeded Batch,2,demo015@example.com,Shop,£7.20,£0.00,
+17/02/2026,DEMO-000395,Demo Pain au Chocolat,2,demo018@example.com,Shop,£4.40,£0.00,
+17/02/2026,DEMO-000396,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+17/02/2026,DEMO-000397,Demo Flat White,3,demo035@example.com,Shop,£10.44,£1.74,£1.35
+17/02/2026,DEMO-000398,Demo Lemon Drizzle Slice,1,demo013@example.com,Market stall,£3.72,£0.62,£0.80
+17/02/2026,DEMO-000399,Demo Lemon Drizzle Slice,1,demo027@example.com,Market stall,£3.72,£0.62,£0.80
+17/02/2026,DEMO-000400,Demo Sourdough Loaf,1,demo008@example.com,Market stall,£4.20,£0.00,
+17/02/2026,DEMO-000401,Demo Croissant,3,demo022@example.com,Shop,£5.70,£0.00,£1.44
+17/02/2026,DEMO-000402,Demo Flat White,2,,Website,£6.96,£1.16,
+17/02/2026,DEMO-000403,Demo Cinnamon Swirl,3,,Shop,£9.36,£1.56,£2.10
+17/02/2026,DEMO-000404,Demo Sourdough Loaf,-2,demo011@example.com,Website,£-8.40,£-0.00,£2.20
+17/02/2026,DEMO-000405,Demo Lemon Drizzle Slice,1,demo011@example.com,Website,£3.72,£0.62,£0.80
+18/02/2026,DEMO-000406,Demo Croissant,2,demo008@example.com,Shop,£3.80,£0.00,
+18/02/2026,DEMO-000407,Demo Pain au Chocolat,3,demo018@example.com,Shop,£6.60,£0.00,£1.80
+18/02/2026,DEMO-000408,Demo Baguette,1,demo005@example.com,Website,£2.10,£0.00,£0.55
+18/02/2026,DEMO-000409,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+18/02/2026,DEMO-000410,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,£0.85
+18/02/2026,DEMO-000411,Demo Birthday Cake,3,,Market stall,£100.80,£16.80,
+18/02/2026,DEMO-000412,Demo Croissant,1,,Website,£1.90,£0.00,
+18/02/2026,DEMO-000413,Demo Lemon Drizzle Slice,1,demo022@example.com,Website,£3.72,£0.62,£0.80
+18/02/2026,DEMO-000414,Demo Sourdough Loaf,2,demo031@example.com,Website,£8.40,£0.00,£2.20
+18/02/2026,DEMO-000415,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+19/02/2026,DEMO-000416,Demo Victoria Sponge Slice,2,demo030@example.com,Website,£7.44,£1.24,
+19/02/2026,DEMO-000417,Demo Sausage Roll (hot),1,demo025@example.com,Shop,£3.00,£0.50,£0.90
+19/02/2026,DEMO-000418,Demo Sausage Roll (hot),2,demo028@example.com,Market stall,£6.00,£1.00,
+19/02/2026,DEMO-000419,Demo Croissant,2,demo022@example.com,Shop,£3.80,£0.00,
+19/02/2026,DEMO-000420,Demo Lemon Drizzle Slice,2,demo019@example.com,Shop,£7.44,£1.24,£1.60
+19/02/2026,DEMO-000421,Demo Victoria Sponge Slice,3,demo020@example.com,Shop,£11.16,£1.86,
+19/02/2026,DEMO-000422,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+19/02/2026,DEMO-000423,Demo Croissant,1,demo020@example.com,Shop,£1.90,£0.00,£0.48
+19/02/2026,DEMO-000424,Demo Filter Coffee,3,demo014@example.com,Shop,£7.92,£1.32,£0.90
+19/02/2026,DEMO-000425,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+19/02/2026,DEMO-000426,Demo Pain au Chocolat,3,,Shop,£6.60,£0.00,£1.80
+19/02/2026,DEMO-000427,Demo Lemon Drizzle Slice,1,demo012@example.com,Website,£3.72,£0.62,£0.80
+19/02/2026,DEMO-000428,Demo Filter Coffee,1,,Website,£2.64,£0.44,£0.30
+20/02/2026,DEMO-000429,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+20/02/2026,DEMO-000430,Demo Sourdough Loaf,1,demo025@example.com,Shop,£4.20,£0.00,£1.10
+20/02/2026,DEMO-000431,Demo Lemon Drizzle Slice,2,,Website,£7.44,£1.24,£1.60
+20/02/2026,DEMO-000432,Demo Victoria Sponge Slice,2,,Website,£7.44,£1.24,
+20/02/2026,DEMO-000433,Demo Croissant,1,,Market stall,£1.90,£0.00,£0.48
+20/02/2026,DEMO-000434,Demo Birthday Cake,3,,Market stall,£100.80,£16.80,
+20/02/2026,DEMO-000435,Demo Croissant,3,,Website,£5.70,£0.00,£1.44
+20/02/2026,DEMO-000436,Demo Pain au Chocolat,2,demo040@example.com,Shop,£4.40,£0.00,£1.20
+20/02/2026,DEMO-000437,Demo Sourdough Loaf,1,,Market stall,£4.20,£0.00,
+20/02/2026,DEMO-000438,Demo Sourdough Loaf,2,,Market stall,£8.40,£0.00,£2.20
+20/02/2026,DEMO-000439,Demo Cinnamon Swirl,1,,Website,£3.12,£0.52,£0.70
+21/02/2026,DEMO-000440,Demo Pain au Chocolat,1,demo028@example.com,Shop,£2.20,£0.00,£0.60
+21/02/2026,DEMO-000441,Demo Lemon Drizzle Slice,2,demo014@example.com,Shop,£7.44,£1.24,£1.60
+21/02/2026,DEMO-000442,Demo Seeded Batch,3,,Market stall,£10.80,£0.00,£2.85
+21/02/2026,DEMO-000443,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,
+21/02/2026,DEMO-000444,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+21/02/2026,DEMO-000445,Demo Victoria Sponge Slice,1,demo012@example.com,Shop,£3.72,£0.62,£0.85
+21/02/2026,DEMO-000446,Demo Flat White,1,,Website,£3.48,£0.58,£0.45
+21/02/2026,DEMO-000447,Demo Birthday Cake,2,,Market stall,£67.20,£11.20,£15.00
+21/02/2026,DEMO-000448,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+21/02/2026,DEMO-000449,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+23/02/2026,DEMO-000450,Demo Croissant,1,demo003@example.com,Shop,£1.90,£0.00,
+23/02/2026,DEMO-000451,Demo Croissant,1,demo006@example.com,Website,£1.90,£0.00,£0.48
+23/02/2026,DEMO-000452,Demo Birthday Cake,1,demo007@example.com,Website,£33.60,£5.60,
+23/02/2026,DEMO-000453,Demo Baguette,1,demo016@example.com,Shop,£2.10,£0.00,£0.55
+23/02/2026,DEMO-000454,Demo Baguette,1,demo003@example.com,Shop,£2.10,£0.00,£0.55
+23/02/2026,DEMO-000455,Demo Sourdough Loaf,1,,Website,£4.20,£0.00,£1.10
+23/02/2026,DEMO-000456,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,£1.40
+23/02/2026,DEMO-000457,Demo Sausage Roll (hot),1,demo013@example.com,Shop,£3.00,£0.50,£0.90
+23/02/2026,DEMO-000458,Demo Sourdough Loaf,2,demo018@example.com,Website,£8.40,£0.00,£2.20
+23/02/2026,DEMO-000459,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+24/02/2026,DEMO-000460,Demo Sausage Roll (hot),2,demo018@example.com,Shop,£6.00,£1.00,
+24/02/2026,DEMO-000461,Demo Croissant,1,demo036@example.com,Shop,£1.90,£0.00,£0.48
+24/02/2026,DEMO-000462,Demo Pain au Chocolat,1,demo002@example.com,Shop,£2.20,£0.00,£0.60
+24/02/2026,DEMO-000463,Demo Seeded Batch,1,demo025@example.com,Website,£3.60,£0.00,
+24/02/2026,DEMO-000464,Demo Victoria Sponge Slice,1,demo022@example.com,Market stall,£3.72,£0.62,£0.85
+24/02/2026,DEMO-000465,Demo Filter Coffee,1,demo002@example.com,Website,£2.64,£0.44,£0.30
+24/02/2026,DEMO-000466,Demo Filter Coffee,3,demo029@example.com,Website,£7.92,£1.32,£0.90
+24/02/2026,DEMO-000467,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+24/02/2026,DEMO-000468,Demo Flat White,1,demo018@example.com,Website,£3.48,£0.58,£0.45
+24/02/2026,DEMO-000469,Demo Filter Coffee,1,,Market stall,£2.64,£0.44,£0.30
+24/02/2026,DEMO-000470,Demo Birthday Cake,1,demo013@example.com,Shop,£33.60,£5.60,£7.50
+24/02/2026,DEMO-000471,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+24/02/2026,DEMO-000472,Demo Flat White,1,demo011@example.com,Shop,£3.48,£0.58,£0.45
+24/02/2026,DEMO-000473,Demo Pain au Chocolat,1,,Website,£2.20,£0.00,£0.60
+25/02/2026,DEMO-000474,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+25/02/2026,DEMO-000475,Demo Lemon Drizzle Slice,3,,Website,£11.16,£1.86,
+25/02/2026,DEMO-000476,Demo Seeded Batch,2,demo022@example.com,Shop,£7.20,£0.00,£1.90
+25/02/2026,DEMO-000477,Demo Baguette,1,demo008@example.com,Website,£2.10,£0.00,£0.55
+25/02/2026,DEMO-000478,Demo Birthday Cake,2,demo003@example.com,Shop,£67.20,£11.20,£15.00
+25/02/2026,DEMO-000479,Demo Sausage Roll (hot),1,demo028@example.com,Shop,£3.00,£0.50,£0.90
+25/02/2026,DEMO-000480,Demo Seeded Batch,1,,Website,£3.60,£0.00,
+25/02/2026,DEMO-000481,Demo Birthday Cake,1,,Shop,£33.60,£5.60,£7.50
+26/02/2026,DEMO-000482,Demo Flat White,1,demo002@example.com,Market stall,£3.48,£0.58,£0.45
+26/02/2026,DEMO-000483,Demo Birthday Cake,1,,Shop,£33.60,£5.60,£7.50
+26/02/2026,DEMO-000484,Demo Croissant,3,,Shop,£5.70,£0.00,£1.44
+26/02/2026,DEMO-000485,Demo Flat White,1,demo035@example.com,Shop,£3.48,£0.58,£0.45
+26/02/2026,DEMO-000486,Demo Flat White,2,,Shop,£6.96,£1.16,£0.90
+26/02/2026,DEMO-000487,Demo Pain au Chocolat,3,,Shop,£6.60,£0.00,£1.80
+26/02/2026,DEMO-000488,Demo Filter Coffee,1,demo007@example.com,Market stall,£2.64,£0.44,
+27/02/2026,DEMO-000489,Demo Cinnamon Swirl,1,demo034@example.com,Shop,£3.12,£0.52,£0.70
+27/02/2026,DEMO-000490,Demo Baguette,1,,Website,£2.10,£0.00,£0.55
+27/02/2026,DEMO-000491,Demo Pain au Chocolat,1,,Website,£2.20,£0.00,£0.60
+27/02/2026,DEMO-000492,Demo Sourdough Loaf,1,demo004@example.com,Shop,£4.20,£0.00,£1.10
+27/02/2026,DEMO-000493,Demo Seeded Batch,1,demo015@example.com,Shop,£3.60,£0.00,
+27/02/2026,DEMO-000494,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+27/02/2026,DEMO-000495,Demo Cinnamon Swirl,3,,Shop,£9.36,£1.56,£2.10
+27/02/2026,DEMO-000496,Demo Sourdough Loaf,1,demo030@example.com,Shop,£4.20,£0.00,
+27/02/2026,DEMO-000497,Demo Baguette,1,,Shop,£2.10,£0.00,
+27/02/2026,DEMO-000498,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+27/02/2026,DEMO-000499,Demo Croissant,1,demo010@example.com,Website,£1.90,£0.00,
+27/02/2026,DEMO-000500,Demo Pain au Chocolat,3,demo028@example.com,Market stall,£6.60,£0.00,£1.80
+28/02/2026,DEMO-000501,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+28/02/2026,DEMO-000502,Demo Croissant,1,,Website,£1.90,£0.00,£0.48
+28/02/2026,DEMO-000503,Demo Filter Coffee,1,,Website,£2.64,£0.44,
+28/02/2026,DEMO-000504,Demo Flat White,2,,Website,£6.96,£1.16,£0.90
+28/02/2026,DEMO-000505,Demo Pain au Chocolat,1,demo030@example.com,Shop,£2.20,£0.00,£0.60
+28/02/2026,DEMO-000506,Demo Sausage Roll (hot),1,demo003@example.com,Market stall,£3.00,£0.50,£0.90
+28/02/2026,DEMO-000507,Demo Sourdough Loaf,1,demo014@example.com,Shop,£4.20,£0.00,£1.10
+28/02/2026,DEMO-000508,Demo Cinnamon Swirl,1,,Website,£3.12,£0.52,£0.70
+28/02/2026,DEMO-000509,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+28/02/2026,DEMO-000510,Demo Pain au Chocolat,1,demo007@example.com,Shop,£2.20,£0.00,£0.60
+28/02/2026,DEMO-000511,Demo Flat White,2,demo013@example.com,Shop,£6.96,£1.16,
+01/04/2026,DEMO-000512,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+01/04/2026,DEMO-000513,Demo Birthday Cake,3,,Market stall,£100.80,£16.80,
+01/04/2026,DEMO-000514,Demo Sourdough Loaf,1,demo024@example.com,Shop,£4.20,£0.00,
+01/04/2026,DEMO-000515,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,£0.85
+01/04/2026,DEMO-000516,Demo Baguette,1,demo008@example.com,Website,£2.10,£0.00,£0.55
+01/04/2026,DEMO-000517,Demo Lemon Drizzle Slice,2,,Website,£7.44,£1.24,£1.60
+02/04/2026,DEMO-000518,Demo Seeded Batch,3,,Website,£10.80,£0.00,£2.85
+02/04/2026,DEMO-000519,Demo Flat White,3,demo026@example.com,Shop,£10.44,£1.74,£1.35
+02/04/2026,DEMO-000520,Demo Birthday Cake,1,,Market stall,£33.60,£5.60,
+02/04/2026,DEMO-000521,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+02/04/2026,DEMO-000522,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,£0.85
+02/04/2026,DEMO-000523,Demo Victoria Sponge Slice,3,demo010@example.com,Market stall,£11.16,£1.86,
+02/04/2026,DEMO-000524,Demo Victoria Sponge Slice,3,,Website,£11.16,£1.86,£2.55
+02/04/2026,DEMO-000525,Demo Seeded Batch,1,,Market stall,£3.60,£0.00,£0.95
+02/04/2026,DEMO-000526,Demo Birthday Cake,1,,Shop,£33.60,£5.60,£7.50
+02/04/2026,DEMO-000527,Demo Birthday Cake,1,,Market stall,£33.60,£5.60,£7.50
+02/04/2026,DEMO-000528,Demo Flat White,1,,Market stall,£3.48,£0.58,£0.45
+03/04/2026,DEMO-000529,Demo Seeded Batch,1,demo038@example.com,Shop,£3.60,£0.00,£0.95
+03/04/2026,DEMO-000530,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,
+03/04/2026,DEMO-000531,Demo Seeded Batch,2,,Website,£7.20,£0.00,£1.90
+03/04/2026,DEMO-000532,Demo Seeded Batch,1,,Market stall,£3.60,£0.00,
+03/04/2026,DEMO-000533,Demo Sausage Roll (hot),2,demo037@example.com,Website,£6.00,£1.00,
+03/04/2026,DEMO-000534,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+03/04/2026,DEMO-000535,Demo Cinnamon Swirl,1,demo033@example.com,Website,£3.12,£0.52,£0.70
+03/04/2026,DEMO-000536,Demo Pain au Chocolat,3,,Website,£6.60,£0.00,£1.80
+03/04/2026,DEMO-000537,Demo Seeded Batch,2,,Website,£7.20,£0.00,£1.90
+04/04/2026,DEMO-000538,Demo Pain au Chocolat,3,demo030@example.com,Shop,£6.60,£0.00,£1.80
+04/04/2026,DEMO-000539,Demo Croissant,1,,Shop,£1.90,£0.00,
+04/04/2026,DEMO-000540,Demo Victoria Sponge Slice,2,,Market stall,£7.44,£1.24,£1.70
+04/04/2026,DEMO-000541,Demo Sourdough Loaf,1,demo023@example.com,Market stall,£4.20,£0.00,£1.10
+04/04/2026,DEMO-000542,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,£0.85
+04/04/2026,DEMO-000543,Demo Seeded Batch,3,demo028@example.com,Shop,£10.80,£0.00,
+04/04/2026,DEMO-000544,Demo Seeded Batch,2,demo001@example.com,Shop,£7.20,£0.00,
+04/04/2026,DEMO-000545,Demo Sausage Roll (hot),1,demo030@example.com,Shop,£3.00,£0.50,£0.90
+04/04/2026,DEMO-000546,Demo Seeded Batch,1,demo037@example.com,Shop,£3.60,£0.00,£0.95
+04/04/2026,DEMO-000547,Demo Pain au Chocolat,1,demo032@example.com,Shop,£2.20,£0.00,£0.60
+04/04/2026,DEMO-000548,Demo Pain au Chocolat,1,demo032@example.com,Shop,£2.20,£0.00,
+04/04/2026,DEMO-000549,Demo Flat White,2,,Shop,£6.96,£1.16,£0.90
+06/04/2026,DEMO-000550,Demo Birthday Cake,1,,Shop,£33.60,£5.60,
+06/04/2026,DEMO-000551,Demo Pain au Chocolat,1,demo020@example.com,Shop,£2.20,£0.00,£0.60
+06/04/2026,DEMO-000552,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+06/04/2026,DEMO-000553,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+06/04/2026,DEMO-000554,Demo Pain au Chocolat,1,,Market stall,£2.20,£0.00,£0.60
+06/04/2026,DEMO-000555,Demo Filter Coffee,1,demo022@example.com,Website,£2.64,£0.44,£0.30
+06/04/2026,DEMO-000556,Demo Birthday Cake,2,,Shop,£67.20,£11.20,£15.00
+07/04/2026,DEMO-000557,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,
+07/04/2026,DEMO-000558,Demo Sausage Roll (hot),2,demo028@example.com,Market stall,£6.00,£1.00,£1.80
+07/04/2026,DEMO-000559,Demo Cinnamon Swirl,2,demo003@example.com,Website,£6.24,£1.04,
+07/04/2026,DEMO-000560,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+07/04/2026,DEMO-000561,Demo Seeded Batch,1,demo039@example.com,Market stall,£3.60,£0.00,£0.95
+07/04/2026,DEMO-000562,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,£0.85
+07/04/2026,DEMO-000563,Demo Seeded Batch,2,demo007@example.com,Shop,£7.20,£0.00,£1.90
+07/04/2026,DEMO-000564,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+07/04/2026,DEMO-000565,Demo Flat White,2,demo040@example.com,Market stall,£6.96,£1.16,£0.90
+07/04/2026,DEMO-000566,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,
+07/04/2026,DEMO-000567,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+07/04/2026,DEMO-000568,Demo Seeded Batch,1,demo034@example.com,Market stall,£3.60,£0.00,£0.95
+07/04/2026,DEMO-000569,Demo Sourdough Loaf,1,demo040@example.com,Market stall,£4.20,£0.00,
+07/04/2026,DEMO-000570,Demo Croissant,1,demo012@example.com,Website,£1.90,£0.00,£0.48
+08/04/2026,DEMO-000571,Demo Flat White,1,demo015@example.com,Shop,£3.48,£0.58,
+08/04/2026,DEMO-000572,Demo Flat White,2,,Market stall,£6.96,£1.16,£0.90
+08/04/2026,DEMO-000573,Demo Victoria Sponge Slice,2,demo009@example.com,Website,£7.44,£1.24,£1.70
+08/04/2026,DEMO-000574,Demo Sourdough Loaf,1,demo035@example.com,Shop,£4.20,£0.00,£1.10
+08/04/2026,DEMO-000575,Demo Flat White,3,,Market stall,£10.44,£1.74,
+08/04/2026,DEMO-000576,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+08/04/2026,DEMO-000577,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+09/04/2026,DEMO-000578,Demo Lemon Drizzle Slice,1,demo027@example.com,Website,£3.72,£0.62,£0.80
+09/04/2026,DEMO-000579,Demo Birthday Cake,1,,Shop,£33.60,£5.60,£7.50
+09/04/2026,DEMO-000580,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+09/04/2026,DEMO-000581,Demo Sourdough Loaf,1,demo029@example.com,Shop,£4.20,£0.00,£1.10
+09/04/2026,DEMO-000582,Demo Cinnamon Swirl,2,demo014@example.com,Shop,£6.24,£1.04,
+09/04/2026,DEMO-000583,Demo Baguette,1,,Market stall,£2.10,£0.00,£0.55
+09/04/2026,DEMO-000584,Demo Baguette,2,demo031@example.com,Shop,£4.20,£0.00,£1.10
+09/04/2026,DEMO-000585,Demo Pain au Chocolat,2,,Market stall,£4.40,£0.00,£1.20
+09/04/2026,DEMO-000586,Demo Baguette,1,,Website,£2.10,£0.00,£0.55
+09/04/2026,DEMO-000587,Demo Croissant,2,,Shop,£3.80,£0.00,£0.96
+09/04/2026,DEMO-000588,Demo Cinnamon Swirl,1,demo035@example.com,Shop,£3.12,£0.52,
+10/04/2026,DEMO-000589,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,
+10/04/2026,DEMO-000590,Demo Baguette,3,demo001@example.com,Shop,£6.30,£0.00,
+10/04/2026,DEMO-000591,Demo Pain au Chocolat,1,demo007@example.com,Shop,£2.20,£0.00,£0.60
+10/04/2026,DEMO-000592,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,
+10/04/2026,DEMO-000593,Demo Baguette,2,demo019@example.com,Shop,£4.20,£0.00,£1.10
+10/04/2026,DEMO-000594,Demo Cinnamon Swirl,2,demo034@example.com,Shop,£6.24,£1.04,
+10/04/2026,DEMO-000595,Demo Croissant,3,,Shop,£5.70,£0.00,£1.44
+10/04/2026,DEMO-000596,Demo Lemon Drizzle Slice,2,demo006@example.com,Shop,£7.44,£1.24,
+11/04/2026,DEMO-000597,Demo Birthday Cake,1,demo036@example.com,Shop,£33.60,£5.60,
+11/04/2026,DEMO-000598,Demo Lemon Drizzle Slice,3,demo021@example.com,Shop,£11.16,£1.86,£2.40
+11/04/2026,DEMO-000599,Demo Croissant,2,,Market stall,£3.80,£0.00,£0.96
+11/04/2026,DEMO-000600,Demo Cinnamon Swirl,1,demo035@example.com,Shop,£3.12,£0.52,£0.70
+11/04/2026,DEMO-000601,Demo Cinnamon Swirl,1,demo038@example.com,Shop,£3.12,£0.52,£0.70
+11/04/2026,DEMO-000602,Demo Birthday Cake,1,,Shop,£33.60,£5.60,£7.50
+11/04/2026,DEMO-000603,Demo Seeded Batch,3,demo024@example.com,Shop,£10.80,£0.00,£2.85
+11/04/2026,DEMO-000604,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,£0.85
+13/04/2026,DEMO-000605,Demo Lemon Drizzle Slice,2,demo006@example.com,Market stall,£7.44,£1.24,
+13/04/2026,DEMO-000606,Demo Pain au Chocolat,2,demo027@example.com,Market stall,£4.40,£0.00,£1.20
+13/04/2026,DEMO-000607,Demo Seeded Batch,3,demo025@example.com,Shop,£10.80,£0.00,£2.85
+13/04/2026,DEMO-000608,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+13/04/2026,DEMO-000609,Demo Sourdough Loaf,3,demo015@example.com,Shop,£12.60,£0.00,£3.30
+13/04/2026,DEMO-000610,Demo Seeded Batch,1,demo020@example.com,Shop,£3.60,£0.00,£0.95
+13/04/2026,DEMO-000611,Demo Sausage Roll (hot),2,demo005@example.com,Website,£6.00,£1.00,£1.80
+14/04/2026,DEMO-000612,Demo Lemon Drizzle Slice,1,demo017@example.com,Shop,£3.72,£0.62,
+14/04/2026,DEMO-000613,Demo Baguette,2,demo022@example.com,Shop,£4.20,£0.00,£1.10
+14/04/2026,DEMO-000614,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+14/04/2026,DEMO-000615,Demo Sourdough Loaf,1,demo007@example.com,Shop,£4.20,£0.00,
+14/04/2026,DEMO-000616,Demo Croissant,1,demo031@example.com,Market stall,£1.90,£0.00,
+14/04/2026,DEMO-000617,Demo Croissant,3,,Shop,£5.70,£0.00,
+14/04/2026,DEMO-000618,Demo Croissant,3,,Website,£5.70,£0.00,
+14/04/2026,DEMO-000619,Demo Filter Coffee,2,,Shop,£5.28,£0.88,
+14/04/2026,DEMO-000620,Demo Lemon Drizzle Slice,2,demo020@example.com,Shop,£7.44,£1.24,
+14/04/2026,DEMO-000621,Demo Sourdough Loaf,2,,Market stall,£8.40,£0.00,
+15/04/2026,DEMO-000622,Demo Seeded Batch,3,demo023@example.com,Shop,£10.80,£0.00,£2.85
+15/04/2026,DEMO-000623,Demo Lemon Drizzle Slice,2,,Website,£7.44,£1.24,£1.60
+15/04/2026,DEMO-000624,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+15/04/2026,DEMO-000625,Demo Baguette,3,demo005@example.com,Market stall,£6.30,£0.00,
+15/04/2026,DEMO-000626,Demo Filter Coffee,2,demo028@example.com,Shop,£5.28,£0.88,£0.60
+15/04/2026,DEMO-000627,Demo Pain au Chocolat,1,demo015@example.com,Shop,£2.20,£0.00,£0.60
+15/04/2026,DEMO-000628,Demo Croissant,1,demo008@example.com,Website,£1.90,£0.00,
+15/04/2026,DEMO-000629,Demo Croissant,1,,Shop,£1.90,£0.00,
+15/04/2026,DEMO-000630,Demo Lemon Drizzle Slice,1,demo011@example.com,Website,£3.72,£0.62,£0.80
+15/04/2026,DEMO-000631,Demo Sourdough Loaf,1,demo005@example.com,Market stall,£4.20,£0.00,
+16/04/2026,DEMO-000632,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,£1.70
+16/04/2026,DEMO-000633,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,
+16/04/2026,DEMO-000634,Demo Cinnamon Swirl,1,demo035@example.com,Website,£3.12,£0.52,£0.70
+16/04/2026,DEMO-000635,Demo Baguette,1,demo031@example.com,Shop,£2.10,£0.00,£0.55
+16/04/2026,DEMO-000636,Demo Baguette,3,demo010@example.com,Shop,£6.30,£0.00,
+16/04/2026,DEMO-000637,Demo Seeded Batch,1,,Market stall,£3.60,£0.00,£0.95
+16/04/2026,DEMO-000638,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,£1.40
+16/04/2026,DEMO-000639,Demo Sourdough Loaf,2,demo021@example.com,Market stall,£8.40,£0.00,£2.20
+16/04/2026,DEMO-000640,Demo Pain au Chocolat,3,,Shop,£6.60,£0.00,£1.80
+16/04/2026,DEMO-000641,Demo Pain au Chocolat,2,demo022@example.com,Market stall,£4.40,£0.00,£1.20
+16/04/2026,DEMO-000642,Demo Croissant,1,demo005@example.com,Market stall,£1.90,£0.00,£0.48
+16/04/2026,DEMO-000643,Demo Sausage Roll (hot),1,demo035@example.com,Shop,£3.00,£0.50,£0.90
+17/04/2026,DEMO-000644,Demo Pain au Chocolat,2,,Market stall,£4.40,£0.00,
+17/04/2026,DEMO-000645,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+17/04/2026,DEMO-000646,Demo Sausage Roll (hot),2,,Shop,£6.00,£1.00,£1.80
+17/04/2026,DEMO-000647,Demo Seeded Batch,2,,Shop,£7.20,£0.00,
+17/04/2026,DEMO-000648,Demo Cinnamon Swirl,2,demo024@example.com,Shop,£6.24,£1.04,
+17/04/2026,DEMO-000649,Demo Cinnamon Swirl,1,demo030@example.com,Shop,£3.12,£0.52,£0.70
+17/04/2026,DEMO-000650,Demo Croissant,2,demo028@example.com,Shop,£3.80,£0.00,
+17/04/2026,DEMO-000651,Demo Baguette,2,,Market stall,£4.20,£0.00,
+18/04/2026,DEMO-000652,Demo Birthday Cake,1,demo035@example.com,Shop,£33.60,£5.60,
+18/04/2026,DEMO-000653,Demo Birthday Cake,2,,Shop,£67.20,£11.20,£15.00
+18/04/2026,DEMO-000654,Demo Sausage Roll (hot),2,,Market stall,£6.00,£1.00,£1.80
+18/04/2026,DEMO-000655,Demo Filter Coffee,2,demo028@example.com,Shop,£5.28,£0.88,£0.60
+18/04/2026,DEMO-000656,Demo Filter Coffee,1,demo003@example.com,Shop,£2.64,£0.44,£0.30
+18/04/2026,DEMO-000657,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+18/04/2026,DEMO-000658,Demo Pain au Chocolat,2,demo006@example.com,Shop,£4.40,£0.00,£1.20
+18/04/2026,DEMO-000659,Demo Croissant,2,,Shop,£3.80,£0.00,£0.96
+18/04/2026,DEMO-000660,Demo Flat White,3,demo002@example.com,Shop,£10.44,£1.74,
+20/04/2026,DEMO-000661,Demo Filter Coffee,2,,Website,£5.28,£0.88,£0.60
+20/04/2026,DEMO-000662,Demo Birthday Cake,3,,Shop,£100.80,£16.80,£22.50
+20/04/2026,DEMO-000663,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+20/04/2026,DEMO-000664,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+20/04/2026,DEMO-000665,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+20/04/2026,DEMO-000666,Demo Croissant,2,,Shop,£3.80,£0.00,£0.96
+20/04/2026,DEMO-000667,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+21/04/2026,DEMO-000668,Demo Baguette,1,demo040@example.com,Website,£2.10,£0.00,
+21/04/2026,DEMO-000669,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+21/04/2026,DEMO-000670,Demo Lemon Drizzle Slice,2,demo030@example.com,Shop,£7.44,£1.24,
+21/04/2026,DEMO-000671,Demo Cinnamon Swirl,2,demo035@example.com,Shop,£6.24,£1.04,£1.40
+21/04/2026,DEMO-000672,Demo Filter Coffee,3,demo018@example.com,Market stall,£7.92,£1.32,
+21/04/2026,DEMO-000673,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+21/04/2026,DEMO-000674,Demo Pain au Chocolat,1,demo033@example.com,Shop,£2.20,£0.00,£0.60
+21/04/2026,DEMO-000675,Demo Lemon Drizzle Slice,2,demo024@example.com,Shop,£7.44,£1.24,£1.60
+21/04/2026,DEMO-000676,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+21/04/2026,DEMO-000677,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+21/04/2026,DEMO-000678,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+21/04/2026,DEMO-000679,Demo Seeded Batch,1,demo021@example.com,Shop,£3.60,£0.00,£0.95
+22/04/2026,DEMO-000680,Demo Sourdough Loaf,1,demo030@example.com,Website,£4.20,£0.00,£1.10
+22/04/2026,DEMO-000681,Demo Cinnamon Swirl,3,demo006@example.com,Shop,£9.36,£1.56,
+22/04/2026,DEMO-000682,Demo Pain au Chocolat,2,demo027@example.com,Market stall,£4.40,£0.00,£1.20
+22/04/2026,DEMO-000683,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,
+22/04/2026,DEMO-000684,Demo Sausage Roll (hot),2,,Shop,£6.00,£1.00,
+22/04/2026,DEMO-000685,Demo Birthday Cake,3,,Shop,£100.80,£16.80,£22.50
+22/04/2026,DEMO-000686,Demo Birthday Cake,1,,Shop,£33.60,£5.60,
+22/04/2026,DEMO-000687,Demo Filter Coffee,2,demo032@example.com,Shop,£5.28,£0.88,
+22/04/2026,DEMO-000688,Demo Baguette,2,demo022@example.com,Shop,£4.20,£0.00,£1.10
+22/04/2026,DEMO-000689,Demo Cinnamon Swirl,1,demo039@example.com,Website,£3.12,£0.52,£0.70
+22/04/2026,DEMO-000690,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,
+23/04/2026,DEMO-000691,Demo Cinnamon Swirl,1,,Website,£3.12,£0.52,£0.70
+23/04/2026,DEMO-000692,Demo Baguette,2,,Market stall,£4.20,£0.00,£1.10
+23/04/2026,DEMO-000693,Demo Croissant,1,,Shop,£1.90,£0.00,
+23/04/2026,DEMO-000694,Demo Seeded Batch,3,demo034@example.com,Shop,£10.80,£0.00,
+23/04/2026,DEMO-000695,Demo Lemon Drizzle Slice,1,demo013@example.com,Shop,£3.72,£0.62,£0.80
+23/04/2026,DEMO-000696,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+23/04/2026,DEMO-000697,Demo Cinnamon Swirl,3,demo009@example.com,Shop,£9.36,£1.56,
+24/04/2026,DEMO-000698,Demo Lemon Drizzle Slice,3,demo026@example.com,Shop,£11.16,£1.86,£2.40
+24/04/2026,DEMO-000699,Demo Sausage Roll (hot),1,demo023@example.com,Website,£3.00,£0.50,
+24/04/2026,DEMO-000700,Demo Sausage Roll (hot),2,,Website,£6.00,£1.00,£1.80
+24/04/2026,DEMO-000701,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,
+24/04/2026,DEMO-000702,Demo Flat White,2,demo021@example.com,Shop,£6.96,£1.16,
+24/04/2026,DEMO-000703,Demo Lemon Drizzle Slice,2,demo025@example.com,Shop,£7.44,£1.24,£1.60
+24/04/2026,DEMO-000704,Demo Filter Coffee,1,demo031@example.com,Website,£2.64,£0.44,£0.30
+24/04/2026,DEMO-000705,Demo Flat White,3,,Market stall,£10.44,£1.74,£1.35
+24/04/2026,DEMO-000706,Demo Seeded Batch,3,,Market stall,£10.80,£0.00,
+24/04/2026,DEMO-000707,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+24/04/2026,DEMO-000708,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+24/04/2026,DEMO-000709,Demo Filter Coffee,3,demo025@example.com,Website,£7.92,£1.32,£0.90
+24/04/2026,DEMO-000710,Demo Baguette,3,demo006@example.com,Shop,£6.30,£0.00,
+25/04/2026,DEMO-000711,Demo Baguette,1,demo022@example.com,Website,£2.10,£0.00,
+25/04/2026,DEMO-000712,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,
+25/04/2026,DEMO-000713,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+25/04/2026,DEMO-000714,Demo Birthday Cake,1,,Shop,£33.60,£5.60,
+25/04/2026,DEMO-000715,Demo Croissant,2,demo039@example.com,Website,£3.80,£0.00,£0.96
+25/04/2026,DEMO-000716,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+25/04/2026,DEMO-000717,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,£1.60
+25/04/2026,DEMO-000718,Demo Sausage Roll (hot),2,demo002@example.com,Shop,£6.00,£1.00,£1.80
+25/04/2026,DEMO-000719,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,£1.60
+25/04/2026,DEMO-000720,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+25/04/2026,DEMO-000721,Demo Sausage Roll (hot),1,demo023@example.com,Shop,£3.00,£0.50,£0.90
+25/04/2026,DEMO-000722,Demo Lemon Drizzle Slice,1,demo012@example.com,Shop,£3.72,£0.62,£0.80
+25/04/2026,DEMO-000723,Demo Victoria Sponge Slice,1,demo026@example.com,Website,£3.72,£0.62,£0.85
+27/04/2026,DEMO-000724,Demo Cinnamon Swirl,1,demo012@example.com,Market stall,£3.12,£0.52,£0.70
+27/04/2026,DEMO-000725,Demo Baguette,1,demo032@example.com,Website,£2.10,£0.00,£0.55
+27/04/2026,DEMO-000726,Demo Sausage Roll (hot),1,,Website,£3.00,£0.50,
+27/04/2026,DEMO-000727,Demo Baguette,1,,Website,£2.10,£0.00,£0.55
+27/04/2026,DEMO-000728,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+27/04/2026,DEMO-000729,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+27/04/2026,DEMO-000730,Demo Flat White,3,,Shop,£10.44,£1.74,£1.35
+27/04/2026,DEMO-000731,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+27/04/2026,DEMO-000732,Demo Pain au Chocolat,1,demo009@example.com,Shop,£2.20,£0.00,£0.60
+27/04/2026,DEMO-000733,Demo Birthday Cake,1,,Shop,£33.60,£5.60,
+28/04/2026,DEMO-000734,Demo Sourdough Loaf,1,,Market stall,£4.20,£0.00,£1.10
+28/04/2026,DEMO-000735,Demo Baguette,-2,demo008@example.com,Shop,£-4.20,£-0.00,£1.10
+28/04/2026,DEMO-000736,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,
+28/04/2026,DEMO-000737,Demo Baguette,3,,Website,£6.30,£0.00,£1.65
+28/04/2026,DEMO-000738,Demo Flat White,2,demo018@example.com,Shop,£6.96,£1.16,£0.90
+28/04/2026,DEMO-000739,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+28/04/2026,DEMO-000740,Demo Baguette,3,demo026@example.com,Shop,£6.30,£0.00,£1.65
+28/04/2026,DEMO-000741,Demo Sausage Roll (hot),1,,Website,£3.00,£0.50,£0.90
+28/04/2026,DEMO-000742,Demo Croissant,3,,Shop,£5.70,£0.00,
+28/04/2026,DEMO-000743,Demo Filter Coffee,1,demo039@example.com,Shop,£2.64,£0.44,
+28/04/2026,DEMO-000744,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,£0.85
+29/04/2026,DEMO-000745,Demo Baguette,1,,Website,£2.10,£0.00,£0.55
+29/04/2026,DEMO-000746,Demo Lemon Drizzle Slice,3,,Shop,£11.16,£1.86,£2.40
+29/04/2026,DEMO-000747,Demo Sourdough Loaf,2,demo018@example.com,Website,£8.40,£0.00,£2.20
+29/04/2026,DEMO-000748,Demo Seeded Batch,3,demo029@example.com,Shop,£10.80,£0.00,£2.85
+29/04/2026,DEMO-000749,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+29/04/2026,DEMO-000750,Demo Baguette,1,,Market stall,£2.10,£0.00,£0.55
+29/04/2026,DEMO-000751,Demo Croissant,1,demo040@example.com,Website,£1.90,£0.00,
+29/04/2026,DEMO-000752,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+29/04/2026,DEMO-000753,Demo Seeded Batch,2,,Shop,£7.20,£0.00,
+29/04/2026,DEMO-000754,Demo Baguette,3,demo040@example.com,Shop,£6.30,£0.00,
+29/04/2026,DEMO-000755,Demo Flat White,1,,Market stall,£3.48,£0.58,£0.45
+30/04/2026,DEMO-000756,Demo Sausage Roll (hot),2,demo019@example.com,Shop,£6.00,£1.00,£1.80
+30/04/2026,DEMO-000757,Demo Victoria Sponge Slice,1,demo030@example.com,Shop,£3.72,£0.62,£0.85
+30/04/2026,DEMO-000758,Demo Birthday Cake,2,,Shop,£67.20,£11.20,£15.00
+30/04/2026,DEMO-000759,Demo Victoria Sponge Slice,1,demo022@example.com,Shop,£3.72,£0.62,£0.85
+30/04/2026,DEMO-000760,Demo Sausage Roll (hot),1,demo030@example.com,Shop,£3.00,£0.50,
+30/04/2026,DEMO-000761,Demo Seeded Batch,2,,Shop,£7.20,£0.00,
+30/04/2026,DEMO-000762,Demo Baguette,1,demo032@example.com,Shop,£2.10,£0.00,£0.55
+30/04/2026,DEMO-000763,Demo Seeded Batch,2,,Website,£7.20,£0.00,£1.90
+30/04/2026,DEMO-000764,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,£0.85
+30/04/2026,DEMO-000765,Demo Sourdough Loaf,2,,Market stall,£8.40,£0.00,£2.20
+30/04/2026,DEMO-000766,Demo Croissant,1,demo021@example.com,Market stall,£1.90,£0.00,
+30/04/2026,DEMO-000767,Demo Seeded Batch,1,demo040@example.com,Shop,£3.60,£0.00,
+30/04/2026,DEMO-000768,Demo Baguette,1,,Website,£2.10,£0.00,£0.55
+30/04/2026,DEMO-000769,Demo Flat White,1,,Shop,£3.48,£0.58,
+01/05/2026,DEMO-000770,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,
+01/05/2026,DEMO-000771,Demo Sausage Roll (hot),1,,Market stall,£3.00,£0.50,£0.90
+01/05/2026,DEMO-000772,Demo Cinnamon Swirl,3,demo022@example.com,Market stall,£9.36,£1.56,£2.10
+01/05/2026,DEMO-000773,Demo Cinnamon Swirl,3,,Shop,£9.36,£1.56,£2.10
+01/05/2026,DEMO-000774,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+01/05/2026,DEMO-000775,Demo Baguette,2,,Shop,£4.20,£0.00,
+02/05/2026,DEMO-000776,Demo Flat White,1,demo038@example.com,Shop,£3.48,£0.58,
+02/05/2026,DEMO-000777,Demo Sourdough Loaf,1,demo016@example.com,Shop,£4.20,£0.00,£1.10
+02/05/2026,DEMO-000778,Demo Sourdough Loaf,3,,Shop,£12.60,£0.00,£3.30
+02/05/2026,DEMO-000779,Demo Birthday Cake,1,demo040@example.com,Website,£33.60,£5.60,
+02/05/2026,DEMO-000780,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,£1.40
+02/05/2026,DEMO-000781,Demo Seeded Batch,1,demo003@example.com,Website,£3.60,£0.00,£0.95
+02/05/2026,DEMO-000782,Demo Cinnamon Swirl,2,,Market stall,£6.24,£1.04,£1.40
+02/05/2026,DEMO-000783,Demo Seeded Batch,1,demo005@example.com,Shop,£3.60,£0.00,
+02/05/2026,DEMO-000784,Demo Birthday Cake,2,demo030@example.com,Market stall,£67.20,£11.20,£15.00
+02/05/2026,DEMO-000785,Demo Baguette,3,,Shop,£6.30,£0.00,
+04/05/2026,DEMO-000786,Demo Lemon Drizzle Slice,1,demo004@example.com,Market stall,£3.72,£0.62,
+04/05/2026,DEMO-000787,Demo Croissant,1,demo009@example.com,Shop,£1.90,£0.00,£0.48
+04/05/2026,DEMO-000788,Demo Filter Coffee,3,,Website,£7.92,£1.32,£0.90
+04/05/2026,DEMO-000789,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,
+04/05/2026,DEMO-000790,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+04/05/2026,DEMO-000791,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+05/05/2026,DEMO-000792,Demo Victoria Sponge Slice,1,demo019@example.com,Shop,£3.72,£0.62,£0.85
+05/05/2026,DEMO-000793,Demo Filter Coffee,2,demo033@example.com,Website,£5.28,£0.88,£0.60
+05/05/2026,DEMO-000794,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+05/05/2026,DEMO-000795,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+05/05/2026,DEMO-000796,Demo Seeded Batch,3,demo005@example.com,Shop,£10.80,£0.00,£2.85
+05/05/2026,DEMO-000797,Demo Birthday Cake,2,demo011@example.com,Shop,£67.20,£11.20,£15.00
+05/05/2026,DEMO-000798,Demo Birthday Cake,1,demo001@example.com,Market stall,£33.60,£5.60,£7.50
+05/05/2026,DEMO-000799,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,£1.40
+05/05/2026,DEMO-000800,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+05/05/2026,DEMO-000801,Demo Flat White,3,demo021@example.com,Shop,£10.44,£1.74,
+06/05/2026,DEMO-000802,Demo Victoria Sponge Slice,1,demo004@example.com,Shop,£3.72,£0.62,
+06/05/2026,DEMO-000803,Demo Cinnamon Swirl,1,demo009@example.com,Shop,£3.12,£0.52,
+06/05/2026,DEMO-000804,Demo Baguette,1,demo032@example.com,Shop,£2.10,£0.00,£0.55
+06/05/2026,DEMO-000805,Demo Sausage Roll (hot),1,,Market stall,£3.00,£0.50,£0.90
+06/05/2026,DEMO-000806,Demo Sausage Roll (hot),2,demo006@example.com,Shop,£6.00,£1.00,£1.80
+06/05/2026,DEMO-000807,Demo Filter Coffee,3,demo037@example.com,Website,£7.92,£1.32,
+06/05/2026,DEMO-000808,Demo Filter Coffee,2,,Shop,£5.28,£0.88,
+06/05/2026,DEMO-000809,Demo Croissant,2,demo008@example.com,Shop,£3.80,£0.00,£0.96
+06/05/2026,DEMO-000810,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+06/05/2026,DEMO-000811,Demo Cinnamon Swirl,1,demo023@example.com,Market stall,£3.12,£0.52,
+06/05/2026,DEMO-000812,Demo Birthday Cake,1,,Shop,£33.60,£5.60,£7.50
+07/05/2026,DEMO-000813,Demo Baguette,1,demo021@example.com,Shop,£2.10,£0.00,£0.55
+07/05/2026,DEMO-000814,Demo Sourdough Loaf,3,,Shop,£12.60,£0.00,£3.30
+07/05/2026,DEMO-000815,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+07/05/2026,DEMO-000816,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+07/05/2026,DEMO-000817,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+07/05/2026,DEMO-000818,Demo Cinnamon Swirl,2,demo010@example.com,Shop,£6.24,£1.04,
+08/05/2026,DEMO-000819,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+08/05/2026,DEMO-000820,Demo Birthday Cake,1,,Shop,£33.60,£5.60,£7.50
+08/05/2026,DEMO-000821,Demo Cinnamon Swirl,2,,Market stall,£6.24,£1.04,£1.40
+08/05/2026,DEMO-000822,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+08/05/2026,DEMO-000823,Demo Victoria Sponge Slice,1,demo009@example.com,Market stall,£3.72,£0.62,£0.85
+08/05/2026,DEMO-000824,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+09/05/2026,DEMO-000825,Demo Seeded Batch,3,demo030@example.com,Shop,£10.80,£0.00,
+09/05/2026,DEMO-000826,Demo Croissant,1,demo038@example.com,Market stall,£1.90,£0.00,£0.48
+09/05/2026,DEMO-000827,Demo Baguette,2,demo005@example.com,Shop,£4.20,£0.00,£1.10
+09/05/2026,DEMO-000828,Demo Sausage Roll (hot),1,demo037@example.com,Website,£3.00,£0.50,£0.90
+09/05/2026,DEMO-000829,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,£2.70
+09/05/2026,DEMO-000830,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+09/05/2026,DEMO-000831,Demo Croissant,1,,Shop,£1.90,£0.00,
+09/05/2026,DEMO-000832,Demo Filter Coffee,1,demo006@example.com,Shop,£2.64,£0.44,£0.30
+09/05/2026,DEMO-000833,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+09/05/2026,DEMO-000834,Demo Baguette,1,demo011@example.com,Shop,£2.10,£0.00,£0.55
+11/05/2026,DEMO-000835,Demo Cinnamon Swirl,1,demo005@example.com,Market stall,£3.12,£0.52,£0.70
+11/05/2026,DEMO-000836,Demo Victoria Sponge Slice,3,,Shop,£11.16,£1.86,
+11/05/2026,DEMO-000837,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+11/05/2026,DEMO-000838,Demo Cinnamon Swirl,2,demo005@example.com,Shop,£6.24,£1.04,£1.40
+11/05/2026,DEMO-000839,Demo Birthday Cake,1,demo032@example.com,Shop,£33.60,£5.60,
+11/05/2026,DEMO-000840,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+11/05/2026,DEMO-000841,Demo Sausage Roll (hot),1,demo028@example.com,Shop,£3.00,£0.50,£0.90
+11/05/2026,DEMO-000842,Demo Cinnamon Swirl,2,demo024@example.com,Market stall,£6.24,£1.04,£1.40
+11/05/2026,DEMO-000843,Demo Flat White,2,demo007@example.com,Shop,£6.96,£1.16,£0.90
+11/05/2026,DEMO-000844,Demo Sourdough Loaf,2,demo011@example.com,Website,£8.40,£0.00,£2.20
+11/05/2026,DEMO-000845,Demo Sausage Roll (hot),2,demo012@example.com,Market stall,£6.00,£1.00,
+11/05/2026,DEMO-000846,Demo Victoria Sponge Slice,1,demo024@example.com,Market stall,£3.72,£0.62,
+11/05/2026,DEMO-000847,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,
+12/05/2026,DEMO-000848,Demo Sourdough Loaf,1,,Market stall,£4.20,£0.00,£1.10
+12/05/2026,DEMO-000849,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+12/05/2026,DEMO-000850,Demo Baguette,1,,Website,£2.10,£0.00,£0.55
+12/05/2026,DEMO-000851,Demo Cinnamon Swirl,1,demo008@example.com,Website,£3.12,£0.52,£0.70
+12/05/2026,DEMO-000852,Demo Seeded Batch,1,demo021@example.com,Market stall,£3.60,£0.00,£0.95
+12/05/2026,DEMO-000853,Demo Seeded Batch,3,demo005@example.com,Shop,£10.80,£0.00,£2.85
+12/05/2026,DEMO-000854,Demo Cinnamon Swirl,2,demo018@example.com,Shop,£6.24,£1.04,£1.40
+12/05/2026,DEMO-000855,Demo Croissant,2,demo040@example.com,Market stall,£3.80,£0.00,£0.96
+12/05/2026,DEMO-000856,Demo Birthday Cake,1,,Shop,£33.60,£5.60,
+12/05/2026,DEMO-000857,Demo Filter Coffee,1,demo004@example.com,Website,£2.64,£0.44,
+12/05/2026,DEMO-000858,Demo Croissant,2,,Shop,£3.80,£0.00,
+12/05/2026,DEMO-000859,Demo Pain au Chocolat,3,demo034@example.com,Website,£6.60,£0.00,£1.80
+12/05/2026,DEMO-000860,Demo Lemon Drizzle Slice,1,demo030@example.com,Shop,£3.72,£0.62,£0.80
+13/05/2026,DEMO-000861,Demo Birthday Cake,1,,Shop,£33.60,£5.60,£7.50
+13/05/2026,DEMO-000862,Demo Victoria Sponge Slice,2,demo035@example.com,Shop,£7.44,£1.24,£1.70
+13/05/2026,DEMO-000863,Demo Birthday Cake,1,,Shop,£33.60,£5.60,
+13/05/2026,DEMO-000864,Demo Pain au Chocolat,1,demo040@example.com,Shop,£2.20,£0.00,
+13/05/2026,DEMO-000865,Demo Pain au Chocolat,1,demo002@example.com,Shop,£2.20,£0.00,
+13/05/2026,DEMO-000866,Demo Sourdough Loaf,3,demo004@example.com,Shop,£12.60,£0.00,£3.30
+13/05/2026,DEMO-000867,Demo Croissant,1,demo027@example.com,Market stall,£1.90,£0.00,
+14/05/2026,DEMO-000868,Demo Sourdough Loaf,3,demo022@example.com,Market stall,£12.60,£0.00,£3.30
+14/05/2026,DEMO-000869,Demo Birthday Cake,3,,Shop,£100.80,£16.80,
+14/05/2026,DEMO-000870,Demo Birthday Cake,2,,Website,£67.20,£11.20,£15.00
+14/05/2026,DEMO-000871,Demo Baguette,1,demo038@example.com,Shop,£2.10,£0.00,
+14/05/2026,DEMO-000872,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+14/05/2026,DEMO-000873,Demo Sourdough Loaf,1,demo004@example.com,Shop,£4.20,£0.00,£1.10
+14/05/2026,DEMO-000874,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+14/05/2026,DEMO-000875,Demo Sausage Roll (hot),3,,Website,£9.00,£1.50,£2.70
+14/05/2026,DEMO-000876,Demo Lemon Drizzle Slice,1,demo008@example.com,Website,£3.72,£0.62,
+15/05/2026,DEMO-000877,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,£1.60
+15/05/2026,DEMO-000878,Demo Pain au Chocolat,2,demo025@example.com,Shop,£4.40,£0.00,£1.20
+15/05/2026,DEMO-000879,Demo Sourdough Loaf,-3,,Shop,£-12.60,£-0.00,£3.30
+15/05/2026,DEMO-000880,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,
+15/05/2026,DEMO-000881,Demo Flat White,1,demo040@example.com,Website,£3.48,£0.58,£0.45
+15/05/2026,DEMO-000882,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+15/05/2026,DEMO-000883,Demo Cinnamon Swirl,1,demo016@example.com,Market stall,£3.12,£0.52,£0.70
+15/05/2026,DEMO-000884,Demo Croissant,1,demo016@example.com,Shop,£1.90,£0.00,£0.48
+15/05/2026,DEMO-000885,Demo Lemon Drizzle Slice,1,demo028@example.com,Shop,£3.72,£0.62,
+15/05/2026,DEMO-000886,Demo Croissant,1,,Market stall,£1.90,£0.00,£0.48
+15/05/2026,DEMO-000887,Demo Seeded Batch,2,demo012@example.com,Shop,£7.20,£0.00,
+15/05/2026,DEMO-000888,Demo Filter Coffee,3,demo004@example.com,Shop,£7.92,£1.32,£0.90
+15/05/2026,DEMO-000889,Demo Pain au Chocolat,2,demo002@example.com,Market stall,£4.40,£0.00,£1.20
+15/05/2026,DEMO-000890,Demo Croissant,1,demo025@example.com,Website,£1.90,£0.00,£0.48
+16/05/2026,DEMO-000891,Demo Flat White,2,,Shop,£6.96,£1.16,£0.90
+16/05/2026,DEMO-000892,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+16/05/2026,DEMO-000893,Demo Victoria Sponge Slice,2,,Website,£7.44,£1.24,£1.70
+16/05/2026,DEMO-000894,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,
+16/05/2026,DEMO-000895,Demo Baguette,1,demo023@example.com,Shop,£2.10,£0.00,£0.55
+16/05/2026,DEMO-000896,Demo Baguette,3,,Shop,£6.30,£0.00,
+16/05/2026,DEMO-000897,Demo Sausage Roll (hot),2,demo019@example.com,Website,£6.00,£1.00,
+16/05/2026,DEMO-000898,Demo Seeded Batch,1,,Shop,£3.60,£0.00,
+16/05/2026,DEMO-000899,Demo Lemon Drizzle Slice,1,demo027@example.com,Market stall,£3.72,£0.62,
+16/05/2026,DEMO-000900,Demo Croissant,2,demo028@example.com,Shop,£3.80,£0.00,£0.96
+16/05/2026,DEMO-000901,Demo Sausage Roll (hot),3,,Website,£9.00,£1.50,£2.70
+18/05/2026,DEMO-000902,Demo Baguette,1,demo038@example.com,Shop,£2.10,£0.00,£0.55
+18/05/2026,DEMO-000903,Demo Flat White,2,demo003@example.com,Website,£6.96,£1.16,£0.90
+18/05/2026,DEMO-000904,Demo Birthday Cake,1,,Shop,£33.60,£5.60,£7.50
+18/05/2026,DEMO-000905,Demo Cinnamon Swirl,1,demo008@example.com,Shop,£3.12,£0.52,£0.70
+18/05/2026,DEMO-000906,Demo Sourdough Loaf,1,demo032@example.com,Market stall,£4.20,£0.00,£1.10
+18/05/2026,DEMO-000907,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+19/05/2026,DEMO-000908,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+19/05/2026,DEMO-000909,Demo Seeded Batch,2,,Market stall,£7.20,£0.00,
+19/05/2026,DEMO-000910,Demo Flat White,1,demo011@example.com,Shop,£3.48,£0.58,£0.45
+19/05/2026,DEMO-000911,Demo Cinnamon Swirl,1,,Market stall,£3.12,£0.52,
+19/05/2026,DEMO-000912,Demo Victoria Sponge Slice,3,demo003@example.com,Website,£11.16,£1.86,£2.55
+19/05/2026,DEMO-000913,Demo Seeded Batch,1,demo029@example.com,Shop,£3.60,£0.00,£0.95
+19/05/2026,DEMO-000914,Demo Filter Coffee,2,demo027@example.com,Shop,£5.28,£0.88,
+19/05/2026,DEMO-000915,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,
+19/05/2026,DEMO-000916,Demo Seeded Batch,3,,Website,£10.80,£0.00,£2.85
+19/05/2026,DEMO-000917,Demo Croissant,3,,Shop,£5.70,£0.00,£1.44
+19/05/2026,DEMO-000918,Demo Flat White,3,,Website,£10.44,£1.74,
+19/05/2026,DEMO-000919,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,£1.70
+19/05/2026,DEMO-000920,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,
+20/05/2026,DEMO-000921,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+20/05/2026,DEMO-000922,Demo Birthday Cake,1,,Website,£33.60,£5.60,£7.50
+20/05/2026,DEMO-000923,Demo Filter Coffee,3,demo030@example.com,Shop,£7.92,£1.32,£0.90
+20/05/2026,DEMO-000924,Demo Lemon Drizzle Slice,1,demo020@example.com,Market stall,£3.72,£0.62,
+20/05/2026,DEMO-000925,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+20/05/2026,DEMO-000926,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,£1.40
+20/05/2026,DEMO-000927,Demo Baguette,1,demo011@example.com,Shop,£2.10,£0.00,
+20/05/2026,DEMO-000928,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+20/05/2026,DEMO-000929,Demo Filter Coffee,1,demo030@example.com,Shop,£2.64,£0.44,£0.30
+20/05/2026,DEMO-000930,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,
+20/05/2026,DEMO-000931,Demo Pain au Chocolat,3,demo001@example.com,Market stall,£6.60,£0.00,
+20/05/2026,DEMO-000932,Demo Croissant,1,demo029@example.com,Shop,£1.90,£0.00,
+20/05/2026,DEMO-000933,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+21/05/2026,DEMO-000934,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,£1.70
+21/05/2026,DEMO-000935,Demo Croissant,3,demo001@example.com,Market stall,£5.70,£0.00,
+21/05/2026,DEMO-000936,Demo Lemon Drizzle Slice,3,demo040@example.com,Website,£11.16,£1.86,£2.40
+21/05/2026,DEMO-000937,Demo Flat White,1,demo032@example.com,Market stall,£3.48,£0.58,£0.45
+21/05/2026,DEMO-000938,Demo Pain au Chocolat,1,demo022@example.com,Shop,£2.20,£0.00,£0.60
+21/05/2026,DEMO-000939,Demo Victoria Sponge Slice,3,,Shop,£11.16,£1.86,£2.55
+21/05/2026,DEMO-000940,Demo Croissant,1,,Website,£1.90,£0.00,
+21/05/2026,DEMO-000941,Demo Seeded Batch,3,demo013@example.com,Website,£10.80,£0.00,£2.85
+21/05/2026,DEMO-000942,Demo Croissant,1,,Shop,£1.90,£0.00,
+21/05/2026,DEMO-000943,Demo Birthday Cake,1,,Shop,£33.60,£5.60,
+21/05/2026,DEMO-000944,Demo Cinnamon Swirl,1,,Website,£3.12,£0.52,£0.70
+22/05/2026,DEMO-000945,Demo Filter Coffee,1,demo009@example.com,Shop,£2.64,£0.44,£0.30
+22/05/2026,DEMO-000946,Demo Seeded Batch,3,demo037@example.com,Shop,£10.80,£0.00,
+22/05/2026,DEMO-000947,Demo Cinnamon Swirl,2,demo005@example.com,Shop,£6.24,£1.04,£1.40
+22/05/2026,DEMO-000948,Demo Flat White,3,demo010@example.com,Shop,£10.44,£1.74,
+22/05/2026,DEMO-000949,Demo Cinnamon Swirl,3,,Market stall,£9.36,£1.56,£2.10
+22/05/2026,DEMO-000950,Demo Pain au Chocolat,1,demo004@example.com,Website,£2.20,£0.00,£0.60
+22/05/2026,DEMO-000951,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+22/05/2026,DEMO-000952,Demo Croissant,2,demo027@example.com,Shop,£3.80,£0.00,£0.96
+23/05/2026,DEMO-000953,Demo Flat White,1,demo024@example.com,Shop,£3.48,£0.58,
+23/05/2026,DEMO-000954,Demo Filter Coffee,1,,Market stall,£2.64,£0.44,
+23/05/2026,DEMO-000955,Demo Sausage Roll (hot),2,demo026@example.com,Shop,£6.00,£1.00,£1.80
+23/05/2026,DEMO-000956,Demo Croissant,2,demo004@example.com,Website,£3.80,£0.00,
+23/05/2026,DEMO-000957,Demo Croissant,2,demo008@example.com,Shop,£3.80,£0.00,
+23/05/2026,DEMO-000958,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+23/05/2026,DEMO-000959,Demo Flat White,2,,Shop,£6.96,£1.16,£0.90
+23/05/2026,DEMO-000960,Demo Sausage Roll (hot),3,demo004@example.com,Shop,£9.00,£1.50,
+23/05/2026,DEMO-000961,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+23/05/2026,DEMO-000962,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+25/05/2026,DEMO-000963,Demo Lemon Drizzle Slice,1,demo037@example.com,Shop,£3.72,£0.62,
+25/05/2026,DEMO-000964,Demo Birthday Cake,3,demo007@example.com,Market stall,£100.80,£16.80,
+25/05/2026,DEMO-000965,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+25/05/2026,DEMO-000966,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,
+25/05/2026,DEMO-000967,Demo Croissant,1,demo026@example.com,Website,£1.90,£0.00,
+25/05/2026,DEMO-000968,Demo Filter Coffee,1,demo011@example.com,Shop,£2.64,£0.44,£0.30
+25/05/2026,DEMO-000969,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,£2.70
+25/05/2026,DEMO-000970,Demo Flat White,3,,Shop,£10.44,£1.74,£1.35
+26/05/2026,DEMO-000971,Demo Birthday Cake,1,,Market stall,£33.60,£5.60,£7.50
+26/05/2026,DEMO-000972,Demo Filter Coffee,1,,Website,£2.64,£0.44,£0.30
+26/05/2026,DEMO-000973,Demo Baguette,1,,Shop,£2.10,£0.00,
+26/05/2026,DEMO-000974,Demo Croissant,1,demo012@example.com,Shop,£1.90,£0.00,£0.48
+26/05/2026,DEMO-000975,Demo Seeded Batch,1,demo020@example.com,Shop,£3.60,£0.00,£0.95
+26/05/2026,DEMO-000976,Demo Sausage Roll (hot),1,demo030@example.com,Market stall,£3.00,£0.50,
+26/05/2026,DEMO-000977,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+26/05/2026,DEMO-000978,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+27/05/2026,DEMO-000979,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,£0.85
+27/05/2026,DEMO-000980,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+27/05/2026,DEMO-000981,Demo Cinnamon Swirl,1,demo031@example.com,Market stall,£3.12,£0.52,£0.70
+27/05/2026,DEMO-000982,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+27/05/2026,DEMO-000983,Demo Lemon Drizzle Slice,3,demo040@example.com,Shop,£11.16,£1.86,
+27/05/2026,DEMO-000984,Demo Cinnamon Swirl,3,demo017@example.com,Market stall,£9.36,£1.56,£2.10
+28/05/2026,DEMO-000985,Demo Seeded Batch,1,demo024@example.com,Market stall,£3.60,£0.00,£0.95
+28/05/2026,DEMO-000986,Demo Flat White,2,,Shop,£6.96,£1.16,
+28/05/2026,DEMO-000987,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+28/05/2026,DEMO-000988,Demo Cinnamon Swirl,3,demo040@example.com,Shop,£9.36,£1.56,
+28/05/2026,DEMO-000989,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,
+28/05/2026,DEMO-000990,Demo Seeded Batch,3,,Website,£10.80,£0.00,
+28/05/2026,DEMO-000991,Demo Seeded Batch,1,demo009@example.com,Website,£3.60,£0.00,£0.95
+28/05/2026,DEMO-000992,Demo Seeded Batch,3,demo016@example.com,Market stall,£10.80,£0.00,
+28/05/2026,DEMO-000993,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,
+28/05/2026,DEMO-000994,Demo Lemon Drizzle Slice,2,demo024@example.com,Shop,£7.44,£1.24,£1.60
+28/05/2026,DEMO-000995,Demo Baguette,2,demo010@example.com,Shop,£4.20,£0.00,£1.10
+29/05/2026,DEMO-000996,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,
+29/05/2026,DEMO-000997,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+29/05/2026,DEMO-000998,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+29/05/2026,DEMO-000999,Demo Croissant,1,demo027@example.com,Website,£1.90,£0.00,£0.48
+29/05/2026,DEMO-001000,Demo Lemon Drizzle Slice,2,demo010@example.com,Shop,£7.44,£1.24,
+29/05/2026,DEMO-001001,Demo Seeded Batch,1,demo002@example.com,Website,£3.60,£0.00,
+29/05/2026,DEMO-001002,Demo Sourdough Loaf,2,demo017@example.com,Website,£8.40,£0.00,£2.20
+29/05/2026,DEMO-001003,Demo Birthday Cake,2,,Website,£67.20,£11.20,£15.00
+29/05/2026,DEMO-001004,Demo Croissant,2,,Market stall,£3.80,£0.00,£0.96
+29/05/2026,DEMO-001005,Demo Baguette,2,,Website,£4.20,£0.00,£1.10
+29/05/2026,DEMO-001006,Demo Seeded Batch,1,demo013@example.com,Shop,£3.60,£0.00,£0.95
+30/05/2026,DEMO-001007,Demo Pain au Chocolat,1,demo010@example.com,Shop,£2.20,£0.00,£0.60
+30/05/2026,DEMO-001008,Demo Baguette,1,demo026@example.com,Website,£2.10,£0.00,£0.55
+30/05/2026,DEMO-001009,Demo Seeded Batch,2,demo014@example.com,Shop,£7.20,£0.00,
+30/05/2026,DEMO-001010,Demo Pain au Chocolat,2,,Website,£4.40,£0.00,
+30/05/2026,DEMO-001011,Demo Sausage Roll (hot),3,demo034@example.com,Shop,£9.00,£1.50,£2.70
+30/05/2026,DEMO-001012,Demo Seeded Batch,1,,Website,£3.60,£0.00,£0.95
+30/05/2026,DEMO-001013,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+01/06/2026,DEMO-001014,Demo Flat White,2,,Market stall,£6.96,£1.16,£0.90
+01/06/2026,DEMO-001015,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+01/06/2026,DEMO-001016,Demo Sausage Roll (hot),2,,Website,£6.00,£1.00,£1.80
+01/06/2026,DEMO-001017,Demo Seeded Batch,3,demo004@example.com,Shop,£10.80,£0.00,£2.85
+01/06/2026,DEMO-001018,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+01/06/2026,DEMO-001019,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+01/06/2026,DEMO-001020,Demo Filter Coffee,3,,Website,£7.92,£1.32,£0.90
+01/06/2026,DEMO-001021,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,
+01/06/2026,DEMO-001022,Demo Seeded Batch,2,demo008@example.com,Shop,£7.20,£0.00,
+01/06/2026,DEMO-001023,Demo Sourdough Loaf,3,,Shop,£12.60,£0.00,£3.30
+02/06/2026,DEMO-001024,Demo Cinnamon Swirl,2,,Website,£6.24,£1.04,
+02/06/2026,DEMO-001025,Demo Birthday Cake,2,,Website,£67.20,£11.20,£15.00
+02/06/2026,DEMO-001026,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+02/06/2026,DEMO-001027,Demo Croissant,2,,Market stall,£3.80,£0.00,
+02/06/2026,DEMO-001028,Demo Victoria Sponge Slice,-2,demo007@example.com,Shop,£-7.44,£-1.24,£1.70
+02/06/2026,DEMO-001029,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+02/06/2026,DEMO-001030,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,£2.70
+02/06/2026,DEMO-001031,Demo Seeded Batch,3,,Market stall,£10.80,£0.00,
+03/06/2026,DEMO-001032,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+03/06/2026,DEMO-001033,Demo Baguette,1,demo015@example.com,Market stall,£2.10,£0.00,£0.55
+03/06/2026,DEMO-001034,Demo Sausage Roll (hot),2,demo020@example.com,Shop,£6.00,£1.00,
+03/06/2026,DEMO-001035,Demo Croissant,3,demo009@example.com,Market stall,£5.70,£0.00,
+03/06/2026,DEMO-001036,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+03/06/2026,DEMO-001037,Demo Cinnamon Swirl,3,,Shop,£9.36,£1.56,
+03/06/2026,DEMO-001038,Demo Flat White,1,demo009@example.com,Shop,£3.48,£0.58,£0.45
+03/06/2026,DEMO-001039,Demo Croissant,1,,Market stall,£1.90,£0.00,£0.48
+03/06/2026,DEMO-001040,Demo Victoria Sponge Slice,2,demo036@example.com,Shop,£7.44,£1.24,£1.70
+03/06/2026,DEMO-001041,Demo Sourdough Loaf,1,,Website,£4.20,£0.00,£1.10
+03/06/2026,DEMO-001042,Demo Lemon Drizzle Slice,3,demo027@example.com,Shop,£11.16,£1.86,£2.40
+03/06/2026,DEMO-001043,Demo Pain au Chocolat,3,demo009@example.com,Market stall,£6.60,£0.00,
+04/06/2026,DEMO-001044,Demo Sourdough Loaf,1,demo018@example.com,Market stall,£4.20,£0.00,£1.10
+04/06/2026,DEMO-001045,Demo Pain au Chocolat,1,,Website,£2.20,£0.00,£0.60
+04/06/2026,DEMO-001046,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+04/06/2026,DEMO-001047,Demo Birthday Cake,3,,Shop,£100.80,£16.80,£22.50
+04/06/2026,DEMO-001048,Demo Filter Coffee,1,,Website,£2.64,£0.44,
+04/06/2026,DEMO-001049,Demo Flat White,2,demo017@example.com,Shop,£6.96,£1.16,£0.90
+04/06/2026,DEMO-001050,Demo Pain au Chocolat,3,demo025@example.com,Shop,£6.60,£0.00,
+04/06/2026,DEMO-001051,Demo Pain au Chocolat,2,demo001@example.com,Website,£4.40,£0.00,£1.20
+04/06/2026,DEMO-001052,Demo Pain au Chocolat,1,demo007@example.com,Shop,£2.20,£0.00,£0.60
+04/06/2026,DEMO-001053,Demo Sourdough Loaf,1,demo007@example.com,Shop,£4.20,£0.00,£1.10
+05/06/2026,DEMO-001054,Demo Birthday Cake,3,,Shop,£100.80,£16.80,
+05/06/2026,DEMO-001055,Demo Cinnamon Swirl,1,demo010@example.com,Shop,£3.12,£0.52,
+05/06/2026,DEMO-001056,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,£2.70
+05/06/2026,DEMO-001057,Demo Cinnamon Swirl,2,,Website,£6.24,£1.04,
+05/06/2026,DEMO-001058,Demo Baguette,2,demo003@example.com,Shop,£4.20,£0.00,£1.10
+05/06/2026,DEMO-001059,Demo Flat White,1,demo008@example.com,Website,£3.48,£0.58,£0.45
+05/06/2026,DEMO-001060,Demo Sausage Roll (hot),1,demo021@example.com,Shop,£3.00,£0.50,£0.90
+05/06/2026,DEMO-001061,Demo Baguette,2,,Market stall,£4.20,£0.00,£1.10
+05/06/2026,DEMO-001062,Demo Cinnamon Swirl,3,,Shop,£9.36,£1.56,£2.10
+05/06/2026,DEMO-001063,Demo Seeded Batch,2,demo016@example.com,Shop,£7.20,£0.00,£1.90
+05/06/2026,DEMO-001064,Demo Sourdough Loaf,1,,Website,£4.20,£0.00,£1.10
+05/06/2026,DEMO-001065,Demo Victoria Sponge Slice,3,demo008@example.com,Market stall,£11.16,£1.86,£2.55
+06/06/2026,DEMO-001066,Demo Baguette,1,,Market stall,£2.10,£0.00,
+06/06/2026,DEMO-001067,Demo Flat White,1,demo023@example.com,Shop,£3.48,£0.58,£0.45
+06/06/2026,DEMO-001068,Demo Filter Coffee,2,,Shop,£5.28,£0.88,
+06/06/2026,DEMO-001069,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,
+06/06/2026,DEMO-001070,Demo Sausage Roll (hot),3,,Market stall,£9.00,£1.50,
+06/06/2026,DEMO-001071,Demo Baguette,3,,Market stall,£6.30,£0.00,£1.65
+06/06/2026,DEMO-001072,Demo Seeded Batch,1,demo039@example.com,Shop,£3.60,£0.00,£0.95
+06/06/2026,DEMO-001073,Demo Seeded Batch,-2,,Shop,£-7.20,£-0.00,£1.90
+06/06/2026,DEMO-001074,Demo Croissant,2,,Shop,£3.80,£0.00,£0.96
+06/06/2026,DEMO-001075,Demo Flat White,1,demo039@example.com,Shop,£3.48,£0.58,
+06/06/2026,DEMO-001076,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+06/06/2026,DEMO-001077,Demo Baguette,3,,Shop,£6.30,£0.00,
+06/06/2026,DEMO-001078,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+08/06/2026,DEMO-001079,Demo Baguette,1,demo038@example.com,Shop,£2.10,£0.00,
+08/06/2026,DEMO-001080,Demo Victoria Sponge Slice,2,demo038@example.com,Shop,£7.44,£1.24,£1.70
+08/06/2026,DEMO-001081,Demo Baguette,1,demo029@example.com,Shop,£2.10,£0.00,£0.55
+08/06/2026,DEMO-001082,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+08/06/2026,DEMO-001083,Demo Sausage Roll (hot),1,demo035@example.com,Shop,£3.00,£0.50,£0.90
+08/06/2026,DEMO-001084,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+08/06/2026,DEMO-001085,Demo Filter Coffee,2,,Website,£5.28,£0.88,£0.60
+09/06/2026,DEMO-001086,Demo Baguette,2,demo037@example.com,Shop,£4.20,£0.00,£1.10
+09/06/2026,DEMO-001087,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+09/06/2026,DEMO-001088,Demo Seeded Batch,1,,Shop,£3.60,£0.00,
+09/06/2026,DEMO-001089,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,£1.70
+09/06/2026,DEMO-001090,Demo Flat White,1,,Market stall,£3.48,£0.58,
+09/06/2026,DEMO-001091,Demo Birthday Cake,1,,Shop,£33.60,£5.60,£7.50
+09/06/2026,DEMO-001092,Demo Baguette,1,,Shop,£2.10,£0.00,
+09/06/2026,DEMO-001093,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,
+09/06/2026,DEMO-001094,Demo Flat White,1,demo005@example.com,Shop,£3.48,£0.58,£0.45
+09/06/2026,DEMO-001095,Demo Filter Coffee,-3,,Shop,£-7.92,£-1.32,£0.90
+09/06/2026,DEMO-001096,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+09/06/2026,DEMO-001097,Demo Sausage Roll (hot),1,,Market stall,£3.00,£0.50,£0.90
+09/06/2026,DEMO-001098,Demo Flat White,3,demo030@example.com,Website,£10.44,£1.74,£1.35
+10/06/2026,DEMO-001099,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+10/06/2026,DEMO-001100,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,£1.40
+10/06/2026,DEMO-001101,Demo Birthday Cake,-1,demo001@example.com,Shop,£-33.60,£-5.60,
+10/06/2026,DEMO-001102,Demo Filter Coffee,1,,Website,£2.64,£0.44,£0.30
+10/06/2026,DEMO-001103,Demo Pain au Chocolat,2,demo013@example.com,Shop,£4.40,£0.00,
+10/06/2026,DEMO-001104,Demo Seeded Batch,1,,Market stall,£3.60,£0.00,
+10/06/2026,DEMO-001105,Demo Sausage Roll (hot),1,,Website,£3.00,£0.50,£0.90
+10/06/2026,DEMO-001106,Demo Flat White,1,,Website,£3.48,£0.58,
+11/06/2026,DEMO-001107,Demo Filter Coffee,1,demo031@example.com,Shop,£2.64,£0.44,£0.30
+11/06/2026,DEMO-001108,Demo Flat White,1,demo003@example.com,Shop,£3.48,£0.58,£0.45
+11/06/2026,DEMO-001109,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+11/06/2026,DEMO-001110,Demo Sourdough Loaf,1,demo022@example.com,Shop,£4.20,£0.00,£1.10
+11/06/2026,DEMO-001111,Demo Cinnamon Swirl,1,demo037@example.com,Website,£3.12,£0.52,£0.70
+11/06/2026,DEMO-001112,Demo Birthday Cake,1,demo011@example.com,Shop,£33.60,£5.60,£7.50
+11/06/2026,DEMO-001113,Demo Victoria Sponge Slice,2,demo029@example.com,Market stall,£7.44,£1.24,
+12/06/2026,DEMO-001114,Demo Sourdough Loaf,1,demo017@example.com,Shop,£4.20,£0.00,£1.10
+12/06/2026,DEMO-001115,Demo Cinnamon Swirl,1,,Market stall,£3.12,£0.52,£0.70
+12/06/2026,DEMO-001116,Demo Seeded Batch,1,,Market stall,£3.60,£0.00,£0.95
+12/06/2026,DEMO-001117,Demo Sourdough Loaf,2,demo004@example.com,Market stall,£8.40,£0.00,
+12/06/2026,DEMO-001118,Demo Croissant,2,,Website,£3.80,£0.00,£0.96
+12/06/2026,DEMO-001119,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+12/06/2026,DEMO-001120,Demo Croissant,1,demo002@example.com,Shop,£1.90,£0.00,£0.48
+12/06/2026,DEMO-001121,Demo Filter Coffee,1,demo001@example.com,Shop,£2.64,£0.44,
+12/06/2026,DEMO-001122,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+12/06/2026,DEMO-001123,Demo Lemon Drizzle Slice,1,demo023@example.com,Website,£3.72,£0.62,£0.80
+12/06/2026,DEMO-001124,Demo Pain au Chocolat,2,demo006@example.com,Shop,£4.40,£0.00,£1.20
+12/06/2026,DEMO-001125,Demo Croissant,3,,Shop,£5.70,£0.00,£1.44
+12/06/2026,DEMO-001126,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+12/06/2026,DEMO-001127,Demo Seeded Batch,2,demo028@example.com,Shop,£7.20,£0.00,£1.90
+13/06/2026,DEMO-001128,Demo Victoria Sponge Slice,1,demo016@example.com,Shop,£3.72,£0.62,£0.85
+13/06/2026,DEMO-001129,Demo Sourdough Loaf,2,,Market stall,£8.40,£0.00,£2.20
+13/06/2026,DEMO-001130,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+13/06/2026,DEMO-001131,Demo Sourdough Loaf,2,,Website,£8.40,£0.00,£2.20
+13/06/2026,DEMO-001132,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+13/06/2026,DEMO-001133,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+15/06/2026,DEMO-001134,Demo Filter Coffee,2,demo029@example.com,Shop,£5.28,£0.88,£0.60
+15/06/2026,DEMO-001135,Demo Baguette,1,demo012@example.com,Website,£2.10,£0.00,£0.55
+15/06/2026,DEMO-001136,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+15/06/2026,DEMO-001137,Demo Sausage Roll (hot),2,demo019@example.com,Shop,£6.00,£1.00,£1.80
+15/06/2026,DEMO-001138,Demo Flat White,1,,Website,£3.48,£0.58,£0.45
+15/06/2026,DEMO-001139,Demo Sausage Roll (hot),1,demo033@example.com,Shop,£3.00,£0.50,
+15/06/2026,DEMO-001140,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,
+15/06/2026,DEMO-001141,Demo Victoria Sponge Slice,1,demo017@example.com,Market stall,£3.72,£0.62,
+15/06/2026,DEMO-001142,Demo Seeded Batch,3,,Shop,£10.80,£0.00,£2.85
+16/06/2026,DEMO-001143,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+16/06/2026,DEMO-001144,Demo Filter Coffee,1,demo033@example.com,Shop,£2.64,£0.44,£0.30
+16/06/2026,DEMO-001145,Demo Filter Coffee,2,,Website,£5.28,£0.88,
+16/06/2026,DEMO-001146,Demo Seeded Batch,2,,Market stall,£7.20,£0.00,
+16/06/2026,DEMO-001147,Demo Cinnamon Swirl,1,demo027@example.com,Market stall,£3.12,£0.52,£0.70
+16/06/2026,DEMO-001148,Demo Birthday Cake,2,demo018@example.com,Shop,£67.20,£11.20,
+16/06/2026,DEMO-001149,Demo Birthday Cake,2,,Shop,£67.20,£11.20,£15.00
+16/06/2026,DEMO-001150,Demo Birthday Cake,2,demo031@example.com,Shop,£67.20,£11.20,£15.00
+16/06/2026,DEMO-001151,Demo Filter Coffee,3,demo010@example.com,Market stall,£7.92,£1.32,£0.90
+16/06/2026,DEMO-001152,Demo Croissant,1,demo037@example.com,Website,£1.90,£0.00,£0.48
+17/06/2026,DEMO-001153,Demo Birthday Cake,1,,Shop,£33.60,£5.60,
+17/06/2026,DEMO-001154,Demo Sausage Roll (hot),2,,Market stall,£6.00,£1.00,£1.80
+17/06/2026,DEMO-001155,Demo Victoria Sponge Slice,2,demo017@example.com,Market stall,£7.44,£1.24,£1.70
+17/06/2026,DEMO-001156,Demo Birthday Cake,1,,Shop,£33.60,£5.60,£7.50
+17/06/2026,DEMO-001157,Demo Sourdough Loaf,2,,Website,£8.40,£0.00,£2.20
+17/06/2026,DEMO-001158,Demo Sausage Roll (hot),2,,Website,£6.00,£1.00,
+17/06/2026,DEMO-001159,Demo Sourdough Loaf,1,demo001@example.com,Shop,£4.20,£0.00,£1.10
+17/06/2026,DEMO-001160,Demo Birthday Cake,-1,,Shop,£-33.60,£-5.60,£7.50
+17/06/2026,DEMO-001161,Demo Lemon Drizzle Slice,1,,Market stall,£3.72,£0.62,£0.80
+17/06/2026,DEMO-001162,Demo Croissant,3,demo032@example.com,Shop,£5.70,£0.00,£1.44
+17/06/2026,DEMO-001163,Demo Baguette,2,demo025@example.com,Website,£4.20,£0.00,£1.10
+18/06/2026,DEMO-001164,Demo Victoria Sponge Slice,3,demo008@example.com,Shop,£11.16,£1.86,£2.55
+18/06/2026,DEMO-001165,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+18/06/2026,DEMO-001166,Demo Filter Coffee,3,demo008@example.com,Shop,£7.92,£1.32,£0.90
+18/06/2026,DEMO-001167,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+18/06/2026,DEMO-001168,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+18/06/2026,DEMO-001169,Demo Seeded Batch,1,,Shop,£3.60,£0.00,
+18/06/2026,DEMO-001170,Demo Croissant,2,,Shop,£3.80,£0.00,£0.96
+18/06/2026,DEMO-001171,Demo Birthday Cake,1,demo034@example.com,Website,£33.60,£5.60,£7.50
+18/06/2026,DEMO-001172,Demo Seeded Batch,1,demo005@example.com,Website,£3.60,£0.00,
+18/06/2026,DEMO-001173,Demo Flat White,1,,Website,£3.48,£0.58,£0.45
+19/06/2026,DEMO-001174,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,£0.85
+19/06/2026,DEMO-001175,Demo Croissant,1,,Shop,£1.90,£0.00,
+19/06/2026,DEMO-001176,Demo Filter Coffee,1,demo025@example.com,Shop,£2.64,£0.44,
+19/06/2026,DEMO-001177,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,£0.85
+19/06/2026,DEMO-001178,Demo Flat White,1,demo031@example.com,Shop,£3.48,£0.58,£0.45
+19/06/2026,DEMO-001179,Demo Lemon Drizzle Slice,1,,Website,£3.72,£0.62,£0.80
+20/06/2026,DEMO-001180,Demo Seeded Batch,2,,Market stall,£7.20,£0.00,
+20/06/2026,DEMO-001181,Demo Birthday Cake,2,,Website,£67.20,£11.20,
+20/06/2026,DEMO-001182,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+20/06/2026,DEMO-001183,Demo Cinnamon Swirl,3,demo026@example.com,Shop,£9.36,£1.56,£2.10
+20/06/2026,DEMO-001184,Demo Cinnamon Swirl,1,,Market stall,£3.12,£0.52,£0.70
+20/06/2026,DEMO-001185,Demo Baguette,1,,Website,£2.10,£0.00,
+20/06/2026,DEMO-001186,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,
+20/06/2026,DEMO-001187,Demo Lemon Drizzle Slice,1,demo016@example.com,Shop,£3.72,£0.62,
+20/06/2026,DEMO-001188,Demo Birthday Cake,3,,Market stall,£100.80,£16.80,£22.50
+22/06/2026,DEMO-001189,Demo Seeded Batch,1,,Shop,£3.60,£0.00,
+22/06/2026,DEMO-001190,Demo Victoria Sponge Slice,2,demo014@example.com,Shop,£7.44,£1.24,£1.70
+22/06/2026,DEMO-001191,Demo Lemon Drizzle Slice,3,demo027@example.com,Shop,£11.16,£1.86,£2.40
+22/06/2026,DEMO-001192,Demo Birthday Cake,1,demo011@example.com,Shop,£33.60,£5.60,
+22/06/2026,DEMO-001193,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+22/06/2026,DEMO-001194,Demo Filter Coffee,3,,Shop,£7.92,£1.32,£0.90
+22/06/2026,DEMO-001195,Demo Lemon Drizzle Slice,1,demo017@example.com,Shop,£3.72,£0.62,£0.80
+22/06/2026,DEMO-001196,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+22/06/2026,DEMO-001197,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,
+22/06/2026,DEMO-001198,Demo Lemon Drizzle Slice,1,demo007@example.com,Shop,£3.72,£0.62,
+23/06/2026,DEMO-001199,Demo Baguette,1,,Market stall,£2.10,£0.00,£0.55
+23/06/2026,DEMO-001200,Demo Cinnamon Swirl,2,,Website,£6.24,£1.04,£1.40
+23/06/2026,DEMO-001201,Demo Flat White,3,,Website,£10.44,£1.74,£1.35
+23/06/2026,DEMO-001202,Demo Cinnamon Swirl,3,,Shop,£9.36,£1.56,
+23/06/2026,DEMO-001203,Demo Lemon Drizzle Slice,3,demo024@example.com,Market stall,£11.16,£1.86,
+23/06/2026,DEMO-001204,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+23/06/2026,DEMO-001205,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+23/06/2026,DEMO-001206,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+23/06/2026,DEMO-001207,Demo Pain au Chocolat,1,demo018@example.com,Website,£2.20,£0.00,£0.60
+23/06/2026,DEMO-001208,Demo Sausage Roll (hot),2,,Website,£6.00,£1.00,£1.80
+23/06/2026,DEMO-001209,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+24/06/2026,DEMO-001210,Demo Cinnamon Swirl,1,demo033@example.com,Shop,£3.12,£0.52,£0.70
+24/06/2026,DEMO-001211,Demo Cinnamon Swirl,1,demo021@example.com,Shop,£3.12,£0.52,£0.70
+24/06/2026,DEMO-001212,Demo Pain au Chocolat,1,demo036@example.com,Website,£2.20,£0.00,£0.60
+24/06/2026,DEMO-001213,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+24/06/2026,DEMO-001214,Demo Flat White,1,,Market stall,£3.48,£0.58,£0.45
+24/06/2026,DEMO-001215,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+25/06/2026,DEMO-001216,Demo Sausage Roll (hot),1,,Website,£3.00,£0.50,£0.90
+25/06/2026,DEMO-001217,Demo Flat White,2,,Website,£6.96,£1.16,
+25/06/2026,DEMO-001218,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,
+25/06/2026,DEMO-001219,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,
+25/06/2026,DEMO-001220,Demo Seeded Batch,1,demo005@example.com,Website,£3.60,£0.00,£0.95
+25/06/2026,DEMO-001221,Demo Pain au Chocolat,1,,Website,£2.20,£0.00,£0.60
+25/06/2026,DEMO-001222,Demo Cinnamon Swirl,1,demo031@example.com,Website,£3.12,£0.52,
+25/06/2026,DEMO-001223,Demo Pain au Chocolat,1,demo020@example.com,Shop,£2.20,£0.00,£0.60
+25/06/2026,DEMO-001224,Demo Filter Coffee,1,,Website,£2.64,£0.44,£0.30
+25/06/2026,DEMO-001225,Demo Flat White,2,demo038@example.com,Shop,£6.96,£1.16,£0.90
+25/06/2026,DEMO-001226,Demo Victoria Sponge Slice,3,,Market stall,£11.16,£1.86,£2.55
+25/06/2026,DEMO-001227,Demo Flat White,1,demo028@example.com,Shop,£3.48,£0.58,£0.45
+25/06/2026,DEMO-001228,Demo Lemon Drizzle Slice,3,,Website,£11.16,£1.86,
+25/06/2026,DEMO-001229,Demo Flat White,2,,Website,£6.96,£1.16,
+26/06/2026,DEMO-001230,Demo Victoria Sponge Slice,3,,Shop,£11.16,£1.86,£2.55
+26/06/2026,DEMO-001231,Demo Baguette,2,demo016@example.com,Market stall,£4.20,£0.00,£1.10
+26/06/2026,DEMO-001232,Demo Baguette,3,,Market stall,£6.30,£0.00,£1.65
+26/06/2026,DEMO-001233,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+26/06/2026,DEMO-001234,Demo Cinnamon Swirl,1,,Market stall,£3.12,£0.52,£0.70
+26/06/2026,DEMO-001235,Demo Croissant,2,,Market stall,£3.80,£0.00,£0.96
+26/06/2026,DEMO-001236,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+26/06/2026,DEMO-001237,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,£1.40
+26/06/2026,DEMO-001238,Demo Lemon Drizzle Slice,2,,Website,£7.44,£1.24,£1.60
+26/06/2026,DEMO-001239,Demo Pain au Chocolat,3,,Shop,£6.60,£0.00,£1.80
+26/06/2026,DEMO-001240,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+26/06/2026,DEMO-001241,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+26/06/2026,DEMO-001242,Demo Filter Coffee,2,,Shop,£5.28,£0.88,
+26/06/2026,DEMO-001243,Demo Pain au Chocolat,2,,Website,£4.40,£0.00,£1.20
+27/06/2026,DEMO-001244,Demo Croissant,2,,Shop,£3.80,£0.00,£0.96
+27/06/2026,DEMO-001245,Demo Pain au Chocolat,1,demo002@example.com,Shop,£2.20,£0.00,£0.60
+27/06/2026,DEMO-001246,Demo Sourdough Loaf,3,,Shop,£12.60,£0.00,£3.30
+27/06/2026,DEMO-001247,Demo Seeded Batch,1,,Shop,£3.60,£0.00,
+27/06/2026,DEMO-001248,Demo Filter Coffee,1,,Website,£2.64,£0.44,£0.30
+27/06/2026,DEMO-001249,Demo Croissant,1,demo009@example.com,Shop,£1.90,£0.00,£0.48
+27/06/2026,DEMO-001250,Demo Lemon Drizzle Slice,1,,Website,£3.72,£0.62,£0.80
+27/06/2026,DEMO-001251,Demo Croissant,1,,Website,£1.90,£0.00,£0.48
+27/06/2026,DEMO-001252,Demo Sausage Roll (hot),1,demo029@example.com,Website,£3.00,£0.50,£0.90
+27/06/2026,DEMO-001253,Demo Sourdough Loaf,1,demo011@example.com,Market stall,£4.20,£0.00,
+29/06/2026,DEMO-001254,Demo Seeded Batch,3,,Shop,£10.80,£0.00,£2.85
+29/06/2026,DEMO-001255,Demo Filter Coffee,3,demo013@example.com,Market stall,£7.92,£1.32,£0.90
+29/06/2026,DEMO-001256,Demo Cinnamon Swirl,2,,Market stall,£6.24,£1.04,
+29/06/2026,DEMO-001257,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+29/06/2026,DEMO-001258,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+29/06/2026,DEMO-001259,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,
+29/06/2026,DEMO-001260,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,£0.85
+29/06/2026,DEMO-001261,Demo Filter Coffee,1,demo038@example.com,Market stall,£2.64,£0.44,£0.30
+29/06/2026,DEMO-001262,Demo Sourdough Loaf,1,demo017@example.com,Website,£4.20,£0.00,£1.10
+30/06/2026,DEMO-001263,Demo Cinnamon Swirl,1,demo029@example.com,Shop,£3.12,£0.52,£0.70
+30/06/2026,DEMO-001264,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+30/06/2026,DEMO-001265,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,£1.40
+30/06/2026,DEMO-001266,Demo Lemon Drizzle Slice,2,demo002@example.com,Market stall,£7.44,£1.24,£1.60
+30/06/2026,DEMO-001267,Demo Seeded Batch,2,demo022@example.com,Shop,£7.20,£0.00,£1.90
+30/06/2026,DEMO-001268,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+30/06/2026,DEMO-001269,Demo Sourdough Loaf,2,,Market stall,£8.40,£0.00,£2.20
+30/06/2026,DEMO-001270,Demo Sourdough Loaf,1,,Market stall,£4.20,£0.00,£1.10
+30/06/2026,DEMO-001271,Demo Cinnamon Swirl,3,,Shop,£9.36,£1.56,
+01/07/2026,DEMO-001272,Demo Pain au Chocolat,3,demo032@example.com,Shop,£6.60,£0.00,
+01/07/2026,DEMO-001273,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+01/07/2026,DEMO-001274,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+01/07/2026,DEMO-001275,Demo Filter Coffee,1,demo006@example.com,Market stall,£2.64,£0.44,£0.30
+01/07/2026,DEMO-001276,Demo Filter Coffee,3,demo021@example.com,Market stall,£7.92,£1.32,£0.90
+01/07/2026,DEMO-001277,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+01/07/2026,DEMO-001278,Demo Croissant,1,demo006@example.com,Shop,£1.90,£0.00,£0.48
+01/07/2026,DEMO-001279,Demo Cinnamon Swirl,3,,Shop,£9.36,£1.56,£2.10
+01/07/2026,DEMO-001280,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,£0.85
+01/07/2026,DEMO-001281,Demo Cinnamon Swirl,1,demo039@example.com,Website,£3.12,£0.52,
+01/07/2026,DEMO-001282,Demo Sausage Roll (hot),1,demo018@example.com,Shop,£3.00,£0.50,
+01/07/2026,DEMO-001283,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+01/07/2026,DEMO-001284,Demo Sourdough Loaf,2,demo028@example.com,Shop,£8.40,£0.00,
+01/07/2026,DEMO-001285,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+02/07/2026,DEMO-001286,Demo Cinnamon Swirl,3,demo007@example.com,Website,£9.36,£1.56,£2.10
+02/07/2026,DEMO-001287,Demo Pain au Chocolat,1,demo003@example.com,Website,£2.20,£0.00,£0.60
+02/07/2026,DEMO-001288,Demo Seeded Batch,2,,Market stall,£7.20,£0.00,
+02/07/2026,DEMO-001289,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+02/07/2026,DEMO-001290,Demo Filter Coffee,1,,Website,£2.64,£0.44,£0.30
+02/07/2026,DEMO-001291,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+02/07/2026,DEMO-001292,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+02/07/2026,DEMO-001293,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+02/07/2026,DEMO-001294,Demo Sourdough Loaf,3,,Shop,£12.60,£0.00,£3.30
+02/07/2026,DEMO-001295,Demo Flat White,3,,Website,£10.44,£1.74,£1.35
+02/07/2026,DEMO-001296,Demo Sausage Roll (hot),3,demo012@example.com,Shop,£9.00,£1.50,£2.70
+02/07/2026,DEMO-001297,Demo Croissant,2,demo025@example.com,Shop,£3.80,£0.00,£0.96
+02/07/2026,DEMO-001298,Demo Victoria Sponge Slice,3,,Website,£11.16,£1.86,£2.55
+02/07/2026,DEMO-001299,Demo Pain au Chocolat,1,demo024@example.com,Shop,£2.20,£0.00,
+03/07/2026,DEMO-001300,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+03/07/2026,DEMO-001301,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+03/07/2026,DEMO-001302,Demo Filter Coffee,1,demo012@example.com,Shop,£2.64,£0.44,£0.30
+03/07/2026,DEMO-001303,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+03/07/2026,DEMO-001304,Demo Seeded Batch,3,,Website,£10.80,£0.00,
+03/07/2026,DEMO-001305,Demo Seeded Batch,1,,Shop,£3.60,£0.00,
+03/07/2026,DEMO-001306,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+03/07/2026,DEMO-001307,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+03/07/2026,DEMO-001308,Demo Croissant,3,,Shop,£5.70,£0.00,£1.44
+03/07/2026,DEMO-001309,Demo Baguette,2,demo002@example.com,Website,£4.20,£0.00,£1.10
+03/07/2026,DEMO-001310,Demo Flat White,2,,Shop,£6.96,£1.16,£0.90
+03/07/2026,DEMO-001311,Demo Seeded Batch,3,demo029@example.com,Market stall,£10.80,£0.00,£2.85
+03/07/2026,DEMO-001312,Demo Croissant,1,,Shop,£1.90,£0.00,
+04/07/2026,DEMO-001313,Demo Pain au Chocolat,-1,,Website,£-2.20,£-0.00,
+04/07/2026,DEMO-001314,Demo Lemon Drizzle Slice,3,,Website,£11.16,£1.86,£2.40
+04/07/2026,DEMO-001315,Demo Baguette,1,demo005@example.com,Website,£2.10,£0.00,
+04/07/2026,DEMO-001316,Demo Victoria Sponge Slice,2,,Market stall,£7.44,£1.24,£1.70
+04/07/2026,DEMO-001317,Demo Cinnamon Swirl,1,demo028@example.com,Market stall,£3.12,£0.52,£0.70
+04/07/2026,DEMO-001318,Demo Seeded Batch,1,demo004@example.com,Shop,£3.60,£0.00,£0.95
+04/07/2026,DEMO-001319,Demo Victoria Sponge Slice,3,,Market stall,£11.16,£1.86,£2.55
+04/07/2026,DEMO-001320,Demo Sausage Roll (hot),2,,Shop,£6.00,£1.00,£1.80
+04/07/2026,DEMO-001321,Demo Pain au Chocolat,3,,Market stall,£6.60,£0.00,
+04/07/2026,DEMO-001322,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,
+04/07/2026,DEMO-001323,Demo Flat White,1,,Website,£3.48,£0.58,
+04/07/2026,DEMO-001324,Demo Victoria Sponge Slice,1,demo011@example.com,Market stall,£3.72,£0.62,£0.85
+04/07/2026,DEMO-001325,Demo Victoria Sponge Slice,2,,Market stall,£7.44,£1.24,
+04/07/2026,DEMO-001326,Demo Birthday Cake,2,,Shop,£67.20,£11.20,£15.00
+06/07/2026,DEMO-001327,Demo Birthday Cake,2,demo037@example.com,Shop,£67.20,£11.20,£15.00
+06/07/2026,DEMO-001328,Demo Filter Coffee,2,,Website,£5.28,£0.88,£0.60
+06/07/2026,DEMO-001329,Demo Lemon Drizzle Slice,1,demo024@example.com,Shop,£3.72,£0.62,£0.80
+06/07/2026,DEMO-001330,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+06/07/2026,DEMO-001331,Demo Sourdough Loaf,3,demo003@example.com,Shop,£12.60,£0.00,£3.30
+06/07/2026,DEMO-001332,Demo Lemon Drizzle Slice,2,demo038@example.com,Market stall,£7.44,£1.24,£1.60
+07/07/2026,DEMO-001333,Demo Filter Coffee,1,demo033@example.com,Website,£2.64,£0.44,£0.30
+07/07/2026,DEMO-001334,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+07/07/2026,DEMO-001335,Demo Victoria Sponge Slice,2,demo037@example.com,Shop,£7.44,£1.24,
+07/07/2026,DEMO-001336,Demo Sourdough Loaf,1,demo011@example.com,Shop,£4.20,£0.00,£1.10
+07/07/2026,DEMO-001337,Demo Baguette,1,demo032@example.com,Shop,£2.10,£0.00,£0.55
+07/07/2026,DEMO-001338,Demo Birthday Cake,1,demo017@example.com,Website,£33.60,£5.60,£7.50
+07/07/2026,DEMO-001339,Demo Lemon Drizzle Slice,1,demo020@example.com,Website,£3.72,£0.62,£0.80
+08/07/2026,DEMO-001340,Demo Victoria Sponge Slice,3,,Website,£11.16,£1.86,
+08/07/2026,DEMO-001341,Demo Sausage Roll (hot),3,,Market stall,£9.00,£1.50,£2.70
+08/07/2026,DEMO-001342,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+08/07/2026,DEMO-001343,Demo Filter Coffee,3,demo031@example.com,Website,£7.92,£1.32,£0.90
+08/07/2026,DEMO-001344,Demo Baguette,1,,Market stall,£2.10,£0.00,£0.55
+08/07/2026,DEMO-001345,Demo Flat White,2,demo019@example.com,Shop,£6.96,£1.16,£0.90
+08/07/2026,DEMO-001346,Demo Sausage Roll (hot),1,,Market stall,£3.00,£0.50,
+08/07/2026,DEMO-001347,Demo Sausage Roll (hot),2,demo022@example.com,Market stall,£6.00,£1.00,£1.80
+08/07/2026,DEMO-001348,Demo Pain au Chocolat,1,demo030@example.com,Market stall,£2.20,£0.00,£0.60
+08/07/2026,DEMO-001349,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+08/07/2026,DEMO-001350,Demo Birthday Cake,3,demo007@example.com,Market stall,£100.80,£16.80,£22.50
+08/07/2026,DEMO-001351,Demo Lemon Drizzle Slice,2,,Market stall,£7.44,£1.24,£1.60
+08/07/2026,DEMO-001352,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,
+08/07/2026,DEMO-001353,Demo Filter Coffee,1,,Market stall,£2.64,£0.44,£0.30
+09/07/2026,DEMO-001354,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,£2.70
+09/07/2026,DEMO-001355,Demo Birthday Cake,2,demo002@example.com,Shop,£67.20,£11.20,£15.00
+09/07/2026,DEMO-001356,Demo Filter Coffee,3,demo029@example.com,Shop,£7.92,£1.32,
+09/07/2026,DEMO-001357,Demo Sourdough Loaf,2,,Website,£8.40,£0.00,£2.20
+09/07/2026,DEMO-001358,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+09/07/2026,DEMO-001359,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+09/07/2026,DEMO-001360,Demo Croissant,1,,Shop,£1.90,£0.00,
+09/07/2026,DEMO-001361,Demo Cinnamon Swirl,2,,Market stall,£6.24,£1.04,
+09/07/2026,DEMO-001362,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+09/07/2026,DEMO-001363,Demo Victoria Sponge Slice,2,demo036@example.com,Shop,£7.44,£1.24,£1.70
+10/07/2026,DEMO-001364,Demo Sourdough Loaf,2,,Market stall,£8.40,£0.00,£2.20
+10/07/2026,DEMO-001365,Demo Croissant,2,,Market stall,£3.80,£0.00,£0.96
+10/07/2026,DEMO-001366,Demo Croissant,2,demo031@example.com,Shop,£3.80,£0.00,£0.96
+10/07/2026,DEMO-001367,Demo Flat White,2,,Market stall,£6.96,£1.16,£0.90
+10/07/2026,DEMO-001368,Demo Croissant,1,demo012@example.com,Shop,£1.90,£0.00,£0.48
+10/07/2026,DEMO-001369,Demo Sourdough Loaf,2,,Market stall,£8.40,£0.00,
+10/07/2026,DEMO-001370,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+11/07/2026,DEMO-001371,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,£1.60
+11/07/2026,DEMO-001372,Demo Lemon Drizzle Slice,2,demo002@example.com,Shop,£7.44,£1.24,£1.60
+11/07/2026,DEMO-001373,Demo Seeded Batch,3,demo028@example.com,Shop,£10.80,£0.00,£2.85
+11/07/2026,DEMO-001374,Demo Croissant,2,demo005@example.com,Shop,£3.80,£0.00,
+11/07/2026,DEMO-001375,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,
+11/07/2026,DEMO-001376,Demo Birthday Cake,1,,Market stall,£33.60,£5.60,£7.50
+11/07/2026,DEMO-001377,Demo Croissant,1,demo037@example.com,Market stall,£1.90,£0.00,£0.48
+11/07/2026,DEMO-001378,Demo Croissant,3,,Shop,£5.70,£0.00,
+11/07/2026,DEMO-001379,Demo Seeded Batch,1,,Website,£3.60,£0.00,£0.95
+11/07/2026,DEMO-001380,Demo Birthday Cake,2,,Market stall,£67.20,£11.20,£15.00
+11/07/2026,DEMO-001381,Demo Flat White,3,demo037@example.com,Website,£10.44,£1.74,
+11/07/2026,DEMO-001382,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+13/07/2026,DEMO-001383,Demo Cinnamon Swirl,3,,Website,£9.36,£1.56,£2.10
+13/07/2026,DEMO-001384,Demo Sourdough Loaf,3,demo038@example.com,Shop,£12.60,£0.00,£3.30
+13/07/2026,DEMO-001385,Demo Pain au Chocolat,1,demo005@example.com,Market stall,£2.20,£0.00,
+13/07/2026,DEMO-001386,Demo Croissant,1,demo008@example.com,Shop,£1.90,£0.00,
+13/07/2026,DEMO-001387,Demo Cinnamon Swirl,2,,Market stall,£6.24,£1.04,£1.40
+13/07/2026,DEMO-001388,Demo Birthday Cake,-3,demo033@example.com,Website,£-100.80,£-16.80,£22.50
+13/07/2026,DEMO-001389,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+13/07/2026,DEMO-001390,Demo Birthday Cake,2,demo006@example.com,Shop,£67.20,£11.20,£15.00
+13/07/2026,DEMO-001391,Demo Flat White,1,,Market stall,£3.48,£0.58,£0.45
+14/07/2026,DEMO-001392,Demo Sausage Roll (hot),3,demo032@example.com,Shop,£9.00,£1.50,£2.70
+14/07/2026,DEMO-001393,Demo Pain au Chocolat,3,demo037@example.com,Website,£6.60,£0.00,
+14/07/2026,DEMO-001394,Demo Birthday Cake,1,demo030@example.com,Shop,£33.60,£5.60,
+14/07/2026,DEMO-001395,Demo Sourdough Loaf,2,demo010@example.com,Website,£8.40,£0.00,£2.20
+14/07/2026,DEMO-001396,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+14/07/2026,DEMO-001397,Demo Pain au Chocolat,2,demo006@example.com,Shop,£4.40,£0.00,£1.20
+14/07/2026,DEMO-001398,Demo Victoria Sponge Slice,3,,Website,£11.16,£1.86,
+14/07/2026,DEMO-001399,Demo Sourdough Loaf,1,demo020@example.com,Shop,£4.20,£0.00,£1.10
+14/07/2026,DEMO-001400,Demo Baguette,1,,Shop,£2.10,£0.00,
+14/07/2026,DEMO-001401,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+14/07/2026,DEMO-001402,Demo Flat White,2,,Shop,£6.96,£1.16,£0.90
+15/07/2026,DEMO-001403,Demo Seeded Batch,2,,Market stall,£7.20,£0.00,£1.90
+15/07/2026,DEMO-001404,Demo Sausage Roll (hot),1,demo026@example.com,Shop,£3.00,£0.50,£0.90
+15/07/2026,DEMO-001405,Demo Birthday Cake,1,demo039@example.com,Shop,£33.60,£5.60,£7.50
+15/07/2026,DEMO-001406,Demo Cinnamon Swirl,1,demo038@example.com,Shop,£3.12,£0.52,£0.70
+15/07/2026,DEMO-001407,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+15/07/2026,DEMO-001408,Demo Baguette,2,,Shop,£4.20,£0.00,
+15/07/2026,DEMO-001409,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,£2.70
+15/07/2026,DEMO-001410,Demo Cinnamon Swirl,1,demo033@example.com,Shop,£3.12,£0.52,
+15/07/2026,DEMO-001411,Demo Sausage Roll (hot),1,demo030@example.com,Shop,£3.00,£0.50,£0.90
+15/07/2026,DEMO-001412,Demo Birthday Cake,3,demo032@example.com,Website,£100.80,£16.80,£22.50
+15/07/2026,DEMO-001413,Demo Lemon Drizzle Slice,2,demo013@example.com,Shop,£7.44,£1.24,£1.60
+16/07/2026,DEMO-001414,Demo Sausage Roll (hot),1,,Market stall,£3.00,£0.50,£0.90
+16/07/2026,DEMO-001415,Demo Pain au Chocolat,1,demo003@example.com,Shop,£2.20,£0.00,£0.60
+16/07/2026,DEMO-001416,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+16/07/2026,DEMO-001417,Demo Baguette,3,,Website,£6.30,£0.00,£1.65
+16/07/2026,DEMO-001418,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+16/07/2026,DEMO-001419,Demo Sausage Roll (hot),1,demo037@example.com,Shop,£3.00,£0.50,£0.90
+16/07/2026,DEMO-001420,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+16/07/2026,DEMO-001421,Demo Seeded Batch,2,,Market stall,£7.20,£0.00,£1.90
+16/07/2026,DEMO-001422,Demo Baguette,1,demo031@example.com,Shop,£2.10,£0.00,
+16/07/2026,DEMO-001423,Demo Sourdough Loaf,3,demo027@example.com,Shop,£12.60,£0.00,
+16/07/2026,DEMO-001424,Demo Seeded Batch,1,,Shop,£3.60,£0.00,
+16/07/2026,DEMO-001425,Demo Seeded Batch,2,demo013@example.com,Website,£7.20,£0.00,£1.90
+16/07/2026,DEMO-001426,Demo Baguette,1,,Shop,£2.10,£0.00,
+17/07/2026,DEMO-001427,Demo Baguette,2,demo025@example.com,Market stall,£4.20,£0.00,£1.10
+17/07/2026,DEMO-001428,Demo Sourdough Loaf,3,demo016@example.com,Market stall,£12.60,£0.00,
+17/07/2026,DEMO-001429,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+17/07/2026,DEMO-001430,Demo Victoria Sponge Slice,2,demo010@example.com,Shop,£7.44,£1.24,
+17/07/2026,DEMO-001431,Demo Baguette,3,demo011@example.com,Market stall,£6.30,£0.00,£1.65
+17/07/2026,DEMO-001432,Demo Croissant,3,demo004@example.com,Website,£5.70,£0.00,
+17/07/2026,DEMO-001433,Demo Filter Coffee,2,,Shop,£5.28,£0.88,
+17/07/2026,DEMO-001434,Demo Sourdough Loaf,2,,Website,£8.40,£0.00,£2.20
+17/07/2026,DEMO-001435,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,
+17/07/2026,DEMO-001436,Demo Birthday Cake,2,,Market stall,£67.20,£11.20,
+17/07/2026,DEMO-001437,Demo Birthday Cake,1,demo010@example.com,Shop,£33.60,£5.60,
+18/07/2026,DEMO-001438,Demo Croissant,2,,Shop,£3.80,£0.00,£0.96
+18/07/2026,DEMO-001439,Demo Victoria Sponge Slice,1,demo006@example.com,Shop,£3.72,£0.62,£0.85
+18/07/2026,DEMO-001440,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,
+18/07/2026,DEMO-001441,Demo Victoria Sponge Slice,1,demo011@example.com,Shop,£3.72,£0.62,£0.85
+18/07/2026,DEMO-001442,Demo Sausage Roll (hot),2,,Website,£6.00,£1.00,
+18/07/2026,DEMO-001443,Demo Birthday Cake,3,,Shop,£100.80,£16.80,
+20/07/2026,DEMO-001444,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+20/07/2026,DEMO-001445,Demo Seeded Batch,3,demo038@example.com,Website,£10.80,£0.00,
+20/07/2026,DEMO-001446,Demo Cinnamon Swirl,2,,Market stall,£6.24,£1.04,£1.40
+20/07/2026,DEMO-001447,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,
+20/07/2026,DEMO-001448,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+20/07/2026,DEMO-001449,Demo Sourdough Loaf,1,,Market stall,£4.20,£0.00,£1.10
+20/07/2026,DEMO-001450,Demo Seeded Batch,2,,Shop,£7.20,£0.00,
+20/07/2026,DEMO-001451,Demo Seeded Batch,1,,Website,£3.60,£0.00,
+20/07/2026,DEMO-001452,Demo Flat White,1,demo015@example.com,Shop,£3.48,£0.58,£0.45
+20/07/2026,DEMO-001453,Demo Filter Coffee,2,demo027@example.com,Shop,£5.28,£0.88,
+20/07/2026,DEMO-001454,Demo Filter Coffee,3,,Website,£7.92,£1.32,£0.90
+21/07/2026,DEMO-001455,Demo Seeded Batch,1,demo003@example.com,Shop,£3.60,£0.00,£0.95
+21/07/2026,DEMO-001456,Demo Filter Coffee,1,demo034@example.com,Shop,£2.64,£0.44,
+21/07/2026,DEMO-001457,Demo Sausage Roll (hot),3,demo006@example.com,Website,£9.00,£1.50,£2.70
+21/07/2026,DEMO-001458,Demo Seeded Batch,2,demo038@example.com,Website,£7.20,£0.00,£1.90
+21/07/2026,DEMO-001459,Demo Seeded Batch,1,demo020@example.com,Market stall,£3.60,£0.00,
+21/07/2026,DEMO-001460,Demo Filter Coffee,3,demo017@example.com,Shop,£7.92,£1.32,
+22/07/2026,DEMO-001461,Demo Victoria Sponge Slice,1,demo007@example.com,Shop,£3.72,£0.62,
+22/07/2026,DEMO-001462,Demo Flat White,1,demo013@example.com,Shop,£3.48,£0.58,£0.45
+22/07/2026,DEMO-001463,Demo Flat White,3,,Shop,£10.44,£1.74,£1.35
+22/07/2026,DEMO-001464,Demo Baguette,1,,Market stall,£2.10,£0.00,
+22/07/2026,DEMO-001465,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,
+22/07/2026,DEMO-001466,Demo Lemon Drizzle Slice,3,demo035@example.com,Market stall,£11.16,£1.86,£2.40
+22/07/2026,DEMO-001467,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+22/07/2026,DEMO-001468,Demo Victoria Sponge Slice,2,demo011@example.com,Shop,£7.44,£1.24,£1.70
+22/07/2026,DEMO-001469,Demo Croissant,2,,Website,£3.80,£0.00,
+23/07/2026,DEMO-001470,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+23/07/2026,DEMO-001471,Demo Pain au Chocolat,1,demo040@example.com,Shop,£2.20,£0.00,
+23/07/2026,DEMO-001472,Demo Seeded Batch,2,demo006@example.com,Shop,£7.20,£0.00,£1.90
+23/07/2026,DEMO-001473,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+23/07/2026,DEMO-001474,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+23/07/2026,DEMO-001475,Demo Birthday Cake,1,demo003@example.com,Market stall,£33.60,£5.60,
+23/07/2026,DEMO-001476,Demo Filter Coffee,2,demo015@example.com,Market stall,£5.28,£0.88,£0.60
+23/07/2026,DEMO-001477,Demo Sausage Roll (hot),1,demo024@example.com,Shop,£3.00,£0.50,£0.90
+23/07/2026,DEMO-001478,Demo Filter Coffee,1,demo030@example.com,Shop,£2.64,£0.44,£0.30
+23/07/2026,DEMO-001479,Demo Victoria Sponge Slice,1,demo011@example.com,Market stall,£3.72,£0.62,£0.85
+24/07/2026,DEMO-001480,Demo Flat White,2,,Shop,£6.96,£1.16,£0.90
+24/07/2026,DEMO-001481,Demo Seeded Batch,2,demo009@example.com,Shop,£7.20,£0.00,£1.90
+24/07/2026,DEMO-001482,Demo Seeded Batch,1,,Website,£3.60,£0.00,£0.95
+24/07/2026,DEMO-001483,Demo Sourdough Loaf,1,,Website,£4.20,£0.00,£1.10
+24/07/2026,DEMO-001484,Demo Pain au Chocolat,2,demo020@example.com,Market stall,£4.40,£0.00,
+24/07/2026,DEMO-001485,Demo Victoria Sponge Slice,1,demo030@example.com,Shop,£3.72,£0.62,£0.85
+25/07/2026,DEMO-001486,Demo Cinnamon Swirl,1,demo024@example.com,Shop,£3.12,£0.52,£0.70
+25/07/2026,DEMO-001487,Demo Lemon Drizzle Slice,1,,Market stall,£3.72,£0.62,
+25/07/2026,DEMO-001488,Demo Birthday Cake,3,,Market stall,£100.80,£16.80,£22.50
+25/07/2026,DEMO-001489,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+25/07/2026,DEMO-001490,Demo Flat White,1,demo033@example.com,Website,£3.48,£0.58,
+25/07/2026,DEMO-001491,Demo Lemon Drizzle Slice,1,demo021@example.com,Shop,£3.72,£0.62,£0.80
+25/07/2026,DEMO-001492,Demo Victoria Sponge Slice,2,demo006@example.com,Shop,£7.44,£1.24,
+27/07/2026,DEMO-001493,Demo Sourdough Loaf,1,demo035@example.com,Market stall,£4.20,£0.00,
+27/07/2026,DEMO-001494,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+27/07/2026,DEMO-001495,Demo Filter Coffee,2,demo035@example.com,Shop,£5.28,£0.88,£0.60
+27/07/2026,DEMO-001496,Demo Victoria Sponge Slice,2,,Market stall,£7.44,£1.24,£1.70
+27/07/2026,DEMO-001497,Demo Baguette,2,demo012@example.com,Market stall,£4.20,£0.00,
+27/07/2026,DEMO-001498,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+27/07/2026,DEMO-001499,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+27/07/2026,DEMO-001500,Demo Birthday Cake,2,demo010@example.com,Shop,£67.20,£11.20,£15.00
+27/07/2026,DEMO-001501,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,£1.70
+27/07/2026,DEMO-001502,Demo Pain au Chocolat,3,,Shop,£6.60,£0.00,£1.80
+27/07/2026,DEMO-001503,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,£1.40
+27/07/2026,DEMO-001504,Demo Sausage Roll (hot),3,demo005@example.com,Shop,£9.00,£1.50,
+27/07/2026,DEMO-001505,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+27/07/2026,DEMO-001506,Demo Sourdough Loaf,-1,demo022@example.com,Shop,£-4.20,£-0.00,£1.10
+28/07/2026,DEMO-001507,Demo Flat White,1,demo015@example.com,Shop,£3.48,£0.58,£0.45
+28/07/2026,DEMO-001508,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+28/07/2026,DEMO-001509,Demo Lemon Drizzle Slice,3,,Website,£11.16,£1.86,£2.40
+28/07/2026,DEMO-001510,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,£2.70
+28/07/2026,DEMO-001511,Demo Victoria Sponge Slice,2,,Market stall,£7.44,£1.24,£1.70
+28/07/2026,DEMO-001512,Demo Croissant,1,demo033@example.com,Market stall,£1.90,£0.00,
+28/07/2026,DEMO-001513,Demo Pain au Chocolat,1,demo004@example.com,Shop,£2.20,£0.00,
+28/07/2026,DEMO-001514,Demo Lemon Drizzle Slice,1,demo037@example.com,Shop,£3.72,£0.62,£0.80
+28/07/2026,DEMO-001515,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,
+28/07/2026,DEMO-001516,Demo Sourdough Loaf,1,demo033@example.com,Shop,£4.20,£0.00,£1.10
+28/07/2026,DEMO-001517,Demo Birthday Cake,1,,Market stall,£33.60,£5.60,£7.50
+29/07/2026,DEMO-001518,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+29/07/2026,DEMO-001519,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+29/07/2026,DEMO-001520,Demo Flat White,1,,Market stall,£3.48,£0.58,£0.45
+29/07/2026,DEMO-001521,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+29/07/2026,DEMO-001522,Demo Birthday Cake,2,demo012@example.com,Shop,£67.20,£11.20,
+29/07/2026,DEMO-001523,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+29/07/2026,DEMO-001524,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+29/07/2026,DEMO-001525,Demo Sausage Roll (hot),1,demo032@example.com,Shop,£3.00,£0.50,£0.90
+29/07/2026,DEMO-001526,Demo Flat White,1,demo035@example.com,Website,£3.48,£0.58,
+29/07/2026,DEMO-001527,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+29/07/2026,DEMO-001528,Demo Flat White,1,demo038@example.com,Shop,£3.48,£0.58,£0.45
+29/07/2026,DEMO-001529,Demo Seeded Batch,3,,Shop,£10.80,£0.00,£2.85
+29/07/2026,DEMO-001530,Demo Sausage Roll (hot),1,demo031@example.com,Shop,£3.00,£0.50,£0.90
+30/07/2026,DEMO-001531,Demo Pain au Chocolat,2,demo017@example.com,Shop,£4.40,£0.00,£1.20
+30/07/2026,DEMO-001532,Demo Sourdough Loaf,3,demo036@example.com,Website,£12.60,£0.00,£3.30
+30/07/2026,DEMO-001533,Demo Baguette,1,demo034@example.com,Shop,£2.10,£0.00,£0.55
+30/07/2026,DEMO-001534,Demo Victoria Sponge Slice,1,demo019@example.com,Website,£3.72,£0.62,£0.85
+30/07/2026,DEMO-001535,Demo Cinnamon Swirl,1,,Market stall,£3.12,£0.52,
+30/07/2026,DEMO-001536,Demo Sourdough Loaf,3,,Shop,£12.60,£0.00,£3.30
+30/07/2026,DEMO-001537,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+30/07/2026,DEMO-001538,Demo Sausage Roll (hot),1,demo036@example.com,Website,£3.00,£0.50,
+30/07/2026,DEMO-001539,Demo Victoria Sponge Slice,3,demo015@example.com,Shop,£11.16,£1.86,£2.55
+30/07/2026,DEMO-001540,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,
+30/07/2026,DEMO-001541,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,£0.85
+30/07/2026,DEMO-001542,Demo Cinnamon Swirl,1,,Market stall,£3.12,£0.52,
+31/07/2026,DEMO-001543,Demo Cinnamon Swirl,2,demo009@example.com,Market stall,£6.24,£1.04,
+31/07/2026,DEMO-001544,Demo Cinnamon Swirl,1,,Market stall,£3.12,£0.52,
+31/07/2026,DEMO-001545,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+31/07/2026,DEMO-001546,Demo Cinnamon Swirl,1,demo024@example.com,Website,£3.12,£0.52,£0.70
+31/07/2026,DEMO-001547,Demo Pain au Chocolat,3,,Shop,£6.60,£0.00,£1.80
+31/07/2026,DEMO-001548,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+31/07/2026,DEMO-001549,Demo Baguette,1,demo024@example.com,Shop,£2.10,£0.00,£0.55
+31/07/2026,DEMO-001550,Demo Pain au Chocolat,1,demo003@example.com,Market stall,£2.20,£0.00,£0.60
+31/07/2026,DEMO-001551,Demo Baguette,1,demo015@example.com,Website,£2.10,£0.00,£0.55
+31/07/2026,DEMO-001552,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+31/07/2026,DEMO-001553,Demo Sourdough Loaf,1,demo002@example.com,Website,£4.20,£0.00,
+01/08/2026,DEMO-001554,Demo Filter Coffee,3,,Market stall,£7.92,£1.32,
+01/08/2026,DEMO-001555,Demo Birthday Cake,2,,Shop,£67.20,£11.20,£15.00
+01/08/2026,DEMO-001556,Demo Cinnamon Swirl,2,demo011@example.com,Market stall,£6.24,£1.04,£1.40
+01/08/2026,DEMO-001557,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+01/08/2026,DEMO-001558,Demo Sourdough Loaf,3,demo040@example.com,Shop,£12.60,£0.00,£3.30
+01/08/2026,DEMO-001559,Demo Croissant,3,,Shop,£5.70,£0.00,£1.44
+01/08/2026,DEMO-001560,Demo Birthday Cake,1,,Shop,£33.60,£5.60,£7.50
+01/08/2026,DEMO-001561,Demo Lemon Drizzle Slice,1,demo035@example.com,Shop,£3.72,£0.62,
+03/08/2026,DEMO-001562,Demo Lemon Drizzle Slice,2,demo004@example.com,Market stall,£7.44,£1.24,£1.60
+03/08/2026,DEMO-001563,Demo Pain au Chocolat,1,demo014@example.com,Shop,£2.20,£0.00,
+03/08/2026,DEMO-001564,Demo Victoria Sponge Slice,1,demo033@example.com,Shop,£3.72,£0.62,
+03/08/2026,DEMO-001565,Demo Sausage Roll (hot),1,,Market stall,£3.00,£0.50,£0.90
+03/08/2026,DEMO-001566,Demo Filter Coffee,-1,demo013@example.com,Shop,£-2.64,£-0.44,
+03/08/2026,DEMO-001567,Demo Lemon Drizzle Slice,1,demo037@example.com,Website,£3.72,£0.62,£0.80
+03/08/2026,DEMO-001568,Demo Sausage Roll (hot),3,,Website,£9.00,£1.50,£2.70
+03/08/2026,DEMO-001569,Demo Birthday Cake,3,,Shop,£100.80,£16.80,
+03/08/2026,DEMO-001570,Demo Baguette,1,demo018@example.com,Shop,£2.10,£0.00,£0.55
+03/08/2026,DEMO-001571,Demo Baguette,1,demo004@example.com,Website,£2.10,£0.00,£0.55
+03/08/2026,DEMO-001572,Demo Sourdough Loaf,2,,Website,£8.40,£0.00,£2.20
+03/08/2026,DEMO-001573,Demo Victoria Sponge Slice,3,demo002@example.com,Shop,£11.16,£1.86,£2.55
+04/08/2026,DEMO-001574,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,£1.60
+04/08/2026,DEMO-001575,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,
+04/08/2026,DEMO-001576,Demo Sausage Roll (hot),2,demo018@example.com,Shop,£6.00,£1.00,£1.80
+04/08/2026,DEMO-001577,Demo Croissant,2,demo016@example.com,Website,£3.80,£0.00,£0.96
+04/08/2026,DEMO-001578,Demo Flat White,3,,Market stall,£10.44,£1.74,
+04/08/2026,DEMO-001579,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+04/08/2026,DEMO-001580,Demo Cinnamon Swirl,1,demo022@example.com,Shop,£3.12,£0.52,£0.70
+04/08/2026,DEMO-001581,Demo Sourdough Loaf,1,demo011@example.com,Shop,£4.20,£0.00,£1.10
+04/08/2026,DEMO-001582,Demo Flat White,2,,Shop,£6.96,£1.16,
+04/08/2026,DEMO-001583,Demo Sourdough Loaf,1,demo031@example.com,Shop,£4.20,£0.00,
+04/08/2026,DEMO-001584,Demo Baguette,2,demo013@example.com,Shop,£4.20,£0.00,£1.10
+04/08/2026,DEMO-001585,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+04/08/2026,DEMO-001586,Demo Sourdough Loaf,1,,Website,£4.20,£0.00,
+04/08/2026,DEMO-001587,Demo Sourdough Loaf,1,,Website,£4.20,£0.00,£1.10
+05/08/2026,DEMO-001588,Demo Flat White,1,demo029@example.com,Shop,£3.48,£0.58,£0.45
+05/08/2026,DEMO-001589,Demo Filter Coffee,1,demo031@example.com,Shop,£2.64,£0.44,
+05/08/2026,DEMO-001590,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+05/08/2026,DEMO-001591,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,£0.85
+05/08/2026,DEMO-001592,Demo Sourdough Loaf,2,demo008@example.com,Website,£8.40,£0.00,£2.20
+05/08/2026,DEMO-001593,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+05/08/2026,DEMO-001594,Demo Seeded Batch,1,demo004@example.com,Shop,£3.60,£0.00,
+05/08/2026,DEMO-001595,Demo Sourdough Loaf,3,demo014@example.com,Shop,£12.60,£0.00,
+05/08/2026,DEMO-001596,Demo Cinnamon Swirl,1,,Website,£3.12,£0.52,£0.70
+06/08/2026,DEMO-001597,Demo Cinnamon Swirl,1,demo017@example.com,Shop,£3.12,£0.52,£0.70
+06/08/2026,DEMO-001598,Demo Sourdough Loaf,3,,Shop,£12.60,£0.00,£3.30
+06/08/2026,DEMO-001599,Demo Croissant,1,,Shop,£1.90,£0.00,
+06/08/2026,DEMO-001600,Demo Croissant,1,demo030@example.com,Website,£1.90,£0.00,
+06/08/2026,DEMO-001601,Demo Croissant,1,,Shop,£1.90,£0.00,
+06/08/2026,DEMO-001602,Demo Victoria Sponge Slice,3,,Shop,£11.16,£1.86,£2.55
+06/08/2026,DEMO-001603,Demo Baguette,3,,Shop,£6.30,£0.00,
+06/08/2026,DEMO-001604,Demo Cinnamon Swirl,2,demo034@example.com,Market stall,£6.24,£1.04,£1.40
+06/08/2026,DEMO-001605,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,£0.85
+06/08/2026,DEMO-001606,Demo Baguette,1,demo038@example.com,Shop,£2.10,£0.00,£0.55
+06/08/2026,DEMO-001607,Demo Pain au Chocolat,2,demo029@example.com,Shop,£4.40,£0.00,£1.20
+06/08/2026,DEMO-001608,Demo Filter Coffee,2,,Website,£5.28,£0.88,
+06/08/2026,DEMO-001609,Demo Sourdough Loaf,2,,Market stall,£8.40,£0.00,
+06/08/2026,DEMO-001610,Demo Sausage Roll (hot),1,,Market stall,£3.00,£0.50,£0.90
+07/08/2026,DEMO-001611,Demo Croissant,1,demo006@example.com,Shop,£1.90,£0.00,£0.48
+07/08/2026,DEMO-001612,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+07/08/2026,DEMO-001613,Demo Birthday Cake,1,demo039@example.com,Website,£33.60,£5.60,£7.50
+07/08/2026,DEMO-001614,Demo Birthday Cake,2,demo034@example.com,Shop,£67.20,£11.20,
+07/08/2026,DEMO-001615,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+07/08/2026,DEMO-001616,Demo Baguette,2,demo016@example.com,Shop,£4.20,£0.00,
+07/08/2026,DEMO-001617,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,
+07/08/2026,DEMO-001618,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+07/08/2026,DEMO-001619,Demo Sausage Roll (hot),2,demo040@example.com,Shop,£6.00,£1.00,
+07/08/2026,DEMO-001620,Demo Pain au Chocolat,2,demo028@example.com,Website,£4.40,£0.00,
+07/08/2026,DEMO-001621,Demo Sausage Roll (hot),1,,Website,£3.00,£0.50,£0.90
+08/08/2026,DEMO-001622,Demo Cinnamon Swirl,3,demo024@example.com,Shop,£9.36,£1.56,£2.10
+08/08/2026,DEMO-001623,Demo Birthday Cake,2,demo020@example.com,Shop,£67.20,£11.20,£15.00
+08/08/2026,DEMO-001624,Demo Pain au Chocolat,2,demo021@example.com,Shop,£4.40,£0.00,£1.20
+08/08/2026,DEMO-001625,Demo Croissant,1,,Website,£1.90,£0.00,£0.48
+08/08/2026,DEMO-001626,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,
+08/08/2026,DEMO-001627,Demo Seeded Batch,3,,Website,£10.80,£0.00,£2.85
+08/08/2026,DEMO-001628,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+08/08/2026,DEMO-001629,Demo Croissant,2,demo004@example.com,Shop,£3.80,£0.00,£0.96
+08/08/2026,DEMO-001630,Demo Victoria Sponge Slice,2,demo040@example.com,Shop,£7.44,£1.24,£1.70
+08/08/2026,DEMO-001631,Demo Baguette,1,,Market stall,£2.10,£0.00,
+08/08/2026,DEMO-001632,Demo Victoria Sponge Slice,1,demo021@example.com,Website,£3.72,£0.62,
+08/08/2026,DEMO-001633,Demo Sourdough Loaf,3,demo014@example.com,Market stall,£12.60,£0.00,£3.30
+08/08/2026,DEMO-001634,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,
+10/08/2026,DEMO-001635,Demo Pain au Chocolat,1,,Market stall,£2.20,£0.00,
+10/08/2026,DEMO-001636,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,
+10/08/2026,DEMO-001637,Demo Flat White,1,demo014@example.com,Website,£3.48,£0.58,£0.45
+10/08/2026,DEMO-001638,Demo Croissant,2,,Shop,£3.80,£0.00,
+10/08/2026,DEMO-001639,Demo Birthday Cake,3,,Market stall,£100.80,£16.80,
+10/08/2026,DEMO-001640,Demo Filter Coffee,1,,Website,£2.64,£0.44,£0.30
+10/08/2026,DEMO-001641,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+10/08/2026,DEMO-001642,Demo Pain au Chocolat,1,demo023@example.com,Shop,£2.20,£0.00,
+10/08/2026,DEMO-001643,Demo Sourdough Loaf,1,,Website,£4.20,£0.00,£1.10
+11/08/2026,DEMO-001644,Demo Victoria Sponge Slice,3,,Shop,£11.16,£1.86,£2.55
+11/08/2026,DEMO-001645,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,£0.85
+11/08/2026,DEMO-001646,Demo Birthday Cake,3,,Shop,£100.80,£16.80,
+11/08/2026,DEMO-001647,Demo Birthday Cake,2,,Market stall,£67.20,£11.20,
+11/08/2026,DEMO-001648,Demo Sausage Roll (hot),2,demo021@example.com,Shop,£6.00,£1.00,£1.80
+11/08/2026,DEMO-001649,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,£2.70
+11/08/2026,DEMO-001650,Demo Pain au Chocolat,1,,Website,£2.20,£0.00,
+11/08/2026,DEMO-001651,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+12/08/2026,DEMO-001652,Demo Birthday Cake,1,,Website,£33.60,£5.60,£7.50
+12/08/2026,DEMO-001653,Demo Sausage Roll (hot),2,,Market stall,£6.00,£1.00,£1.80
+12/08/2026,DEMO-001654,Demo Lemon Drizzle Slice,1,demo032@example.com,Shop,£3.72,£0.62,
+12/08/2026,DEMO-001655,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+12/08/2026,DEMO-001656,Demo Flat White,1,,Market stall,£3.48,£0.58,£0.45
+12/08/2026,DEMO-001657,Demo Seeded Batch,2,demo025@example.com,Shop,£7.20,£0.00,£1.90
+12/08/2026,DEMO-001658,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+12/08/2026,DEMO-001659,Demo Croissant,2,,Market stall,£3.80,£0.00,
+12/08/2026,DEMO-001660,Demo Pain au Chocolat,2,,Market stall,£4.40,£0.00,£1.20
+12/08/2026,DEMO-001661,Demo Pain au Chocolat,1,demo028@example.com,Website,£2.20,£0.00,
+12/08/2026,DEMO-001662,Demo Victoria Sponge Slice,1,demo027@example.com,Market stall,£3.72,£0.62,£0.85
+12/08/2026,DEMO-001663,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,
+13/08/2026,DEMO-001664,Demo Lemon Drizzle Slice,1,,Website,£3.72,£0.62,£0.80
+13/08/2026,DEMO-001665,Demo Cinnamon Swirl,1,demo010@example.com,Shop,£3.12,£0.52,£0.70
+13/08/2026,DEMO-001666,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+13/08/2026,DEMO-001667,Demo Cinnamon Swirl,3,,Shop,£9.36,£1.56,
+13/08/2026,DEMO-001668,Demo Cinnamon Swirl,2,demo009@example.com,Market stall,£6.24,£1.04,
+13/08/2026,DEMO-001669,Demo Pain au Chocolat,2,demo010@example.com,Shop,£4.40,£0.00,£1.20
+13/08/2026,DEMO-001670,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+13/08/2026,DEMO-001671,Demo Cinnamon Swirl,1,,Market stall,£3.12,£0.52,
+13/08/2026,DEMO-001672,Demo Pain au Chocolat,2,demo015@example.com,Shop,£4.40,£0.00,
+13/08/2026,DEMO-001673,Demo Seeded Batch,3,,Shop,£10.80,£0.00,
+14/08/2026,DEMO-001674,Demo Baguette,1,,Market stall,£2.10,£0.00,
+14/08/2026,DEMO-001675,Demo Pain au Chocolat,-1,demo035@example.com,Shop,£-2.20,£-0.00,£0.60
+14/08/2026,DEMO-001676,Demo Baguette,1,demo038@example.com,Website,£2.10,£0.00,
+14/08/2026,DEMO-001677,Demo Seeded Batch,1,demo027@example.com,Shop,£3.60,£0.00,
+14/08/2026,DEMO-001678,Demo Baguette,3,,Shop,£6.30,£0.00,
+14/08/2026,DEMO-001679,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,£0.85
+14/08/2026,DEMO-001680,Demo Birthday Cake,1,,Website,£33.60,£5.60,
+14/08/2026,DEMO-001681,Demo Lemon Drizzle Slice,1,demo028@example.com,Website,£3.72,£0.62,£0.80
+14/08/2026,DEMO-001682,Demo Filter Coffee,2,demo027@example.com,Shop,£5.28,£0.88,
+14/08/2026,DEMO-001683,Demo Victoria Sponge Slice,2,demo040@example.com,Shop,£7.44,£1.24,£1.70
+15/08/2026,DEMO-001684,Demo Filter Coffee,2,,Market stall,£5.28,£0.88,£0.60
+15/08/2026,DEMO-001685,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,
+15/08/2026,DEMO-001686,Demo Croissant,2,,Shop,£3.80,£0.00,
+15/08/2026,DEMO-001687,Demo Sourdough Loaf,3,,Website,£12.60,£0.00,£3.30
+15/08/2026,DEMO-001688,Demo Victoria Sponge Slice,2,,Website,£7.44,£1.24,£1.70
+15/08/2026,DEMO-001689,Demo Birthday Cake,1,,Market stall,£33.60,£5.60,£7.50
+15/08/2026,DEMO-001690,Demo Filter Coffee,2,demo013@example.com,Website,£5.28,£0.88,£0.60
+15/08/2026,DEMO-001691,Demo Filter Coffee,2,,Shop,£5.28,£0.88,
+15/08/2026,DEMO-001692,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,£1.70
+15/08/2026,DEMO-001693,Demo Cinnamon Swirl,3,demo035@example.com,Shop,£9.36,£1.56,
+15/08/2026,DEMO-001694,Demo Sausage Roll (hot),1,,Market stall,£3.00,£0.50,
+17/08/2026,DEMO-001695,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+17/08/2026,DEMO-001696,Demo Birthday Cake,1,,Website,£33.60,£5.60,
+17/08/2026,DEMO-001697,Demo Pain au Chocolat,1,demo032@example.com,Shop,£2.20,£0.00,
+17/08/2026,DEMO-001698,Demo Croissant,3,,Market stall,£5.70,£0.00,£1.44
+17/08/2026,DEMO-001699,Demo Flat White,2,,Shop,£6.96,£1.16,£0.90
+17/08/2026,DEMO-001700,Demo Pain au Chocolat,1,,Website,£2.20,£0.00,
+18/08/2026,DEMO-001701,Demo Croissant,1,demo023@example.com,Shop,£1.90,£0.00,£0.48
+18/08/2026,DEMO-001702,Demo Birthday Cake,1,demo010@example.com,Shop,£33.60,£5.60,£7.50
+18/08/2026,DEMO-001703,Demo Sausage Roll (hot),2,,Shop,£6.00,£1.00,£1.80
+18/08/2026,DEMO-001704,Demo Filter Coffee,-1,demo008@example.com,Shop,£-2.64,£-0.44,£0.30
+18/08/2026,DEMO-001705,Demo Baguette,2,demo020@example.com,Website,£4.20,£0.00,£1.10
+18/08/2026,DEMO-001706,Demo Flat White,2,,Shop,£6.96,£1.16,
+18/08/2026,DEMO-001707,Demo Pain au Chocolat,1,,Website,£2.20,£0.00,£0.60
+18/08/2026,DEMO-001708,Demo Birthday Cake,2,,Shop,£67.20,£11.20,
+18/08/2026,DEMO-001709,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+18/08/2026,DEMO-001710,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,£1.10
+18/08/2026,DEMO-001711,Demo Seeded Batch,2,demo002@example.com,Market stall,£7.20,£0.00,
+18/08/2026,DEMO-001712,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+19/08/2026,DEMO-001713,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,
+19/08/2026,DEMO-001714,Demo Baguette,3,demo023@example.com,Shop,£6.30,£0.00,
+19/08/2026,DEMO-001715,Demo Baguette,2,,Shop,£4.20,£0.00,
+19/08/2026,DEMO-001716,Demo Baguette,3,demo023@example.com,Market stall,£6.30,£0.00,
+19/08/2026,DEMO-001717,Demo Croissant,2,,Website,£3.80,£0.00,
+19/08/2026,DEMO-001718,Demo Seeded Batch,1,demo019@example.com,Shop,£3.60,£0.00,£0.95
+19/08/2026,DEMO-001719,Demo Lemon Drizzle Slice,1,,Website,£3.72,£0.62,£0.80
+19/08/2026,DEMO-001720,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+19/08/2026,DEMO-001721,Demo Filter Coffee,1,demo001@example.com,Website,£2.64,£0.44,£0.30
+19/08/2026,DEMO-001722,Demo Birthday Cake,2,demo008@example.com,Market stall,£67.20,£11.20,£15.00
+20/08/2026,DEMO-001723,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,
+20/08/2026,DEMO-001724,Demo Birthday Cake,2,demo009@example.com,Shop,£67.20,£11.20,
+20/08/2026,DEMO-001725,Demo Filter Coffee,1,demo031@example.com,Shop,£2.64,£0.44,£0.30
+20/08/2026,DEMO-001726,Demo Birthday Cake,3,demo025@example.com,Shop,£100.80,£16.80,£22.50
+20/08/2026,DEMO-001727,Demo Flat White,2,demo010@example.com,Website,£6.96,£1.16,£0.90
+20/08/2026,DEMO-001728,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+20/08/2026,DEMO-001729,Demo Sausage Roll (hot),1,demo029@example.com,Shop,£3.00,£0.50,
+20/08/2026,DEMO-001730,Demo Victoria Sponge Slice,3,demo001@example.com,Market stall,£11.16,£1.86,£2.55
+20/08/2026,DEMO-001731,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+20/08/2026,DEMO-001732,Demo Lemon Drizzle Slice,3,demo023@example.com,Shop,£11.16,£1.86,
+20/08/2026,DEMO-001733,Demo Victoria Sponge Slice,1,demo029@example.com,Market stall,£3.72,£0.62,£0.85
+20/08/2026,DEMO-001734,Demo Flat White,2,,Shop,£6.96,£1.16,£0.90
+20/08/2026,DEMO-001735,Demo Lemon Drizzle Slice,1,demo027@example.com,Shop,£3.72,£0.62,£0.80
+20/08/2026,DEMO-001736,Demo Lemon Drizzle Slice,3,,Shop,£11.16,£1.86,£2.40
+21/08/2026,DEMO-001737,Demo Pain au Chocolat,2,demo029@example.com,Market stall,£4.40,£0.00,£1.20
+21/08/2026,DEMO-001738,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,£1.70
+21/08/2026,DEMO-001739,Demo Baguette,1,,Website,£2.10,£0.00,£0.55
+21/08/2026,DEMO-001740,Demo Victoria Sponge Slice,1,demo023@example.com,Website,£3.72,£0.62,£0.85
+21/08/2026,DEMO-001741,Demo Croissant,1,demo013@example.com,Shop,£1.90,£0.00,£0.48
+21/08/2026,DEMO-001742,Demo Pain au Chocolat,2,demo026@example.com,Shop,£4.40,£0.00,
+21/08/2026,DEMO-001743,Demo Lemon Drizzle Slice,3,demo003@example.com,Shop,£11.16,£1.86,
+21/08/2026,DEMO-001744,Demo Birthday Cake,1,demo010@example.com,Website,£33.60,£5.60,
+21/08/2026,DEMO-001745,Demo Filter Coffee,2,demo022@example.com,Shop,£5.28,£0.88,£0.60
+21/08/2026,DEMO-001746,Demo Sausage Roll (hot),1,demo022@example.com,Shop,£3.00,£0.50,£0.90
+22/08/2026,DEMO-001747,Demo Flat White,1,,Website,£3.48,£0.58,£0.45
+22/08/2026,DEMO-001748,Demo Seeded Batch,2,demo036@example.com,Website,£7.20,£0.00,£1.90
+22/08/2026,DEMO-001749,Demo Seeded Batch,1,demo022@example.com,Shop,£3.60,£0.00,
+22/08/2026,DEMO-001750,Demo Pain au Chocolat,1,demo008@example.com,Shop,£2.20,£0.00,
+22/08/2026,DEMO-001751,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+22/08/2026,DEMO-001752,Demo Victoria Sponge Slice,3,demo007@example.com,Website,£11.16,£1.86,£2.55
+22/08/2026,DEMO-001753,Demo Pain au Chocolat,1,demo031@example.com,Market stall,£2.20,£0.00,£0.60
+22/08/2026,DEMO-001754,Demo Filter Coffee,1,,Website,£2.64,£0.44,
+22/08/2026,DEMO-001755,Demo Cinnamon Swirl,1,demo010@example.com,Market stall,£3.12,£0.52,£0.70
+22/08/2026,DEMO-001756,Demo Filter Coffee,3,demo004@example.com,Shop,£7.92,£1.32,
+22/08/2026,DEMO-001757,Demo Filter Coffee,2,demo037@example.com,Shop,£5.28,£0.88,
+22/08/2026,DEMO-001758,Demo Birthday Cake,2,demo001@example.com,Shop,£67.20,£11.20,
+24/08/2026,DEMO-001759,Demo Birthday Cake,2,,Market stall,£67.20,£11.20,£15.00
+24/08/2026,DEMO-001760,Demo Sourdough Loaf,3,demo033@example.com,Market stall,£12.60,£0.00,£3.30
+24/08/2026,DEMO-001761,Demo Flat White,1,demo026@example.com,Shop,£3.48,£0.58,£0.45
+24/08/2026,DEMO-001762,Demo Sausage Roll (hot),2,demo023@example.com,Shop,£6.00,£1.00,£1.80
+24/08/2026,DEMO-001763,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,£0.85
+24/08/2026,DEMO-001764,Demo Sourdough Loaf,1,demo013@example.com,Website,£4.20,£0.00,£1.10
+25/08/2026,DEMO-001765,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+25/08/2026,DEMO-001766,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+25/08/2026,DEMO-001767,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,£1.60
+25/08/2026,DEMO-001768,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+25/08/2026,DEMO-001769,Demo Seeded Batch,1,,Market stall,£3.60,£0.00,£0.95
+25/08/2026,DEMO-001770,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+25/08/2026,DEMO-001771,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+25/08/2026,DEMO-001772,Demo Pain au Chocolat,1,demo038@example.com,Website,£2.20,£0.00,
+25/08/2026,DEMO-001773,Demo Cinnamon Swirl,3,demo038@example.com,Website,£9.36,£1.56,£2.10
+25/08/2026,DEMO-001774,Demo Sourdough Loaf,2,,Website,£8.40,£0.00,£2.20
+25/08/2026,DEMO-001775,Demo Pain au Chocolat,3,demo023@example.com,Shop,£6.60,£0.00,£1.80
+25/08/2026,DEMO-001776,Demo Flat White,2,,Shop,£6.96,£1.16,
+26/08/2026,DEMO-001777,Demo Lemon Drizzle Slice,1,demo026@example.com,Website,£3.72,£0.62,£0.80
+26/08/2026,DEMO-001778,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,
+26/08/2026,DEMO-001779,Demo Victoria Sponge Slice,1,demo021@example.com,Shop,£3.72,£0.62,£0.85
+26/08/2026,DEMO-001780,Demo Cinnamon Swirl,1,demo022@example.com,Website,£3.12,£0.52,£0.70
+26/08/2026,DEMO-001781,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+26/08/2026,DEMO-001782,Demo Birthday Cake,1,demo015@example.com,Shop,£33.60,£5.60,£7.50
+27/08/2026,DEMO-001783,Demo Birthday Cake,1,demo006@example.com,Shop,£33.60,£5.60,
+27/08/2026,DEMO-001784,Demo Baguette,1,demo033@example.com,Market stall,£2.10,£0.00,
+27/08/2026,DEMO-001785,Demo Seeded Batch,1,demo013@example.com,Shop,£3.60,£0.00,
+27/08/2026,DEMO-001786,Demo Sausage Roll (hot),3,demo017@example.com,Shop,£9.00,£1.50,£2.70
+27/08/2026,DEMO-001787,Demo Sourdough Loaf,3,demo016@example.com,Market stall,£12.60,£0.00,
+27/08/2026,DEMO-001788,Demo Flat White,3,,Website,£10.44,£1.74,£1.35
+28/08/2026,DEMO-001789,Demo Filter Coffee,3,demo013@example.com,Market stall,£7.92,£1.32,£0.90
+28/08/2026,DEMO-001790,Demo Filter Coffee,2,demo021@example.com,Website,£5.28,£0.88,£0.60
+28/08/2026,DEMO-001791,Demo Lemon Drizzle Slice,1,demo012@example.com,Shop,£3.72,£0.62,£0.80
+28/08/2026,DEMO-001792,Demo Birthday Cake,1,demo015@example.com,Shop,£33.60,£5.60,
+28/08/2026,DEMO-001793,Demo Croissant,2,,Market stall,£3.80,£0.00,£0.96
+28/08/2026,DEMO-001794,Demo Sausage Roll (hot),1,demo030@example.com,Shop,£3.00,£0.50,£0.90
+28/08/2026,DEMO-001795,Demo Seeded Batch,1,,Market stall,£3.60,£0.00,£0.95
+28/08/2026,DEMO-001796,Demo Flat White,1,,Website,£3.48,£0.58,£0.45
+28/08/2026,DEMO-001797,Demo Croissant,1,,Website,£1.90,£0.00,£0.48
+29/08/2026,DEMO-001798,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+29/08/2026,DEMO-001799,Demo Seeded Batch,2,,Shop,£7.20,£0.00,
+29/08/2026,DEMO-001800,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,£1.40
+29/08/2026,DEMO-001801,Demo Flat White,1,,Website,£3.48,£0.58,
+29/08/2026,DEMO-001802,Demo Pain au Chocolat,1,demo026@example.com,Shop,£2.20,£0.00,
+29/08/2026,DEMO-001803,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,£1.60
+29/08/2026,DEMO-001804,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+29/08/2026,DEMO-001805,Demo Sausage Roll (hot),2,demo007@example.com,Market stall,£6.00,£1.00,£1.80
+29/08/2026,DEMO-001806,Demo Cinnamon Swirl,2,demo007@example.com,Market stall,£6.24,£1.04,£1.40
+29/08/2026,DEMO-001807,Demo Victoria Sponge Slice,3,,Shop,£11.16,£1.86,£2.55
+31/08/2026,DEMO-001808,Demo Lemon Drizzle Slice,1,demo019@example.com,Shop,£3.72,£0.62,£0.80
+31/08/2026,DEMO-001809,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+31/08/2026,DEMO-001810,Demo Lemon Drizzle Slice,3,demo037@example.com,Shop,£11.16,£1.86,£2.40
+31/08/2026,DEMO-001811,Demo Croissant,1,,Shop,£1.90,£0.00,
+31/08/2026,DEMO-001812,Demo Pain au Chocolat,1,,Website,£2.20,£0.00,£0.60
+31/08/2026,DEMO-001813,Demo Birthday Cake,2,demo011@example.com,Shop,£67.20,£11.20,
+31/08/2026,DEMO-001814,Demo Lemon Drizzle Slice,1,,Website,£3.72,£0.62,
+31/08/2026,DEMO-001815,Demo Victoria Sponge Slice,3,demo037@example.com,Market stall,£11.16,£1.86,£2.55
+31/08/2026,DEMO-001816,Demo Lemon Drizzle Slice,-1,,Shop,£-3.72,£-0.62,£0.80
+31/08/2026,DEMO-001817,Demo Victoria Sponge Slice,2,demo031@example.com,Market stall,£7.44,£1.24,
+31/08/2026,DEMO-001818,Demo Pain au Chocolat,2,demo027@example.com,Shop,£4.40,£0.00,£1.20
+01/09/2026,DEMO-001819,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+01/09/2026,DEMO-001820,Demo Sausage Roll (hot),1,,Market stall,£3.00,£0.50,£0.90
+01/09/2026,DEMO-001821,Demo Croissant,2,demo038@example.com,Shop,£3.80,£0.00,£0.96
+01/09/2026,DEMO-001822,Demo Lemon Drizzle Slice,1,demo030@example.com,Website,£3.72,£0.62,
+01/09/2026,DEMO-001823,Demo Birthday Cake,1,demo023@example.com,Shop,£33.60,£5.60,
+01/09/2026,DEMO-001824,Demo Pain au Chocolat,2,demo031@example.com,Website,£4.40,£0.00,£1.20
+01/09/2026,DEMO-001825,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+01/09/2026,DEMO-001826,Demo Cinnamon Swirl,1,demo009@example.com,Shop,£3.12,£0.52,£0.70
+01/09/2026,DEMO-001827,Demo Birthday Cake,1,demo020@example.com,Shop,£33.60,£5.60,
+02/09/2026,DEMO-001828,Demo Croissant,2,,Market stall,£3.80,£0.00,£0.96
+02/09/2026,DEMO-001829,Demo Sausage Roll (hot),3,demo011@example.com,Market stall,£9.00,£1.50,£2.70
+02/09/2026,DEMO-001830,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+02/09/2026,DEMO-001831,Demo Sausage Roll (hot),2,,Website,£6.00,£1.00,£1.80
+02/09/2026,DEMO-001832,Demo Filter Coffee,3,demo033@example.com,Website,£7.92,£1.32,£0.90
+02/09/2026,DEMO-001833,Demo Sourdough Loaf,3,demo011@example.com,Shop,£12.60,£0.00,£3.30
+02/09/2026,DEMO-001834,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+02/09/2026,DEMO-001835,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+02/09/2026,DEMO-001836,Demo Filter Coffee,1,demo037@example.com,Shop,£2.64,£0.44,
+02/09/2026,DEMO-001837,Demo Sourdough Loaf,2,,Website,£8.40,£0.00,£2.20
+03/09/2026,DEMO-001838,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,
+03/09/2026,DEMO-001839,Demo Pain au Chocolat,1,demo029@example.com,Shop,£2.20,£0.00,
+03/09/2026,DEMO-001840,Demo Filter Coffee,1,,Website,£2.64,£0.44,£0.30
+03/09/2026,DEMO-001841,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+03/09/2026,DEMO-001842,Demo Cinnamon Swirl,2,demo040@example.com,Market stall,£6.24,£1.04,
+03/09/2026,DEMO-001843,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,
+03/09/2026,DEMO-001844,Demo Flat White,2,,Shop,£6.96,£1.16,
+03/09/2026,DEMO-001845,Demo Cinnamon Swirl,2,,Shop,£6.24,£1.04,
+03/09/2026,DEMO-001846,Demo Pain au Chocolat,2,demo003@example.com,Shop,£4.40,£0.00,
+03/09/2026,DEMO-001847,Demo Croissant,3,demo029@example.com,Shop,£5.70,£0.00,
+03/09/2026,DEMO-001848,Demo Filter Coffee,2,,Market stall,£5.28,£0.88,
+04/09/2026,DEMO-001849,Demo Sourdough Loaf,1,demo017@example.com,Shop,£4.20,£0.00,£1.10
+04/09/2026,DEMO-001850,Demo Flat White,1,demo014@example.com,Shop,£3.48,£0.58,£0.45
+04/09/2026,DEMO-001851,Demo Flat White,2,,Shop,£6.96,£1.16,£0.90
+04/09/2026,DEMO-001852,Demo Victoria Sponge Slice,3,,Website,£11.16,£1.86,£2.55
+04/09/2026,DEMO-001853,Demo Sausage Roll (hot),2,demo026@example.com,Website,£6.00,£1.00,
+04/09/2026,DEMO-001854,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+04/09/2026,DEMO-001855,Demo Croissant,1,demo002@example.com,Shop,£1.90,£0.00,£0.48
+04/09/2026,DEMO-001856,Demo Victoria Sponge Slice,3,demo035@example.com,Market stall,£11.16,£1.86,£2.55
+04/09/2026,DEMO-001857,Demo Seeded Batch,2,demo030@example.com,Shop,£7.20,£0.00,
+04/09/2026,DEMO-001858,Demo Flat White,1,demo011@example.com,Shop,£3.48,£0.58,£0.45
+05/09/2026,DEMO-001859,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+05/09/2026,DEMO-001860,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,
+05/09/2026,DEMO-001861,Demo Filter Coffee,1,demo038@example.com,Shop,£2.64,£0.44,£0.30
+05/09/2026,DEMO-001862,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,
+05/09/2026,DEMO-001863,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+05/09/2026,DEMO-001864,Demo Flat White,1,,Website,£3.48,£0.58,
+05/09/2026,DEMO-001865,Demo Baguette,2,demo039@example.com,Website,£4.20,£0.00,
+05/09/2026,DEMO-001866,Demo Sausage Roll (hot),1,demo001@example.com,Shop,£3.00,£0.50,£0.90
+05/09/2026,DEMO-001867,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+05/09/2026,DEMO-001868,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+07/09/2026,DEMO-001869,Demo Cinnamon Swirl,3,demo038@example.com,Shop,£9.36,£1.56,£2.10
+07/09/2026,DEMO-001870,Demo Cinnamon Swirl,2,demo026@example.com,Market stall,£6.24,£1.04,£1.40
+07/09/2026,DEMO-001871,Demo Baguette,1,demo012@example.com,Shop,£2.10,£0.00,£0.55
+07/09/2026,DEMO-001872,Demo Birthday Cake,2,demo034@example.com,Shop,£67.20,£11.20,£15.00
+07/09/2026,DEMO-001873,Demo Seeded Batch,1,demo032@example.com,Market stall,£3.60,£0.00,£0.95
+07/09/2026,DEMO-001874,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,
+07/09/2026,DEMO-001875,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,£0.85
+07/09/2026,DEMO-001876,Demo Lemon Drizzle Slice,2,,Website,£7.44,£1.24,£1.60
+07/09/2026,DEMO-001877,Demo Victoria Sponge Slice,3,,Shop,£11.16,£1.86,£2.55
+07/09/2026,DEMO-001878,Demo Birthday Cake,1,demo002@example.com,Shop,£33.60,£5.60,
+07/09/2026,DEMO-001879,Demo Cinnamon Swirl,1,demo017@example.com,Shop,£3.12,£0.52,
+07/09/2026,DEMO-001880,Demo Croissant,2,demo026@example.com,Shop,£3.80,£0.00,£0.96
+08/09/2026,DEMO-001881,Demo Lemon Drizzle Slice,2,,Market stall,£7.44,£1.24,£1.60
+08/09/2026,DEMO-001882,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,£1.60
+08/09/2026,DEMO-001883,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+08/09/2026,DEMO-001884,Demo Birthday Cake,1,demo004@example.com,Shop,£33.60,£5.60,£7.50
+08/09/2026,DEMO-001885,Demo Baguette,1,,Market stall,£2.10,£0.00,
+08/09/2026,DEMO-001886,Demo Lemon Drizzle Slice,2,demo040@example.com,Shop,£7.44,£1.24,£1.60
+08/09/2026,DEMO-001887,Demo Flat White,2,demo029@example.com,Shop,£6.96,£1.16,£0.90
+08/09/2026,DEMO-001888,Demo Flat White,2,,Shop,£6.96,£1.16,£0.90
+08/09/2026,DEMO-001889,Demo Flat White,2,,Website,£6.96,£1.16,£0.90
+09/09/2026,DEMO-001890,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,
+09/09/2026,DEMO-001891,Demo Cinnamon Swirl,3,,Website,£9.36,£1.56,£2.10
+09/09/2026,DEMO-001892,Demo Lemon Drizzle Slice,2,demo012@example.com,Website,£7.44,£1.24,£1.60
+09/09/2026,DEMO-001893,Demo Croissant,1,,Website,£1.90,£0.00,£0.48
+09/09/2026,DEMO-001894,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+09/09/2026,DEMO-001895,Demo Pain au Chocolat,1,,Website,£2.20,£0.00,£0.60
+10/09/2026,DEMO-001896,Demo Sourdough Loaf,2,,Website,£8.40,£0.00,
+10/09/2026,DEMO-001897,Demo Birthday Cake,3,,Website,£100.80,£16.80,£22.50
+10/09/2026,DEMO-001898,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+10/09/2026,DEMO-001899,Demo Pain au Chocolat,1,,Website,£2.20,£0.00,£0.60
+10/09/2026,DEMO-001900,Demo Sausage Roll (hot),2,,Shop,£6.00,£1.00,
+10/09/2026,DEMO-001901,Demo Victoria Sponge Slice,2,demo006@example.com,Shop,£7.44,£1.24,£1.70
+10/09/2026,DEMO-001902,Demo Birthday Cake,3,demo013@example.com,Market stall,£100.80,£16.80,£22.50
+10/09/2026,DEMO-001903,Demo Pain au Chocolat,2,demo037@example.com,Shop,£4.40,£0.00,
+10/09/2026,DEMO-001904,Demo Pain au Chocolat,2,demo003@example.com,Market stall,£4.40,£0.00,£1.20
+10/09/2026,DEMO-001905,Demo Baguette,1,,Website,£2.10,£0.00,£0.55
+10/09/2026,DEMO-001906,Demo Cinnamon Swirl,1,demo026@example.com,Website,£3.12,£0.52,
+10/09/2026,DEMO-001907,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+10/09/2026,DEMO-001908,Demo Victoria Sponge Slice,-3,demo036@example.com,Shop,£-11.16,£-1.86,
+11/09/2026,DEMO-001909,Demo Cinnamon Swirl,1,,Market stall,£3.12,£0.52,£0.70
+11/09/2026,DEMO-001910,Demo Flat White,3,,Website,£10.44,£1.74,£1.35
+11/09/2026,DEMO-001911,Demo Baguette,2,,Website,£4.20,£0.00,£1.10
+11/09/2026,DEMO-001912,Demo Seeded Batch,3,,Shop,£10.80,£0.00,£2.85
+11/09/2026,DEMO-001913,Demo Filter Coffee,2,,Shop,£5.28,£0.88,£0.60
+11/09/2026,DEMO-001914,Demo Birthday Cake,1,demo032@example.com,Shop,£33.60,£5.60,£7.50
+11/09/2026,DEMO-001915,Demo Sourdough Loaf,1,demo026@example.com,Website,£4.20,£0.00,
+11/09/2026,DEMO-001916,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+12/09/2026,DEMO-001917,Demo Sausage Roll (hot),2,demo040@example.com,Shop,£6.00,£1.00,
+12/09/2026,DEMO-001918,Demo Seeded Batch,2,demo032@example.com,Market stall,£7.20,£0.00,£1.90
+12/09/2026,DEMO-001919,Demo Sourdough Loaf,2,,Market stall,£8.40,£0.00,£2.20
+12/09/2026,DEMO-001920,Demo Victoria Sponge Slice,1,demo007@example.com,Website,£3.72,£0.62,
+12/09/2026,DEMO-001921,Demo Cinnamon Swirl,2,demo018@example.com,Market stall,£6.24,£1.04,£1.40
+12/09/2026,DEMO-001922,Demo Croissant,1,demo029@example.com,Market stall,£1.90,£0.00,£0.48
+12/09/2026,DEMO-001923,Demo Seeded Batch,3,,Shop,£10.80,£0.00,£2.85
+12/09/2026,DEMO-001924,Demo Sourdough Loaf,3,,Market stall,£12.60,£0.00,
+12/09/2026,DEMO-001925,Demo Sausage Roll (hot),3,demo028@example.com,Market stall,£9.00,£1.50,£2.70
+14/09/2026,DEMO-001926,Demo Baguette,3,demo009@example.com,Shop,£6.30,£0.00,£1.65
+14/09/2026,DEMO-001927,Demo Sourdough Loaf,2,,Shop,£8.40,£0.00,£2.20
+14/09/2026,DEMO-001928,Demo Sausage Roll (hot),3,,Shop,£9.00,£1.50,£2.70
+14/09/2026,DEMO-001929,Demo Croissant,1,,Website,£1.90,£0.00,
+14/09/2026,DEMO-001930,Demo Sausage Roll (hot),2,,Shop,£6.00,£1.00,
+14/09/2026,DEMO-001931,Demo Cinnamon Swirl,1,demo015@example.com,Website,£3.12,£0.52,£0.70
+14/09/2026,DEMO-001932,Demo Sausage Roll (hot),1,,Website,£3.00,£0.50,£0.90
+14/09/2026,DEMO-001933,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+14/09/2026,DEMO-001934,Demo Filter Coffee,1,,Website,£2.64,£0.44,£0.30
+15/09/2026,DEMO-001935,Demo Flat White,1,demo023@example.com,Website,£3.48,£0.58,£0.45
+15/09/2026,DEMO-001936,Demo Seeded Batch,3,demo013@example.com,Website,£10.80,£0.00,£2.85
+15/09/2026,DEMO-001937,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+15/09/2026,DEMO-001938,Demo Victoria Sponge Slice,2,,Shop,£7.44,£1.24,£1.70
+15/09/2026,DEMO-001939,Demo Baguette,2,,Website,£4.20,£0.00,
+15/09/2026,DEMO-001940,Demo Lemon Drizzle Slice,1,,Market stall,£3.72,£0.62,£0.80
+16/09/2026,DEMO-001941,Demo Cinnamon Swirl,1,demo003@example.com,Shop,£3.12,£0.52,£0.70
+16/09/2026,DEMO-001942,Demo Sausage Roll (hot),3,demo040@example.com,Shop,£9.00,£1.50,£2.70
+16/09/2026,DEMO-001943,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+16/09/2026,DEMO-001944,Demo Birthday Cake,2,,Shop,£67.20,£11.20,£15.00
+16/09/2026,DEMO-001945,Demo Cinnamon Swirl,2,demo008@example.com,Shop,£6.24,£1.04,£1.40
+16/09/2026,DEMO-001946,Demo Birthday Cake,1,demo039@example.com,Shop,£33.60,£5.60,
+16/09/2026,DEMO-001947,Demo Sausage Roll (hot),2,demo013@example.com,Website,£6.00,£1.00,£1.80
+16/09/2026,DEMO-001948,Demo Sausage Roll (hot),1,,Shop,£3.00,£0.50,£0.90
+16/09/2026,DEMO-001949,Demo Seeded Batch,2,demo028@example.com,Shop,£7.20,£0.00,£1.90
+16/09/2026,DEMO-001950,Demo Croissant,2,demo015@example.com,Website,£3.80,£0.00,£0.96
+17/09/2026,DEMO-001951,Demo Victoria Sponge Slice,2,demo037@example.com,Shop,£7.44,£1.24,
+17/09/2026,DEMO-001952,Demo Flat White,2,demo011@example.com,Shop,£6.96,£1.16,
+17/09/2026,DEMO-001953,Demo Baguette,1,demo003@example.com,Shop,£2.10,£0.00,£0.55
+17/09/2026,DEMO-001954,Demo Pain au Chocolat,2,,Market stall,£4.40,£0.00,
+17/09/2026,DEMO-001955,Demo Baguette,3,demo038@example.com,Shop,£6.30,£0.00,£1.65
+17/09/2026,DEMO-001956,Demo Seeded Batch,3,demo007@example.com,Shop,£10.80,£0.00,£2.85
+17/09/2026,DEMO-001957,Demo Birthday Cake,1,,Market stall,£33.60,£5.60,£7.50
+17/09/2026,DEMO-001958,Demo Flat White,2,demo027@example.com,Market stall,£6.96,£1.16,£0.90
+17/09/2026,DEMO-001959,Demo Filter Coffee,3,demo025@example.com,Market stall,£7.92,£1.32,
+17/09/2026,DEMO-001960,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+17/09/2026,DEMO-001961,Demo Lemon Drizzle Slice,2,demo020@example.com,Website,£7.44,£1.24,£1.60
+18/09/2026,DEMO-001962,Demo Pain au Chocolat,1,demo031@example.com,Website,£2.20,£0.00,£0.60
+18/09/2026,DEMO-001963,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+18/09/2026,DEMO-001964,Demo Flat White,2,,Shop,£6.96,£1.16,£0.90
+18/09/2026,DEMO-001965,Demo Victoria Sponge Slice,2,demo001@example.com,Shop,£7.44,£1.24,£1.70
+18/09/2026,DEMO-001966,Demo Birthday Cake,3,,Shop,£100.80,£16.80,
+18/09/2026,DEMO-001967,Demo Birthday Cake,2,demo004@example.com,Shop,£67.20,£11.20,£15.00
+18/09/2026,DEMO-001968,Demo Croissant,3,,Website,£5.70,£0.00,
+18/09/2026,DEMO-001969,Demo Flat White,1,demo012@example.com,Website,£3.48,£0.58,£0.45
+19/09/2026,DEMO-001970,Demo Croissant,2,demo030@example.com,Website,£3.80,£0.00,
+19/09/2026,DEMO-001971,Demo Pain au Chocolat,2,,Market stall,£4.40,£0.00,
+19/09/2026,DEMO-001972,Demo Filter Coffee,1,demo024@example.com,Market stall,£2.64,£0.44,£0.30
+19/09/2026,DEMO-001973,Demo Sourdough Loaf,1,,Market stall,£4.20,£0.00,
+19/09/2026,DEMO-001974,Demo Lemon Drizzle Slice,1,,Shop,£3.72,£0.62,£0.80
+19/09/2026,DEMO-001975,Demo Seeded Batch,1,demo019@example.com,Shop,£3.60,£0.00,£0.95
+21/09/2026,DEMO-001976,Demo Sausage Roll (hot),1,demo024@example.com,Shop,£3.00,£0.50,£0.90
+21/09/2026,DEMO-001977,Demo Sausage Roll (hot),1,,Market stall,£3.00,£0.50,£0.90
+21/09/2026,DEMO-001978,Demo Victoria Sponge Slice,3,,Shop,£11.16,£1.86,£2.55
+21/09/2026,DEMO-001979,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,
+21/09/2026,DEMO-001980,Demo Croissant,2,,Shop,£3.80,£0.00,
+21/09/2026,DEMO-001981,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+21/09/2026,DEMO-001982,Demo Flat White,1,demo007@example.com,Shop,£3.48,£0.58,£0.45
+21/09/2026,DEMO-001983,Demo Croissant,1,demo032@example.com,Website,£1.90,£0.00,
+22/09/2026,DEMO-001984,Demo Flat White,3,demo007@example.com,Shop,£10.44,£1.74,£1.35
+22/09/2026,DEMO-001985,Demo Filter Coffee,3,,Shop,£7.92,£1.32,£0.90
+22/09/2026,DEMO-001986,Demo Seeded Batch,1,,Shop,£3.60,£0.00,£0.95
+22/09/2026,DEMO-001987,Demo Flat White,1,,Market stall,£3.48,£0.58,
+22/09/2026,DEMO-001988,Demo Sourdough Loaf,2,demo004@example.com,Shop,£8.40,£0.00,
+22/09/2026,DEMO-001989,Demo Flat White,1,demo023@example.com,Website,£3.48,£0.58,
+22/09/2026,DEMO-001990,Demo Victoria Sponge Slice,3,demo013@example.com,Market stall,£11.16,£1.86,
+22/09/2026,DEMO-001991,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+22/09/2026,DEMO-001992,Demo Pain au Chocolat,1,,Shop,£2.20,£0.00,£0.60
+22/09/2026,DEMO-001993,Demo Flat White,2,,Market stall,£6.96,£1.16,£0.90
+22/09/2026,DEMO-001994,Demo Baguette,2,demo017@example.com,Website,£4.20,£0.00,£1.10
+22/09/2026,DEMO-001995,Demo Flat White,1,demo038@example.com,Shop,£3.48,£0.58,
+22/09/2026,DEMO-001996,Demo Sausage Roll (hot),1,demo029@example.com,Shop,£3.00,£0.50,
+23/09/2026,DEMO-001997,Demo Victoria Sponge Slice,2,,Market stall,£7.44,£1.24,£1.70
+23/09/2026,DEMO-001998,Demo Pain au Chocolat,-1,,Shop,£-2.20,£-0.00,
+23/09/2026,DEMO-001999,Demo Sausage Roll (hot),2,demo028@example.com,Market stall,£6.00,£1.00,
+23/09/2026,DEMO-002000,Demo Filter Coffee,1,,Shop,£2.64,£0.44,£0.30
+23/09/2026,DEMO-002001,Demo Filter Coffee,3,,Website,£7.92,£1.32,£0.90
+23/09/2026,DEMO-002002,Demo Birthday Cake,3,,Shop,£100.80,£16.80,
+23/09/2026,DEMO-002003,Demo Victoria Sponge Slice,1,demo003@example.com,Website,£3.72,£0.62,£0.85
+23/09/2026,DEMO-002004,Demo Flat White,2,demo009@example.com,Shop,£6.96,£1.16,
+23/09/2026,DEMO-002005,Demo Cinnamon Swirl,1,,Website,£3.12,£0.52,£0.70
+23/09/2026,DEMO-002006,Demo Victoria Sponge Slice,-2,,Website,£-7.44,£-1.24,£1.70
+23/09/2026,DEMO-002007,Demo Filter Coffee,3,,Market stall,£7.92,£1.32,£0.90
+24/09/2026,DEMO-002008,Demo Sausage Roll (hot),1,demo025@example.com,Shop,£3.00,£0.50,£0.90
+24/09/2026,DEMO-002009,Demo Seeded Batch,3,demo004@example.com,Website,£10.80,£0.00,£2.85
+24/09/2026,DEMO-002010,Demo Lemon Drizzle Slice,3,,Shop,£11.16,£1.86,£2.40
+24/09/2026,DEMO-002011,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+24/09/2026,DEMO-002012,Demo Seeded Batch,1,demo021@example.com,Shop,£3.60,£0.00,£0.95
+24/09/2026,DEMO-002013,Demo Lemon Drizzle Slice,2,,Shop,£7.44,£1.24,£1.60
+24/09/2026,DEMO-002014,Demo Lemon Drizzle Slice,1,demo036@example.com,Shop,£3.72,£0.62,£0.80
+24/09/2026,DEMO-002015,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+24/09/2026,DEMO-002016,Demo Croissant,2,demo028@example.com,Website,£3.80,£0.00,
+24/09/2026,DEMO-002017,Demo Flat White,3,demo003@example.com,Shop,£10.44,£1.74,£1.35
+24/09/2026,DEMO-002018,Demo Pain au Chocolat,-1,demo038@example.com,Website,£-2.20,£-0.00,
+24/09/2026,DEMO-002019,Demo Pain au Chocolat,3,demo009@example.com,Shop,£6.60,£0.00,
+24/09/2026,DEMO-002020,Demo Victoria Sponge Slice,1,,Shop,£3.72,£0.62,£0.85
+25/09/2026,DEMO-002021,Demo Cinnamon Swirl,2,demo004@example.com,Shop,£6.24,£1.04,£1.40
+25/09/2026,DEMO-002022,Demo Pain au Chocolat,1,demo032@example.com,Website,£2.20,£0.00,
+25/09/2026,DEMO-002023,Demo Lemon Drizzle Slice,1,demo024@example.com,Shop,£3.72,£0.62,
+25/09/2026,DEMO-002024,Demo Flat White,2,demo030@example.com,Website,£6.96,£1.16,£0.90
+25/09/2026,DEMO-002025,Demo Flat White,2,,Shop,£6.96,£1.16,£0.90
+25/09/2026,DEMO-002026,Demo Birthday Cake,1,,Shop,£33.60,£5.60,
+25/09/2026,DEMO-002027,Demo Sausage Roll (hot),1,demo039@example.com,Shop,£3.00,£0.50,£0.90
+25/09/2026,DEMO-002028,Demo Pain au Chocolat,2,,Shop,£4.40,£0.00,£1.20
+25/09/2026,DEMO-002029,Demo Sourdough Loaf,1,,Website,£4.20,£0.00,
+25/09/2026,DEMO-002030,Demo Lemon Drizzle Slice,3,,Shop,£11.16,£1.86,
+25/09/2026,DEMO-002031,Demo Croissant,1,,Shop,£1.90,£0.00,£0.48
+25/09/2026,DEMO-002032,Demo Sourdough Loaf,2,,Market stall,£8.40,£0.00,£2.20
+25/09/2026,DEMO-002033,Demo Baguette,1,,Shop,£2.10,£0.00,£0.55
+26/09/2026,DEMO-002034,Demo Seeded Batch,1,demo020@example.com,Website,£3.60,£0.00,
+26/09/2026,DEMO-002035,Demo Sourdough Loaf,1,,Shop,£4.20,£0.00,
+26/09/2026,DEMO-002036,Demo Sausage Roll (hot),3,demo029@example.com,Shop,£9.00,£1.50,£2.70
+26/09/2026,DEMO-002037,Demo Pain au Chocolat,1,,Market stall,£2.20,£0.00,£0.60
+26/09/2026,DEMO-002038,Demo Lemon Drizzle Slice,3,,Market stall,£11.16,£1.86,£2.40
+26/09/2026,DEMO-002039,Demo Baguette,1,demo018@example.com,Website,£2.10,£0.00,
+26/09/2026,DEMO-002040,Demo Filter Coffee,1,demo021@example.com,Website,£2.64,£0.44,£0.30
+26/09/2026,DEMO-002041,Demo Baguette,2,,Shop,£4.20,£0.00,£1.10
+26/09/2026,DEMO-002042,Demo Flat White,1,demo009@example.com,Website,£3.48,£0.58,£0.45
+26/09/2026,DEMO-002043,Demo Flat White,1,demo035@example.com,Market stall,£3.48,£0.58,
+26/09/2026,DEMO-002044,Demo Filter Coffee,1,,Shop,£2.64,£0.44,
+26/09/2026,DEMO-002045,Demo Sourdough Loaf,2,demo026@example.com,Website,£8.40,£0.00,
+28/09/2026,DEMO-002046,Demo Filter Coffee,1,demo023@example.com,Shop,£2.64,£0.44,£0.30
+28/09/2026,DEMO-002047,Demo Pain au Chocolat,3,,Shop,£6.60,£0.00,£1.80
+28/09/2026,DEMO-002048,Demo Croissant,1,,Shop,£1.90,£0.00,
+28/09/2026,DEMO-002049,Demo Sausage Roll (hot),2,,Shop,£6.00,£1.00,
+28/09/2026,DEMO-002050,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+28/09/2026,DEMO-002051,Demo Baguette,3,demo020@example.com,Website,£6.30,£0.00,
+28/09/2026,DEMO-002052,Demo Lemon Drizzle Slice,3,demo038@example.com,Shop,£11.16,£1.86,£2.40

@@ -1,0 +1,17 @@
+﻿Date,Receipt No,Item,Qty,Customer Email,Channel,Total (inc VAT),VAT,Cost
+29/09/2026,DEMO-900001,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+29/09/2026,DEMO-900002,Demo Birthday Cake,2,,Shop,£67.20,£11.20,
+29/09/2026,DEMO-900003,Demo Birthday Cake,2,,Shop,£67.20,£11.20,£15.00
+31/04/2026,DEMO-900004,Demo Cinnamon Swirl,1,,Website,£3.12,£0.52,
+30/09/2026,DEMO-900005,Demo Seeded Batch,3,,Shop,£10.80,£0.00,£2.85
+09/28/2026,DEMO-900006,Demo Victoria Sponge Slice,1,,Market stall,£3.72,£0.62,
+01/10/2026,DEMO-900007,Demo Victoria Sponge Slice,1,,Website,£3.72,£0.62,£0.85
+01/10/2026,DEMO-900008,Demo Seeded Batch,2,,Market stall,"£4,50",£0.00,£1.90
+01/10/2026,DEMO-900009,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,
+01/10/2026,DEMO-900010,Demo Sausage Roll (hot),1,,Shop,,£0.50,£0.90
+01/10/2026,DEMO-900011,Demo Victoria Sponge Slice,2,,Website,£7.44,£1.24,
+01/10/2026,DEMO-900012,Demo Flat White,1,,Market stall,£3.48,£0.58,
+01/10/2026,DEMO-900013,Demo Cinnamon Swirl,1,,Shop,£3.12,£0.52,£0.70
+01/10/2026,DEMO-900014,Demo Seeded Batch,2,,Shop,£7.20,£0.00,£1.90
+29/09/2026,DEMO-900001,Demo Flat White,1,,Shop,£3.48,£0.58,£0.45
+29/09/2026,DEMO-900002,Demo Birthday Cake,2,,Shop,£67.20,£11.20,
