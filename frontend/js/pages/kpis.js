@@ -7,14 +7,15 @@ import { api } from "../auth.js";
 import { openBusiness } from "../business.js";
 import { guard, jobProgress, number, put, table, waitForJob } from "../data.js";
 import { el } from "../dom.js";
-import { ukDateTime } from "../format.js";
+import { gbp, ukDate, ukDateTime } from "../format.js";
 import { barChart, changeClass, changeText, formatValue, missingText, periodLabel } from "../kpi.js";
 import { showMessage } from "../ui.js";
 
 const message = document.getElementById("message");
 const content = document.getElementById("content");
 const GRANULARITY = "month";
-const CATEGORY_TITLE = { financial: "Money", sales: "Sales" };
+const CATEGORY_TITLE = { financial: "Money", sales: "Sales", customer: "Customers", inventory: "Stock" };
+const CATEGORY_ORDER = ["financial", "sales", "customer", "inventory"];
 
 let orgId = null;
 let base = "";
@@ -35,9 +36,77 @@ async function load() {
   const header = headerCard(data);
   const groups = {};
   for (const kpi of data.kpis) (groups[kpi.category] ??= []).push(kpi);
+  const slots = el("div", { class: "stack" });
   content.replaceChildren(
     header,
-    ...Object.entries(groups).map(([category, kpis]) => groupCard(category, kpis)),
+    ...CATEGORY_ORDER.filter((c) => groups[c]).map((c) => groupCard(c, groups[c])),
+    slots,
+  );
+  await loadBreakdowns(slots);
+}
+
+// --- where sales come from, and which stock to watch (read straight from the records) ---------------------
+
+async function loadBreakdowns(slots) {
+  const [channels, products, movers] = await Promise.all([
+    guard(message, () => api.get(`${base}/breakdown/channel`)),
+    guard(message, () => api.get(`${base}/breakdown/product`)),
+    guard(message, () => api.get(`${base}/stock/movers`)),
+  ]);
+  if (channels && channels.rows.length) slots.append(breakdownCard("Where your sales come from", "Sales", channels, false));
+  if (products && products.rows.length) slots.append(breakdownCard("Your best sellers", "Items sold", products, true));
+  if (movers && (movers.fast.length || movers.slow.length || movers.dead.length)) slots.append(moversCard(movers));
+}
+
+function breakdownCard(title, countHeading, data, withProfit) {
+  const headers = ["", "Sales", "Share", countHeading, ...(withProfit ? ["Profit"] : [])];
+  return el(
+    "section",
+    { class: "card" },
+    el("h2", { style: "margin-top:0" }, title),
+    el("p", { class: "muted" }, `${ukDate(data.period_from)} to ${ukDate(data.period_to)}, before VAT, after refunds.`),
+    table(
+      headers,
+      data.rows.map((r) => [
+        r.label,
+        gbp(r.revenue),
+        r.share_pct === null ? "–" : `${Number(r.share_pct).toFixed(1)}%`,
+        number(r.count),
+        ...(withProfit ? [r.gross_profit === null ? "–" : gbp(r.gross_profit)] : []),
+      ]),
+      { empty: "No sales in this period." },
+    ),
+  );
+}
+
+function moversCard(movers) {
+  const section = (heading, note, rows) =>
+    rows.length
+      ? el(
+          "div",
+          {},
+          el("h3", {}, heading),
+          el("p", { class: "muted" }, note),
+          table(
+            ["Product", "Sold", "In stock", "Stock value", "Last sold"],
+            rows.map((m) => [
+              m.name,
+              number(m.units_sold),
+              number(m.on_hand),
+              m.stock_value === null ? "–" : gbp(m.stock_value),
+              m.last_sold_on ? ukDate(m.last_sold_on) : "Never",
+            ]),
+          ),
+        )
+      : null;
+  return el(
+    "section",
+    { class: "card" },
+    el("h2", { style: "margin-top:0" }, "Stock to watch"),
+    el("p", { class: "muted" }, `Looking at the last ${movers.days} days.`),
+    section("Selling fastest", "Make sure you don't run out.", movers.fast),
+    section("Selling slowest", "Selling, but not much.", movers.slow),
+    section("Not selling at all", "In stock, but nothing sold in this time: money sitting on the shelf.", movers.dead),
   );
 }
 
@@ -104,7 +173,7 @@ function kpiTile(kpi) {
     tile,
     el("div", { class: latest.status === "ok" ? "kpi-value" : "kpi-value muted" }, formatValue(latest.value, kpi.unit)),
     el("div", { class: "muted" }, periodLabel(latest.period_start, GRANULARITY)),
-    latest.status !== "ok" ? el("div", { class: "muted" }, missingText(latest)) : null,
+    latest.status !== "ok" ? el("div", { class: "muted" }, missingText(latest, kpi.requires)) : null,
     change ? el("div", { class: changeClass(change.sign, kpi.direction) }, `${change.sign > 0 ? "▲" : change.sign < 0 ? "▼" : "•"} ${change.text}`) : null,
     kpi.current && kpi.current.status === "ok"
       ? el("div", { class: "muted" }, `${periodLabel(kpi.current.period_start, GRANULARITY)} so far: ${formatValue(kpi.current.value, kpi.unit)}`)

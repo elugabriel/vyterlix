@@ -27,9 +27,9 @@ from app.core.uk import today_uk
 from app.integrations.base import utcnow
 from app.kpi import periods
 from app.kpi.expression import Compiled, ExpressionError, compile_expression, evaluate
-from app.kpi.measures import DATASET_TABLES, MEASURES, compute_series, has_records
+from app.kpi.measures import MEASURES, PRESENCE, compute_series, has_records
 from app.models.business import BusinessProfile
-from app.models.data import Expense, Sale
+from app.models.data import Expense, Sale, StockMovement
 from app.models.kpi import KpiCalculationRun, KpiDefinition, KpiValue
 from app.schemas.kpi import KpiHistoryOut, KpiOut, KpisOut, KpiValueOut, RunOut
 from app.services.data_quality import build_report
@@ -76,9 +76,9 @@ def active_definitions(db: Session) -> list[KpiDefinition]:
 
 
 def _data_bounds(db: Session) -> tuple[date, date] | None:
-    """The first and last date the business has any sales or expenses on."""
+    """The first and last date the business has any sales, expenses or stock movements on."""
     lows, highs = [], []
-    for column in (Sale.sold_on, Expense.spent_on):
+    for column in (Sale.sold_on, Expense.spent_on, StockMovement.moved_on):
         low, high = db.execute(select(func.min(column), func.max(column))).one()
         if low is not None:
             lows.append(low)
@@ -182,7 +182,7 @@ def _calculate(
     if "yoy" in shifts:
         earliest = min(earliest, periods.same_period_last_year(before, granularity))
     data = compute_series(db, needed, granularity, earliest, periods.end_of(last, granularity))
-    present = {dataset: has_records(db, dataset) for dataset in DATASET_TABLES}
+    present = {dataset: has_records(db, dataset) for dataset in PRESENCE}
     quality = _quality_by_period(db, granularity, today)
 
     def evaluate_at(definition: KpiDefinition, period: date) -> tuple[str, Decimal | None, dict]:
@@ -315,6 +315,7 @@ def list_kpis(db: Session, granularity: str = "month") -> KpisOut:
                 category=d.category,
                 unit=d.unit,
                 direction=d.direction,
+                requires=list(d.requires),
                 latest=pick(d, latest_period),
                 current=pick(d, current_period),
             )
@@ -343,6 +344,7 @@ def kpi_history(
         category=definition.category,
         unit=definition.unit,
         direction=definition.direction,
+        requires=list(definition.requires),
         granularity=granularity,
         formula=definition.expression,
         values=[_value_out(r, definition.unit) for r in reversed(rows)],

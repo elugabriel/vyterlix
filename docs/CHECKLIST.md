@@ -18,7 +18,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 2 | Authentication + multi-tenancy | Done |
 | 3 | Business onboarding & profile | Done |
 | 4 | Data import + normalisation | **Part A, milestone, job queue (10) and integration framework (11) done; real connectors (Xero, Shopify, WooCommerce, Google Analytics) remain** |
-| 5 | KPI engine | **In progress — step 1 done (engine, financial and sales KPIs, Key figures page); customer, inventory and breakdown KPIs next** |
+| 5 | KPI engine | **Done apart from marketing (needs Google Analytics) and cash/runway (needs Xero): 28 KPIs, breakdowns, Key figures page** |
 | 6 | Business health engine | Not started |
 | 7 | Diagnostic engine | Not started |
 | 8 | Forecasting engine | Not started |
@@ -195,10 +195,10 @@ Design (Phase 5 step 1): small SQL **measures** in code (`app/kpi/measures.py`: 
 - [x] KPI engine as a service (`app/services/kpi.py`, not in route handlers); runs as the `kpi.calculate` background job, queued automatically after every import or undo, or by the owner (`POST /kpis/calculate`); a broken formula is skipped, not fatal; a KPI that cannot be worked out says so (`no_data` / `undefined`) instead of showing a made-up number
 - [x] KPI definitions stored as data, not hard-coded
 - [x] Financial: revenue, takings incl. VAT, cost of goods sold, gross profit and margin, running costs, net profit and margin, stock bought. **Not yet:** cash position and runway (need bank or accounting data: the Xero connector)
-- [x] Sales: sales count, average sale, items sold, refund rate, growth on the previous period, comparison with the same period last year. **Not yet:** sales by channel and by product (breakdowns, not single numbers: next step)
-- [ ] Customer: active count, new/returning, repeat rate, churn, retention, CAC, CLV
+- [x] Sales: sales count, average sale, items sold, refund rate, growth on the previous period, comparison with the same period last year; **sales by channel and by product** (step 2: `GET .../kpis/breakdown/{channel|product}`, biggest first, the rest rolled into "Everything else", product gross profit)
+- [x] Customer (step 2): customers who bought, new, returning, repeat rate, retention, churn, spend per customer, and how many sales name a customer (so you know how far to trust them). **Not yet:** CAC (needs marketing spend) and a true lifetime value (needs more history)
 - [ ] Marketing: spend, conversion rate, ROAS/CAC by channel, traffic (needs the Google Analytics connector and ad spend data)
-- [ ] Inventory: stock level, turnover, stockout rate, COGS, fast/slow movers, dead stock
+- [x] Inventory (step 2): items in stock, stock value at cost, stock turnover, days of stock, products out of stock, cost of goods sold; fast movers, slow movers and dead stock (`GET .../kpis/stock/movers`)
 - [x] KPI history storage (every period kept; history endpoint, 24 periods by default)
 - [x] Period-over-period comparison (previous period and change on every value; weeks, months, quarters and years supported by the engine; the page uses months)
 - [x] Key figures page (`kpis.html`): everyone can look; the owner can recalculate; shows change since last month, data quality warnings, a chart and the figures behind each number. Verified against the demo year to the penny

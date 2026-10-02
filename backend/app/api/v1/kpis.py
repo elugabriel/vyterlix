@@ -1,14 +1,16 @@
-from typing import Annotated
+from datetime import date
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.deps import DB, Meta, Tenant, require_permission
 from app.core.permissions import Perm
 from app.schemas.jobs import JobOut
-from app.schemas.kpi import Granularity, KpiHistoryOut, KpisOut
+from app.schemas.kpi import BreakdownOut, Granularity, KpiHistoryOut, KpisOut, MoversOut
 from app.services import job_handlers  # noqa: F401  (registers the handlers)
 from app.services.jobs import enqueue
 from app.services.kpi import kpi_history, list_kpis
+from app.services.kpi_breakdown import breakdown, movers
 
 router = APIRouter(prefix="/organizations/{organization_id}/kpis", tags=["kpis"])
 
@@ -37,6 +39,31 @@ def calculate(
         meta=meta,
         payload={"granularity": granularity, "trigger": "manual"},
     )
+
+
+@router.get("/breakdown/{dimension}", response_model=BreakdownOut)
+def sales_breakdown(
+    dimension: Literal["channel", "product"],
+    tenant: Viewer,
+    db: DB,
+    date_from: Annotated[date | None, Query(alias="from")] = None,
+    date_to: Annotated[date | None, Query(alias="to")] = None,
+    limit: Annotated[int, Query(ge=1, le=50)] = 10,
+):
+    """Where sales come from, by sales channel or by product, for a date range (default: the last
+    12 finished months). The biggest come first; the rest are rolled into "Everything else"."""
+    return breakdown(db, dimension, date_from, date_to, limit)
+
+
+@router.get("/stock/movers", response_model=MoversOut)
+def stock_movers(
+    tenant: Viewer,
+    db: DB,
+    days: Annotated[int, Query(ge=7, le=365)] = 90,
+    limit: Annotated[int, Query(ge=1, le=25)] = 5,
+):
+    """Fast movers, slow movers and dead stock (in stock, but not sold in the last `days` days)."""
+    return movers(db, days=days, limit=limit)
 
 
 @router.get("/{code}", response_model=KpiHistoryOut)

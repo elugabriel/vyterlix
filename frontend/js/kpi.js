@@ -19,6 +19,7 @@ export function formatValue(value, unit) {
   const n = Number(value);
   if (unit === "gbp") return gbp(n);
   if (unit === "percent") return `${n.toLocaleString("en-GB", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+  if (unit === "ratio") return `${n.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} times`;
   return n.toLocaleString("en-GB", { maximumFractionDigits: 2 });
 }
 
@@ -52,10 +53,20 @@ export function changeClass(sign, direction) {
   return (sign > 0) === (direction === "up_good") ? "status-ok" : "status-bad";
 }
 
-/** Why a KPI shows no number, in plain words. */
-export function missingText(value) {
-  if (value.status === "no_data") return "Needs records you haven't added yet.";
-  return "Can't be worked out for this period (for example, nothing was sold).";
+const NEEDS = {
+  sales: "sales",
+  expenses: "expenses",
+  customer_sales: "sales that say which customer bought",
+  stock: "stock records",
+};
+
+/** Why a KPI shows no number, in plain words. `requires` is what the KPI needs (from the API). */
+export function missingText(value, requires = []) {
+  if (value.status === "no_data") {
+    const needs = requires.map((r) => NEEDS[r] ?? r);
+    return needs.length ? `Needs ${needs.join(" and ")}, which you haven't added yet.` : "Needs records you haven't added yet.";
+  }
+  return "Can't be worked out for this period (for example, nothing was sold, or there is no earlier period to compare with).";
 }
 
 /** A small bar chart of a KPI over time (finished periods solid, the one in progress faded). */

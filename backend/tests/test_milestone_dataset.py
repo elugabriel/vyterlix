@@ -241,6 +241,25 @@ def test_a_whole_year_arrives_with_exactly_the_expected_totals(api, db, storage,
     )
     assert D("0") < year_profit < D(expected["sales"]["net"]) * D("0.25")  # a thin, real profit
 
+    # customers: everyone who bought is a *new* customer in exactly one month
+    new_customers = api.get(f"{ORGS}/{org_id}/kpis/new_customers?limit=24", headers=auth).json()
+    assert (
+        sum(int(v["value"]) for v in new_customers["values"] if v["status"] == "ok")
+        == (expected["sales"]["customers_who_bought"])
+    )
+    # stock: what the KPI says is on hand at the end equals what the generator says
+    units = api.get(f"{ORGS}/{org_id}/kpis/stock_units?limit=24", headers=auth).json()["values"]
+    september = next(v for v in units if v["period_start"] == "2026-09-01")
+    assert int(september["value"]) == sum(expected["stock"]["closing"].values())
+    # breakdowns add back up to total sales, however they are sliced
+    year = {"from": "2025-10-01", "to": "2026-09-30", "limit": 50}
+    for dimension in ("channel", "product"):
+        res = api.get(f"{ORGS}/{org_id}/kpis/breakdown/{dimension}", params=year, headers=auth)
+        assert res.json()["total_revenue"] == pence(expected["sales"]["net"]), dimension
+        assert {r["label"] for r in res.json()["rows"]} >= (
+            {"Shop", "Website", "Market stall"} if dimension == "channel" else {"Demo Croissant"}
+        )
+
     # the data-quality screen agrees this is a healthy, complete year
     quality = api.get(f"{ORGS}/{org_id}/data-quality", headers=auth).json()
     assert quality["band"] == "good", quality["headline"]

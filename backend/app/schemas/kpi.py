@@ -44,6 +44,7 @@ class KpiOut(BaseModel):
     category: str
     unit: Literal["gbp", "percent", "count", "ratio"]
     direction: Literal["up_good", "down_good", "neutral"]
+    requires: list[str]  # kinds of record it needs: sales, expenses, customer_sales, stock
     latest: KpiValueOut | None  # the most recent finished period
     current: KpiValueOut | None  # the period in progress, if it has one
 
@@ -61,6 +62,43 @@ class KpiHistoryOut(BaseModel):
     category: str
     unit: Literal["gbp", "percent", "count", "ratio"]
     direction: Literal["up_good", "down_good", "neutral"]
+    requires: list[str]
     granularity: Granularity
     formula: str  # the stored formula, so the number can be explained
     values: list[KpiValueOut]  # oldest first
+
+
+class BreakdownRowOut(BaseModel):
+    key: uuid.UUID | None  # None for "no channel recorded" and "everything else"
+    label: str
+    revenue: str  # net of VAT, after refunds, as pounds
+    share_pct: str | None  # of all sales in the period; None when there were none
+    count: int  # sales (by channel) or items sold (by product)
+    gross_profit: str | None  # revenue minus cost of goods; by product only
+
+
+class BreakdownOut(BaseModel):
+    dimension: Literal["channel", "product"]
+    period_from: date
+    period_to: date
+    total_revenue: str
+    rows: list[BreakdownRowOut]  # biggest first; the rest are rolled into "Everything else"
+
+
+class MoverOut(BaseModel):
+    product_id: uuid.UUID
+    name: str
+    sku: str | None
+    units_sold: str  # in the window, after refunds
+    on_hand: str  # items in stock now
+    stock_value: str | None  # at cost; None when the product has no cost price
+    last_sold_on: date | None
+    days_since_last_sale: int | None
+
+
+class MoversOut(BaseModel):
+    as_of: date
+    days: int
+    fast: list[MoverOut]  # selling most
+    slow: list[MoverOut]  # selling, but least
+    dead: list[MoverOut]  # in stock but not sold in the window
