@@ -47,7 +47,7 @@ async function start({ org }) {
   effect.addEventListener("change", refresh);
   hideExpected.addEventListener("change", refresh);
   content.replaceChildren(
-    el("p", { class: "muted" }, "Each change is measured against the month before. Small ups and downs are left out; only the bigger movements appear."),
+    el("p", { class: "muted" }, "Each figure is compared with the month before, and with how it usually behaves over the last year. Small ups and downs are left out; only the bigger movements appear."),
     filters,
     results,
   );
@@ -64,12 +64,17 @@ async function show(slot, effect, hideExpected) {
     slot.replaceChildren(emptyCard(effect || hideExpected));
     return;
   }
+  // One card per figure per month. A figure can both have moved on the month before and be unusual
+  // for the business, so the two are shown together, led by the move on the month before.
   const months = new Map();
   for (const event of events) {
-    if (!months.has(event.period_start)) months.set(event.period_start, []);
-    months.get(event.period_start).push(event);
+    if (!months.has(event.period_start)) months.set(event.period_start, new Map());
+    const figures = months.get(event.period_start);
+    const entry = figures.get(event.kpi_code) ?? {};
+    entry[event.kind === "anomaly" ? "unusual" : "change"] = event;
+    figures.set(event.kpi_code, entry);
   }
-  slot.replaceChildren(...[...months].map(([month, list]) => monthCard(month, list)));
+  slot.replaceChildren(...[...months].map(([month, figures]) => monthCard(month, [...figures.values()])));
 }
 
 function emptyCard(filtered) {
@@ -97,7 +102,8 @@ function monthCard(month, events) {
   );
 }
 
-function eventRow(event) {
+function eventRow({ change, unusual }) {
+  const event = change ?? unusual;
   return el(
     "div",
     { class: "kpi" },
@@ -109,9 +115,11 @@ function eventRow(event) {
       el("span", { class: `badge ${EFFECT_CLASS[event.effect]}` }, EFFECT_TEXT[event.effect]),
       " ",
       el("span", { class: "muted" }, SEVERITY_TEXT[event.severity]),
+      unusual ? el("span", { class: "badge" }, "Unusual for you") : null,
     ),
     el("p", {}, event.summary),
-    event.explained_by_season ? el("p", { class: "muted" }, "Expected for the time of year, so probably nothing to worry about.") : null,
+    change && unusual ? el("p", {}, unusual.summary) : null,
+    event.explained_by_season && !unusual ? el("p", { class: "muted" }, "Expected for the time of year, so probably nothing to worry about.") : null,
     event.data_quality !== null && event.data_quality < 80
       ? el("p", { class: "status-bad" }, `Some of the data behind this month is incomplete (${event.data_quality} out of 100), so treat it with care.`)
       : null,

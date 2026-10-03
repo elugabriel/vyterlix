@@ -21,16 +21,20 @@ def changes(
     month: date | None = None,
     effect: Literal["good", "bad", "neutral"] | None = None,
     severity: Literal["notable", "major"] | None = None,
+    kind: Literal["material_change", "anomaly"] | None = None,
     include_expected: bool = True,
     limit: Annotated[int, Query(ge=1, le=500)] = 100,
 ):
     """The changes in the business's figures that are bigger than normal, newest month first and
-    the biggest first within a month. `month` is the first day of a month (e.g. 2026-02-01)."""
+    the biggest first within a month. `kind` picks one sort: a change on the month before, or a
+    month unusual for the business's own history. `month` is the first day of a month (e.g.
+    2026-02-01)."""
     return list_events(
         db,
         month=None if month is None else month.replace(day=1),
         effect=effect,
         severity=severity,
+        kind=kind,
         include_expected=include_expected,
         limit=limit,
     )

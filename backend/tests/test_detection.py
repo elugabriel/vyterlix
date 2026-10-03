@@ -615,3 +615,249 @@ def test_removing_an_event_removes_its_diagnosis_and_evidence(db, business):
         db.execute(DetectionEvent.__table__.delete())
         assert db.scalar(select(func.count()).select_from(Diagnosis)) == 0
         assert db.scalar(select(func.count()).select_from(DiagnosticEvidence)) == 0
+
+
+# --- an unusual month, judged against the business's own history ----------------------------
+
+STEADY = [D(v) for v in (1000, 1050, 950, 1000, 1020, 980)]  # usual 1,000; strays by about 30
+
+
+def test_what_is_usual_is_the_middle_and_the_normal_straying_is_worked_out_robustly():
+    usual, spread = rules.usual_and_spread("gbp", [D(v) for v in (90, 95, 100, 105, 110, 100)])
+    # middle value 100; the distances 10, 5, 0, 0, 5, 10 have a middle of 5; 5 x 1.4826
+    assert usual == 100 and spread == D("7.413")
+    usual, spread = rules.usual_and_spread("gbp", STEADY)
+    assert usual == 1000 and spread == D("29.652")
+
+
+def test_one_wild_month_does_not_move_what_is_usual():
+    usual, _ = rules.usual_and_spread("gbp", [D(v) for v in (1000, 1000, 1000, 1000, 1000, 9000)])
+    assert usual == 1000
+
+
+def test_a_very_steady_figure_is_still_allowed_a_little_wobble():
+    assert rules.usual_and_spread("gbp", [D(1000)] * 6)[1] == 20  # 2% of the usual
+    assert rules.usual_and_spread("percent", [D(10)] * 6)[1] == D("0.5")  # half a point
+
+
+def test_with_too_little_history_nothing_is_usual_yet():
+    assert rules.usual_and_spread("gbp", [D(1000)] * 5) is None
+    assert rules.find_anomaly("gbp", D(1), [D(1000)] * 5) is None
+
+
+def test_a_month_far_outside_the_normal_range_and_big_enough_to_matter_is_an_anomaly():
+    found = rules.find_anomaly("gbp", D(700), STEADY)
+    assert found.usual == 1000 and found.change == -30 and found.change_unit == "percent"
+    assert found.severity == "major" and found.score < -10
+
+
+def test_a_month_inside_the_normal_range_is_not():
+    assert rules.find_anomaly("gbp", D(950), STEADY) is None  # score about -1.7
+    assert rules.find_anomaly("gbp", D(1100), STEADY) is None
+
+
+def test_far_outside_a_very_steady_range_but_too_small_to_matter_is_not_reported():
+    assert rules.find_anomaly("gbp", D(1060), [D(1000)] * 6) is None  # 3 spreads out, but 6%
+    assert rules.find_anomaly("gbp", D(1200), [D(1000)] * 6).severity == "notable"  # 20%
+
+
+def test_the_line_is_exactly_three_normal_wobbles():
+    history = [D(v) for v in (900, 950, 1000, 1000, 1050, 1100)]  # spread 74.13
+    assert rules.find_anomaly("gbp", D("1222.39"), history) is not None  # exactly 3.0
+    assert rules.find_anomaly("gbp", D("1222.38"), history) is None
+    assert rules.find_anomaly("gbp", D("777.61"), history) is not None
+    assert rules.find_anomaly("gbp", D("777.62"), history) is None
+
+
+def test_a_margin_is_judged_in_points_against_its_own_history():
+    steady = [D(10)] * 6
+    assert rules.find_anomaly("percent", D("11.5"), steady) is None  # 1.5 points: too small
+    found = rules.find_anomaly("percent", D("13.5"), steady)
+    assert (found.change, found.change_unit, found.severity) == (D("3.5"), "points", "notable")
+
+
+def test_the_anomaly_sentence_says_how_far_from_usual_it_was():
+    assert rules.describe_anomaly(
+        "Sales", "gbp", "July 2026", D(700), D(1000), D(-30), "percent", 6
+    ) == (
+        "Sales in July 2026 was £700.00, 30% below your usual £1,000.00 (the middle of the last "
+        "6 months). That is further from normal than this figure usually strays."
+    )
+    assert "3.5 points above your usual 10.0%" in rules.describe_anomaly(
+        "Profit margin", "percent", "July 2026", D("13.5"), D(10), D("3.5"), "points", 6
+    )
+
+
+def anomalies(api, business, query=""):
+    return changes(api, business, f"?kind=anomaly{query}")
+
+
+def test_an_unusual_month_is_found_with_the_numbers_behind_it(api, db, business):
+    values = Values(db, business)
+    values.series("revenue", [1000, 1050, 950, 1000, 1020, 980, 700])
+    run(db, business)
+    [event] = anomalies(api, business)
+    assert event["period_start"] == "2026-07-01" and event["kind"] == "anomaly"
+    assert (event["direction"], event["severity"], event["effect"]) == ("down", "major", "bad")
+    assert (event["value"], event["reference_value"]) == ("700.00", "1000.00")
+    assert (event["change"], event["change_unit"]) == ("-30.0", "percent")
+    assert event["summary"] == (
+        f"{event['kpi_name']} in July 2026 was £700.00, 30% below your usual £1,000.00 "
+        "(the middle of the last 6 months). That is further from normal than this figure "
+        "usually strays."
+    )
+
+
+def test_a_month_can_be_both_a_change_on_last_month_and_unusual(api, db, business):
+    values = Values(db, business)
+    values.series("revenue", [1000, 1050, 950, 1000, 1020, 980, 700])
+    run(db, business)
+    july = by_kpi(changes(api, business, "?month=2026-07-01"), "revenue")
+    assert sorted(e["kind"] for e in july) == ["anomaly", "material_change"]
+
+
+def test_a_slow_slide_is_caught_even_though_no_single_month_moved_much(api, db, business):
+    values = Values(db, business)
+    values.series("revenue", [1000] * 6 + [940, 880, 800])  # 6%, 6%, 9% a month
+    run(db, business)
+    assert not [e for e in changes(api, business) if e["kind"] == "material_change"]
+    found = anomalies(api, business)
+    assert [(e["period_start"], e["severity"]) for e in found] == [("2026-09-01", "notable")]
+    assert found[0]["change"] == "-20.0"
+
+
+def test_a_bounce_back_to_normal_is_not_unusual(api, db, business):
+    values = Values(db, business)
+    values.series("revenue", [1000, 1050, 950, 1000, 1020, 980, 700, 1000])
+    run(db, business)
+    assert [e["period_start"] for e in anomalies(api, business)] == ["2026-07-01"]
+
+
+def test_six_months_of_history_are_enough_and_five_are_not(api, db, business):
+    values = Values(db, business)
+    values.series("revenue", [1000, 1050, 950, 1000, 1020, 700])  # only five before the dip
+    run(db, business)
+    assert anomalies(api, business) == []
+
+
+def test_only_the_last_twelve_months_count_as_history(api, db, business):
+    values = Values(db, business)
+    values.put("revenue", date(2025, 6, 1), 5000, None)  # the thirteenth month back
+    for offset in range(12):  # July 2025 to June 2026
+        year, month = divmod(6 + offset, 12)
+        values.put("revenue", date(2025 + year, month + 1, 1), 1000, None)
+    values.put("revenue", date(2026, 7, 1), 700, 1000)
+    run(db, business)
+    with scoped(db, business):
+        july = db.scalars(
+            select(DetectionEvent).where(
+                DetectionEvent.kind == "anomaly", DetectionEvent.period_start == date(2026, 7, 1)
+            )
+        ).one()
+        assert july.details["history_months"] == 12
+
+
+def test_months_with_no_figure_are_simply_left_out_of_the_history(api, db, business):
+    values = Values(db, business)
+    for month, value in ((1, 1000), (2, 1050), (3, 950), (5, 1000), (6, 1020), (8, 980)):
+        values.put("revenue", date(2026, month, 1), value, None)  # April and July are missing
+    values.put("revenue", date(2026, 9, 1), 700, None)
+    run(db, business)
+    assert [e["period_start"] for e in anomalies(api, business)] == ["2026-09-01"]
+
+
+def test_a_month_still_in_progress_is_not_unusual(api, db, business):
+    values = Values(db, business)
+    values.series("revenue", [1000, 1050, 950, 1000, 1020, 980])
+    values.put("revenue", date(2026, 7, 1), 100, 980, complete=False)
+    run(db, business)
+    assert anomalies(api, business) == []
+
+
+def test_an_unusual_month_counts_even_with_nothing_to_compare_with_last_month(api, db, business):
+    values = Values(db, business)
+    for month, value in enumerate([1000, 1050, 950, 1000, 1020, 980], start=1):
+        values.put("revenue", date(2026, month, 1), value, None)
+    values.put("revenue", date(2026, 7, 1), 700, None)  # no previous value stored
+    run(db, business)
+    assert len(anomalies(api, business)) == 1
+    assert not [e for e in changes(api, business) if e["kind"] == "material_change"]
+
+
+def test_a_busy_season_is_not_an_anomaly(api, db, business):
+    values = Values(db, business)
+    values.series("revenue", [1000] * 7)
+    values.put("revenue", date(2026, 8, 1), 1500, 1000)
+    with_summer(db, business)  # August is 50% busier than normal
+    run(db, business)
+    assert anomalies(api, business) == []  # 1,500 is exactly what a busy August should bring
+
+
+def test_a_weak_busy_season_is_unusual_even_though_it_beat_last_month(api, db, business):
+    values = Values(db, business)
+    values.series("revenue", [1000] * 7)
+    values.put("revenue", date(2026, 8, 1), 1200, 1000)  # up 20%, in a month that should be +50%
+    with_summer(db, business)
+    run(db, business)
+    [event] = anomalies(api, business)
+    assert (event["direction"], event["effect"], event["severity"]) == ("down", "bad", "notable")
+    assert (event["value"], event["reference_value"]) == ("1200.00", "1500.00")
+    assert event["change"] == "-20.0"
+    with scoped(db, business):
+        stored = db.scalars(select(DetectionEvent).where(DetectionEvent.kind == "anomaly")).one()
+        assert stored.details["adjusted_for_seasons"] is True
+
+
+def test_without_the_season_the_same_month_is_an_unusual_high(api, db, business):
+    values = Values(db, business)
+    values.series("revenue", [1000] * 7)
+    values.put("revenue", date(2026, 8, 1), 1500, 1000)
+    run(db, business)
+    [event] = anomalies(api, business)
+    assert (event["direction"], event["effect"], event["severity"]) == ("up", "good", "major")
+
+
+def test_the_list_can_be_limited_to_one_kind(api, db, business):
+    values = Values(db, business)
+    values.series("revenue", [1000, 1050, 950, 1000, 1020, 980, 700])
+    run(db, business)
+    assert {e["kind"] for e in changes(api, business, "?kind=material_change")} == {
+        "material_change"
+    }
+    assert {e["kind"] for e in changes(api, business, "?kind=anomaly")} == {"anomaly"}
+    assert len(changes(api, business)) == 2
+    bad = api.get(f"{ORGS}/{business[0]}/changes?kind=gossip", headers=business[2]["owner"])
+    assert bad.status_code == 422
+
+
+def test_an_unusual_month_that_is_no_longer_unusual_is_removed(api, db, business):
+    values = Values(db, business)
+    values.series("revenue", [1000, 1050, 950, 1000, 1020, 980, 700])
+    run(db, business)
+    assert len(anomalies(api, business)) == 1
+    with scoped(db, business):
+        db.execute(
+            KpiValue.__table__.update()
+            .where(KpiValue.period_start == date(2026, 7, 1))
+            .values(value=D("990"))
+        )
+    run(db, business)
+    assert anomalies(api, business) == []
+
+
+def test_with_an_even_number_of_months_the_middle_is_halfway_between_the_two_in_the_middle():
+    usual, spread = rules.usual_and_spread("gbp", [D(v) for v in (100, 110, 120, 130, 140, 150)])
+    # middle 125; the distances 25, 15, 5, 5, 15, 25 have a middle of 15; 15 x 1.4826
+    assert usual == 125 and spread == D("22.239")
+
+
+def test_a_long_season_earlier_does_not_make_a_normal_month_after_it_look_unusual(
+    api, db, business
+):
+    values = Values(db, business)
+    values.series("revenue", [1000, 1000, 1500, 1500, 1500, 1500, 1000])  # Jan to Jul
+    with scoped(db, business):
+        db.add(season("Spring", (3, 1), (6, 30), 50, source="user", status="active"))
+        db.flush()
+    run(db, business)
+    assert anomalies(api, business) == []  # July is normal once spring is allowed for
