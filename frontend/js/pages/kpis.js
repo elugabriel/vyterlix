@@ -162,7 +162,7 @@ function groupCard(category, kpis) {
 
 function kpiTile(kpi) {
   const latest = kpi.latest;
-  const tile = el("div", { class: "kpi" });
+  const tile = el("div", { class: "kpi", id: kpi.code }); // so other pages can link straight to it
   put(tile, el("div", { class: "kpi-name" }, kpi.name));
   if (!latest) {
     put(tile, el("div", { class: "kpi-value muted" }, "–"), el("div", { class: "muted" }, "Not worked out yet"));

@@ -65,13 +65,10 @@ def _owner_and_org(db: Session, org_id: uuid.UUID) -> tuple[Organization, JobTen
 
 def _demo_imports(db: Session) -> list[DataImport]:
     names = [name for name, _, _ in milestone.FILES]
-    return list(
-        db.scalars(
-            select(DataImport)
-            .where(DataImport.original_filename.in_(names))
-            .order_by(DataImport.created_at)
-        )
-    )
+    found = db.scalars(select(DataImport).where(DataImport.original_filename.in_(names)))
+    # Load order (customers first, stock last), so removing in reverse never strands a row.
+    # Not by created_at: imports made inside one transaction share a timestamp.
+    return sorted(found, key=lambda i: (names.index(i.original_filename), i.created_at))
 
 
 def load_year(

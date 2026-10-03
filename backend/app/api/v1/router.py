@@ -5,6 +5,7 @@ from app.api.v1 import (
     auth,
     benchmarks,
     business,
+    business_health,
     business_lists,
     data_quality,
     goals,
@@ -44,6 +45,7 @@ api_router.include_router(imports.sources_router)
 api_router.include_router(jobs.router)
 api_router.include_router(integrations.router)
 api_router.include_router(kpis.router)
+api_router.include_router(business_health.router)
 api_router.include_router(trading.sales_router)
 api_router.include_router(trading.expenses_router)
 api_router.include_router(trading.customers_router)

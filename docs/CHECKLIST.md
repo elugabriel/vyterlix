@@ -19,7 +19,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 3 | Business onboarding & profile | Done |
 | 4 | Data import + normalisation | **Part A, milestone, job queue (10) and integration framework (11) done; real connectors (Xero, Shopify, WooCommerce, Google Analytics) remain** |
 | 5 | KPI engine | **Done apart from marketing (needs Google Analytics) and cash/runway (needs Xero): 28 KPIs, breakdowns, Key figures page** |
-| 6 | Business health engine | Not started |
+| 6 | Business health engine | **Step 1 done (scoring, rules as data, explanations, history, page); seasonality and real sector benchmarks next** |
 | 7 | Diagnostic engine | Not started |
 | 8 | Forecasting engine | Not started |
 | 9 | Recommendation engine | Not started |
@@ -205,15 +205,17 @@ Design (Phase 5 step 1): small SQL **measures** in code (`app/kpi/measures.py`: 
 
 ## Phase 6: Business health engine
 
-- [ ] Tables: business_health, business_health_components, health_rules
-- [ ] Categories: Financial, Sales, Customer, Marketing, Inventory, Operational
-- [ ] Per-business baseline ("normal" for this business)
-- [ ] Configurable health rules (weights/thresholds per industry)
-- [ ] Weighted overall score
-- [ ] Trend per component (↑ ↓ →)
-- [ ] Explanation stored for every component (click-through to evidence)
-- [ ] Health history
-- [ ] Health dashboard UI
+Design (step 1): the score is built from the KPIs the KPI engine stored, judged by **rules held as data** (`health_rules`: which KPI, which area, how much it counts, whether higher or lower is better, and three anchors: bad = 0, ok = 60, good = 100, straight lines between). A rule judges either the KPI's own value (a margin of 12%) or how far it is from **this business's own usual** (the average of its earlier 6 months; needs at least 3), so no outside benchmark is needed to start. Metrics roll up into areas and areas into one score, each as a weighted average; areas with no data (marketing today) are left out and the score says how much of the picture it covers (and gives no overall score below 40%). Every area stores a plain-English explanation and the exact metrics behind it. Only finished months are scored. Starting thresholds are labelled as Vyterlix's own choices, to be replaced by real sector benchmarks when loaded.
+
+- [x] Tables: business_health, business_health_components, health_rules (plus health_category_weights)
+- [x] Areas: Money, Sales, Customers, Stock scored now; Marketing (needs Google Analytics) and Operations (needs the actions engine) counted once they have data
+- [x] Per-business baseline ("normal" for this business): the average of the earlier six months
+- [x] Configurable health rules and area weights, with per-industry overrides (a rule or weight written for an industry replaces the general one for businesses in it). No industry-specific rules are seeded yet: that needs real benchmarks
+- [x] Weighted overall score, status (healthy 80+, fair 60+, needs attention 40+, at risk), coverage and the lowest data quality among the figures used
+- [x] Trend per area and overall (up / down / flat, against the month straight before; a 3-point move counts)
+- [x] Explanation stored for every area (click-through to evidence: each metric's value, usual level, how far from it, score and a sentence)
+- [x] Health history (every finished month, recalculated whenever the KPIs are: `GET .../business-health`, `/history`, `/{month}`)
+- [x] Business health page (`health.html`): headline score and why, a card per area that opens to its figures, a month picker, and a month-by-month chart
 
 ## Phase 7: Diagnostic / explanation engine
 
@@ -531,6 +533,8 @@ weeks, Europe/London, en-GB wording.
 | **Orders with one row per product line** (the same order number on several rows with different products) are reported as a conflict, not combined into one sale with lines | Needs a "group rows by order" option in the mapping | Phase 4 (after the milestone), or when a real file needs it |
 | **Mobile-ready API** (device sessions, refresh token in secure storage, app links, push tokens, minimum app version) | Listed under Phase 18; do not build the web-only shortcuts deeper (e.g. cookie-only refresh) without a mobile path | Phase 18 (design check at Phase 14) |
 | **Statistics after bulk loads:** a bulk import leaves Postgres thinking the tables are nearly empty, which made undo take minutes and imports erratic; the import now refreshes statistics (ANALYZE) as it grows and before an undo. Any future bulk loader (connectors, Part B) must do the same, and production should check autovacuum settings | Found by timing a 50,000-row run on the real server | Phase 4 Part B / L3 |
+| **Health scores ignore seasons:** "usual" is a plain average of the earlier six months, so a quiet January after a busy December scores badly for a seasonal business (seen on the demo year: January and February score about 40-45) | Needs seasonality: once a business has a year of history, judge sales against the same month last year; until then, use the seasons the owner entered in onboarding | Phase 6 step 2 / Phase 8 (forecasting) |
+| **No industry-specific health rules or sector benchmarks yet:** the starting thresholds are Vyterlix's own, labelled as such | Never load made-up benchmarks; needs real sources | When real benchmarks are loaded |
 | **Data-quality extras:** unusual amounts (a sale far above normal), unusual days (a quiet day inside a busy month), per-product stock-out gaps, and scoring per connected system once connectors exist | Needs enough real history to know what is "unusual"; false alarms would erode trust | Phase 5 (KPI engine) / Part B |
 | **Browser caching of JS/CSS in production** (stale code after a deploy: seen in dev with the plain Python server) | Needs cache headers or versioned file names at the web host | L4 |
 | Manage members/roles and view the audit log from `business.html` (currently only invite in the wizard) | APIs exist; screens not built yet | Core UX |

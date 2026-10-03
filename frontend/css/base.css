@@ -275,3 +275,11 @@ input[type="file"] { width: 100%; padding: 8px 0; }
 .chart .bar-partial { opacity: 0.45; }
 .chart .axis { stroke: var(--border); stroke-width: 1; }
 .kpi:has(details[open]) { grid-column: 1 / -1; }  /* an opened figure gets the full width */
+
+/* Business health */
+.health-healthy { color: var(--ok); border-color: var(--ok); }
+.health-fair { color: var(--warn); border-color: var(--warn); }
+.health-needs_attention { color: #c2410c; border-color: #c2410c; }
+.health-at_risk { color: var(--bad); border-color: var(--bad); }
+.health-not_enough_data { color: var(--muted); }
+.badge[class*="health-"] { text-transform: none; }
