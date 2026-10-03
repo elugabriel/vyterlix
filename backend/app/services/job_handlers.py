@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from app.core.errors import ConflictError
 from app.core.permissions import Perm
-from app.services import health, kpi
+from app.services import detection, health, kpi
 from app.services.import_runner import run_import, undo_import
 from app.services.import_validation import validate_import
 from app.services.integrations import run_sync
@@ -84,4 +84,10 @@ def calculate_kpis(ctx: JobContext) -> BaseModel:
     except Exception:
         ctx.db.rollback()
         logger.error("Could not work out business health", exc_info=True)
+    # Likewise the changes worth a look are found from the KPIs just stored.
+    try:
+        detection.detect(ctx.db, ctx.tenant)
+    except Exception:
+        ctx.db.rollback()
+        logger.error("Could not look for changes in the figures", exc_info=True)
     return run

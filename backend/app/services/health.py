@@ -123,7 +123,7 @@ def _series(db: Session, codes: set[str]) -> tuple[dict, dict]:
     return series, info
 
 
-def _season_effects(db: Session) -> list[BusinessSeason]:
+def confirmed_seasons(db: Session) -> list[BusinessSeason]:
     """The seasons the owner has confirmed, and that say how much busier or quieter they are."""
     return list(
         db.scalars(
@@ -286,7 +286,7 @@ def calculate(db: Session, tenant, *, today: date | None = None) -> HealthRun:
     rules = active_rules(db, industry)
     weights = category_weights(db, industry)
     series, info = _series(db, {r.kpi_code for r in rules})
-    seasons = _season_effects(db)
+    seasons = confirmed_seasons(db)
     months = sorted({p for per in series.values() for p in per})
     if not months:
         return HealthRun(0, 0)

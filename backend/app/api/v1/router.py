@@ -8,6 +8,7 @@ from app.api.v1 import (
     business_health,
     business_lists,
     data_quality,
+    detections,
     goals,
     health,
     imports,
@@ -46,6 +47,7 @@ api_router.include_router(jobs.router)
 api_router.include_router(integrations.router)
 api_router.include_router(kpis.router)
 api_router.include_router(business_health.router)
+api_router.include_router(detections.router)
 api_router.include_router(trading.sales_router)
 api_router.include_router(trading.expenses_router)
 api_router.include_router(trading.customers_router)
