@@ -80,6 +80,34 @@ def baseline_of(values: list[Decimal]) -> Decimal | None:
     return sum(values, ZERO) / len(values)
 
 
+def season_factor(effect_pct: Decimal) -> Decimal | None:
+    """+40 (40% busier than normal) -> 1.4. None when the number can't be used (-100% or worse)."""
+    factor = 1 + Decimal(effect_pct) / HUNDRED
+    return factor if factor > 0 else None
+
+
+def seasonal_baseline(
+    earlier: list[tuple[Decimal, Decimal]], this_month_effect: Decimal
+) -> Decimal | None:
+    """What is usual for a month with this seasonal effect, from earlier months.
+
+    `earlier` is [(value, that month's seasonal effect in %)]. Each earlier month is first
+    stripped of its own season, the plain average is taken, and the result is put back into this
+    month's season. None if there aren't enough months or an effect can't be used.
+    """
+    target = season_factor(this_month_effect)
+    if target is None:
+        return None
+    plain = []
+    for value, effect in earlier:
+        factor = season_factor(effect)
+        if factor is None:
+            return None
+        plain.append(Decimal(value) / factor)
+    usual = baseline_of(plain)
+    return None if usual is None else usual * target
+
+
 def percent_from(value: Decimal, baseline: Decimal) -> Decimal | None:
     """How far above (+) or below (-) the usual level, as a percentage. None if usual is zero."""
     if baseline == 0:
@@ -122,19 +150,29 @@ def describe_metric(
     baseline: Decimal | None = None,
     compared: Decimal | None = None,
     baseline_months: int = 0,
+    baseline_kind: str = "average",
 ) -> str:
     """One plain sentence on a metric: what it was, what it is judged against, what it scored."""
     shown = format_value(value, unit)
     points = f"That scores {to_int(score)} out of 100."
     if basis == "vs_baseline" and baseline is not None and compared is not None:
         usual = format_value(baseline, unit)
+        if baseline_kind == "last_year":
+            if abs(compared) < Decimal("0.5"):
+                where = f"in line with the same month last year ({usual})"
+            else:
+                side = "above" if compared > 0 else "below"
+                where = f"{abs(compared):.0f}% {side} the same month last year ({usual})"
+            return f"{name}: {shown}, {where}. {points}"
         if abs(compared) < Decimal("0.5"):
             where = f"in line with your usual {usual}"
         else:
             side = "above" if compared > 0 else "below"
             where = f"{abs(compared):.0f}% {side} your usual {usual}"
-        months = f"(the average of the last {baseline_months} months)"
-        return f"{name}: {shown}, {where} {months}. {points}"
+        months = f"the average of the last {baseline_months} months"
+        if baseline_kind == "seasonal":
+            months += ", adjusted for your busy and quiet seasons"
+        return f"{name}: {shown}, {where} ({months}). {points}"
     good_text, bad_text = format_value(good, unit), format_value(bad, unit)
     if direction == "down_good":
         yardstick = f"A good level is {good_text} or less; above {bad_text} is a worry."

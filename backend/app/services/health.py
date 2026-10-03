@@ -12,7 +12,7 @@ and judging it would always look like a bad month.
 
 import logging
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 from sqlalchemy import delete, select
@@ -22,7 +22,7 @@ from app.core.errors import NotFoundError
 from app.health import scoring
 from app.integrations.base import utcnow
 from app.kpi import periods
-from app.models.business import BusinessProfile
+from app.models.business import BusinessProfile, BusinessSeason
 from app.models.health import (
     BusinessHealth,
     BusinessHealthComponent,
@@ -37,6 +37,7 @@ from app.schemas.health import (
     HealthPointOut,
     MetricOut,
 )
+from app.services.seasons import covers
 
 logger = logging.getLogger("vyterlix.health")
 ZERO = Decimal("0")
@@ -122,8 +123,67 @@ def _series(db: Session, codes: set[str]) -> tuple[dict, dict]:
     return series, info
 
 
+def _season_effects(db: Session) -> list[BusinessSeason]:
+    """The seasons the owner has confirmed, and that say how much busier or quieter they are."""
+    return list(
+        db.scalars(
+            select(BusinessSeason).where(
+                BusinessSeason.status == "active", BusinessSeason.expected_change_pct.is_not(None)
+            )
+        )
+    )
+
+
+def season_effect(seasons: list[BusinessSeason], month: date) -> Decimal:
+    """How much busier (+) or quieter (-) than normal the month is, in %, from the seasons.
+
+    Worked out day by day (a season covering half the month counts for half of it); where
+    seasons overlap, the stronger one is used for that day.
+    """
+    last = periods.end_of(month, GRANULARITY)
+    total = ZERO
+    days = 0
+    day = month
+    while day <= last:
+        today = [Decimal(s.expected_change_pct) for s in seasons if covers(s, day)]
+        total += max(today, key=abs) if today else ZERO
+        days += 1
+        day += timedelta(days=1)
+    return total / days
+
+
+def _seasonal_usual(
+    rule: HealthRule,
+    period: date,
+    series: dict,
+    seasons: list[BusinessSeason],
+    plain: Decimal | None,
+) -> tuple[Decimal | None, str]:
+    """What is usual for a month that follows the trading year, and how it was worked out.
+
+    The best yardstick is the same month a year ago, which already contains the season. Without
+    that, the owner's busy and quiet seasons adjust the plain average; with neither, it stays
+    the plain average.
+    """
+    own = series.get(rule.kpi_code, {})
+    last_year = own.get(periods.shift(period, GRANULARITY, -12))
+    if last_year is not None and last_year.value:  # only an ok figure has a value
+        return last_year.value, "last_year"
+    now = season_effect(seasons, period)
+    pairs = []
+    for n in range(1, scoring.BASELINE_PERIODS + 1):
+        month = periods.shift(period, GRANULARITY, -n)
+        point = own.get(month)
+        if point is not None and point.status == "ok" and point.value is not None:
+            pairs.append((point.value, season_effect(seasons, month)))
+    if now == 0 and all(effect == 0 for _, effect in pairs):
+        return plain, "average"
+    adjusted = scoring.seasonal_baseline(pairs, now)
+    return (adjusted, "seasonal") if adjusted is not None else (plain, "average")
+
+
 def _judge(
-    rule: HealthRule, period: date, series: dict, info: dict
+    rule: HealthRule, period: date, series: dict, info: dict, seasons: list[BusinessSeason]
 ) -> tuple[_Metric | None, str | None]:
     """Score one rule for one month. Returns (metric, None) or (None, why it was left out)."""
     name, unit = info.get(rule.kpi_code, (rule.kpi_code, "count"))
@@ -133,6 +193,7 @@ def _judge(
     value = point.value
     baseline = compared = None
     months = 0
+    kind = "average"
     judged = value
     if rule.basis == "vs_baseline":
         earlier = [
@@ -143,12 +204,16 @@ def _judge(
             p.value for p in earlier if p is not None and p.status == "ok" and p.value is not None
         ]
         baseline = scoring.baseline_of(usable)
+        months = len(usable)
+        if rule.seasonal:
+            baseline, kind = _seasonal_usual(rule, period, series, seasons, baseline)
+            months = 1 if kind == "last_year" else months
         if baseline is None:
             return None, f"there isn't enough history yet to know what is usual for {name}"
         compared = scoring.percent_from(value, baseline)
         if compared is None:
             return None, f"{name} has no usual level to compare with"
-        months, judged = len(usable), compared
+        judged = compared
     score = scoring.score_metric(
         judged,
         rule.direction,
@@ -159,7 +224,7 @@ def _judge(
     text = scoring.describe_metric(
         name, unit, rule.basis, rule.direction, value, score,
         bad=Decimal(rule.threshold_bad), good=Decimal(rule.threshold_good),
-        baseline=baseline, compared=compared, baseline_months=months,
+        baseline=baseline, compared=compared, baseline_months=months, baseline_kind=kind,
     )  # fmt: skip
     detail = {
         "kpi_code": rule.kpi_code,
@@ -169,6 +234,7 @@ def _judge(
         "value": str(value.quantize(Decimal("0.01"))),
         "baseline": None if baseline is None else str(baseline.quantize(Decimal("0.01"))),
         "baseline_months": months,
+        "baseline_kind": kind if rule.basis == "vs_baseline" else None,
         "compared_pct": None if compared is None else str(compared.quantize(Decimal("0.1"))),
         "score": float(score.quantize(Decimal("0.1"))),
         "weight": float(rule.weight),
@@ -178,14 +244,19 @@ def _judge(
 
 
 def _evaluate(
-    period: date, rules: list[HealthRule], weights: dict[str, Decimal], series: dict, info: dict
+    period: date,
+    rules: list[HealthRule],
+    weights: dict[str, Decimal],
+    series: dict,
+    info: dict,
+    seasons: list[BusinessSeason],
 ) -> dict[str, _Component]:
     components = {c: _Component(c, w) for c, w in weights.items()}
     for rule in rules:
         component = components.get(rule.category)
         if component is None:  # an area that carries no weight is not part of the score
             continue
-        metric, why = _judge(rule, period, series, info)
+        metric, why = _judge(rule, period, series, info, seasons)
         if metric is None:
             component.skipped.append(why)
         else:
@@ -215,6 +286,7 @@ def calculate(db: Session, tenant, *, today: date | None = None) -> HealthRun:
     rules = active_rules(db, industry)
     weights = category_weights(db, industry)
     series, info = _series(db, {r.kpi_code for r in rules})
+    seasons = _season_effects(db)
     months = sorted({p for per in series.values() for p in per})
     if not months:
         return HealthRun(0, 0)
@@ -227,7 +299,7 @@ def calculate(db: Session, tenant, *, today: date | None = None) -> HealthRun:
     scored = 0
     total_weight = sum(weights.values(), ZERO)
     for month in months:
-        components = _evaluate(month, rules, weights, series, info)
+        components = _evaluate(month, rules, weights, series, info, seasons)
         adjacent = (
             previous_month is not None and periods.shift(month, GRANULARITY, -1) == previous_month
         )

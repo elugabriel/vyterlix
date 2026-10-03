@@ -19,7 +19,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 3 | Business onboarding & profile | Done |
 | 4 | Data import + normalisation | **Part A, milestone, job queue (10) and integration framework (11) done; real connectors (Xero, Shopify, WooCommerce, Google Analytics) remain** |
 | 5 | KPI engine | **Done apart from marketing (needs Google Analytics) and cash/runway (needs Xero): 28 KPIs, breakdowns, Key figures page** |
-| 6 | Business health engine | **Step 1 done (scoring, rules as data, explanations, history, page); seasonality and real sector benchmarks next** |
+| 6 | Business health engine | **Step 1 and 2 done (scoring, rules as data, explanations, history, page; seasonal "usual"); real sector benchmarks wait for real sources** |
 | 7 | Diagnostic engine | Not started |
 | 8 | Forecasting engine | Not started |
 | 9 | Recommendation engine | Not started |
@@ -216,6 +216,13 @@ Design (step 1): the score is built from the KPIs the KPI engine stored, judged 
 - [x] Explanation stored for every area (click-through to evidence: each metric's value, usual level, how far from it, score and a sentence)
 - [x] Health history (every finished month, recalculated whenever the KPIs are: `GET .../business-health`, `/history`, `/{month}`)
 - [x] Business health page (`health.html`): headline score and why, a card per area that opens to its figures, a month picker, and a month-by-month chart
+
+Design (step 2): health rules marked **seasonal** (sales, profit and active customers; a flag in the rule, so it is data) are judged against a better "usual" than the plain six-month average. In order: **the same month last year** when the business has it (it already contains the season); otherwise the six-month average **adjusted for the busy and quiet seasons the owner has confirmed** (each earlier month is stripped of its own season, averaged, then put into this month's season; a season covering half a month counts for half of it, and where seasons overlap the stronger one counts for that day); otherwise the plain average as before. Seasons that were only suggested, or have no expected change, are never used. Margins, order size and stock turnover don't follow the trading year and are unchanged. Each figure's sentence says which yardstick was used.
+
+- [x] Seasonal flag on health rules (`health_rules.seasonal`, migration `9b3e4d7a2c18`)
+- [x] Same month last year as "usual" once there is a year of history
+- [x] Owner's confirmed seasons adjust the average when there is not yet a year
+- [x] Evidence says how "usual" was worked out (`baseline_kind`: average / last year / seasonal) in the figure's sentence and the API
 
 ## Phase 7: Diagnostic / explanation engine
 
@@ -533,7 +540,7 @@ weeks, Europe/London, en-GB wording.
 | **Orders with one row per product line** (the same order number on several rows with different products) are reported as a conflict, not combined into one sale with lines | Needs a "group rows by order" option in the mapping | Phase 4 (after the milestone), or when a real file needs it |
 | **Mobile-ready API** (device sessions, refresh token in secure storage, app links, push tokens, minimum app version) | Listed under Phase 18; do not build the web-only shortcuts deeper (e.g. cookie-only refresh) without a mobile path | Phase 18 (design check at Phase 14) |
 | **Statistics after bulk loads:** a bulk import leaves Postgres thinking the tables are nearly empty, which made undo take minutes and imports erratic; the import now refreshes statistics (ANALYZE) as it grows and before an undo. Any future bulk loader (connectors, Part B) must do the same, and production should check autovacuum settings | Found by timing a 50,000-row run on the real server | Phase 4 Part B / L3 |
-| **Health scores ignore seasons:** "usual" is a plain average of the earlier six months, so a quiet January after a busy December scores badly for a seasonal business (seen on the demo year: January and February score about 40-45) | Needs seasonality: once a business has a year of history, judge sales against the same month last year; until then, use the seasons the owner entered in onboarding | Phase 6 step 2 / Phase 8 (forecasting) |
+| **Seasonal "usual" for a business with under a year of history and no confirmed seasons is still the plain six-month average:** a quiet January after a busy December can score low (the demo year's January and February score about 40-45 until a year exists) | Confirm seasons (onboarding or the suggested ones from Phase 8 detection); from the second year the same month last year is used | Phase 8 (forecasting / seasonality detection) |
 | **No industry-specific health rules or sector benchmarks yet:** the starting thresholds are Vyterlix's own, labelled as such | Never load made-up benchmarks; needs real sources | When real benchmarks are loaded |
 | **Data-quality extras:** unusual amounts (a sale far above normal), unusual days (a quiet day inside a busy month), per-product stock-out gaps, and scoring per connected system once connectors exist | Needs enough real history to know what is "unusual"; false alarms would erode trust | Phase 5 (KPI engine) / Part B |
 | **Browser caching of JS/CSS in production** (stale code after a deploy: seen in dev with the plain Python server) | Needs cache headers or versioned file names at the web host | L4 |

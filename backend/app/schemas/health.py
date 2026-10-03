@@ -17,6 +17,9 @@ class MetricOut(BaseModel):
     value: str
     baseline: str | None  # this business's usual level, when judged against it
     baseline_months: int
+    # "average": the earlier months; "last_year": the same month a year ago; "seasonal": the
+    # average, adjusted for the business's busy and quiet seasons
+    baseline_kind: Literal["average", "last_year", "seasonal"] | None = None
     compared_pct: str | None  # how far from usual, in %
     score: float  # 0-100
     weight: float

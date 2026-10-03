@@ -516,3 +516,164 @@ def test_a_problem_working_out_health_does_not_hide_that_the_kpis_were_done(
     ran = jobs.work_once(db, "w", storage=storage)
     assert ran.status == "succeeded" and ran.result["status"] == "succeeded"
     assert api.get(f"{ORGS}/{business[0]}/kpis", headers=business[2]["owner"]).json()["last_run"]
+
+
+# --- seasons: what "usual" means for a business that follows the trading year -------------
+
+
+def season(name, start, end, pct, **extra):
+    from app.models.business import BusinessSeason
+
+    return BusinessSeason(
+        name=name, start_month=start[0], start_day=start[1], end_month=end[0], end_day=end[1],
+        expected_change_pct=None if pct is None else D(str(pct)), **extra,
+    )  # fmt: skip
+
+
+def test_an_earlier_month_is_stripped_of_its_season_and_the_answer_put_back_into_this_one():
+    # Three 1,000 months at normal, then a month that is 40% busier: 1,000 x 1.4
+    earlier = [(D("1000"), D("0")), (D("1400"), D("40")), (D("1400"), D("40"))]
+    assert scoring.seasonal_baseline(earlier, D("40")) == D("1400")
+    assert scoring.seasonal_baseline(earlier, D("0")) == D("1000")
+    assert scoring.seasonal_baseline(earlier, D("-20")) == D("800")
+
+
+def test_a_seasonal_usual_needs_enough_months_and_a_usable_season():
+    assert scoring.seasonal_baseline([(D("1000"), D("0"))] * 2, D("0")) is None
+    assert scoring.seasonal_baseline([(D("1000"), D("0"))] * 3, D("-100")) is None
+    assert scoring.seasonal_baseline([(D("1000"), D("-100"))] * 3, D("0")) is None
+
+
+def test_a_month_takes_the_seasons_that_cover_its_days_in_proportion():
+    christmas = season("Christmas", (12, 1), (1, 5), 40)
+    assert health.season_effect([christmas], date(2025, 12, 1)) == 40
+    # 5 of January's 31 days: 40 x 5 / 31
+    assert health.season_effect([christmas], date(2026, 1, 1)).quantize(D("0.01")) == D("6.45")
+    assert health.season_effect([christmas], date(2026, 6, 1)) == 0
+    assert health.season_effect([], date(2025, 12, 1)) == 0
+
+
+def test_where_seasons_overlap_the_stronger_one_counts_for_that_day():
+    sale = season("Sale", (9, 1), (9, 30), 20)
+    slump = season("Slump", (9, 1), (9, 30), -50)
+    assert health.season_effect([sale, slump], date(2026, 9, 1)) == -50
+
+
+def sales_metric(body):
+    return next(m for m in component(body, "sales")["metrics"] if m["kpi_code"] == "revenue")
+
+
+def test_the_same_month_last_year_is_what_usual_means_once_there_is_a_year_of_history(
+    api, db, business
+):
+    kpis = Kpis(db, business)
+    kpis.put("revenue", date(2025, 8, 1), 2000)
+    kpis.months("revenue", [1000] * 6 + [1800], start=2)  # Feb-Jul 1,000; August 1,800
+    calculate(db, business)
+    metric = sales_metric(get(api, business, "/2026-08-01").json())
+    # Against last August (2,000) that is 10% down: 30. Against the 1,000 average it would be 100.
+    assert metric["baseline_kind"] == "last_year" and metric["baseline"] == "2000.00"
+    assert metric["baseline_months"] == 1
+    assert metric["compared_pct"] == "-10.0" and metric["score"] == 30
+    assert "10% below the same month last year (£2,000.00)" in metric["text"]
+
+
+def test_without_a_year_of_history_the_owners_seasons_adjust_the_average(api, db, business):
+    kpis = Kpis(db, business)
+    kpis.months("revenue", [1000] * 6 + [1500], start=2)
+    with scoped(db, business):
+        db.add(season("Summer", (8, 1), (8, 31), 50, source="user", status="active"))
+        db.flush()
+    calculate(db, business)
+    metric = sales_metric(get(api, business, "/2026-08-01").json())
+    # August is 50% busier than normal, so usual is 1,000 x 1.5 = 1,500; 1,500 is spot on (60).
+    assert metric["baseline_kind"] == "seasonal" and metric["baseline"] == "1500.00"
+    assert metric["baseline_months"] == 6 and metric["score"] == 60
+    assert "adjusted for your busy and quiet seasons" in metric["text"]
+
+
+def test_a_season_the_owner_has_not_confirmed_changes_nothing(api, db, business):
+    kpis = Kpis(db, business)
+    kpis.months("revenue", [1000] * 6 + [1500], start=2)
+    with scoped(db, business):
+        db.add(season("Summer?", (8, 1), (8, 31), 50, source="detected", status="suggested"))
+        db.add(season("Quiet", (8, 1), (8, 31), None, source="user", status="active"))
+        db.flush()
+    calculate(db, business)
+    metric = sales_metric(get(api, business, "/2026-08-01").json())
+    assert metric["baseline_kind"] == "average" and metric["baseline"] == "1000.00"
+    assert metric["score"] == 100  # 50% above usual
+
+
+def test_last_year_beats_the_seasons_because_it_already_contains_them(api, db, business):
+    kpis = Kpis(db, business)
+    kpis.put("revenue", date(2025, 8, 1), 1500)
+    kpis.months("revenue", [1000] * 6 + [1500], start=2)
+    with scoped(db, business):
+        db.add(season("Summer", (8, 1), (8, 31), 50, source="user", status="active"))
+        db.flush()
+    calculate(db, business)
+    metric = sales_metric(get(api, business, "/2026-08-01").json())
+    assert metric["baseline_kind"] == "last_year" and metric["baseline"] == "1500.00"
+
+
+def test_a_figure_that_does_not_follow_the_trading_year_ignores_seasons(api, db, business):
+    kpis = Kpis(db, business)
+    kpis.months("average_order_value", [50] * 7, start=2)
+    kpis.put("average_order_value", date(2025, 8, 1), 80)
+    with scoped(db, business):
+        db.add(season("Summer", (8, 1), (8, 31), 50, source="user", status="active"))
+        db.flush()
+    calculate(db, business)
+    body = get(api, business, "/2026-08-01").json()
+    metric = next(
+        m for m in component(body, "sales")["metrics"] if m["kpi_code"] == "average_order_value"
+    )
+    assert metric["baseline_kind"] == "average" and metric["baseline"] == "50.00"
+
+
+def test_a_rule_can_be_made_seasonal_or_not_as_data(api, db, business):
+    kpis = Kpis(db, business)
+    kpis.put("revenue", date(2025, 8, 1), 2000)
+    kpis.months("revenue", [1000] * 6 + [1800], start=2)
+    db.execute(
+        HealthRule.__table__.update().where(HealthRule.kpi_code == "revenue").values(seasonal=False)
+    )
+    calculate(db, business)
+    metric = sales_metric(get(api, business, "/2026-08-01").json())
+    assert metric["baseline_kind"] == "average" and metric["baseline"] == "1000.00"
+
+
+def test_a_seasonal_rule_with_no_season_and_no_last_year_is_the_plain_average(api, db, business):
+    kpis = Kpis(db, business)
+    kpis.months("revenue", [1000] * 6 + [1100], start=2)
+    calculate(db, business)
+    metric = sales_metric(get(api, business, "/2026-08-01").json())
+    assert metric["baseline_kind"] == "average" and metric["score"] == 100
+    assert "the average of the last 6 months)" in metric["text"]
+
+
+def test_a_value_rule_has_no_kind_of_usual(api, steady_shop):
+    body = get(api, steady_shop).json()
+    margin = next(m for m in component(body, "financial")["metrics"] if m["basis"] == "value")
+    assert margin["baseline_kind"] is None
+
+
+def test_a_last_year_of_nothing_is_not_used_as_usual(api, db, business):
+    kpis = Kpis(db, business)
+    kpis.put("revenue", date(2025, 8, 1), 0)
+    kpis.months("revenue", [1000] * 6 + [1100], start=2)
+    calculate(db, business)
+    metric = sales_metric(get(api, business, "/2026-08-01").json())
+    assert metric["baseline_kind"] == "average" and metric["baseline"] == "1000.00"
+
+
+def test_seasons_in_other_months_do_not_change_how_usual_is_worked_out(api, db, business):
+    kpis = Kpis(db, business)
+    kpis.months("revenue", [1000] * 6 + [1100], start=2)
+    with scoped(db, business):
+        db.add(season("Christmas", (12, 1), (12, 31), 40, source="user", status="active"))
+        db.flush()
+    calculate(db, business)
+    metric = sales_metric(get(api, business, "/2026-08-01").json())
+    assert metric["baseline_kind"] == "average" and metric["baseline"] == "1000.00"

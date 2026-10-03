@@ -94,6 +94,9 @@ class HealthRule(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     industry_code: Mapped[str | None] = mapped_column(String(50), ForeignKey("industries.code"))
     note: Mapped[str | None] = mapped_column(String(300))  # where the thresholds come from
     is_active: Mapped[bool] = mapped_column(Boolean, server_default=text("true"))
+    # A seasonal rule follows the trading year (sales, profit, customers), so its "usual" is the
+    # same month last year or is adjusted for the business's busy and quiet seasons.
+    seasonal: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
 
 
 class HealthCategoryWeight(UUIDPrimaryKeyMixin, TimestampMixin, Base):
