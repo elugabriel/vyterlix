@@ -6,12 +6,14 @@ from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import DB, Tenant, require_permission
 from app.core.permissions import Perm
-from app.schemas.diagnostics import DetectionOut
+from app.schemas.diagnostics import DetectionOut, DiagnosisOut
 from app.services.detection import get_event, list_events
+from app.services.diagnosis import diagnose, read
 
 router = APIRouter(prefix="/organizations/{organization_id}/changes", tags=["diagnostics"])
 
 Viewer = Annotated[Tenant, Depends(require_permission(Perm.INSIGHTS_VIEW))]
+Manager = Annotated[Tenant, Depends(require_permission(Perm.ACTIONS_MANAGE))]
 
 
 @router.get("", response_model=list[DetectionOut])
@@ -43,3 +45,16 @@ def changes(
 @router.get("/{event_id}", response_model=DetectionOut)
 def one_change(event_id: uuid.UUID, tenant: Viewer, db: DB):
     return get_event(db, event_id)
+
+
+@router.get("/{event_id}/diagnosis", response_model=DiagnosisOut)
+def get_diagnosis(event_id: uuid.UUID, tenant: Viewer, db: DB):
+    """Why this change happened, with the evidence behind it (404 until it has been explained)."""
+    return read(db, event_id)
+
+
+@router.post("/{event_id}/diagnosis", response_model=DiagnosisOut)
+def explain_change(event_id: uuid.UUID, tenant: Manager, db: DB):
+    """Work out why this change happened and keep the explanation. Safe to run again: the
+    diagnosis and its evidence are replaced, so they always match the current figures."""
+    return diagnose(db, tenant, event_id)

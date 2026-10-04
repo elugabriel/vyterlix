@@ -128,6 +128,11 @@ class Diagnosis(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base):
     summary: Mapped[str] = mapped_column(Text)
     confidence: Mapped[int | None] = mapped_column(SmallInteger)  # 0-100
     confidence_label: Mapped[str] = mapped_column(String(15))
+    confidence_note: Mapped[str | None] = mapped_column(Text)  # how the confidence was reached
+    # Which version of the rules produced this, and the figures it was based on, so any
+    # diagnosis can be traced back to exactly what it was built from.
+    rules_version: Mapped[str] = mapped_column(String(30), server_default="diagnosis-1")
+    basis: Mapped[dict[str, Any]] = mapped_column(JSONB, server_default=text("'{}'"))
     diagnosed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 

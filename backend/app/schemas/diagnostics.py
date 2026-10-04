@@ -113,3 +113,29 @@ class DriversOut(BaseModel):
     lenses: list[LensOut]
     # The strongest drivers across every lens and every way of splitting into parts, biggest first.
     findings: list[FindingOut]
+
+
+class EvidenceOut(BaseModel):
+    """One statement behind a diagnosis, marked with what kind of statement it is."""
+
+    id: uuid.UUID
+    evidence_type: Literal["fact", "statistical", "ai_interpretation", "insufficient"]
+    statement: str
+    data: dict
+    sort_order: int
+
+
+class DiagnosisOut(BaseModel):
+    """Why a change happened: a headline, how sure we are, and the evidence."""
+
+    id: uuid.UUID
+    event: DetectionOut
+    status: Literal["ready", "insufficient_evidence"]
+    headline: str
+    summary: str
+    confidence: int | None  # 0-100; null when there is not enough evidence to say
+    confidence_label: Literal["high", "medium", "low", "insufficient"]
+    confidence_note: str | None  # how the confidence was reached
+    rules_version: str  # which version of the rules made this
+    diagnosed_at: datetime
+    evidence: list[EvidenceOut]
