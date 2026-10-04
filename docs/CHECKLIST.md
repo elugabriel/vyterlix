@@ -20,7 +20,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 4 | Data import + normalisation | **Part A, milestone, job queue (10) and integration framework (11) done; real connectors (Xero, Shopify, WooCommerce, Google Analytics) remain** |
 | 5 | KPI engine | **Done apart from marketing (needs Google Analytics) and cash/runway (needs Xero): 28 KPIs, breakdowns, Key figures page** |
 | 6 | Business health engine | **Step 1 and 2 done (scoring, rules as data, explanations, history, page; seasonal "usual"); real sector benchmarks wait for real sources** |
-| 7 | Diagnostic engine | **Steps 1-5 done (detection, anomalies, segments, drivers, evidence and diagnoses with confidence); the diagnosis screen next** |
+| 7 | Diagnostic engine | **Done apart from the parked items: anomalies, segments (product, channel, customer, day, cost), drivers, evidence and diagnoses with confidence, and the What changed page with the explanation screen** |
 | 8 | Forecasting engine | Not started |
 | 9 | Recommendation engine | Not started |
 | 10 | Action management | Not started |
@@ -237,7 +237,7 @@ Design (step 1, then step 2 for anomalies): the engine first **notices** that so
 - [x] Evidence generation + storage (step 5): `POST /organizations/{id}/changes/{change}/diagnosis` (owner or manager) explains a detected change and keeps the explanation; `GET` reads it back (viewers too). Safe to run again (replaces the evidence, same diagnosis). Evidence: the figure itself and how complete its data is; the drivers (parts read off the records are facts, splits worked out by arithmetic are statistical); how far from usual an unusual month was; what the owner's seasons expect; and what the engine cannot tell. Marked on the change as diagnosed
 - [x] Diagnosis records with confidence (step 5): headline and summary in plain English, a 0-100 confidence with high / medium / low (or none, `insufficient_evidence`, when no cause accounts for a quarter of the change or the figure cannot be broken down yet), and a sentence saying how it was reached. From written rules, never a model's opinion: 60% how much of the change the strongest cause explains, 40% how complete the data is, a little more when independent readings agree, less when the cause hides in sales with no product detail, never above 95. Each diagnosis stores the rules version (`diagnosis-1`) and the figures it was built from
 - [x] Fact / statistical finding / AI interpretation / insufficient evidence stored separately (step 5: every piece of evidence has its type; facts, statistics and "cannot tell" are produced now; `ai_interpretation` is only ever written by the AI assistant, in Phase 13, and is never produced here)
-- [ ] Diagnosis explanation in UI
+- [x] Diagnosis explanation in UI (step 6): on the What changed page every change has "Why did this happen?": the headline, the confidence (high / medium / low / not enough evidence) and how it was reached, and the evidence grouped by what kind of statement it is (what your records show, what we worked out from your figures, what the AI assistant thinks, what we can't tell), with the date and rules version. Owners and managers get "Explain this" and "Work it out again"; viewers read explanations already made. Browser-tested on the demo year, including a figure that cannot be broken down yet (honest "not enough evidence")
 
 ## Phase 8: Forecasting engine
 

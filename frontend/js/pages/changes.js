@@ -8,6 +8,7 @@ import { openBusiness } from "../business.js";
 import { guard, table } from "../data.js";
 import { el } from "../dom.js";
 import { field, select } from "../forms.js";
+import { ukDateTime } from "../format.js";
 import { formatValue, periodLabel } from "../kpi.js";
 
 const message = document.getElementById("message");
@@ -30,9 +31,22 @@ let base = "";
 let segmentBase = "";
 let driversBase = "";
 let splittable = {};
+let canExplain = false;
+
+const CONFIDENCE_TEXT = { high: "High confidence", medium: "Medium confidence", low: "Low confidence", insufficient: "Not enough evidence" };
+const CONFIDENCE_CLASS = { high: "health-healthy", medium: "health-fair", low: "health-needs_attention", insufficient: "health-not_enough_data" };
+// What each kind of statement is called on screen, in the order they are shown. A guess is never
+// shown as a fact: every line says what kind of statement it is.
+const EVIDENCE_GROUPS = [
+  ["fact", "What your records show"],
+  ["statistical", "What we worked out from your figures"],
+  ["ai_interpretation", "What the AI assistant thinks"],
+  ["insufficient", "What we can't tell"],
+];
 
 async function start({ org }) {
   orgId = org.id;
+  canExplain = org.role === "owner" || org.role === "manager";
   base = `/organizations/${orgId}/changes`;
   segmentBase = `/organizations/${orgId}/segments`;
   driversBase = `/organizations/${orgId}/drivers`;
@@ -138,8 +152,68 @@ function eventRow({ change, unusual }) {
     event.data_quality !== null && event.data_quality < 80
       ? el("p", { class: "status-bad" }, `Some of the data behind this month is incomplete (${event.data_quality} out of 100), so treat it with care.`)
       : null,
+    diagnosisPanel(event),
     splittable[event.kpi_code] ? whereFrom(event) : null,
     el("a", { href: `kpis.html?org=${orgId}#${event.kpi_code}` }, "See this figure"),
+  );
+}
+
+// --- why did it happen? the diagnosis and the evidence behind it -------------------------------------------
+
+function diagnosisPanel(event) {
+  const result = el("div", { class: "stack" });
+  const panel = el("details", { class: "diagnosis" }, el("summary", {}, "Why did this happen?"), result);
+  let diagnosed = event.status === "diagnosed";
+
+  const show = (diagnosis) => {
+    diagnosed = true;
+    result.replaceChildren(diagnosisView(diagnosis, explain));
+  };
+  async function explain() {
+    const diagnosis = await guard(message, () => api.post(`${base}/${event.id}/diagnosis`));
+    if (diagnosis) show(diagnosis);
+  }
+  const notYet = () =>
+    result.replaceChildren(
+      canExplain
+        ? el(
+            "div",
+            { class: "stack" },
+            el("p", {}, "This change has not been explained yet."),
+            el("div", { class: "actions" }, el("button", { type: "button", onclick: explain }, "Explain this")),
+          )
+        : el("p", { class: "muted" }, "This change has not been explained yet. The owner or a manager can ask for an explanation."),
+    );
+
+  let opened = false;
+  panel.addEventListener("toggle", async () => {
+    if (!panel.open || opened) return;
+    opened = true;
+    if (!diagnosed) return notYet();
+    const diagnosis = await guard(message, () => api.get(`${base}/${event.id}/diagnosis`));
+    if (diagnosis) show(diagnosis);
+  });
+  return panel;
+}
+
+function diagnosisView(diagnosis, again) {
+  const groups = EVIDENCE_GROUPS.map(([type, title]) => [title, diagnosis.evidence.filter((e) => e.evidence_type === type)]).filter(([, items]) => items.length);
+  return el(
+    "div",
+    { class: "stack" },
+    el("p", {}, el("strong", {}, diagnosis.headline)),
+    el(
+      "p",
+      {},
+      el("span", { class: `badge ${CONFIDENCE_CLASS[diagnosis.confidence_label]}` }, CONFIDENCE_TEXT[diagnosis.confidence_label]),
+      diagnosis.confidence === null ? null : el("span", { class: "muted" }, ` ${diagnosis.confidence} out of 100`),
+    ),
+    diagnosis.confidence_note ? el("p", { class: "muted" }, diagnosis.confidence_note) : null,
+    ...groups.map(([title, items]) =>
+      el("div", {}, el("strong", {}, title), el("ul", {}, ...items.map((e) => el("li", {}, e.statement)))),
+    ),
+    el("p", { class: "muted" }, `Worked out on ${ukDateTime(diagnosis.diagnosed_at)} using version ${diagnosis.rules_version} of the rules. Every line above comes from your records or from arithmetic on them; nothing here is a guess.`),
+    canExplain ? el("div", { class: "actions" }, el("button", { type: "button", class: "secondary", onclick: again }, "Work it out again")) : null,
   );
 }
 
