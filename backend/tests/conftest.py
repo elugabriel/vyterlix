@@ -14,6 +14,7 @@ from app.db.session import get_db
 from app.main import create_app
 from app.services.email import EmailMessage, get_email_sender
 from app.services.storage import LocalFileStorage, get_file_storage
+from tests.shops import bakery, costs  # noqa: F401  (fixtures shared by several test files)
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 TEST_DATABASE_URL = os.environ.get(

@@ -67,3 +67,49 @@ class SegmentOptionsOut(BaseModel):
     """Which figures can be split up, and by what."""
 
     metrics: dict[str, list[str]]
+
+
+class FindingOut(BaseModel):
+    """One thing that drove a change, with how much of the change it accounts for."""
+
+    kind: Literal[
+        "calendar_days",
+        "daily_rate",
+        "sales_count",
+        "sale_value",
+        "volume",
+        "price",
+        "no_product_detail",
+        "contributor",
+    ]
+    lens: Literal["days", "orders", "price_volume", "parts"]
+    label: str  # a short title
+    amount: str  # signed, in the figure's own unit
+    share_pct: str | None  # of the overall change; negative = it worked against the change
+    text: str  # a plain sentence
+
+
+class LensOut(BaseModel):
+    """One way of reading the change: two effects that add up to the whole of it."""
+
+    key: Literal["days", "orders", "price_volume"]
+    title: str
+    effects: list[FindingOut]
+
+
+class DriversOut(BaseModel):
+    metric: str
+    metric_label: str
+    unit: Literal["gbp", "percent", "count", "ratio"]
+    month: date
+    compared_with: date
+    against: Literal["previous_month", "last_year"]
+    total_previous: str
+    total_current: str
+    total_change: str
+    total_change_pct: str | None
+    headline: str
+    # Each lens splits the same change in two; they are different readings, not to be added up.
+    lenses: list[LensOut]
+    # The strongest drivers across every lens and every way of splitting into parts, biggest first.
+    findings: list[FindingOut]

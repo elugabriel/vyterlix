@@ -241,7 +241,9 @@ def _pounds_or_count(value: Decimal, unit: str) -> str:
     value = Decimal(value)
     if unit == "gbp":
         return str(value.quantize(PENNY))
-    return str(value.quantize(Decimal("1"))) if value == value.to_integral_value() else str(value)
+    if value == value.to_integral_value():
+        return str(value.quantize(Decimal("1")))
+    return str(value.quantize(PENNY))
 
 
 def _month_name(month: date) -> str:

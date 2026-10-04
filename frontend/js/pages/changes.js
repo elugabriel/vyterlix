@@ -28,12 +28,14 @@ const DIMENSION_TEXT = {
 let orgId = null;
 let base = "";
 let segmentBase = "";
+let driversBase = "";
 let splittable = {};
 
 async function start({ org }) {
   orgId = org.id;
   base = `/organizations/${orgId}/changes`;
   segmentBase = `/organizations/${orgId}/segments`;
+  driversBase = `/organizations/${orgId}/drivers`;
   document.getElementById("org-name").textContent = org.name;
   document.getElementById("back").href = `business.html?org=${orgId}`;
 
@@ -147,6 +149,12 @@ function whereFrom(event) {
   const dimensions = splittable[event.kpi_code];
   const chooser = select("dimension", dimensions.map((d) => [d, DIMENSION_TEXT[d] ?? d]), { selected: dimensions[0] });
   const result = el("div", { class: "stack" });
+  const why = el("div", { class: "stack" });
+  const loadWhy = async () => {
+    const params = new URLSearchParams({ month: event.period_start });
+    const body = await guard(message, () => api.get(`${driversBase}/${event.kpi_code}?${params}`));
+    if (body) why.replaceChildren(driversList(body));
+  };
   const load = async () => {
     const params = new URLSearchParams({ month: event.period_start });
     const body = await guard(message, () => api.get(`${segmentBase}/${event.kpi_code}/${chooser.value}?${params}`));
@@ -157,16 +165,34 @@ function whereFrom(event) {
     "details",
     {},
     el("summary", {}, "Where did this come from?"),
-    el("div", { class: "stack" }, field("Split by", chooser), result),
+    el("div", { class: "stack" }, why, field("Split by", chooser), result),
   );
   let loaded = false;
   panel.addEventListener("toggle", () => {
     if (panel.open && !loaded) {
       loaded = true;
+      loadWhy();
       load();
     }
   });
   return panel;
+}
+
+function driversList(body) {
+  if (!body.findings.length) return el("p", { class: "muted" }, "Nothing stands out as the main cause.");
+  return el(
+    "div",
+    { class: "stack" },
+    el("strong", {}, "What drove it"),
+    el(
+      "ul",
+      {},
+      ...body.findings.map((f) =>
+        el("li", {}, f.text, f.share_pct === null || f.kind === "contributor" ? null : el("span", { class: "muted" }, ` (${Math.round(Number(f.share_pct))}% of the change)`)),
+      ),
+    ),
+    el("p", { class: "muted" }, "These are different ways of reading the same change, so the percentages are not meant to add up to 100."),
+  );
 }
 
 function signed(value, unit) {
