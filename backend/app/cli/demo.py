@@ -4,6 +4,8 @@ business whose name ends with "(demo data)", so it can't be mixed into a real bu
     python -m app.cli.demo files --out ./demo-files   # write the CSV files, to upload by hand
     python -m app.cli.demo load --org <business id>   # bring a fake year of trading in
     python -m app.cli.demo clear --org <business id>  # take it all out again (undoes the imports)
+    python -m app.cli.demo showcase --org <id> [--org <id>]  # fill every screen with demos
+    python -m app.cli.demo unshowcase                 # remove the demo benchmarks again
 
 The year is a small invented UK bakery, 1 October 2025 to 30 September 2026 (see
 app/demo/milestone.py). `load` uses the same import pipeline as the Upload page.
@@ -22,6 +24,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_sessionmaker
 from app.db.tenant import ACROSS_TENANTS, tenant_scope
 from app.demo import milestone
+from app.demo.showcase import ShowcaseError
 from app.models.business import BusinessListItem
 from app.models.identity import Organization, OrganizationUser, Role, User
 from app.models.imports import DataImport
@@ -147,14 +150,28 @@ def main(argv: list[str] | None = None) -> int:
     files.add_argument("--out", type=Path, required=True)
     for name, help_ in (("load", "import the demo year"), ("clear", "undo the demo imports")):
         commands.add_parser(name, help=help_).add_argument("--org", type=uuid.UUID, required=True)
+    showcase = commands.add_parser("showcase", help="fill every screen with demo information")
+    showcase.add_argument("--org", type=uuid.UUID, action="append", required=True)
+    showcase.add_argument(
+        "--also-owner", action="append", default=[], help="an email to make an owner too"
+    )
+    commands.add_parser("unshowcase", help="remove the demo benchmarks")
     args = parser.parse_args(argv)
     try:
-        if args.command == "files":
+        if args.command == "showcase":
+            from app.demo import showcase as showcase_module
+
+            showcase_module.run(args.org, also_owners=args.also_owner)
+        elif args.command == "unshowcase":
+            from app.demo import showcase as showcase_module
+
+            showcase_module.remove()
+        elif args.command == "files":
             write_files(args.out)
         else:
             with get_sessionmaker()() as db:
                 (load_year if args.command == "load" else clear_year)(db, args.org)
-    except DemoError as exc:
+    except (DemoError, ShowcaseError) as exc:
         print(exc, file=sys.stderr)
         return 1
     return 0

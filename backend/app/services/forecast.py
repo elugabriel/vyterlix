@@ -126,9 +126,12 @@ def calculate(
     kpi_code: str = "revenue",
     horizon: int = DEFAULT_HORIZON,
     level: int = selection.INTERVAL_LEVEL,
+    as_of: date | None = None,
 ) -> ForecastOut:
     """Forecast one figure for the next `horizon` months and save it (replacing any forecast
-    made from the same last month)."""
+    made from the same last month). `as_of` forecasts as if standing at the end of that earlier
+    month, using only what was known then; it is how past forecasts are made to check them against
+    what happened."""
     if kpi_code not in FORECASTABLE:
         raise AppError("That figure can't be forecast yet.", code="bad_metric", status_code=422)
     if not 1 <= horizon <= 12:
@@ -143,6 +146,8 @@ def calculate(
     non_negative = FORECASTABLE[kpi_code]["non_negative"]
     refresh_actuals(db, tenant)  # note what really happened in months forecast earlier
     series = _series(db, kpi)
+    if as_of is not None:
+        series = [(m, v) for m, v in series if m <= as_of]
     if not series:
         raise NotFoundError(
             "There are no finished months of figures to forecast from yet.", code="no_history"
@@ -184,7 +189,7 @@ def calculate(
         )  # fmt: skip
         db.add(forecast)
         db.commit()
-        return read_latest(db, kpi_code)
+        return _out(db, forecast, kpi)
 
     method = METHODS[best.code]
     model = db.scalars(select(ForecastModel).where(ForecastModel.code == best.code)).one()
@@ -237,7 +242,7 @@ def calculate(
             )
         )  # fmt: skip
     db.commit()
-    return read_latest(db, kpi_code)
+    return _out(db, forecast, kpi)
 
 
 def _decimal(value: float | None, places: str) -> Decimal | None:
@@ -467,7 +472,7 @@ def _out(db: Session, forecast: Forecast, kpi: KpiDefinition) -> ForecastOut:
         .where(ForecastEvaluation.forecast_id == forecast.id)
         .order_by(ForecastEvaluation.mae)
     ).all()
-    series = _series(db, kpi)[-HISTORY_SHOWN:]
+    series = [(m, v) for m, v in _series(db, kpi) if m <= forecast.as_of][-HISTORY_SHOWN:]
 
     def money(value) -> str:
         return str(Decimal(value).quantize(PENNY))

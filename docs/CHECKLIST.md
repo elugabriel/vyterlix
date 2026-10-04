@@ -483,6 +483,7 @@ weeks, Europe/London, en-GB wording.
 
 ## L6: UAT & go-live
 
+- [ ] **Remove all demo information before going live**: the demo businesses (names ending "(demo data)"), the demo accounts (`e2e-ui@acme.co.uk`, `manager@` and `viewer@fakeham-bakery.example`), the DEMO sector benchmarks (`python -m app.cli.demo unshowcase`), the local `.demo-logins.local.md` file, and any account given owner rights to a demo business for testing
 - [ ] UAT: registration, onboarding, CSV import, KPIs, health, diagnosis, forecast, recommendation, approval, action, follow-up, outcome, learning, AI, alerts, reports, billing, mobile
 - [ ] Production smoke test
 - [ ] Backup and restore verified

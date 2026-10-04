@@ -254,3 +254,25 @@ GitHub Actions runs `ruff check`, `ruff format --check` and `pytest` on every pu
 - **AI layer:** the LLM explains results; it never calculates a figure or makes up a
   conclusion. Every score, forecast and recommendation stores the data and rule/model
   version that produced it.
+
+
+## Demo information (development only)
+
+For trying every screen, and for showing it to a client, a demo business can be filled with demo
+information everywhere. It only goes into a business whose name ends with "(demo data)" and only on
+a development system; it is all invented and must be removed before the system is hosted.
+
+```
+python -m app.cli.demo load --org <business id>        # a fake year of trading (see above)
+python -m app.cli.demo showcase --org <business id> [--org <another>] [--also-owner you@example.com]
+python -m app.cli.demo unshowcase                      # remove the demo sector benchmarks again
+```
+
+`showcase` adds the business's own set-up (profile, goals, seasons, lists, settings, a finished
+onboarding), a manager and a viewer who can log in, invitations waiting, invented sector
+benchmarks (each labelled DEMO), a practice connection with an update history, an upload history in
+every state, a few hand-typed records, and works out the key figures, health, changes,
+explanations and forecasts (including forecasts made as if at earlier months, so the accuracy
+section has something to check). The demo logins are written to `backend/.demo-logins.local.md`,
+which is not committed. Run it again at any time: it adds what is missing and gives the demo
+accounts new passwords.

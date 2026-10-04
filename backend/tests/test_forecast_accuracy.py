@@ -427,3 +427,44 @@ def test_only_the_latest_two_years_of_checked_months_are_listed_but_all_are_coun
     refresh(db, business)
     body = accuracy(api, business)
     assert body["checked"] == 36 and len(body["rows"]) == 24  # three forecasts of twelve months
+
+
+# --- forecasting as if at an earlier month ----------------------------------------------------
+
+
+def test_a_forecast_can_be_made_as_if_standing_at_an_earlier_month(db, business):
+    put_revenue(db, business, [1000 + 10 * i for i in range(12)])  # October 2025 to September 2026
+    with scoped(db, business):
+        earlier = forecast.calculate(
+            db, owner_tenant(db, business), "revenue", 3, as_of=date(2026, 3, 1)
+        )
+    assert earlier.as_of == date(2026, 3, 1) and earlier.history_months == 6  # October to March
+    assert [p.period_start for p in earlier.predictions] == [
+        date(2026, 4, 1), date(2026, 5, 1), date(2026, 6, 1),
+    ]  # fmt: skip
+    assert earlier.history[-1].period_start == date(2026, 3, 1)
+    assert earlier.history[-1].value == "1050.00"  # learned only from what was known then
+    # Those months have since finished, so they have already been checked
+    assert [p.actual_value for p in earlier.predictions] == [None, None, None]
+    refresh(db, business)
+    assert [p.actual_value for p in predictions(db, business).values()] == [
+        D("1060"),
+        D("1070"),
+        D("1080"),
+    ]
+
+
+def test_forecasting_as_if_before_there_was_any_history_is_refused(db, business):
+    put_revenue(db, business, [1000] * 12)
+    with scoped(db, business), pytest.raises(forecast.NotFoundError):
+        forecast.calculate(db, owner_tenant(db, business), "revenue", 3, as_of=date(2025, 5, 1))
+
+
+def test_an_earlier_forecast_sits_beside_the_latest_one_and_does_not_replace_it(api, db, business):
+    put_revenue(db, business, [1000] * 12)
+    with scoped(db, business):
+        forecast.calculate(db, owner_tenant(db, business), "revenue", 3, as_of=date(2026, 3, 1))
+    latest = make(api, business).json()
+    assert latest["as_of"] == "2026-09-01"
+    with scoped(db, business):
+        assert db.scalar(select(func.count()).select_from(Forecast)) == 2
