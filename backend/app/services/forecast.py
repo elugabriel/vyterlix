@@ -21,6 +21,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError, NotFoundError
+from app.forecast import accuracy as accuracy_rules
 from app.forecast import selection
 from app.forecast.models import METHODS
 from app.health import scoring
@@ -31,6 +32,9 @@ from app.models.forecast import Forecast, ForecastEvaluation, ForecastModel, For
 from app.models.health import HealthRule
 from app.models.kpi import KpiDefinition, KpiValue
 from app.schemas.forecast import (
+    AccuracyOut,
+    AccuracyRowOut,
+    AheadOut,
     EvaluationOut,
     ForecastOut,
     HistoryPointOut,
@@ -137,6 +141,7 @@ def calculate(
         )
     kpi = db.scalars(select(KpiDefinition).where(KpiDefinition.code == kpi_code)).one()
     non_negative = FORECASTABLE[kpi_code]["non_negative"]
+    refresh_actuals(db, tenant)  # note what really happened in months forecast earlier
     series = _series(db, kpi)
     if not series:
         raise NotFoundError(
@@ -241,7 +246,8 @@ def _decimal(value: float | None, places: str) -> Decimal | None:
 
 def calculate_all(db: Session, tenant) -> ForecastRun:
     """Forecast every figure that can be forecast, for those with any history. Used straight
-    after the KPIs are worked out."""
+    after the KPIs are worked out. (Each forecast first notes what really happened in months
+    forecast earlier.)"""
     done = months = 0
     for code in FORECASTABLE:
         try:
@@ -251,6 +257,179 @@ def calculate_all(db: Session, tenant) -> ForecastRun:
         done += 1
         months += len(result.predictions)
     return ForecastRun(done, months)
+
+
+# --- checking forecasts against what happened -----------------------------------------------
+
+
+def refresh_actuals(db: Session, tenant) -> int:
+    """Fill in the real figure for every forecast month that has since finished, and score each
+    forecast on the months that can now be checked. Safe to run again: a figure that has changed
+    (a corrected import, say) is updated. Returns how many predictions were newly filled in or
+    changed."""
+    organization_id = tenant.organization_id
+    rows = db.execute(
+        select(ForecastPrediction, Forecast, KpiValue)
+        .join(
+            Forecast,
+            (Forecast.organization_id == ForecastPrediction.organization_id)
+            & (Forecast.id == ForecastPrediction.forecast_id),
+        )
+        .join(
+            KpiValue,
+            (KpiValue.kpi_id == Forecast.kpi_id)
+            & (KpiValue.period_start == ForecastPrediction.period_start)
+            & (KpiValue.granularity == GRANULARITY),
+        )
+        .where(
+            KpiValue.is_complete.is_(True),
+            KpiValue.status == "ok",
+            KpiValue.value.is_not(None),
+        )
+    ).all()
+    now = utcnow()
+    changed = 0
+    touched: dict = {}
+    for prediction, forecast, value in rows:
+        touched[forecast.id] = forecast
+        if prediction.actual_value is None or Decimal(prediction.actual_value) != Decimal(
+            value.value
+        ):
+            prediction.actual_value = Decimal(value.value)
+            prediction.actual_recorded_at = now
+            changed += 1
+    db.flush()
+    for forecast in touched.values():
+        _score_forecast(db, organization_id, forecast)
+    if touched:
+        db.commit()
+    return changed
+
+
+def _checked(predictions) -> list[accuracy_rules.Checked]:
+    return [
+        accuracy_rules.Checked(
+            float(p.value), float(p.lower_value), float(p.upper_value), float(p.actual_value)
+        )
+        for p in predictions
+        if p.actual_value is not None
+    ]
+
+
+def _score_forecast(db: Session, organization_id, forecast: Forecast) -> None:
+    """Record how one forecast did on the months that have finished (replacing its last score)."""
+    predictions = db.scalars(
+        select(ForecastPrediction).where(ForecastPrediction.forecast_id == forecast.id)
+    ).all()
+    result = accuracy_rules.score(_checked(predictions))
+    db.execute(
+        delete(ForecastEvaluation).where(
+            ForecastEvaluation.forecast_id == forecast.id, ForecastEvaluation.method == "actual"
+        )
+    )
+    if result is None or forecast.model_id is None:
+        return
+    model = db.get(ForecastModel, forecast.model_id)
+    db.add(
+        ForecastEvaluation(
+            organization_id=organization_id,
+            forecast_id=forecast.id,
+            model_code=model.code,
+            method="actual",
+            mae=Decimal(str(result.mae)).quantize(Decimal("0.000001")),
+            rmse=Decimal(str(result.rmse)).quantize(Decimal("0.000001")),
+            mape=_decimal(result.mape, "0.0001"),
+            n_points=result.n,
+            within_range=result.within,
+            is_chosen=True,
+        )
+    )
+
+
+def accuracy(db: Session, kpi_code: str) -> AccuracyOut:
+    """How well past forecasts of a figure matched what happened, over every forecast month that
+    has since finished."""
+    if kpi_code not in FORECASTABLE:
+        raise AppError("That figure can't be forecast yet.", code="bad_metric", status_code=422)
+    kpi = db.scalars(select(KpiDefinition).where(KpiDefinition.code == kpi_code)).one()
+    found = db.execute(
+        select(ForecastPrediction, Forecast)
+        .join(
+            Forecast,
+            (Forecast.organization_id == ForecastPrediction.organization_id)
+            & (Forecast.id == ForecastPrediction.forecast_id),
+        )
+        .where(Forecast.kpi_id == kpi.id, ForecastPrediction.actual_value.is_not(None))
+    ).all()
+    unit = kpi.unit
+    entries = []
+    for prediction, forecast in found:
+        ahead = (
+            (prediction.period_start.year - forecast.as_of.year) * 12
+            + prediction.period_start.month
+            - forecast.as_of.month
+        )
+        entries.append((prediction, forecast, ahead))
+    entries.sort(key=lambda e: (e[0].period_start, e[2]), reverse=True)
+
+    items = [_checked([p])[0] for p, _, _ in entries]
+    result = accuracy_rules.score(items)
+    levels = [f.interval_level for _, f, _ in entries]
+    promised = max(set(levels), key=levels.count) if levels else selection.INTERVAL_LEVEL
+    headline, verdict = accuracy_rules.headline(result, unit, promised, kpi.name.lower())
+
+    by_ahead = []
+    for step in sorted({a for _, _, a in entries}):
+        part = accuracy_rules.score(
+            [i for i, (_, _, a) in zip(items, entries, strict=True) if a == step]
+        )
+        by_ahead.append(
+            AheadOut(
+                months_ahead=step,
+                checked=part.n,
+                typical_miss_pct=None if part.mape is None else f"{part.mape:.1f}",
+                within_range_pct=f"{part.within / part.n * 100:.1f}",
+            )
+        )
+    rows = []
+    for item, (prediction, forecast, ahead) in zip(items, entries, strict=True):
+        error = item.predicted - item.actual
+        rows.append(
+            AccuracyRowOut(
+                period_start=prediction.period_start,
+                made_from=forecast.as_of,
+                months_ahead=ahead,
+                predicted=_money(prediction.value),
+                lower=_money(prediction.lower_value),
+                upper=_money(prediction.upper_value),
+                actual=_money(prediction.actual_value),
+                error=_money(Decimal(str(error))),
+                error_pct=None if item.actual == 0 else f"{error / abs(item.actual) * 100:.1f}",
+                within_range=accuracy_rules.within_range(item),
+            )
+        )
+    enough = result is not None and result.n >= accuracy_rules.MIN_CHECKED
+    return AccuracyOut(
+        kpi_code=kpi.code,
+        kpi_name=kpi.name,
+        unit=unit,
+        enough_data=enough,
+        checked=0 if result is None else result.n,
+        within_range=0 if result is None else result.within,
+        within_range_pct=None if result is None else f"{result.within / result.n * 100:.1f}",
+        promised_pct=promised,
+        typical_miss=None if result is None else _money(Decimal(str(result.mae))),
+        typical_miss_pct=None if result is None or result.mape is None else f"{result.mape:.1f}",
+        bias_pct=None if result is None or result.bias_pct is None else f"{result.bias_pct:.1f}",
+        headline=headline,
+        verdict=verdict,
+        by_months_ahead=by_ahead,
+        rows=rows[:HISTORY_SHOWN],
+    )
+
+
+def _money(value) -> str:
+    return str(Decimal(value).quantize(PENNY))
 
 
 # --- reading -------------------------------------------------------------------------------

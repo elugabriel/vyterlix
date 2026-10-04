@@ -134,6 +134,9 @@ class ForecastEvaluation(UUIDPrimaryKeyMixin, TenantScopedMixin, Base):
         ),
         CheckConstraint(_one_of("method", EVALUATION_METHODS), name="method_valid"),
         CheckConstraint("n_points >= 1", name="points_positive"),
+        CheckConstraint(
+            "within_range IS NULL OR within_range BETWEEN 0 AND n_points", name="within_range_valid"
+        ),
         CheckConstraint("mae >= 0 AND rmse >= 0", name="errors_not_negative"),
         Index("ix_forecast_evaluations_forecast", "forecast_id"),
     )
@@ -145,4 +148,6 @@ class ForecastEvaluation(UUIDPrimaryKeyMixin, TenantScopedMixin, Base):
     rmse: Mapped[Decimal] = mapped_column(Numeric(24, 6))
     mape: Mapped[Decimal | None] = mapped_column(Numeric(14, 4))  # typical miss in per cent
     n_points: Mapped[int] = mapped_column(SmallInteger)  # how many months it was tried on
+    # For checks against what really happened: how many of those months landed inside the range.
+    within_range: Mapped[int | None] = mapped_column(SmallInteger)
     is_chosen: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))

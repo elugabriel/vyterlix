@@ -283,3 +283,12 @@ input[type="file"] { width: 100%; padding: 8px 0; }
 .health-at_risk { color: var(--bad); border-color: var(--bad); }
 .health-not_enough_data { color: var(--muted); }
 .badge[class*="health-"] { text-transform: none; }
+
+/* Forecast */
+.chart-tall { height: 200px; }
+.chart .band { fill: var(--accent); opacity: 0.15; }
+.chart .line { fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.chart .line-forecast { stroke-dasharray: 6 4; }
+.chart .dot { fill: var(--accent); }
+.chart .ring { fill: none; stroke: var(--text); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.key { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.875rem; color: var(--muted); }

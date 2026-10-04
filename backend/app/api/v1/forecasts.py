@@ -4,8 +4,14 @@ from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import DB, Tenant, require_permission
 from app.core.permissions import Perm
-from app.schemas.forecast import ForecastOptionsOut, ForecastOut
-from app.services.forecast import DEFAULT_HORIZON, calculate, forecastable, read_latest
+from app.schemas.forecast import AccuracyOut, ForecastOptionsOut, ForecastOut
+from app.services.forecast import (
+    DEFAULT_HORIZON,
+    accuracy,
+    calculate,
+    forecastable,
+    read_latest,
+)
 
 router = APIRouter(prefix="/organizations/{organization_id}/forecasts", tags=["forecasts"])
 
@@ -17,6 +23,13 @@ Manager = Annotated[Tenant, Depends(require_permission(Perm.ACTIONS_MANAGE))]
 def options(tenant: Viewer):
     """Which figures can be forecast (each is a KPI code)."""
     return ForecastOptionsOut(kpis=forecastable())
+
+
+@router.get("/{kpi_code}/accuracy", response_model=AccuracyOut)
+def how_accurate(kpi_code: str, tenant: Viewer, db: DB):
+    """How well past forecasts of a figure matched what really happened: how often the real figure
+    landed inside the range, and the typical miss, over every forecast month that has finished."""
+    return accuracy(db, kpi_code)
 
 
 @router.get("/{kpi_code}", response_model=ForecastOut | None)

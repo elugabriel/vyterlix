@@ -6,7 +6,7 @@ import { gbp, MONTHS, ukDate } from "./format.js";
 
 const SVG = "http://www.w3.org/2000/svg";
 
-function svg(tag, attrs = {}, ...children) {
+export function svg(tag, attrs = {}, ...children) {
   const node = document.createElementNS(SVG, tag);
   for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
   node.append(...children);
@@ -102,6 +102,46 @@ export function barChart(values, unit, label) {
     { viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": label, class: "chart", preserveAspectRatio: "none" },
     svg("line", { x1: 0, x2: width, y1: zero, y2: zero, class: "axis" }),
     ...bars,
+  );
+  return el("div", { class: "chart-box" }, chart);
+}
+
+/** A line of past figures, then the forecast as a dashed line with its range shaded around it. Months
+ * that have since finished show what really happened as a ring. `history` is [{period_start, value}],
+ * `predictions` is [{period_start, value, lower, upper, actual_value}]. */
+export function rangeChart(history, predictions, unit, label) {
+  const width = 560;
+  const height = 200;
+  const pad = 10;
+  const past = history.map((h) => Number(h.value));
+  const future = predictions.map((p) => ({ value: Number(p.value), lower: Number(p.lower), upper: Number(p.upper), actual: p.actual_value === null ? null : Number(p.actual_value) }));
+  if (!past.length || !future.length) return el("p", { class: "muted" }, "Nothing to chart yet.");
+  const all = [...past, ...future.flatMap((f) => [f.lower, f.upper, f.actual ?? f.value])];
+  const min = Math.min(0, ...all);
+  const max = Math.max(...all);
+  const span = max - min || 1;
+  const count = past.length + future.length;
+  const x = (i) => pad + (i / (count - 1)) * (width - pad * 2);
+  const y = (n) => height - pad - ((n - min) / span) * (height - pad * 2);
+  const last = past.length - 1;
+  const pastPoints = past.map((n, i) => `${x(i)},${y(n)}`).join(" ");
+  const joined = [`${x(last)},${y(past[last])}`, ...future.map((f, i) => `${x(last + 1 + i)},${y(f.value)}`)].join(" ");
+  const upper = [`${x(last)},${y(past[last])}`, ...future.map((f, i) => `${x(last + 1 + i)},${y(f.upper)}`)];
+  const lower = [`${x(last)},${y(past[last])}`, ...future.map((f, i) => `${x(last + 1 + i)},${y(f.lower)}`)].reverse();
+  const dots = future.flatMap((f, i) => {
+    const forecastDot = svg("circle", { cx: x(last + 1 + i), cy: y(f.value), r: 3.5, class: "dot" }, svg("title", {}, `${periodLabel(predictions[i].period_start, "month")}: ${formatValue(predictions[i].value, unit)} (${formatValue(predictions[i].lower, unit)} to ${formatValue(predictions[i].upper, unit)})`));
+    if (f.actual === null) return [forecastDot];
+    const ring = svg("circle", { cx: x(last + 1 + i), cy: y(f.actual), r: 5, class: "ring" }, svg("title", {}, `What happened in ${periodLabel(predictions[i].period_start, "month")}: ${formatValue(predictions[i].actual_value, unit)}`));
+    return [forecastDot, ring];
+  });
+  const chart = svg(
+    "svg",
+    { viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": label, class: "chart chart-tall", preserveAspectRatio: "none" },
+    svg("line", { x1: 0, x2: width, y1: y(0), y2: y(0), class: "axis" }),
+    svg("polygon", { points: [...upper, ...lower].join(" "), class: "band" }),
+    svg("polyline", { points: pastPoints, class: "line" }),
+    svg("polyline", { points: joined, class: "line line-forecast" }),
+    ...dots,
   );
   return el("div", { class: "chart-box" }, chart);
 }

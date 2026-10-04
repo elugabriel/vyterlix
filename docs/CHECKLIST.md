@@ -21,7 +21,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 5 | KPI engine | **Done apart from marketing (needs Google Analytics) and cash/runway (needs Xero): 28 KPIs, breakdowns, Key figures page** |
 | 6 | Business health engine | **Step 1 and 2 done (scoring, rules as data, explanations, history, page; seasonal "usual"); real sector benchmarks wait for real sources** |
 | 7 | Diagnostic engine | **Done apart from the parked items: anomalies, segments (product, channel, customer, day, cost), drivers, evidence and diagnoses with confidence, and the What changed page with the explanation screen** |
-| 8 | Forecasting engine | **Step 1 done (tables, swappable methods, sales forecast with a range on every month); accuracy tracking, the chart and the other forecasts next** |
+| 8 | Forecasting engine | **Steps 1-2 done (swappable methods, sales forecast with a range on every month, accuracy tracking, the forecast page); the other forecasts next** |
 | 9 | Recommendation engine | Not started |
 | 10 | Action management | Not started |
 | 11 | Follow-up + outcome measurement | Not started |
@@ -251,8 +251,8 @@ Design (step 1): a forecast learns from the monthly KPI values the KPI engine st
 - [ ] Inventory requirements forecast
 - [ ] Churn/retention risk forecast
 - [x] Confidence interval on every prediction (step 1: a lower and upper value with the level, and the typical miss of each method tried)
-- [ ] `actual_value` backfill + accuracy tracking (the column and the "actual" kind of evaluation exist; filling them in as months finish, and showing how accurate past forecasts were, is the next step)
-- [ ] Forecast visualisation
+- [x] `actual_value` backfill + accuracy tracking (step 2): whenever the figures are worked out (and when a forecast is made) every forecast month that has since finished gets its real figure filled in, a corrected figure is picked up, and each forecast is scored on the months that can be checked (kind "actual" in `forecast_evaluations`, with how many landed inside the range). `GET /organizations/{id}/forecasts/{figure}/accuracy` gives the typical miss in pounds and per cent, which way forecasts lean (too high or too low), how often the real figure landed inside the range against how often it was meant to (and says plainly when the ranges are too narrow), the same by how many months ahead, and every checked month, newest first. Passes no judgement until three forecast months have finished
+- [x] Forecast visualisation (step 2: `forecast.html`): recent months as a line, the forecast as a dashed line with its range shaded and widening, a ring where a finished month's real figure is known, a table of expected and range and what happened, how the method was chosen (every method tried and how close each came), the accuracy section, and "Work it out again" with 3, 6 or 12 months for owners and managers
 - [~] Rule enforced: LLM never produces the forecast number (nothing in the forecasting code or service reaches an AI provider, and a test checks the service source says so; the rule stays open until the AI assistant exists to be held to it)
 
 ## Phase 9: Recommendation engine

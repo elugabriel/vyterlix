@@ -62,3 +62,45 @@ class ForecastOut(BaseModel):
 
 class ForecastOptionsOut(BaseModel):
     kpis: list[str]  # the figures that can be forecast
+
+
+class AccuracyRowOut(BaseModel):
+    """One forecast month that has since finished: what we said, and what happened."""
+
+    period_start: date
+    made_from: date  # the last finished month the forecast learned from
+    months_ahead: int
+    predicted: str
+    lower: str
+    upper: str
+    actual: str
+    error: str  # forecast minus actual; + means the forecast was too high
+    error_pct: str | None
+    within_range: bool
+
+
+class AheadOut(BaseModel):
+    """How the forecasts did at one distance ahead (the further ahead, the harder)."""
+
+    months_ahead: int
+    checked: int
+    typical_miss_pct: str | None
+    within_range_pct: str
+
+
+class AccuracyOut(BaseModel):
+    kpi_code: str
+    kpi_name: str
+    unit: Literal["gbp", "percent", "count", "ratio"]
+    enough_data: bool  # false until a few forecast months have finished
+    checked: int
+    within_range: int
+    within_range_pct: str | None
+    promised_pct: int  # how often the range was meant to hold
+    typical_miss: str | None  # in the figure's unit
+    typical_miss_pct: str | None
+    bias_pct: str | None  # + means forecasts ran too high
+    headline: str
+    verdict: str | None
+    by_months_ahead: list[AheadOut]
+    rows: list[AccuracyRowOut]  # newest first
