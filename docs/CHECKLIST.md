@@ -20,7 +20,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 4 | Data import + normalisation | **Part A, milestone, job queue (10) and integration framework (11) done; real connectors (Xero, Shopify, WooCommerce, Google Analytics) remain** |
 | 5 | KPI engine | **Done apart from marketing (needs Google Analytics) and cash/runway (needs Xero): 28 KPIs, breakdowns, Key figures page** |
 | 6 | Business health engine | **Step 1 and 2 done (scoring, rules as data, explanations, history, page; seasonal "usual"); real sector benchmarks wait for real sources** |
-| 7 | Diagnostic engine | **Steps 1-2 done (tables, material-change and anomaly detection, What changed page); segments, drivers and diagnoses next** |
+| 7 | Diagnostic engine | **Steps 1-3 done (tables, material-change and anomaly detection, segment analysis, What changed page); drivers and diagnoses next** |
 | 8 | Forecasting engine | Not started |
 | 9 | Recommendation engine | Not started |
 | 10 | Action management | Not started |
@@ -232,7 +232,7 @@ Design (step 1, then step 2 for anomalies): the engine first **notices** that so
 - [x] Material-change detection (step 1: month against the month before; `GET /organizations/{id}/changes`, filter by month, good/bad, size, hide expected; `GET .../changes/{id}`)
 - [x] "What changed" page (`changes.html`): newest month first, biggest first, good/bad, expected-for-the-time-of-year note, link to the figure
 - [x] Anomaly detection (step 2): a month is flagged as unusual when a figure is 3 or more "normal wobbles" from the middle of its own last 12 finished months (needs 6), and is also a big enough change to matter (same size bands). Robust to one wild month (middle value, not average); a very steady figure is allowed a little wobble (2% of usual, half a point for a %). Seasonal figures are judged with each month's confirmed season taken out. Catches a slow slide that no single month shows. Same table and page as changes (`kind` = anomaly; `?kind=` filter); the page shows both on one card.
-- [ ] Segment analysis (product, customer, location, time, channels, price, quantity, cost category, inventory)
+- [~] Segment analysis (step 3): `GET /organizations/{id}/segments` lists what can be split; `GET .../segments/{figure}/{split}?month=&against=previous_month|last_year&limit=` splits a figure for a month into its parts, each compared with the month before (or last year), biggest movers first, with the share of the overall change each part is (over 100% or negative when parts moved against each other) and a plain sentence. Sales by product, channel, customer and day of the week; number of sales by channel, customer and weekday; items sold and gross profit by product; running costs by cost category and supplier. The parts always add up to the Key figures number (a test checks every split against the KPI engine); sales recorded without product detail get a row of their own. Read from the records when asked, nothing stored. Shown on the What changed page ("Where did this come from?"). **Not yet:** location (customer postcode area), price and quantity effects, inventory, customer groups, other KPIs (margins, customers who came back)
 - [ ] Driver/contributor identification
 - [ ] Evidence generation + storage
 - [ ] Diagnosis records with confidence
