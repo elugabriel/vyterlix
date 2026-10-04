@@ -36,6 +36,7 @@ from app.schemas.forecast import (
     AccuracyRowOut,
     AheadOut,
     EvaluationOut,
+    ForecastFigureOut,
     ForecastOut,
     HistoryPointOut,
     MethodOut,
@@ -47,7 +48,48 @@ GRANULARITY = "month"
 PENNY = Decimal("0.01")
 HISTORY_SHOWN = 24
 # The figures that can be forecast, and whether they can go below nothing.
-FORECASTABLE = {"revenue": {"non_negative": True}}
+# The figures that can be forecast. `ceiling` stops a percentage forecast passing 100; `seasonal`
+# is whether the figure rises and falls with the trading year (a health rule for the same figure,
+# if there is one, overrides this).
+FORECASTABLE = {
+    "revenue": {"non_negative": True, "ceiling": None, "seasonal": True, "group": "Sales"},
+    "sales_count": {
+        "non_negative": True,
+        "ceiling": None,
+        "seasonal": True,
+        "group": "Customer demand",
+    },
+    "units_sold": {
+        "non_negative": True,
+        "ceiling": None,
+        "seasonal": True,
+        "group": "Customer demand",
+    },
+    "active_customers": {
+        "non_negative": True,
+        "ceiling": None,
+        "seasonal": True,
+        "group": "Customer demand",
+    },
+    "new_customers": {
+        "non_negative": True,
+        "ceiling": None,
+        "seasonal": True,
+        "group": "Customer demand",
+    },
+    "customer_retention_pct": {
+        "non_negative": True,
+        "ceiling": 100.0,
+        "seasonal": False,
+        "group": "Keeping customers",
+    },
+    "customer_churn_pct": {
+        "non_negative": True,
+        "ceiling": 100.0,
+        "seasonal": False,
+        "group": "Keeping customers",
+    },
+}
 DEFAULT_HORIZON = 3
 
 
@@ -59,6 +101,24 @@ class ForecastRun:
 
 def forecastable() -> list[str]:
     return list(FORECASTABLE)
+
+
+def forecastable_figures(db: Session) -> list[ForecastFigureOut]:
+    """The figures that can be forecast, with their names, in the order the page shows them."""
+    names = {
+        k.code: k
+        for k in db.scalars(select(KpiDefinition).where(KpiDefinition.code.in_(list(FORECASTABLE))))
+    }
+    return [
+        ForecastFigureOut(
+            code=code,
+            name=names[code].name,
+            unit=names[code].unit,
+            group=FORECASTABLE[code]["group"],
+        )
+        for code in FORECASTABLE
+        if code in names
+    ]
 
 
 def _series(db: Session, kpi: KpiDefinition) -> list[tuple[date, Decimal]]:
@@ -85,15 +145,16 @@ def _series(db: Session, kpi: KpiDefinition) -> list[tuple[date, Decimal]]:
 
 
 def _follows_the_year(db: Session, code: str) -> bool:
-    return bool(
-        db.scalar(
-            select(HealthRule.id).where(
-                HealthRule.kpi_code == code,
-                HealthRule.seasonal.is_(True),
-                HealthRule.is_active.is_(True),
-            )
+    """Does this figure rise and fall with the trading year? A health rule for it says so if there
+    is one (the rule is data); otherwise the figure's own default."""
+    rule = db.scalar(
+        select(HealthRule.seasonal).where(
+            HealthRule.kpi_code == code,
+            HealthRule.is_active.is_(True),
+            HealthRule.industry_code.is_(None),
         )
     )
+    return bool(FORECASTABLE[code]["seasonal"] if rule is None else rule)
 
 
 def _explain(
@@ -120,6 +181,21 @@ def _explain(
     )
 
 
+def season_factors(
+    db: Session, months: list[date], *, follows_year: bool = True
+) -> tuple[dict[date, float], bool]:
+    """What the owner's confirmed busy and quiet seasons do to each month: 1.0 for a normal month,
+    1.4 for one that is 40% busier. All 1.0 (and False) when the figure does not follow the year,
+    there are no confirmed seasons, or a season says -100% or worse."""
+    plain = {m: 1.0 for m in months}
+    seasons = confirmed_seasons(db) if follows_year else []
+    wanted = {m: scoring.season_factor(season_effect(seasons, m)) for m in months}
+    if any(f is None for f in wanted.values()):
+        return plain, False
+    factors = {m: float(f) for m, f in wanted.items()}
+    return factors, any(f != 1.0 for f in factors.values())
+
+
 def calculate(
     db: Session,
     tenant,
@@ -144,6 +220,7 @@ def calculate(
         )
     kpi = db.scalars(select(KpiDefinition).where(KpiDefinition.code == kpi_code)).one()
     non_negative = FORECASTABLE[kpi_code]["non_negative"]
+    ceiling = FORECASTABLE[kpi_code]["ceiling"]
     refresh_actuals(db, tenant)  # note what really happened in months forecast earlier
     series = _series(db, kpi)
     if as_of is not None:
@@ -158,18 +235,13 @@ def calculate(
     target_months = [periods.shift(as_of, GRANULARITY, step) for step in range(1, horizon + 1)]
 
     # Take each month's season out (and put it back into the forecast months)
-    seasons = confirmed_seasons(db) if _follows_the_year(db, kpi_code) else []
-    factors = {m: 1.0 for m in months + target_months}
-    adjusted = False
-    if seasons:
-        wanted = {m: scoring.season_factor(season_effect(seasons, m)) for m in factors}
-        if all(f is not None for f in wanted.values()):
-            factors = {m: float(f) for m, f in wanted.items()}
-            adjusted = any(f != 1.0 for f in factors.values())
+    factors, adjusted = season_factors(
+        db, months + target_months, follows_year=_follows_the_year(db, kpi_code)
+    )
     history = [v / factors[m] for m, v in zip(months, values, strict=True)]
 
     candidates = selection.eligible(history)
-    scores = [selection.backtest(m, history, non_negative) for m in candidates]
+    scores = [selection.backtest(m, history, non_negative, ceiling) for m in candidates]
     best = selection.choose(scores)
 
     db.execute(delete(Forecast).where(Forecast.kpi_id == kpi.id, Forecast.as_of == as_of))
@@ -198,7 +270,8 @@ def calculate(
     predictions = []
     for step, (target, point) in enumerate(zip(target_months, raw, strict=True), start=1):
         point = max(0.0, point) if non_negative else point
-        lower, upper = selection.interval(point, sigma, step, level, non_negative)
+        point = point if ceiling is None else min(ceiling, point)
+        lower, upper = selection.interval(point, sigma, step, level, non_negative, ceiling)
         factor = factors[target]
         predictions.append(
             {

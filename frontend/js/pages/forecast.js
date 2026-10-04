@@ -1,5 +1,6 @@
-// Forecast: what the business's sales are likely to be over the next few months, with a range around
-// every month, how that was worked out, and how accurate past forecasts turned out to be.
+// Forecast: what the business's sales, customer demand and customer retention are likely to be over
+// the next few months, with a range around every month, how that was worked out, and how accurate past
+// forecasts turned out to be. Also what to stock: how much of each product to have, from how fast it sells.
 // Everyone in the business can look; the owner and managers can ask for the forecast to be worked out
 // again.
 
@@ -13,12 +14,14 @@ import { formatValue, periodLabel, rangeChart } from "../kpi.js";
 
 const message = document.getElementById("message");
 const content = document.getElementById("content");
-const KPI = "revenue";
+const STATUS = { order_now: ["Order now", "health-at_risk"], watch: ["Watch", "health-fair"], ok: ["Well stocked", "health-healthy"] };
 
 let orgId = null;
 let base = "";
 let canMake = false;
 let horizon = "3";
+let kpi = "revenue";
+let figures = [];
 
 async function start({ org }) {
   orgId = org.id;
@@ -26,17 +29,43 @@ async function start({ org }) {
   base = `/organizations/${orgId}/forecasts`;
   document.getElementById("org-name").textContent = org.name;
   document.getElementById("back").href = `business.html?org=${orgId}`;
+  const options = await guard(message, () => api.get(base));
+  if (!options) return;
+  figures = options.figures;
+  const wanted = new URLSearchParams(location.search).get("figure");
+  if (wanted && figures.some((f) => f.code === wanted)) kpi = wanted;
   await load();
 }
 
+function figureChooser() {
+  const chooser = el("select", { name: "figure", "aria-label": "Forecast" });
+  for (const group of [...new Set(figures.map((f) => f.group))]) {
+    chooser.append(el("optgroup", { label: group }, ...figures.filter((f) => f.group === group).map((f) => el("option", { value: f.code }, f.name))));
+  }
+  chooser.value = kpi;
+  chooser.addEventListener("change", async () => {
+    kpi = chooser.value;
+    history.replaceState(null, "", `?org=${orgId}&figure=${kpi}`);
+    await load();
+  });
+  return el("section", { class: "card" }, field("Forecast", chooser));
+}
+
 async function load() {
-  const [forecast, accuracy] = await Promise.all([guard(message, () => api.get(`${base}/${KPI}`)), guard(message, () => api.get(`${base}/${KPI}/accuracy`))]);
-  if (forecast === undefined || !accuracy) return;
-  if (forecast === null) return void content.replaceChildren(emptyCard());
+  const [forecast, accuracy, stock] = await Promise.all([
+    guard(message, () => api.get(`${base}/${kpi}`)),
+    guard(message, () => api.get(`${base}/${kpi}/accuracy`)),
+    guard(message, () => api.get(`${base}/stock-requirements`)),
+  ]);
+  if (forecast === undefined || !accuracy || !stock) return;
+  const chooser = figureChooser();
+  if (forecast === null) return void content.replaceChildren(chooser, emptyCard(), stockCard(stock));
   content.replaceChildren(
+    chooser,
     forecast.status === "ok" ? mainCard(forecast) : tooEarlyCard(forecast),
     ...(forecast.status === "ok" ? [methodCard(forecast)] : []),
     accuracyCard(accuracy),
+    stockCard(stock),
   );
 }
 
@@ -48,7 +77,7 @@ function makeButton(label) {
   button.addEventListener("click", async () => {
     horizon = chooser.value;
     button.disabled = true;
-    const done = await guard(message, () => api.post(`${base}/${KPI}?horizon=${horizon}`));
+    const done = await guard(message, () => api.post(`${base}/${kpi}?horizon=${horizon}`));
     button.disabled = false;
     if (done) await load();
   });
@@ -60,7 +89,7 @@ function emptyCard() {
     "section",
     { class: "card" },
     el("h2", { style: "margin-top:0" }, "No forecast yet"),
-    el("p", {}, "A forecast is worked out from your key figures. Add some sales (or upload a file), work out your key figures, and it will appear here."),
+    el("p", {}, "A forecast is worked out from your key figures. Add some records (or upload a file), work out your key figures, and it will appear here."),
     el("div", { class: "actions" }, el("a", { class: "button", href: `kpis.html?org=${orgId}` }, "Go to key figures")),
     canMake ? makeButton("Make a forecast now") : null,
   );
@@ -165,6 +194,32 @@ function accuracyCard(accuracy) {
           ),
         )
       : null,
+  );
+  return card;
+}
+
+// --- what to stock ---------------------------------------------------------------------------------
+
+function stockCard(stock) {
+  const card = el("section", { class: "card" });
+  put(
+    card,
+    el("h2", { style: "margin-top:0" }, "What to stock"),
+    el("p", {}, stock.headline),
+    stock.rows.length
+      ? table(
+          ["Product", `Expected this month (up to ${stock.level}% sure)`, "On the shelf", "Lasts about", "What to do", "Order"],
+          stock.rows.map((r) => [
+            r.name,
+            `${r.expected_units} (between ${r.lower_units} and ${r.upper_units})`,
+            String(r.on_hand),
+            r.days_of_cover === null ? "–" : `${r.days_of_cover} days`,
+            el("span", { class: `badge ${STATUS[r.status][1]}` }, STATUS[r.status][0]),
+            r.order_suggested ? String(r.order_suggested) : "–",
+          ]),
+        )
+      : null,
+    el("p", { class: "muted" }, stock.note),
   );
   return card;
 }

@@ -422,7 +422,7 @@ def test_a_choice_that_makes_no_sense_is_refused(api, db, business):
 
 def test_the_figures_that_can_be_forecast_are_listed(api, business):
     res = api.get(f"{ORGS}/{business[0]}/forecasts", headers=business[2]["owner"])
-    assert res.json() == {"kpis": ["revenue"]}
+    assert res.json()["kpis"][0] == "revenue" and len(res.json()["kpis"]) == 7
 
 
 def test_forecasting_again_from_the_same_month_replaces_it(api, db, business):

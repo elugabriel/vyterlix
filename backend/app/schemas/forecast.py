@@ -60,8 +60,16 @@ class ForecastOut(BaseModel):
     evaluations: list[EvaluationOut]
 
 
+class ForecastFigureOut(BaseModel):
+    code: str
+    name: str
+    unit: Literal["gbp", "percent", "count", "ratio"]
+    group: str  # how the page groups them: Sales, Customer demand, Keeping customers
+
+
 class ForecastOptionsOut(BaseModel):
-    kpis: list[str]  # the figures that can be forecast
+    kpis: list[str]  # the figures that can be forecast (KPI codes)
+    figures: list[ForecastFigureOut]  # the same, with their names
 
 
 class AccuracyRowOut(BaseModel):
@@ -104,3 +112,34 @@ class AccuracyOut(BaseModel):
     verdict: str | None
     by_months_ahead: list[AheadOut]
     rows: list[AccuracyRowOut]  # newest first
+
+
+class StockNeedOut(BaseModel):
+    """One product: how much we expect to sell, what is on the shelf, and what to do."""
+
+    product_id: uuid.UUID
+    name: str
+    sku: str | None
+    expected_units: int  # what we expect to sell in the month
+    lower_units: int
+    upper_units: int  # no more than this, `level` times out of 100
+    on_hand: int
+    days_of_cover: int | None  # how long the stock lasts at the expected pace
+    status: Literal["order_now", "watch", "ok"]
+    order_suggested: int  # to cover a busy month (the upper figure)
+    method: str  # which forecasting method was closest for this product
+    history_months: int
+    typical_miss_pct: str | None
+
+
+class StockRequirementsOut(BaseModel):
+    month: date  # the month the expected sales are for (the one in progress)
+    as_of: date  # the last finished month learned from
+    level: int
+    order_now: int
+    watch: int
+    ok: int
+    not_enough_history: int  # products with too little sales history to forecast
+    headline: str
+    note: str
+    rows: list[StockNeedOut]  # most urgent first

@@ -4,14 +4,21 @@ from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import DB, Tenant, require_permission
 from app.core.permissions import Perm
-from app.schemas.forecast import AccuracyOut, ForecastOptionsOut, ForecastOut
+from app.schemas.forecast import (
+    AccuracyOut,
+    ForecastOptionsOut,
+    ForecastOut,
+    StockRequirementsOut,
+)
 from app.services.forecast import (
     DEFAULT_HORIZON,
     accuracy,
     calculate,
     forecastable,
+    forecastable_figures,
     read_latest,
 )
+from app.services.stock_forecast import requirements
 
 router = APIRouter(prefix="/organizations/{organization_id}/forecasts", tags=["forecasts"])
 
@@ -20,9 +27,17 @@ Manager = Annotated[Tenant, Depends(require_permission(Perm.ACTIONS_MANAGE))]
 
 
 @router.get("", response_model=ForecastOptionsOut)
-def options(tenant: Viewer):
+def options(tenant: Viewer, db: DB):
     """Which figures can be forecast (each is a KPI code)."""
-    return ForecastOptionsOut(kpis=forecastable())
+    return ForecastOptionsOut(kpis=forecastable(), figures=forecastable_figures(db))
+
+
+@router.get("/stock-requirements", response_model=StockRequirementsOut)
+def stock_requirements(tenant: Viewer, db: DB):
+    """How much of each product to have: what we expect to sell this month, set against the stock on
+    hand, with a plain instruction per product (order now, watch, ok), the days the stock will last,
+    and how many to order to cover a busy month. Most urgent first."""
+    return requirements(db)
 
 
 @router.get("/{kpi_code}/accuracy", response_model=AccuracyOut)

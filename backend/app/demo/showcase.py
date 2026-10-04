@@ -36,6 +36,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.core.errors import NotFoundError
 from app.core.security import hash_password
 from app.db.session import get_sessionmaker
 from app.db.tenant import ACROSS_TENANTS, tenant_scope
@@ -510,8 +511,12 @@ def _analytics(api: Api, db: Session, org_id: uuid.UUID, say: Callable[[str], No
         health.calculate(db, tenant)
         detection.detect(db, tenant)
         # Forecasts made as if at earlier months, so the accuracy section has months to check
-        for month in range(3, 9):
-            forecast.calculate(db, tenant, "revenue", 3, as_of=date(2026, month, 1))
+        for code in forecast.forecastable():
+            for month in range(3, 9):
+                try:
+                    forecast.calculate(db, tenant, code, 3, as_of=date(2026, month, 1))
+                except NotFoundError:
+                    break  # nothing to learn from for this figure yet
         forecast.calculate_all(db, tenant)
     events = api.call("GET", f"{base}/changes?limit=200")
     chosen = []

@@ -47,7 +47,12 @@ def eligible(history: list[float]) -> list[Method]:
     return [m for m in METHODS.values() if start >= m.min_history]
 
 
-def backtest(method: Method, history: list[float], non_negative: bool = True) -> Score:
+def backtest(
+    method: Method,
+    history: list[float],
+    non_negative: bool = True,
+    ceiling: float | None = None,
+) -> Score:
     """Forecast each of the latest months one step ahead from what came before it."""
     n = len(history)
     errors = []
@@ -55,6 +60,8 @@ def backtest(method: Method, history: list[float], non_negative: bool = True) ->
         guess = method.predict(history[:t], 1)[0]
         if non_negative:
             guess = max(0.0, guess)
+        if ceiling is not None:
+            guess = min(ceiling, guess)
         errors.append(history[t] - guess)
     actuals = history[n - len(errors) :]
     relative = [abs(e) / abs(a) for e, a in zip(errors, actuals, strict=True) if a != 0]
@@ -83,10 +90,16 @@ def spread(score: Score, history: list[float]) -> float:
 
 
 def interval(
-    point: float, sigma: float, step: int, level: int = INTERVAL_LEVEL, non_negative: bool = True
+    point: float,
+    sigma: float,
+    step: int,
+    level: int = INTERVAL_LEVEL,
+    non_negative: bool = True,
+    ceiling: float | None = None,
 ) -> tuple[float, float]:
     """The range the real figure should fall in `level` per cent of the time. It widens the
     further ahead we look (the uncertainty grows with the square root of the months ahead)."""
     half = Z[level] * sigma * math.sqrt(step)
     lower = point - half
-    return (max(0.0, lower) if non_negative else lower), point + half
+    upper = point + half if ceiling is None else min(ceiling, point + half)
+    return (max(0.0, lower) if non_negative else lower), upper
