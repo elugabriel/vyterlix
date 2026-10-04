@@ -22,7 +22,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 6 | Business health engine | **Step 1 and 2 done (scoring, rules as data, explanations, history, page; seasonal "usual"); real sector benchmarks wait for real sources** |
 | 7 | Diagnostic engine | **Done apart from the parked items: anomalies, segments (product, channel, customer, day, cost), drivers, evidence and diagnoses with confidence, and the What changed page with the explanation screen** |
 | 8 | Forecasting engine | **Steps 1-3 done (swappable methods, ranges on every month, accuracy tracking, the forecast page, demand, retention and what-to-stock forecasts); cash flow waits for Xero** |
-| 9 | Recommendation engine | Not started |
+| 9 | Recommendation engine | **Step 1 done (library, options from a diagnosis and the owner's goals, scoring and ranking, why-this-one, the screen); forecast, history and constraints as inputs come with Phases 11-12** |
 | 10 | Action management | Not started |
 | 11 | Follow-up + outcome measurement | Not started |
 | ⚑ | Vertical slice proof | Not started |
@@ -257,14 +257,17 @@ Design (step 1): a forecast learns from the monthly KPI values the KPI engine st
 
 ## Phase 9: Recommendation engine
 
-- [ ] Tables: recommendations, recommendation_options, recommendation_evidence, intervention_library
-- [ ] Intervention library
-- [ ] Option generation (diagnosis + goals + forecast + history + constraints)
-- [ ] Option evaluation (impact, cost, effort, confidence, history, urgency, goal fit)
-- [ ] Ranking / selection scoring
-- [ ] Recommended-action selection
-- [ ] "Why this one" rationale
-- [ ] Rule enforced: ranking is rules + evaluation, not the LLM
+Design (step 1): a recommendation answers "what should I do about this?" for one detected change that has been explained (the diagnosis is made first if it has not been). The causes the diagnosis found, when each accounts for at least a quarter of the change in the direction of the change, call up the actions in the **intervention library** that answer that kind of cause (a product that slipped, a smaller average sale, a quiet weekday, a supplier whose bill rose...). Each candidate is scored 0-100 on six things and the weighted points rank them: **impact** 30% (how much of the change it could win back; half the change is full marks), **confidence** 20% (half the diagnosis's confidence, half the size of the cause), **fit with the owner's goals** 15% (a goal for the same figure fits perfectly, a goal of the same kind fits well, none set is neutral), **ease** 15% (100 less points for effort and cost), **urgency** 10% (how big the change was, a little more for an action that shows fast), and **track record** 10% (neutral until outcomes are recorded in Phase 11). Ties go to the bigger impact, then the easier action. The best action is marked as recommended with a plain-English reason (what it is aimed at, what it could win back, effort and cost, the goal it fits, and what put the next one second); up to five options are kept. The library is data (`intervention_library`: steps, which causes it answers, effort, cost, days to show, and a starting estimate of the share of the gap it usually wins back, labelled as Vyterlix's own). Good news gets "nothing needs fixing"; a cause we cannot explain or that no library action answers gets "cannot recommend yet", never a guess. **No language model is involved anywhere in the ranking.**
+
+- [x] Tables: recommendations, recommendation_options (every option's score and the working behind it; exactly one marked recommended, always rank 1), recommendation_evidence (typed like diagnosis evidence), intervention_library
+- [x] Intervention library (10 actions: promote a product, bundle or add-on, win back customers, weekday special, channel push, price review, supplier review, cost review, local marketing, record product on every sale). `GET /organizations/{id}/interventions`
+- [~] Option generation (step 1: from the diagnosis and the owner's active goals. **Not yet:** the forecast (for example, what to restock), history and the owner's constraints (budget, staff), which need Phase 11-12)
+- [x] Option evaluation: impact, confidence, goal fit, ease (effort and cost), urgency and track record, with the working shown for every option
+- [x] Ranking / selection scoring: weighted total, deterministic tie-breaks
+- [x] Recommended-action selection: the top option is the recommendation (`POST /organizations/{id}/changes/{change}/recommendation` for owners and managers, `GET` for everyone; `GET .../recommendations` lists them)
+- [x] "Why this one" rationale
+- [x] Rule enforced: ranking is rules + evaluation, not the LLM (the rules are pure functions in `app/recommend/rules.py` with a version stamped on every recommendation; no AI provider is called)
+- [x] Screen: on the What changed page, a "What should I do about it?" section on every bad-news change: the action to do first with how to do it, why, how it scored, the other options weighed, and the evidence
 
 ## Phase 10: Action management
 
@@ -554,6 +557,8 @@ weeks, Europe/London, en-GB wording.
 | **Confidence weights (60/40, bonuses, cap of 95) are Vyterlix's own starting rules**, not calibrated against outcomes | Calibrate with real outcomes once follow-up tracking (Phase 11) has data | Phase 11-12 |
 | **Forecasts are plain statistical methods on a figure's own history:** no promotions, price changes, stock-outs or outside events. Cash flow needs bank or accounting data (the Xero connector). The what-to-stock answer is not saved, so its accuracy is not tracked, and it treats the whole of the current month's sales as still to come | More methods and drivers; save and score stock forecasts; cash flow once Xero is connected | Phase 8 later steps / Phase 4 connectors |
 | **Forecast needs 6 finished months, and a seasonal method needs 18** (a year to repeat plus months to test it on): a new business gets a wide, plain forecast | Improves as history builds; the owner's confirmed seasons help meanwhile | Ongoing |
+| **Recommendations answer only changes the diagnosis can break down (sales, number of sales, items sold, gross profit, running costs), and the library has 10 actions:** no recommendation yet for margins or customer figures, or for a stock shortage found by the stock forecast | More actions and more figures as drivers are added | Phase 9 next steps |
+| **The share of a gap each action wins back is Vyterlix's own starting estimate**, the same for every business; track record is neutral and the owner's budget and staffing are unknown | Replace with measured outcomes (Phase 11) and remembered constraints (Phase 12) | Phase 11-12 |
 | **Detection thresholds (15% / 30%, 3 / 8 points) are Vyterlix's own starting values**, the same for every business and sector | Tune per sector once real benchmarks and real customer data exist | When real data is available |
 | **Data-quality extras:** unusual amounts (a sale far above normal), unusual days (a quiet day inside a busy month), per-product stock-out gaps, and scoring per connected system once connectors exist | Needs enough real history to know what is "unusual"; false alarms would erode trust | Phase 5 (KPI engine) / Part B |
 | **Browser caching of JS/CSS in production** (stale code after a deploy: seen in dev with the plain Python server) | Needs cache headers or versioned file names at the web host | L4 |

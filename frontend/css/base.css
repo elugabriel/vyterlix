@@ -292,3 +292,4 @@ input[type="file"] { width: 100%; padding: 8px 0; }
 .chart .dot { fill: var(--accent); }
 .chart .ring { fill: none; stroke: var(--text); stroke-width: 2; vector-effect: non-scaling-stroke; }
 .key { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.875rem; color: var(--muted); }
+.badge.plain { text-transform: none; }

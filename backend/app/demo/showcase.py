@@ -524,6 +524,10 @@ def _analytics(api: Api, db: Session, org_id: uuid.UUID, say: Callable[[str], No
         chosen += [e for e in events if e["kind"] == kind and e["severity"] == "major"][:8]
     for event in chosen:
         api.call("POST", f"{base}/changes/{event['id']}/diagnosis")
+    # And what to do about the bad news among them
+    bad = [e for e in events if e["effect"] == "bad" and e["kind"] == "material_change"]
+    for event in bad[:14]:
+        api.call("POST", f"{base}/changes/{event['id']}/recommendation")
 
 
 # --- the whole thing ------------------------------------------------------------------------------------------------

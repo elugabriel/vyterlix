@@ -3,6 +3,7 @@
 // business can look. A change the owner's own busy and quiet seasons lead them to expect is shown
 // but marked as expected.
 
+import { ApiError } from "../api.js";
 import { api } from "../auth.js";
 import { openBusiness } from "../business.js";
 import { guard, table } from "../data.js";
@@ -153,6 +154,7 @@ function eventRow({ change, unusual }) {
       ? el("p", { class: "status-bad" }, `Some of the data behind this month is incomplete (${event.data_quality} out of 100), so treat it with care.`)
       : null,
     diagnosisPanel(event),
+    event.effect === "bad" ? recommendationPanel(event) : null,
     splittable[event.kpi_code] ? whereFrom(event) : null,
     el("a", { href: `kpis.html?org=${orgId}#${event.kpi_code}` }, "See this figure"),
   );
@@ -213,6 +215,100 @@ function diagnosisView(diagnosis, again) {
       el("div", {}, el("strong", {}, title), el("ul", {}, ...items.map((e) => el("li", {}, e.statement)))),
     ),
     el("p", { class: "muted" }, `Worked out on ${ukDateTime(diagnosis.diagnosed_at)} using version ${diagnosis.rules_version} of the rules. Every line above comes from your records or from arithmetic on them; nothing here is a guess.`),
+    canExplain ? el("div", { class: "actions" }, el("button", { type: "button", class: "secondary", onclick: again }, "Work it out again")) : null,
+  );
+}
+
+// --- what should I do? the options, ranked, and why one is recommended -------------------------------
+
+const EFFORT_TEXT = { low: "Low effort", medium: "Moderate effort", high: "A lot of effort" };
+const COST_TEXT = { none: "No cost", low: "Low cost", medium: "Moderate cost", high: "High cost" };
+const RECOMMENDATION_NOTICE = {
+  no_action_needed: "This is good news, so there is nothing to put right.",
+  insufficient_evidence: "We cannot say what to do yet, because we cannot say why this happened.",
+};
+
+function recommendationPanel(event) {
+  const result = el("div", { class: "stack" });
+  const panel = el("details", { class: "recommendation" }, el("summary", {}, "What should I do about it?"), result);
+  const show = (recommendation) => result.replaceChildren(recommendationView(recommendation, make));
+  async function make() {
+    const recommendation = await guard(message, () => api.post(`${base}/${event.id}/recommendation`));
+    if (recommendation) show(recommendation);
+  }
+  const notYet = () =>
+    result.replaceChildren(
+      canExplain
+        ? el(
+            "div",
+            { class: "stack" },
+            el("p", {}, "We have not worked out what to do about this yet."),
+            el("div", { class: "actions" }, el("button", { type: "button", onclick: make }, "Suggest what to do")),
+          )
+        : el("p", { class: "muted" }, "Nothing has been suggested for this yet. The owner or a manager can ask for suggestions."),
+    );
+  let opened = false;
+  panel.addEventListener("toggle", async () => {
+    if (!panel.open || opened) return;
+    opened = true;
+    try {
+      show(await api.get(`${base}/${event.id}/recommendation`));
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) notYet();
+      else throw error;
+    }
+  });
+  return panel;
+}
+
+function badges(option) {
+  return el(
+    "p",
+    {},
+    el("span", { class: "badge plain" }, EFFORT_TEXT[option.effort]),
+    " ",
+    el("span", { class: "badge plain" }, COST_TEXT[option.cost_level]),
+    " ",
+    el("span", { class: "badge plain" }, `Starts to show in about ${option.days_to_effect} days`),
+  );
+}
+
+function scoreTable(option) {
+  return table(
+    ["What we looked at", "Score", "How much it counts"],
+    option.scores.map((line) => [line.label, `${line.score} out of 100`, `${line.weight}%`]),
+  );
+}
+
+function recommendationView(recommendation, again) {
+  const [best, ...others] = recommendation.options;
+  const groups = EVIDENCE_GROUPS.map(([type, title]) => [title, recommendation.evidence.filter((e) => e.evidence_type === type)]).filter(([, items]) => items.length);
+  return el(
+    "div",
+    { class: "stack" },
+    el("p", {}, el("strong", {}, recommendation.headline)),
+    RECOMMENDATION_NOTICE[recommendation.status] ? el("p", { class: "muted" }, RECOMMENDATION_NOTICE[recommendation.status]) : null,
+    best
+      ? el(
+          "div",
+          { class: "stack" },
+          el("div", { class: "kpi" }, el("div", { class: "kpi-name" }, `Do this first: ${best.title}`), el("p", {}, best.description), badges(best), el("strong", {}, "How to do it"), el("ol", {}, ...best.intervention.steps.map((step) => el("li", {}, step)))),
+          el("p", {}, el("strong", {}, "Why this one. "), recommendation.rationale),
+        )
+      : el("p", {}, recommendation.rationale),
+    best ? el("details", {}, el("summary", {}, `How it scored (${best.total_score} out of 100)`), scoreTable(best)) : null,
+    others.length
+      ? el(
+          "div",
+          { class: "stack" },
+          el("strong", {}, "Other options we weighed"),
+          ...others.map((option) =>
+            el("details", {}, el("summary", {}, `${option.rank}. ${option.title} (${option.total_score} out of 100)`), el("p", {}, option.description), badges(option), scoreTable(option)),
+          ),
+        )
+      : null,
+    ...groups.map(([title, items]) => el("div", {}, el("strong", {}, title), el("ul", {}, ...items.map((e) => el("li", {}, e.statement))))),
+    el("p", { class: "muted" }, `Worked out on ${ukDateTime(recommendation.generated_at)} using version ${recommendation.rules_version} of the rules. The order comes from rules and the figures above, not from a guess. The amounts are starting estimates, not promises.`),
     canExplain ? el("div", { class: "actions" }, el("button", { type: "button", class: "secondary", onclick: again }, "Work it out again")) : null,
   );
 }

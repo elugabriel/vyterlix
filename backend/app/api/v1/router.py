@@ -21,6 +21,7 @@ from app.api.v1 import (
     me,
     onboarding,
     organizations,
+    recommendations,
     seasons,
     segments,
     settings,
@@ -53,6 +54,7 @@ api_router.include_router(business_health.router)
 api_router.include_router(detections.router)
 api_router.include_router(drivers.router)
 api_router.include_router(forecasts.router)
+api_router.include_router(recommendations.router)
 api_router.include_router(segments.router)
 api_router.include_router(trading.sales_router)
 api_router.include_router(trading.expenses_router)
