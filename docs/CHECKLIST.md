@@ -21,7 +21,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 5 | KPI engine | **Done apart from marketing (needs Google Analytics) and cash/runway (needs Xero): 28 KPIs, breakdowns, Key figures page** |
 | 6 | Business health engine | **Step 1 and 2 done (scoring, rules as data, explanations, history, page; seasonal "usual"); real sector benchmarks wait for real sources** |
 | 7 | Diagnostic engine | **Done apart from the parked items: anomalies, segments (product, channel, customer, day, cost), drivers, evidence and diagnoses with confidence, and the What changed page with the explanation screen** |
-| 8 | Forecasting engine | Not started |
+| 8 | Forecasting engine | **Step 1 done (tables, swappable methods, sales forecast with a range on every month); accuracy tracking, the chart and the other forecasts next** |
 | 9 | Recommendation engine | Not started |
 | 10 | Action management | Not started |
 | 11 | Follow-up + outcome measurement | Not started |
@@ -241,17 +241,19 @@ Design (step 1, then step 2 for anomalies): the engine first **notices** that so
 
 ## Phase 8: Forecasting engine
 
-- [ ] Tables: forecasts, forecast_predictions, forecast_models, forecast_evaluations
-- [ ] `ForecastService` with swappable models
-- [ ] Revenue forecast
-- [ ] Cash-flow forecast
+Design (step 1): a forecast learns from the monthly KPI values the KPI engine stored (it never recalculates them) and is made by plain statistical methods in `app/forecast` (pure functions, no database, **no language model**): the recent average, a straight-line trend, and the same month last year. Each method is **tried on the business's own recent months** (cover up the last few, forecast each from what came before, compare with what happened), the one that missed by the least is used (the simplest if equal), and the size of its misses sets the **range** around every prediction (80% by default, 50-99% on request; it widens with the square root of the months ahead and is never narrower than 2% of the level). At least 6 finished months are needed; with fewer the forecast says so instead of guessing. A figure that follows the trading year is learned with each month's confirmed season taken out and put back into the forecast months. Methods are rows in `forecast_models` (code, plain description, version, months needed); every forecast records which method and version made it and the figures it learned from. Refreshed after every KPI calculation, best-effort.
+
+- [x] Tables: forecasts, forecast_predictions, forecast_models (3 methods seeded), forecast_evaluations (how each method did when tried: typical miss in pounds and per cent, months tested, which was chosen)
+- [x] `ForecastService` with swappable models (`app/services/forecast.py`; a method is a small class in `app/forecast/models.py`, a row in `forecast_models`, and nothing else to change)
+- [x] Revenue forecast (step 1: next 1-12 months, default 3; `GET /organizations/{id}/forecasts/revenue`, `POST` to make one now (owner or manager), `GET /forecasts` lists what can be forecast). Only sales so far
+- [ ] Cash-flow forecast (needs bank or accounting data: the Xero connector)
 - [ ] Customer demand forecast
 - [ ] Inventory requirements forecast
 - [ ] Churn/retention risk forecast
-- [ ] Confidence interval on every prediction
-- [ ] `actual_value` backfill + accuracy tracking
+- [x] Confidence interval on every prediction (step 1: a lower and upper value with the level, and the typical miss of each method tried)
+- [ ] `actual_value` backfill + accuracy tracking (the column and the "actual" kind of evaluation exist; filling them in as months finish, and showing how accurate past forecasts were, is the next step)
 - [ ] Forecast visualisation
-- [ ] Rule enforced: LLM never produces the forecast number
+- [~] Rule enforced: LLM never produces the forecast number (nothing in the forecasting code or service reaches an AI provider, and a test checks the service source says so; the rule stays open until the AI assistant exists to be held to it)
 
 ## Phase 9: Recommendation engine
 
@@ -549,6 +551,8 @@ weeks, Europe/London, en-GB wording.
 | **Change detection reports pairs that are really one change** (retention and churn always move together; revenue and takings including VAT; profit and its margin) and orders mixed units (per cent and points) by size | Group related figures into one finding; rank by effect on the business | Phase 7 step 3 (segment/driver work) |
 | **Diagnosis is made on request, not automatically after detection, and only explains moves against the month before:** an unusual month that did not move much on last month is reported as "not enough evidence" rather than broken down | Make diagnoses automatically for the biggest changes (with alerts, Phase 14); explain a month against its history | Phase 7 step 6 / Phase 14 |
 | **Confidence weights (60/40, bonuses, cap of 95) are Vyterlix's own starting rules**, not calibrated against outcomes | Calibrate with real outcomes once follow-up tracking (Phase 11) has data | Phase 11-12 |
+| **Forecasts only cover sales, and only from a plain recent-average, straight-line or same-month-last-year method:** no promotions, price changes, stock-outs or outside events, and none for cash, customers or stock yet | More methods and figures; accuracy tracking will show where it misses | Phase 8 next steps |
+| **Forecast needs 6 finished months, and a seasonal method needs 18** (a year to repeat plus months to test it on): a new business gets a wide, plain forecast | Improves as history builds; the owner's confirmed seasons help meanwhile | Ongoing |
 | **Detection thresholds (15% / 30%, 3 / 8 points) are Vyterlix's own starting values**, the same for every business and sector | Tune per sector once real benchmarks and real customer data exist | When real data is available |
 | **Data-quality extras:** unusual amounts (a sale far above normal), unusual days (a quiet day inside a busy month), per-product stock-out gaps, and scoring per connected system once connectors exist | Needs enough real history to know what is "unusual"; false alarms would erode trust | Phase 5 (KPI engine) / Part B |
 | **Browser caching of JS/CSS in production** (stale code after a deploy: seen in dev with the plain Python server) | Needs cache headers or versioned file names at the web host | L4 |

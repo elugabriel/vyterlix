@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from app.core.errors import ConflictError
 from app.core.permissions import Perm
-from app.services import detection, health, kpi
+from app.services import detection, forecast, health, kpi
 from app.services.import_runner import run_import, undo_import
 from app.services.import_validation import validate_import
 from app.services.integrations import run_sync
@@ -90,4 +90,10 @@ def calculate_kpis(ctx: JobContext) -> BaseModel:
     except Exception:
         ctx.db.rollback()
         logger.error("Could not look for changes in the figures", exc_info=True)
+    # And the forecast, which learns from the same figures.
+    try:
+        forecast.calculate_all(ctx.db, ctx.tenant)
+    except Exception:
+        ctx.db.rollback()
+        logger.error("Could not forecast the figures", exc_info=True)
     return run
