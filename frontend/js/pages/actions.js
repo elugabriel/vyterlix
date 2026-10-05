@@ -41,6 +41,7 @@ const KIND_TEXT = {
   modification: "Changed",
   steps: "Steps",
   evidence: "Evidence",
+  outcome: "Result",
   overdue: "Overdue",
 };
 
@@ -53,6 +54,7 @@ let filter = "open";
 const list = el("div", { class: "stack" });
 const detail = el("div", { class: "stack" });
 const counts = el("p", { class: "muted" });
+const results = el("div", { class: "stack" });
 
 async function start({ user, org }) {
   orgId = org.id;
@@ -68,9 +70,9 @@ async function start({ user, org }) {
     filter = chooser.value;
     loadList();
   });
-  content.replaceChildren(counts, field("Show", chooser), list, detail);
+  content.replaceChildren(counts, results, field("Show", chooser), list, detail);
   window.addEventListener("hashchange", openFromHash);
-  await Promise.all([loadList(), loadCounts()]);
+  await Promise.all([loadList(), loadCounts(), loadResults()]);
   await openFromHash();
 }
 
@@ -83,6 +85,40 @@ async function loadCounts() {
   if (c.pending) parts.push(`${c.pending} waiting for approval`);
   parts.push(`${c.completed} done`, `${c.mine_open} of the open ones are yours`);
   counts.textContent = parts.join(" · ");
+}
+
+const OUTCOME_CLASS = {
+  successful: "health-healthy",
+  partially_successful: "health-fair",
+  unsuccessful: "health-at_risk",
+  inconclusive: "health-not_enough_data",
+};
+
+async function loadResults() {
+  const r = await guard(message, () => api.get(`${base}/outcomes`));
+  if (!r) return;
+  const checked = r.successful + r.partially_successful + r.unsuccessful + r.inconclusive;
+  results.replaceChildren();
+  if (!r.waiting && !checked) return;
+  const parts = [];
+  if (r.waiting) parts.push(`${r.waiting} finished and waiting to be checked${r.due ? ` (${r.due} ready now)` : ""}`);
+  if (checked) parts.push(`${r.successful} worked`, `${r.partially_successful} partly worked`, `${r.unsuccessful} did not work`, `${r.inconclusive} could not be judged`);
+  put(
+    results,
+    el("p", { class: "muted" }, `Results: ${parts.join(" · ")}`),
+    r.track_record.length
+      ? el(
+          "details",
+          {},
+          el("summary", {}, "How each kind of action has worked for you"),
+          table(
+            ["Kind of action", "Worked", "Partly", "Did not", "Score"],
+            r.track_record.map((t) => [t.name, t.successful, t.partially_successful, t.unsuccessful, `${t.score} out of 100`]),
+          ),
+          el("p", { class: "muted" }, "The score starts at 50 and moves with each result. It counts for a tenth of how a suggestion is ranked next time."),
+        )
+      : null,
+  );
 }
 
 async function loadList() {
@@ -124,6 +160,7 @@ async function send(call) {
     show(action);
     loadList();
     loadCounts();
+    loadResults();
   }
 }
 
@@ -142,12 +179,70 @@ function show(a) {
       { class: "muted" },
       `Meant to improve ${d.kpi_name}: it was ${formatValue(d.baseline_value, d.unit)} in ${periodLabel(d.baseline_period, "month")} when this was accepted. Accepted by ${d.accepted_by ? d.accepted_by.name : "someone"} on ${ukDateTime(d.accepted_at)}${d.modified ? `, changed from "${d.original_title ?? "the suggestion"}"` : ""}.`,
     ),
+    resultPanel(a),
     a.status === "pending" && isOwner ? pendingControls(a) : null,
     canWork && open && a.status !== "pending" ? controls(a) : null,
     stepsView(a),
     evidenceView(a),
     timeline(a),
   );
+}
+
+function resultPanel(a) {
+  if (a.outcome) {
+    const o = a.outcome;
+    const money = (v) => (v === null ? "–" : formatValue(v, o.unit));
+    return el(
+      "div",
+      { class: "stack" },
+      el("h3", {}, "What came of it ", el("span", { class: `badge ${OUTCOME_CLASS[o.outcome]}` }, o.label)),
+      el("p", {}, o.reason),
+      table(
+        ["", "Figure"],
+        [
+          [`${o.kpi_name} when accepted (${o.baseline_period ? periodLabel(o.baseline_period, "month") : "–"})`, money(o.baseline_value)],
+          [`${o.kpi_name} afterwards (${o.measured_period ? periodLabel(o.measured_period, "month") : "no figures"})`, money(o.measured_value)],
+          ["Change we expected", money(o.expected_change)],
+          ["Change that happened", money(o.actual_change)],
+          ["Normal change for that time of year", o.seasonal_change === null ? "Not known (no figures from last year)" : money(o.seasonal_change)],
+          ["Change after taking that out", money(o.adjusted_change)],
+        ],
+      ),
+      o.alternative ? el("p", {}, el("strong", {}, "What we now suggest instead: "), `${o.alternative}. See it on the What changed page.`) : null,
+      el("p", { class: "muted" }, `Checked on ${ukDateTime(o.measured_at)}${o.measured_by ? ` by ${o.measured_by}` : " automatically"}.`),
+      reportButton(a),
+    );
+  }
+  if (!a.follow_up) return null;
+  const f = a.follow_up;
+  const check = canWork && f.is_due ? el("button", { type: "button", onclick: () => send(() => api.post(`${base}/${a.id}/measure`)) }, "Check the result now") : null;
+  return el(
+    "div",
+    { class: "stack" },
+    el("h3", {}, "Checking whether it worked"),
+    el("p", {}, f.is_due ? `The check is due. We will compare ${periodLabel(f.measure_month, "month")} with the month you accepted it, as soon as those figures are in.` : `It will be checked from ${ukDate(f.due_date)}, comparing ${periodLabel(f.measure_month, "month")} with the month you accepted it.`),
+    check ? el("div", { class: "actions" }, check) : null,
+    reportButton(a),
+  );
+}
+
+function reportButton(a) {
+  const out = el("div", { class: "stack" });
+  const button = el("button", { type: "button", class: "secondary" }, "Show the full report");
+  button.addEventListener("click", async () => {
+    const r = await guard(message, () => api.get(`${base}/${a.id}/report`));
+    if (!r) return;
+    button.hidden = true;
+    out.replaceChildren();
+    put(
+      out,
+      el("p", {}, r.summary),
+      r.why ? el("p", { class: "muted" }, `Why it was suggested: ${r.why}`) : null,
+      r.notes.length ? el("ul", {}, ...r.notes.map((n) => el("li", {}, n))) : null,
+      el("p", { class: "muted" }, `${r.steps_done} of ${r.steps_total} steps done · ${r.evidence_count} piece(s) of evidence`),
+    );
+  });
+  return el("div", { class: "stack" }, el("div", { class: "actions" }, button), out);
 }
 
 function pendingControls(a) {

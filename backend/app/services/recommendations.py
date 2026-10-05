@@ -18,8 +18,10 @@ from sqlalchemy.orm import Session
 from app.core.errors import NotFoundError
 from app.diagnostics import evidence as diagnosis_evidence
 from app.integrations.base import utcnow
+from app.models.actions import BusinessIntervention
 from app.models.diagnostics import DetectionEvent, Diagnosis
 from app.models.kpi import KpiDefinition
+from app.models.outcomes import InterventionOutcome
 from app.models.recommendations import (
     Intervention,
     Recommendation,
@@ -36,6 +38,7 @@ from app.schemas.recommendations import (
     ScoreLineOut,
 )
 from app.services import diagnosis as diagnosis_service
+from app.services import track_record
 from app.services.detection import get_event
 from app.services.goals import list_goals
 
@@ -70,6 +73,20 @@ def _library(db: Session) -> list[rules.Action]:
             select(Intervention).where(Intervention.is_active.is_(True)).order_by(Intervention.code)
         )
     ]
+
+
+def _tried(db: Session, event_id: uuid.UUID) -> set[tuple[str | None, str | None]]:
+    """Actions already tried for this change that did not fully work (code, what it was aimed at):
+    a different one is suggested next time."""
+    rows = db.execute(
+        select(BusinessIntervention.library_code, BusinessIntervention.target_label)
+        .join(InterventionOutcome, InterventionOutcome.intervention_id == BusinessIntervention.id)
+        .where(
+            BusinessIntervention.event_id == event_id,
+            InterventionOutcome.outcome.in_(("partially_successful", "unsuccessful")),
+        )
+    ).all()
+    return {(code, target) for code, target in rows}
 
 
 def _findings(drivers: dict | None) -> list[rules.Finding]:
@@ -113,6 +130,7 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
     findings = _findings(drivers)
     unit = kpi.unit if not drivers else drivers["unit"]
     scored: list[rules.Scored] = []
+    record: dict[str, track_record.Record] = {}
 
     if event.effect != "bad":
         status = "no_action_needed"
@@ -123,7 +141,13 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
         )
     else:
         goals = _goals(db)
-        candidates = rules.generate(_library(db), findings, kpi.code)
+        tried = _tried(db, event.id)
+        candidates = [
+            c
+            for c in rules.generate(_library(db), findings, kpi.code)
+            if (c.action.code, c.target) not in tried
+        ]
+        record = track_record.load(db)
         change = Decimal(drivers["total_change"]) if drivers else Decimal(0)
         scored = rules.rank(
             [
@@ -134,6 +158,9 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
                     severity=event.severity,
                     diagnosis_confidence=diagnosis.confidence,
                     goals=goals,
+                    history=record[c.action.code].score
+                    if c.action.code in record
+                    else rules.NEUTRAL_HISTORY,
                 )
                 for c in candidates
             ]
@@ -209,7 +236,7 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
                 breakdown={"lines": item.breakdown, "goal": item.goal_match},
             )
         )
-    for order, piece in enumerate(_evidence(event, diagnosis, scored)):
+    for order, piece in enumerate(_evidence(event, diagnosis, scored, record)):
         db.add(
             RecommendationEvidence(
                 organization_id=tenant.organization_id,
@@ -224,7 +251,9 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
     return read(db, event_id)
 
 
-def _evidence(event, diagnosis, scored: list[rules.Scored]) -> list[diagnosis_evidence.Item]:
+def _evidence(
+    event, diagnosis, scored: list[rules.Scored], record: dict[str, track_record.Record]
+) -> list[diagnosis_evidence.Item]:
     items = [
         diagnosis_evidence.Item("fact", event.summary, {"event_id": str(event.id)}),
         diagnosis_evidence.Item(
@@ -261,14 +290,31 @@ def _evidence(event, diagnosis, scored: list[rules.Scored]) -> list[diagnosis_ev
                 },
             )
         )
-        items.append(
-            diagnosis_evidence.Item(
-                "insufficient",
-                "We have no record yet of how this kind of action worked for your business, so its "
-                "track record counts as neutral.",
-                {"reason": "no_history"},
+        seen = record.get(best.candidate.action.code)
+        if seen is None or not seen.decided:
+            items.append(
+                diagnosis_evidence.Item(
+                    "insufficient",
+                    "We have no record yet of how this kind of action worked for your business, so "
+                    "its track record counts as neutral.",
+                    {"reason": "no_history"},
+                )
             )
-        )
+        else:
+            items.append(
+                diagnosis_evidence.Item(
+                    "fact",
+                    f"This kind of action has been tried {seen.decided} "
+                    f"time{'s' if seen.decided != 1 else ''} in your business: {seen.successful} "
+                    f"worked, {seen.partially_successful} partly worked and {seen.unsuccessful} "
+                    "did not. That moves its score up or down a little.",
+                    {
+                        "successful": seen.successful,
+                        "partial": seen.partially_successful,
+                        "unsuccessful": seen.unsuccessful,
+                    },
+                )
+            )
         items.append(
             diagnosis_evidence.Item(
                 "insufficient",

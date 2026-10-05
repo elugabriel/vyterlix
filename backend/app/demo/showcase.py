@@ -552,7 +552,7 @@ def _actions(
     say("  actions in every state, with notes and evidence")
     base = f"/organizations/{org_id}"
     today = today_uk()
-    plans = ("in_progress", "completed", "overdue", "pending", "partial", "accepted", "cancelled")
+    plans = ("completed", "in_progress", "overdue", "pending", "partial", "accepted", "cancelled")
     if api.call("GET", f"{base}/actions"):
         return  # already set up on an earlier run
     # Only the recommendations that have something to accept
@@ -561,8 +561,12 @@ def _actions(
         for e in events
         if api.call("GET", f"{base}/changes/{e['id']}/recommendation")["status"] == "open"
     ]
+    events.sort(
+        key=lambda e: e["period_start"]
+    )  # the oldest change is the one that can be followed up
     made: dict[str, dict] = {}
     proposed = None
+    oldest = events[0] if events else None
     # The last open recommendation is left alone, so there is one to accept by hand
     for plan, event in zip(plans, events[:-1], strict=False):
         if plan == "pending":
@@ -639,8 +643,47 @@ def _actions(
     if "cancelled" in made:
         post("cancelled", "/status", {"status": "cancelled", "note": "Not the right time of year."})
     api.call("GET", mine)  # marks the late one overdue
+    if "completed" in made:
+        _look_back(db, org_id, made["completed"]["id"], oldest["period_start"], today)
     if proposed is not None:
         _proposal(api, db, org_id, proposed, manager_password)
+
+
+def _look_back(
+    db: Session, org_id: uuid.UUID, action_id: str, change_month: str, today: date
+) -> None:
+    """Make the finished action old enough to be followed up, then follow up on it for real."""
+    from datetime import UTC, datetime, timedelta
+
+    from app.models.actions import BusinessAction, BusinessIntervention
+    from app.models.outcomes import FollowUpSchedule
+    from app.services import outcomes, scheduler
+
+    first = date.fromisoformat(change_month)
+    finished = min(
+        datetime.now(UTC) - timedelta(days=20),
+        datetime(first.year, first.month, 1, 12, tzinfo=UTC) + timedelta(days=45),
+    )
+    with tenant_scope(db, org_id):
+        action = db.get(BusinessAction, uuid.UUID(action_id))
+        action.completed_at = finished
+        intervention = db.get(BusinessIntervention, action.intervention_id)
+        intervention.accepted_at = finished - timedelta(days=30)
+        action.start_date = (finished - timedelta(days=30)).date()
+        action.target_date = (finished - timedelta(days=5)).date()
+        db.execute(
+            delete(FollowUpSchedule).where(
+                FollowUpSchedule.intervention_id == action.intervention_id
+            )
+        )
+        owner = db.scalars(
+            select(User).where(User.email == OWNER_EMAIL).execution_options(**ACROSS_TENANTS)
+        ).one()
+        from app.services.jobs import JobTenant
+
+        outcomes.schedule(db, JobTenant(organization_id=org_id, user=owner), action)
+        db.commit()
+    scheduler.tick(db, today=today)
 
 
 def _proposal(api, db, org_id, event, manager_password) -> None:

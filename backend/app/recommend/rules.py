@@ -236,6 +236,7 @@ def evaluate(
     severity: str,
     diagnosis_confidence: int | None,
     goals: list[Goal],
+    history: int = NEUTRAL_HISTORY,
 ) -> Scored:
     action = candidate.action
     impact_value = candidate.gap * action.impact_share
@@ -246,7 +247,7 @@ def evaluate(
         "goal_fit": fit,
         "ease": ease_score(action.effort, action.cost_level),
         "urgency": urgency_score(severity, action.days),
-        "history": NEUTRAL_HISTORY,
+        "history": history,
     }
     total = total_score(scores)
     breakdown = [

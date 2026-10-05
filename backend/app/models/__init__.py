@@ -17,6 +17,7 @@ from app.models import (
     integrations,
     jobs,
     kpi,
+    outcomes,
     recommendations,
 )
 
@@ -33,5 +34,6 @@ __all__ = [
     "integrations",
     "jobs",
     "kpi",
+    "outcomes",
     "recommendations",
 ]

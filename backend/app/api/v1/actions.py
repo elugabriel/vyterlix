@@ -17,7 +17,9 @@ from app.schemas.actions import (
     RejectIn,
     StatusIn,
 )
+from app.schemas.outcomes import OutcomesSummaryOut, ReportOut
 from app.services import actions as service
+from app.services import outcomes
 from app.services.storage import FileStorage, get_file_storage
 
 router = APIRouter(prefix="/organizations/{organization_id}/actions", tags=["actions"])
@@ -49,6 +51,13 @@ def actions(
 def summary(tenant: Viewer, db: DB):
     """How many actions are in each state, how many are due soon, and how many are yours."""
     return service.counts(db, tenant)
+
+
+@router.get("/outcomes", response_model=OutcomesSummaryOut)
+def outcome_summary(tenant: Viewer, db: DB):
+    """How many finished actions are waiting to be checked, how the checked ones turned out, and
+    how each kind of action has worked for this business."""
+    return outcomes.summary(db)
 
 
 @router.get("/{action_id}", response_model=ActionOut)
@@ -88,6 +97,18 @@ def reject(
 ):
     """Turn down a proposed action. The recommendation can be taken up again."""
     return service.reject(db, tenant, action_id, None if body is None else body.reason, meta)
+
+
+@router.get("/{action_id}/report", response_model=ReportOut)
+def report(action_id: uuid.UUID, tenant: Viewer, db: DB):
+    """One action's whole story: what was decided and why, what was done, and what came of it."""
+    return outcomes.report(db, action_id)
+
+
+@router.post("/{action_id}/measure", response_model=ActionOut)
+def measure(action_id: uuid.UUID, tenant: Worker, db: DB):
+    """Check the result now (once the follow-up date has come and the figures are in)."""
+    return service.measure_now(db, tenant, action_id)
 
 
 @router.post("/{action_id}/evidence", response_model=ActionOut)

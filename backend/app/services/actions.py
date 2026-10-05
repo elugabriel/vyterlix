@@ -51,6 +51,7 @@ from app.schemas.actions import (
     UpdateOut,
     WhatWasDecidedOut,
 )
+from app.services import outcomes
 from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
 from app.services.storage import FileStorage, FileTooLargeError, evidence_key
@@ -475,6 +476,8 @@ def set_status(
         db, tenant, meta, AuditAction.ACTION_STATUS_CHANGED, action.id,
         from_status=current, to_status=body.status,
     )  # fmt: skip
+    if body.status == "completed":
+        outcomes.schedule(db, tenant, action)  # to be checked once it has had time to show
     db.commit()
     return get_action(db, action.id)
 
@@ -509,6 +512,14 @@ def _sync_overdue(db: Session, tenant, action: BusinessAction, today: date) -> b
         )  # fmt: skip
         return True
     return False
+
+
+def measure_now(db: Session, tenant, action_id: uuid.UUID) -> ActionOut:
+    """Check the result of a finished action now, if its follow-up date has come."""
+    action = _get(db, action_id)
+    _require(tenant, Perm.ACTIONS_MANAGE, action.category)
+    outcomes.measure(db, tenant, action.id)
+    return get_action(db, action.id)
 
 
 def refresh_overdue(db: Session, tenant, today: date | None = None) -> int:
@@ -696,6 +707,8 @@ def get_action(db: Session, action_id: uuid.UUID, today: date | None = None) -> 
             for u in updates
         ],
         evidence=[_evidence_out(e, people) for e in evidence],
+        follow_up=outcomes.follow_up_for(db, action.intervention_id, today),
+        outcome=outcomes.outcome_for(db, action.intervention_id),
         last_activity_at=action.last_activity_at,
     )  # fmt: skip
 

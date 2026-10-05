@@ -2,6 +2,7 @@
 
     python -m app.cli.worker run             # keep running until Ctrl+C
     python -m app.cli.worker run --once      # run what is waiting, then stop
+    python -m app.cli.worker tick            # do the timed round once (overdue work, follow-ups)
     python -m app.cli.worker status          # how many jobs are in each state
     python -m app.cli.worker prune           # delete finished jobs older than 30 days
 
@@ -24,13 +25,26 @@ from app.core.config import get_settings
 from app.db.session import get_sessionmaker
 from app.db.tenant import ACROSS_TENANTS
 from app.models.jobs import Job
-from app.services import job_handlers  # noqa: F401  (registers the handlers)
+from app.services import (
+    job_handlers,  # noqa: F401  (registers the handlers)
+    scheduler,
+)
 from app.services.jobs import prune_finished, work_once
 
 logger = logging.getLogger("vyterlix.worker")
 
 
-def run(*, once: bool, poll_seconds: float) -> int:
+def tick() -> int:
+    with get_sessionmaker()() as db:
+        totals = scheduler.tick(db)
+    print(
+        f"{totals['businesses']} business(es): {totals['overdue']} marked overdue, "
+        f"{totals['followed_up']} follow-up(s) sent, {totals['measured']} result(s) measured."
+    )
+    return 0
+
+
+def run(*, once: bool, poll_seconds: float, tick_minutes: float = 15.0) -> int:
     worker_id = f"{socket.gethostname()}:{os.getpid()}"
     sessions = get_sessionmaker()
     stopping = False
@@ -45,7 +59,14 @@ def run(*, once: bool, poll_seconds: float) -> int:
     signal.signal(signal.SIGINT, _stop)
     print(f"Worker {worker_id} started. Waiting for jobs...")
     done = 0
+    next_tick = 0.0  # the timed round runs straight away, then every few minutes
     while not stopping:
+        if time.monotonic() >= next_tick:
+            next_tick = time.monotonic() + tick_minutes * 60
+            try:
+                tick()
+            except Exception:
+                logger.error("The timed round failed", exc_info=True)
         with sessions() as db:
             job = work_once(db, worker_id, own_session=sessions)
         if job is not None:
@@ -88,12 +109,18 @@ def main(argv: list[str] | None = None) -> int:
     runner = commands.add_parser("run", help="run queued jobs")
     runner.add_argument("--once", action="store_true", help="stop when nothing is waiting")
     runner.add_argument("--poll", type=float, default=2.0, help="seconds between checks when idle")
+    runner.add_argument(
+        "--tick-minutes", type=float, default=15.0, help="minutes between timed rounds"
+    )
+    commands.add_parser("tick", help="do the timed round once")
     commands.add_parser("status", help="count jobs by state")
     commands.add_parser("prune", help="delete old finished jobs")
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
     if args.command == "run":
-        return run(once=args.once, poll_seconds=args.poll)
+        return run(once=args.once, poll_seconds=args.poll, tick_minutes=args.tick_minutes)
+    if args.command == "tick":
+        return tick()
     return status() if args.command == "status" else prune()
 
 

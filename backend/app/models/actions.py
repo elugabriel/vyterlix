@@ -59,6 +59,7 @@ UPDATE_KINDS = (
     "steps",
     "evidence",
     "overdue",
+    "outcome",
 )
 EVIDENCE_KINDS = ("note", "link", "file")
 

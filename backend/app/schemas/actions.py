@@ -4,6 +4,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
+from app.schemas.outcomes import FollowUpOut, OutcomeOut
+
 ActionStatus = Literal[
     "pending", "accepted", "in_progress", "partially_completed", "completed", "cancelled", "overdue"
 ]
@@ -194,6 +196,8 @@ class ActionOut(BaseModel):
     decision: WhatWasDecidedOut
     updates: list[UpdateOut]  # oldest first
     evidence: list[EvidenceOut]
+    follow_up: FollowUpOut | None  # once it is done: when it will be checked
+    outcome: OutcomeOut | None  # and what came of it
     last_activity_at: datetime
 
 

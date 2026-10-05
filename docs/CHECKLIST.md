@@ -24,7 +24,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 8 | Forecasting engine | **Steps 1-3 done (swappable methods, ranges on every month, accuracy tracking, the forecast page, demand, retention and what-to-stock forecasts); cash flow waits for Xero** |
 | 9 | Recommendation engine | **Step 1 done (library, options from a diagnosis and the owner's goals, scoring and ranking, why-this-one, the screen); forecast, history and constraints as inputs come with Phases 11-12** |
 | 10 | Action management | **Step 1 done (accept a recommendation, change it first, give it to someone, dates, steps, statuses, notes, evidence files, approval of a manager's suggestion, overdue detection, the Actions screen)** |
-| 11 | Follow-up + outcome measurement | Not started |
+| 11 | Follow-up + outcome measurement | **Step 1 done (follow-up plan, timed round in the worker, result emails, expected vs actual with the season taken out, four outcomes, intervention report, another suggestion after a non-success, track record feeding the recommendations, the results on the Actions screen)** |
 | ⚑ | Vertical slice proof | Not started |
 | 12 | Business memory / learning | Not started |
 | 13 | AI consultation | Not started |
@@ -288,14 +288,19 @@ Design (step 1): taking up a recommended option creates an **intervention** (a f
 
 ## Phase 11: Follow-up + outcome measurement
 
-- [ ] Tables: intervention_outcomes, follow_up_schedules
-- [ ] Background scheduler (*decision needed: no Docker on Windows → Memurai or APScheduler instead of Redis/Celery*)
-- [ ] Follow-up notification to the responsible user
-- [ ] KPI re-measurement at follow-up
-- [ ] Expected vs actual comparison
-- [ ] Outcomes: SUCCESSFUL, PARTIALLY_SUCCESSFUL, UNSUCCESSFUL, **INCONCLUSIVE**
-- [ ] Intervention report
-- [ ] On non-success: generate an alternative recommendation
+Design (step 1): **Scheduler decision: no Redis, Memurai or APScheduler.** The background worker that already runs the queued jobs makes a timed round every 15 minutes (`python -m app.cli.worker run`, or once with `python -m app.cli.worker tick`): work past its date is marked overdue, and finished actions whose follow-up date has come are followed up. Everything the round does is safe to repeat, and it also runs after every figures calculation, so a result is measured as soon as the figures it needs arrive.
+
+When an action is marked done, a follow-up is planned: the date is when the action should have started to show (its usual days to show) or the start of the second month after it finished, whichever is later, and the figure used is the latest full month by then (always a month that began after the work finished). On that date the owner of the action (or whoever accepted it) is emailed once, if they have not switched action emails off. The result is then measured: the figure for that month against the figure when the action was accepted, and against the change that was expected (the starting estimate made at the time). Where last year's figures exist, the change those two months normally bring is taken out first, so a seasonal rise is not mistaken for the action working. **Successful** (at least 80% of the expected change), **partially successful** (at least 30%), **unsuccessful** (less), or **inconclusive** (no expected figure, the month's data under 60 out of 100, no figures after 60 days of waiting, or the time of year alone would have brought the change). After a partial or unsuccessful result the recommendation is worked out again **without the action just tried**, and the owner is told what is now suggested. Every result also feeds a **track record** per kind of action (starts at 50, a success counts as one, a partial as half, inconclusive results are ignored) that replaces the neutral 10% track-record score in later recommendations. The Actions page shows a result panel with the figures, a "Check the result now" button once it is due, and a full report.
+
+- [x] Tables: intervention_outcomes, follow_up_schedules
+- [x] Background scheduler (decision: the existing database-backed worker, see above)
+- [x] Follow-up notification to the responsible user (email; an in-app and phone notification come with Phase 14)
+- [x] KPI re-measurement at follow-up
+- [x] Expected vs actual comparison (with the season taken out when last year is known)
+- [x] Outcomes: SUCCESSFUL, PARTIALLY_SUCCESSFUL, UNSUCCESSFUL, **INCONCLUSIVE**
+- [x] Intervention report
+- [x] On non-success: generate an alternative recommendation
+- [x] Track record feeding the recommendation scores
 
 ## ⚑ Milestone: vertical slice proof
 
@@ -562,7 +567,8 @@ weeks, Europe/London, en-GB wording.
 | **Forecasts are plain statistical methods on a figure's own history:** no promotions, price changes, stock-outs or outside events. Cash flow needs bank or accounting data (the Xero connector). The what-to-stock answer is not saved, so its accuracy is not tracked, and it treats the whole of the current month's sales as still to come | More methods and drivers; save and score stock forecasts; cash flow once Xero is connected | Phase 8 later steps / Phase 4 connectors |
 | **Forecast needs 6 finished months, and a seasonal method needs 18** (a year to repeat plus months to test it on): a new business gets a wide, plain forecast | Improves as history builds; the owner's confirmed seasons help meanwhile | Ongoing |
 | **Recommendations answer only changes the diagnosis can break down (sales, number of sales, items sold, gross profit, running costs), and the library has 10 actions:** no recommendation yet for margins or customer figures, or for a stock shortage found by the stock forecast | More actions and more figures as drivers are added | Phase 9 next steps |
-| **Actions send no reminders:** overdue and due-soon work shows on the Actions page but nobody is emailed or notified, and evidence cannot be removed once attached | Needs the notification channel and scheduler; removal needs a rule on who may delete evidence | Phase 11 |
+| **Actions are only emailed about when their follow-up is due or a result is in:** overdue and due-soon work shows on the Actions page but nobody is emailed about it, nothing appears in the app or on a phone, and evidence cannot be removed once attached | Needs the notification centre (Phase 14); removal needs a rule on who may delete evidence | Phase 14 |
+| **Outcomes compare one month with one month** and say nothing about other things that changed at the same time (a price rise, a new shop nearby); the 80% / 30% lines and the 60 data-quality limit are Vyterlix's own starting values | Longer windows, several months and comparison with similar businesses once there is data to calibrate on | Phase 12 |
 | **The share of a gap each action wins back is Vyterlix's own starting estimate**, the same for every business; track record is neutral and the owner's budget and staffing are unknown | Replace with measured outcomes (Phase 11) and remembered constraints (Phase 12) | Phase 11-12 |
 | **Detection thresholds (15% / 30%, 3 / 8 points) are Vyterlix's own starting values**, the same for every business and sector | Tune per sector once real benchmarks and real customer data exist | When real data is available |
 | **Data-quality extras:** unusual amounts (a sale far above normal), unusual days (a quiet day inside a busy month), per-product stock-out gaps, and scoring per connected system once connectors exist | Needs enough real history to know what is "unusual"; false alarms would erode trust | Phase 5 (KPI engine) / Part B |
