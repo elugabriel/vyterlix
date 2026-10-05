@@ -304,20 +304,22 @@ When an action is marked done, a follow-up is planned: the date is when the acti
 
 ## ⚑ Milestone: vertical slice proof
 
-Prove the whole loop on one fake retail business before building further.
+Prove the whole loop on one fake retail business before building further. **Done:** `backend/tests/test_vertical_slice.py` takes the generated Fakeham Bakery year (October 2025 to September 2026, five files) round the whole loop through the real API, checking each step against figures worked out by hand from the files. It found January 2026's fall in sales (£10,662.90 to £7,406.10), explained it, forecast the next three months with ranges, suggested five actions and picked "Win back the customers who stopped coming" (expected to win back £868.48), accepted it, ticked it off, followed it up and measured it (March was £877.10 above January, 101% of what was expected: successful), and the result came back as a track record that raised that action's score in the next recommendation. Run it with `python -m pytest tests/test_vertical_slice.py`.
 
-- [ ] Upload data
-- [ ] Calculate KPIs
-- [ ] Detect a revenue decline
-- [ ] Explain the cause
-- [ ] Forecast revenue
-- [ ] Generate 3 candidate actions
-- [ ] Select and explain a recommendation
-- [ ] User accepts it
-- [ ] Track the action
-- [ ] Run follow-up
-- [ ] Measure the outcome
-- [ ] Store the learning
+Two honest limits: the data ends in September 2026, so the action is treated as finished in mid-February 2026 (the test sets that date) so that a month after it exists to measure; and there is no figure from the year before to take the season out, so the result is read as it stands.
+
+- [x] Upload data
+- [x] Calculate KPIs
+- [x] Detect a revenue decline
+- [x] Explain the cause
+- [x] Forecast revenue
+- [x] Generate 3 candidate actions
+- [x] Select and explain a recommendation
+- [x] User accepts it
+- [x] Track the action
+- [x] Run follow-up
+- [x] Measure the outcome
+- [x] Store the learning
 
 ## Phase 12: Business memory / learning
 
