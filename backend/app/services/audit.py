@@ -79,6 +79,8 @@ class AuditAction(StrEnum):
     ACTION_STATUS_CHANGED = "action.status_changed"
     ACTION_EVIDENCE_ADDED = "action.evidence_added"
     OUTCOME_MEASURED = "action.outcome_measured"
+    ASSISTANT_SETTINGS_CHANGED = "assistant.settings_changed"
+    ASSISTANT_SENT_OUTSIDE = "assistant.sent_outside"
 
 
 def record_audit(

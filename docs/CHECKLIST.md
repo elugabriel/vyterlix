@@ -27,7 +27,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 11 | Follow-up + outcome measurement | **Step 1 done (follow-up plan, timed round in the worker, result emails, expected vs actual with the season taken out, four outcomes, intervention report, another suggestion after a non-success, track record feeding the recommendations, the results on the Actions screen)** |
 | ⚑ | Vertical slice proof | Not started |
 | 12 | Business memory / learning | **Step 1 done (what is normal, customer patterns, goals and seasons, the owner's limits, lessons and patterns from results, similar cases, a record of what memory was used, memory feeding the recommendations, the What we know screen)** |
-| 13 | AI consultation | Not started |
+| 13 | AI consultation | **Step 1 done (a grounded assistant: questions understood by rules, answered only from the business's own results, every answer sourced, conversations kept, role-based, per-business AI controls, Claude behind a wrapper that may only reword and is checked)** |
 | 14 | Alerts + notifications | Not started |
 | — | Core UX screens | Not started |
 | 15 | Reporting | Not started |
@@ -253,7 +253,7 @@ Design (step 1): a forecast learns from the monthly KPI values the KPI engine st
 - [x] Confidence interval on every prediction (step 1: a lower and upper value with the level, and the typical miss of each method tried)
 - [x] `actual_value` backfill + accuracy tracking (step 2): whenever the figures are worked out (and when a forecast is made) every forecast month that has since finished gets its real figure filled in, a corrected figure is picked up, and each forecast is scored on the months that can be checked (kind "actual" in `forecast_evaluations`, with how many landed inside the range). `GET /organizations/{id}/forecasts/{figure}/accuracy` gives the typical miss in pounds and per cent, which way forecasts lean (too high or too low), how often the real figure landed inside the range against how often it was meant to (and says plainly when the ranges are too narrow), the same by how many months ahead, and every checked month, newest first. Passes no judgement until three forecast months have finished
 - [x] Forecast visualisation (step 2: `forecast.html`): recent months as a line, the forecast as a dashed line with its range shaded and widening, a ring where a finished month's real figure is known, a table of expected and range and what happened, how the method was chosen (every method tried and how close each came), the accuracy section, and "Work it out again" with 3, 6 or 12 months for owners and managers
-- [~] Rule enforced: LLM never produces the forecast number (nothing in the forecasting code or service reaches an AI provider, and a test checks the service source says so; the rule stays open until the AI assistant exists to be held to it)
+- [x] Rule enforced: LLM never produces the forecast number (nothing in the forecasting code or service reaches an AI provider; checked by a test now that the AI assistant exists to be held to it)
 
 ## Phase 9: Recommendation engine
 
@@ -339,16 +339,19 @@ Design (step 1): **memory is rules and records, not a language model.** It has f
 
 ## Phase 13: AI consultation
 
-- [ ] Tables: conversations, conversation_messages, conversation_context, ai_tool_calls, ai_model_versions
-- [ ] Provider wrapper (Claude first, swappable)
-- [ ] Chat interface (web)
-- [ ] Intent detection
-- [ ] Business-context retrieval
-- [ ] Grounded tools: health, KPI, trend, diagnosis, forecast, recommendations, actions, outcomes
-- [ ] Answers only from tool outputs (never question → LLM → guess)
-- [ ] Conversation history
-- [ ] Role-based response shaping
-- [ ] Respect per-organisation AI/data-use controls
+Design (step 1): **the assistant answers from the business's own results, never from a model's memory.** A question goes through the same steps every time: (1) the business must allow it (the owner can switch the assistant off); (2) the question is **understood by fixed rules** (`app/ai/intents.py`): what kind of answer is wanted (health, a figure, a trend, why it changed, a forecast, what to do, actions, outcomes, what is normal, a greeting or help), which figure, and which month, using what the conversation was just about for a follow-up like "and why?"; a question it does not understand stays **unknown and is answered with an honest "I do not know"**, never passed to a model to guess; (3) the **tools** (`app/services/assistant_tools.py`) look the answer up in the part of the system that worked it out (KPIs, business health, detected changes and their explanations, forecasts, recommendations, actions, outcomes, memory) and write down what they found as short plain-English facts with the figures already in them; a tool never works out a figure that is not already stored, and says so when there is nothing to report; (4) the **plain answer is built from those facts and nothing else**; (5) only if the owner has allowed it **and** an outside provider is set up, the question and that short list of facts (never the records, never the user's details) are sent to Claude to be reworded, and the wording is **kept only if every figure in it is one of the facts**, with no links and not too long, otherwise the plain answer is used; (6) the answer is stored with where each part came from and **every look-up made**, which engine and version wrote it, and whether anything was sent outside. What is shown depends on who asks: only people who can act on an area see the steps and names of the work in it; a manager outside the area is told to ask the owner. A conversation belongs to the person who had it. The owner's controls (all off or safe by default): switch the assistant off, allow outside AI to reword answers (off), allow conversations to improve models (off, stored only: nothing uses it). Every change to the controls, and every time facts are sent outside, is in the audit log. The Claude key is read only from the environment (`VYTERLIX_AI_PROVIDER=anthropic`, `VYTERLIX_ANTHROPIC_API_KEY`) and never stored or shown.
+
+- [x] Tables: conversations, conversation_messages, conversation_context, ai_tool_calls, ai_model_versions (and ai_settings for the business's controls)
+- [x] Provider wrapper (Claude first, swappable): `app/ai/provider.py`; tested against a fake transport, **not yet against the real Claude service** (needs an API key from Dolaris)
+- [x] Chat interface (web): Ask Vyterlix
+- [x] Intent detection (rules)
+- [x] Business-context retrieval (the conversation's context: the figure, month and change it was last about)
+- [x] Grounded tools: health, KPI, trend, diagnosis, forecast, recommendations, actions, outcomes (and what is normal)
+- [x] Answers only from tool outputs (never question → LLM → guess): a test checks the tools cannot reach a provider and that nothing that works out a figure imports the AI code
+- [x] Conversation history
+- [x] Role-based response shaping
+- [x] Respect per-organisation AI/data-use controls
+- [x] Rule enforced: LLM never produces the forecast number, the ranking or the diagnosis (checked by a test of the source of every service that works one out)
 
 ## Phase 14: Alerts + notifications
 
@@ -575,6 +578,8 @@ weeks, Europe/London, en-GB wording.
 | **Actions are only emailed about when their follow-up is due or a result is in:** overdue and due-soon work shows on the Actions page but nobody is emailed about it, nothing appears in the app or on a phone, and evidence cannot be removed once attached | Needs the notification centre (Phase 14); removal needs a rule on who may delete evidence | Phase 14 |
 | **Outcomes compare one month with one month** and say nothing about other things that changed at the same time (a price rise, a new shop nearby); the 80% / 30% lines and the 60 data-quality limit are Vyterlix's own starting values | Longer windows, several months and comparison with similar businesses once there is data to calibrate on | Phase 12 |
 | **Similar cases means the same figure only:** it does not yet look at the same cause, the same product or day, or other businesses; and no staff or budget amounts are asked for (only levels of cost and effort) | Match on cause and target; real budget and hours once the owner has told us | Phase 13-14 |
+| **The assistant answers one question about one figure at a time** and understands a fixed set of phrasings; there is no rate limit on questions, no streaming, no voice, and no way to ask for work to be done (it only reads) | Wider phrasing and multi-part questions; a limit per person; actions from chat | Phase 13 next steps |
+| **The outside provider (Claude) has not been tried against the real service:** only against a pretend one | Needs an Anthropic API key and a documented purpose and subprocessor entry before any real data is sent | L1 |
 | **Customer patterns are three simple ones**, not segments or buying habits over time | More patterns once customers are segmented | Later |
 | **The share of a gap each action wins back is Vyterlix's own starting estimate**, the same for every business; track record is neutral and the owner's budget and staffing are unknown | Replace with measured outcomes (Phase 11) and remembered constraints (Phase 12) | Phase 11-12 |
 | **Detection thresholds (15% / 30%, 3 / 8 points) are Vyterlix's own starting values**, the same for every business and sector | Tune per sector once real benchmarks and real customer data exist | When real data is available |

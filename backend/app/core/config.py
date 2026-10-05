@@ -3,7 +3,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import model_validator
+from pydantic import SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Known, public value: fine for local dev and tests, refused in staging/prod.
@@ -55,6 +55,12 @@ class Settings(BaseSettings):
     # this key. To rotate: put the new key first and keep the old ones in `previous_...`; every
     # token is re-encrypted with the new key the next time it is saved.
     encryption_key: str = DEV_ENCRYPTION_KEY
+    # The AI assistant answers from the business's own results with fixed rules. An outside provider
+    # (Claude) may only reword those answers, and only for a business whose owner has allowed it.
+    ai_provider: Literal["offline", "anthropic"] = "offline"
+    anthropic_api_key: SecretStr | None = None  # only ever from the environment, never stored
+    anthropic_model: str = "claude-sonnet-5-5"
+    ai_timeout_seconds: float = 20.0
     previous_encryption_keys: list[str] = []
     oauth_state_ttl_minutes: int = 10  # how long a "connect" attempt stays valid
     token_refresh_margin_seconds: int = 120  # refresh access tokens this long before they expire

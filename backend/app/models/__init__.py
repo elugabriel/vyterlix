@@ -7,6 +7,7 @@ from app.db import tenant  # noqa: F401  (registers tenant-isolation session hoo
 from app.db.base import Base
 from app.models import (
     actions,
+    assistant,
     business,
     data,
     diagnostics,
@@ -25,6 +26,7 @@ from app.models import (
 __all__ = [
     "Base",
     "actions",
+    "assistant",
     "business",
     "data",
     "diagnostics",
