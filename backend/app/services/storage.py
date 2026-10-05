@@ -22,7 +22,12 @@ from app.models.imports import FILE_SUFFIXES
 
 CHUNK_BYTES = 1024 * 1024
 _UUID = r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-_KEY = re.compile(rf"^{_UUID}/{_UUID}\.(csv|xlsx)$")
+EVIDENCE_SUFFIXES = ("png", "jpg", "jpeg", "pdf", "txt", "csv", "xlsx", "docx")
+# An upload is `{business}/{import}.csv|xlsx`; a file attached to an action is
+# `{business}/evidence/{evidence}.{png|jpg|jpeg|pdf|txt|csv|xlsx|docx}`.
+_KEY = re.compile(
+    rf"^{_UUID}/(?:{_UUID}\.(?:csv|xlsx)|evidence/{_UUID}\.(?:{'|'.join(EVIDENCE_SUFFIXES)}))$"
+)
 
 
 class InvalidStorageKeyError(ValueError):
@@ -45,6 +50,11 @@ class StoredFile:
 def storage_key(organization_id: uuid.UUID, import_id: uuid.UUID, source: str) -> str:
     """`{organization_id}/{import_id}.csv|.xlsx`: one folder per business."""
     return check_key(f"{organization_id}/{import_id}{FILE_SUFFIXES[source]}")
+
+
+def evidence_key(organization_id: uuid.UUID, evidence_id: uuid.UUID, suffix: str) -> str:
+    """`{business}/evidence/{evidence}.{suffix}`: a file attached to an action."""
+    return check_key(f"{organization_id}/evidence/{evidence_id}.{suffix}")
 
 
 def check_key(key: str) -> str:

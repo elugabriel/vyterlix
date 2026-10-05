@@ -3,13 +3,15 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends
 
-from app.api.deps import DB, Tenant, require_permission
+from app.api.deps import DB, Meta, Tenant, require_permission
 from app.core.permissions import Perm
+from app.schemas.actions import AcceptIn, ActionOut, DismissIn
 from app.schemas.recommendations import (
     InterventionOut,
     RecommendationOut,
     RecommendationSummaryOut,
 )
+from app.services import actions as action_service
 from app.services.recommendations import generate, interventions, list_recommendations, read
 
 router = APIRouter(prefix="/organizations/{organization_id}", tags=["recommendations"])
@@ -29,7 +31,10 @@ def library(tenant: Viewer, db: DB):
 def recommendations(
     tenant: Viewer,
     db: DB,
-    status: Literal["open", "no_action_needed", "insufficient_evidence", "dismissed"] | None = None,
+    status: Literal[
+        "open", "no_action_needed", "insufficient_evidence", "dismissed", "proposed", "accepted"
+    ]
+    | None = None,
 ):
     """Every recommendation made, newest first."""
     return list_recommendations(db, status)
@@ -47,3 +52,19 @@ def recommend(event_id: uuid.UUID, tenant: Decider, db: DB):
     """Work out what to do about this change (explaining it first if that has not been done).
     Safe to run again: the recommendation and its options are replaced."""
     return generate(db, tenant, event_id)
+
+
+@router.post("/changes/{event_id}/recommendation/accept", response_model=ActionOut)
+def accept(event_id: uuid.UUID, tenant: Decider, db: DB, meta: Meta, body: AcceptIn | None = None):
+    """Accept a recommended option and turn it into an action: with an owner, dates and steps,
+    changed first if you want. Outside your own area you can only propose it, and it waits for
+    approval. Send nothing to take the recommended option as it was suggested."""
+    return action_service.accept(db, tenant, event_id, body or AcceptIn(), meta)
+
+
+@router.post("/changes/{event_id}/recommendation/dismiss", status_code=204)
+def dismiss(
+    event_id: uuid.UUID, tenant: Decider, db: DB, meta: Meta, body: DismissIn | None = None
+):
+    """Decide not to act on a recommendation. It stays on record, with the reason."""
+    action_service.dismiss(db, tenant, event_id, body or DismissIn(), meta)

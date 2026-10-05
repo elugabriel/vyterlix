@@ -18,6 +18,10 @@ MULTIPART_OVERHEAD_BYTES = 1024 * 1024
 _UPLOAD_PATH = re.compile(r"^/api/v1/organizations/[^/]+/imports/?$")
 
 
+_EVIDENCE_PATH = re.compile(r"^/api/v1/organizations/[^/]+/actions/[^/]+/evidence/file/?$")
+EVIDENCE_LIMIT_BYTES = 5 * 1024 * 1024
+
+
 class BodyTooLargeError(AppError):
     status_code = 413
     code = "request_too_large"
@@ -33,6 +37,12 @@ class BodySizeLimitMiddleware:
         """(bytes refused above, bytes named in the message, error code)."""
         if scope["method"] == "POST" and _UPLOAD_PATH.match(scope["path"]):
             return self.upload_limit, self.upload_max, "file_too_large"
+        if scope["method"] == "POST" and _EVIDENCE_PATH.match(scope["path"]):
+            return (
+                EVIDENCE_LIMIT_BYTES + MULTIPART_OVERHEAD_BYTES,
+                EVIDENCE_LIMIT_BYTES,
+                "file_too_large",
+            )
         return JSON_LIMIT_BYTES, JSON_LIMIT_BYTES, "request_too_large"
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:

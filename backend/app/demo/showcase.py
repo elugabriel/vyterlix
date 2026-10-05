@@ -37,6 +37,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.errors import NotFoundError
+from app.core.permissions import KpiCategory
 from app.core.security import hash_password
 from app.db.session import get_sessionmaker
 from app.db.tenant import ACROSS_TENANTS, tenant_scope
@@ -496,7 +497,9 @@ def _stock(api: Api, org_id: uuid.UUID, say: Callable[[str], None]) -> None:
 # --- working everything out ----------------------------------------------------------------------------------------
 
 
-def _analytics(api: Api, db: Session, org_id: uuid.UUID, say: Callable[[str], None]) -> None:
+def _analytics(
+    api: Api, db: Session, org_id: uuid.UUID, manager_password: str, say: Callable[[str], None]
+) -> None:
     from app.services import detection, forecast, health, kpi
     from app.services.jobs import JobTenant
 
@@ -526,8 +529,149 @@ def _analytics(api: Api, db: Session, org_id: uuid.UUID, say: Callable[[str], No
         api.call("POST", f"{base}/changes/{event['id']}/diagnosis")
     # And what to do about the bad news among them
     bad = [e for e in events if e["effect"] == "bad" and e["kind"] == "material_change"]
-    for event in bad[:14]:
+    for event in bad:
+        if event["status"] != "diagnosed" and event not in chosen:
+            api.call("POST", f"{base}/changes/{event['id']}/diagnosis")
         api.call("POST", f"{base}/changes/{event['id']}/recommendation")
+    _actions(api, db, org_id, bad, manager_password, say)
+
+
+def _actions(
+    api: Api,
+    db: Session,
+    org_id: uuid.UUID,
+    events: list[dict],
+    manager_password: str,
+    say: Callable[[str], None],
+) -> None:
+    """Take up some of the recommendations, leaving the actions in every state."""
+    from datetime import timedelta
+
+    from app.core.uk import today_uk
+
+    say("  actions in every state, with notes and evidence")
+    base = f"/organizations/{org_id}"
+    today = today_uk()
+    plans = ("in_progress", "completed", "overdue", "pending", "partial", "accepted", "cancelled")
+    if api.call("GET", f"{base}/actions"):
+        return  # already set up on an earlier run
+    # Only the recommendations that have something to accept
+    events = [
+        e
+        for e in events
+        if api.call("GET", f"{base}/changes/{e['id']}/recommendation")["status"] == "open"
+    ]
+    made: dict[str, dict] = {}
+    proposed = None
+    # The last open recommendation is left alone, so there is one to accept by hand
+    for plan, event in zip(plans, events[:-1], strict=False):
+        if plan == "pending":
+            proposed = event
+            continue
+        body: dict = {}
+        if plan == "overdue":
+            body = {
+                "start_date": str(today - timedelta(days=40)),
+                "target_date": str(today - timedelta(days=6)),
+            }
+        elif plan == "in_progress":
+            body = {"note": "Agreed at the Monday meeting."}
+        made[plan] = api.call(
+            "POST", f"{base}/changes/{event['id']}/recommendation/accept", json=body
+        )
+    mine = f"{base}/actions"
+
+    def post(plan: str, path: str, payload: dict) -> dict:
+        return api.call("POST", f"{mine}/{made[plan]['id']}{path}", json=payload)
+
+    def tick(plan: str, count: int) -> None:
+        steps = [{"text": s["text"], "done": i < count} for i, s in enumerate(made[plan]["steps"])]
+        api.call("PATCH", f"{mine}/{made[plan]['id']}", json={"steps": steps})
+
+    if "in_progress" in made:
+        post("in_progress", "/status", {"status": "in_progress", "note": "Started this week."})
+        tick("in_progress", 1)
+        post("in_progress", "/notes", {"note": "Spoke to two regular customers; both were keen."})
+        post(
+            "in_progress",
+            "/evidence",
+            {
+                "kind": "note",
+                "title": "Customer feedback",
+                "note": "Regulars asked for the new offer to run on weekends too.",
+            },
+        )
+    if "completed" in made:
+        post("completed", "/status", {"status": "in_progress"})
+        tick("completed", len(made["completed"]["steps"]))
+        post(
+            "completed",
+            "/evidence",
+            {
+                "kind": "link",
+                "title": "Our announcement",
+                "url": "https://fakeham-bakery.example/news/offer",
+            },
+        )
+        api.call(
+            "POST",
+            f"{mine}/{made['completed']['id']}/evidence/file",
+            files={
+                "file": (
+                    "results.txt",
+                    io.BytesIO(b"Week 1: sales up. Week 2: sales up again."),
+                    "text/plain",
+                )
+            },
+            data={"title": "Weekly results"},
+        )
+        post("completed", "/status", {"status": "completed", "note": "All done and working well."})
+    if "partial" in made:
+        post(
+            "partial",
+            "/status",
+            {
+                "status": "partially_completed",
+                "note": "Two of the steps are done; waiting on the supplier.",
+            },
+        )
+        tick("partial", 2)
+    if "cancelled" in made:
+        post("cancelled", "/status", {"status": "cancelled", "note": "Not the right time of year."})
+    api.call("GET", mine)  # marks the late one overdue
+    if proposed is not None:
+        _proposal(api, db, org_id, proposed, manager_password)
+
+
+def _proposal(api, db, org_id, event, manager_password) -> None:
+    """The manager suggests something outside their own area, so it waits for the owner."""
+    others = [c.value for c in KpiCategory if c.value != event["category"]]
+    manager_email = TEAM[0][1]
+    with tenant_scope(db, org_id):
+        member = db.scalars(
+            select(OrganizationUser)
+            .join(User, User.id == OrganizationUser.user_id)
+            .where(User.email == manager_email)
+        ).one()
+        was = member.scope
+        member.scope = {"kpi_categories": others}
+    db.commit()
+    try:
+        manager = Api(api.client, manager_email, manager_password)
+        manager.call(
+            "POST",
+            f"/organizations/{org_id}/changes/{event['id']}/recommendation/accept",
+            json={"note": "Worth trying, but it is outside my area."},
+        )
+    finally:
+        with tenant_scope(db, org_id):
+            member = db.scalars(
+                select(OrganizationUser)
+                .join(User, User.id == OrganizationUser.user_id)
+                .where(User.email == manager_email)
+            ).one()
+            member.scope = was
+        db.commit()
 
 
 # --- the whole thing ------------------------------------------------------------------------------------------------
@@ -563,7 +707,7 @@ def run(
         with sessions() as db:
             _run_waiting_jobs(db, say)
         with sessions() as db:
-            _analytics(owner, db, org_id, say)
+            _analytics(owner, db, org_id, passwords["manager"], say)
     say(f"Done. Logins are in {LOGINS_FILE.name} (not committed).")
 
 

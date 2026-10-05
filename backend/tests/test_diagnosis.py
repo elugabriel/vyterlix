@@ -305,18 +305,6 @@ def test_the_confidence_says_how_it_was_reached():
 # --- whole diagnoses on a shop worked out by hand --------------------------------------------
 
 
-@pytest.fixture
-def march(db, bakery):
-    """The bakery's February and March worked out by the KPI engine, and the changes detected."""
-    with scoped(db, bakery):
-        tenant = owner_tenant(db, bakery)
-        kpi.calculate(
-            db, tenant, granularity="month", first=date(2026, 2, 1), last=date(2026, 3, 1)
-        )
-        detection.detect(db, tenant)
-    return bakery
-
-
 def event_for(api, business, code, kind="material_change", month="2026-03-01", who="owner", org=0):
     res = api.get(
         f"{ORGS}/{business[org]}/changes?month={month}&kind={kind}&limit=500",

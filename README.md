@@ -150,6 +150,7 @@ Open http://localhost:5500 — you'll land on the login page. Pages:
 | `entry.html?org=…` | Type in a sale, expense, customer, supplier, product or stock change |
 | `health.html?org=…` | Business health: one score, why, and the figures behind each area, month by month |
 | `forecast.html?org=…` | Forecast: sales, customer demand and customers coming back for the next months with a range around each, how it was worked out, how accurate past forecasts were, and what to stock |
+| `actions.html?org=…` | Actions: the work decided on after a change, who is doing it and by when, steps, status, notes, evidence files, and anything waiting for the owner to approve |
 | `changes.html?org=…` | What changed: the figures that moved by more than normal, newest month first, good or bad news, where each came from, why it happened (with the evidence and how sure we are), and what to do about it |
 | `kpis.html?org=…` | Key figures: sales, profit, margins and more, each with its change since last month (the owner can recalculate; needs the worker) |
 | `connections.html?org=…` | Connect another system (shows what will be read first), update it, disconnect (needs the worker). Only a practice "Sandbox" provider exists until the real connectors are built |

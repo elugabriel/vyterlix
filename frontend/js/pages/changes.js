@@ -5,6 +5,7 @@
 
 import { ApiError } from "../api.js";
 import { api } from "../auth.js";
+import { acceptForm, loadPeople } from "../actions.js";
 import { openBusiness } from "../business.js";
 import { guard, table } from "../data.js";
 import { el } from "../dom.js";
@@ -33,6 +34,8 @@ let segmentBase = "";
 let driversBase = "";
 let splittable = {};
 let canExplain = false;
+let me = null;
+let people = [];
 
 const CONFIDENCE_TEXT = { high: "High confidence", medium: "Medium confidence", low: "Low confidence", insufficient: "Not enough evidence" };
 const CONFIDENCE_CLASS = { high: "health-healthy", medium: "health-fair", low: "health-needs_attention", insufficient: "health-not_enough_data" };
@@ -45,8 +48,10 @@ const EVIDENCE_GROUPS = [
   ["insufficient", "What we can't tell"],
 ];
 
-async function start({ org }) {
+async function start({ user, org }) {
   orgId = org.id;
+  me = user;
+  if (org.role === "owner" || org.role === "manager") people = await loadPeople(org.id, user);
   canExplain = org.role === "owner" || org.role === "manager";
   base = `/organizations/${orgId}/changes`;
   segmentBase = `/organizations/${orgId}/segments`;
@@ -226,12 +231,15 @@ const COST_TEXT = { none: "No cost", low: "Low cost", medium: "Moderate cost", h
 const RECOMMENDATION_NOTICE = {
   no_action_needed: "This is good news, so there is nothing to put right.",
   insufficient_evidence: "We cannot say what to do yet, because we cannot say why this happened.",
+  dismissed: "You decided this is not for you.",
+  accepted: "You have taken this up. Follow it on the Actions page.",
+  proposed: "This has been suggested as an action and is waiting for the owner to approve it.",
 };
 
 function recommendationPanel(event) {
   const result = el("div", { class: "stack" });
   const panel = el("details", { class: "recommendation" }, el("summary", {}, "What should I do about it?"), result);
-  const show = (recommendation) => result.replaceChildren(recommendationView(recommendation, make));
+  const show = (recommendation) => result.replaceChildren(recommendationView(recommendation, make, event, show));
   async function make() {
     const recommendation = await guard(message, () => api.post(`${base}/${event.id}/recommendation`));
     if (recommendation) show(recommendation);
@@ -280,7 +288,39 @@ function scoreTable(option) {
   );
 }
 
-function recommendationView(recommendation, again) {
+function decide(recommendation, event, show) {
+  const area = el("div", { class: "stack" });
+  const finish = async (action) => {
+    if (action) {
+      area.replaceChildren(
+        el("p", { class: "status-ok" }, action.status === "pending" ? "Suggested. The owner needs to approve it before it starts." : "Accepted. It is now on your Actions page."),
+        el("a", { href: `actions.html?org=${orgId}#${action.id}` }, "Open the action"),
+      );
+    }
+  };
+  const choose = (option) =>
+    area.replaceChildren(
+      acceptForm(option, people, me, {
+        onCancel: () => area.replaceChildren(buttons),
+        onAccept: async (body) => finish(await guard(message, () => api.post(`${base}/${event.id}/recommendation/accept`, body))),
+      }),
+    );
+  const chooser = select("option", recommendation.options.map((o) => [o.id, `${o.rank}. ${o.title}`]), { selected: recommendation.options[0].id });
+  const buttons = el(
+    "div",
+    { class: "actions" },
+    el("button", { type: "button", onclick: () => choose(recommendation.options.find((o) => o.id === chooser.value)) }, "Accept and set it up"),
+    chooser,
+    el("button", { type: "button", class: "secondary", onclick: async () => {
+      const done = await guard(message, async () => (await api.post(`${base}/${event.id}/recommendation/dismiss`, {}), true));
+      if (done) show({ ...recommendation, status: "dismissed" });
+    } }, "Not for me"),
+  );
+  area.append(buttons);
+  return area;
+}
+
+function recommendationView(recommendation, again, event, show) {
   const [best, ...others] = recommendation.options;
   const groups = EVIDENCE_GROUPS.map(([type, title]) => [title, recommendation.evidence.filter((e) => e.evidence_type === type)]).filter(([, items]) => items.length);
   return el(
@@ -296,6 +336,7 @@ function recommendationView(recommendation, again) {
           el("p", {}, el("strong", {}, "Why this one. "), recommendation.rationale),
         )
       : el("p", {}, recommendation.rationale),
+    best && recommendation.status === "open" && canExplain ? decide(recommendation, event, show) : null,
     best ? el("details", {}, el("summary", {}, `How it scored (${best.total_score} out of 100)`), scoreTable(best)) : null,
     others.length
       ? el(

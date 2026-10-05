@@ -17,10 +17,9 @@ from app.models.recommendations import (
     RecommendationOption,
 )
 from app.recommend import rules
-from app.services import detection, kpi
 from app.services import recommendations as service
 from tests.test_detection import Values, run
-from tests.test_health import ORGS, owner_tenant, scoped
+from tests.test_health import ORGS, scoped
 
 D = Decimal
 
@@ -368,18 +367,6 @@ def test_effort_and_cost_are_said_in_plain_words():
 
 
 # --- whole recommendations --------------------------------------------------------------------
-
-
-@pytest.fixture
-def march(db, bakery):
-    """The bakery's February and March worked out by the KPI engine, and the changes detected."""
-    with scoped(db, bakery):
-        tenant = owner_tenant(db, bakery)
-        kpi.calculate(
-            db, tenant, granularity="month", first=date(2026, 2, 1), last=date(2026, 3, 1)
-        )
-        detection.detect(db, tenant)
-    return bakery
 
 
 def event_for(api, business, code, kind="material_change", month="2026-03-01", who="owner", org=0):

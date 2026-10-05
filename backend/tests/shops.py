@@ -11,7 +11,8 @@ import pytest
 
 from app.models.business import BusinessListItem
 from app.models.data import Customer, Expense, Product, Sale, SaleLine, Supplier
-from tests.test_health import scoped
+from app.services import detection, kpi
+from tests.test_health import owner_tenant, scoped
 
 D = Decimal
 
@@ -118,3 +119,15 @@ def costs(db, business):
     e(date(2026, 3, 8), 600, category=stock, supplier=miller)
     e(date(2026, 3, 9), 50)
     return business
+
+
+@pytest.fixture
+def march(db, bakery):
+    """The bakery's February and March worked out by the KPI engine, and the changes detected."""
+    with scoped(db, bakery):
+        tenant = owner_tenant(db, bakery)
+        kpi.calculate(
+            db, tenant, granularity="month", first=date(2026, 2, 1), last=date(2026, 3, 1)
+        )
+        detection.detect(db, tenant)
+    return bakery

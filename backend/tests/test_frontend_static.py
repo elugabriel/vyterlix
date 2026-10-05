@@ -94,7 +94,18 @@ def test_every_api_method_the_pages_call_exists():
 
 @pytest.mark.parametrize(
     "name",
-    ["data", "imports", "import", "entry", "connections", "kpis", "health", "changes", "forecast"],
+    [
+        "data",
+        "imports",
+        "import",
+        "entry",
+        "connections",
+        "kpis",
+        "health",
+        "changes",
+        "forecast",
+        "actions",
+    ],
 )
 def test_data_pages_start_last_so_their_constants_are_ready(name):
     """A top-level `await start()` before later `const`s run makes a reload crash with

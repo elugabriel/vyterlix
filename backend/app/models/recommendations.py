@@ -45,7 +45,14 @@ from app.models.kpi import KPI_CATEGORIES
 
 LEVELS = ("low", "medium", "high")
 COST_LEVELS = ("none", "low", "medium", "high")
-RECOMMENDATION_STATUSES = ("open", "no_action_needed", "insufficient_evidence", "dismissed")
+RECOMMENDATION_STATUSES = (
+    "open",
+    "no_action_needed",
+    "insufficient_evidence",
+    "dismissed",  # the owner decided not to act
+    "proposed",  # someone outside their remit put it forward; waiting for approval
+    "accepted",  # being done: see the action
+)
 
 
 class Intervention(UUIDPrimaryKeyMixin, TimestampMixin, Base):

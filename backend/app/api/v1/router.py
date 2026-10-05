@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1 import (
+    actions,
     audit,
     auth,
     benchmarks,
@@ -55,6 +56,7 @@ api_router.include_router(detections.router)
 api_router.include_router(drivers.router)
 api_router.include_router(forecasts.router)
 api_router.include_router(recommendations.router)
+api_router.include_router(actions.router)
 api_router.include_router(segments.router)
 api_router.include_router(trading.sales_router)
 api_router.include_router(trading.expenses_router)

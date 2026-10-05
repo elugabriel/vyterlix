@@ -52,7 +52,9 @@ class OptionOut(BaseModel):
 class RecommendationOut(BaseModel):
     id: uuid.UUID
     event: DetectionOut
-    status: Literal["open", "no_action_needed", "insufficient_evidence", "dismissed"]
+    status: Literal[
+        "open", "no_action_needed", "insufficient_evidence", "dismissed", "proposed", "accepted"
+    ]
     headline: str
     rationale: str  # why this one
     rules_version: str
@@ -66,7 +68,9 @@ class RecommendationSummaryOut(BaseModel):
     event_id: uuid.UUID
     kpi_name: str
     period_start: date
-    status: Literal["open", "no_action_needed", "insufficient_evidence", "dismissed"]
+    status: Literal[
+        "open", "no_action_needed", "insufficient_evidence", "dismissed", "proposed", "accepted"
+    ]
     headline: str
     recommended: str | None  # the title of the top option
     score: int | None

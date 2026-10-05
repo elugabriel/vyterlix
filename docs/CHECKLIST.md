@@ -23,7 +23,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 7 | Diagnostic engine | **Done apart from the parked items: anomalies, segments (product, channel, customer, day, cost), drivers, evidence and diagnoses with confidence, and the What changed page with the explanation screen** |
 | 8 | Forecasting engine | **Steps 1-3 done (swappable methods, ranges on every month, accuracy tracking, the forecast page, demand, retention and what-to-stock forecasts); cash flow waits for Xero** |
 | 9 | Recommendation engine | **Step 1 done (library, options from a diagnosis and the owner's goals, scoring and ranking, why-this-one, the screen); forecast, history and constraints as inputs come with Phases 11-12** |
-| 10 | Action management | Not started |
+| 10 | Action management | **Step 1 done (accept a recommendation, change it first, give it to someone, dates, steps, statuses, notes, evidence files, approval of a manager's suggestion, overdue detection, the Actions screen)** |
 | 11 | Follow-up + outcome measurement | Not started |
 | ⚑ | Vertical slice proof | Not started |
 | 12 | Business memory / learning | Not started |
@@ -271,16 +271,20 @@ Design (step 1): a recommendation answers "what should I do about this?" for one
 
 ## Phase 10: Action management
 
-- [ ] Tables: actions, action_updates, action_evidence, interventions
-- [ ] Accept recommendation → intervention
-- [ ] Modify before accepting
-- [ ] Assign owner
-- [ ] Start / target dates
-- [ ] Statuses: PENDING, ACCEPTED, IN_PROGRESS, PARTIALLY_COMPLETED, COMPLETED, CANCELLED, OVERDUE
-- [ ] Notes
-- [ ] Evidence attachments
-- [ ] Mark complete
-- [ ] Overdue detection
+Design (step 1): taking up a recommended option creates an **intervention** (a frozen copy of what was decided: the option, its score, the figure it is meant to change and what that figure was) and an **action** (the work: title, steps, owner, start and finish dates, status). Before accepting, the title, details and steps can be changed (the original is kept and the history says it was changed), the work can be given to anyone in the business, and the dates can be set (the finish date defaults to when the action usually starts to show). The owner accepts outright; a manager accepts outright inside their own area, but **outside it can only propose**: the action waits as "Waiting for approval" and the owner approves or turns it down (turning it down reopens the recommendation). "Not for me" turns a recommendation down and keeps it on record. An action moves accepted → in progress → partly done → done, or is cancelled (done and cancelled are final); overdue is **never chosen by a person**: the system marks open work overdue the day after its finish date (on every list, and after every figures calculation) and clears it when the date is moved on. Every change is written to the action's history (who, when, what), steps are ticked off with a progress count, and evidence (a note, a web link, or a picture/pdf/text/csv/xlsx/docx file up to 5 MB, always downloaded and never shown in the page) can be attached.
+
+- [x] Tables: actions, action_updates, action_evidence, interventions
+- [x] Accept recommendation → intervention
+- [x] Modify before accepting
+- [x] Assign owner
+- [x] Start / target dates
+- [x] Statuses: PENDING, ACCEPTED, IN_PROGRESS, PARTIALLY_COMPLETED, COMPLETED, CANCELLED, OVERDUE
+- [x] Notes
+- [x] Evidence attachments
+- [x] Mark complete
+- [x] Overdue detection
+- [x] Approval of a manager's suggestion outside their area
+- [x] Screen: Actions page (list with filters, one action with history, steps, controls and evidence) and Accept / "Not for me" on the What changed page
 
 ## Phase 11: Follow-up + outcome measurement
 
@@ -558,6 +562,7 @@ weeks, Europe/London, en-GB wording.
 | **Forecasts are plain statistical methods on a figure's own history:** no promotions, price changes, stock-outs or outside events. Cash flow needs bank or accounting data (the Xero connector). The what-to-stock answer is not saved, so its accuracy is not tracked, and it treats the whole of the current month's sales as still to come | More methods and drivers; save and score stock forecasts; cash flow once Xero is connected | Phase 8 later steps / Phase 4 connectors |
 | **Forecast needs 6 finished months, and a seasonal method needs 18** (a year to repeat plus months to test it on): a new business gets a wide, plain forecast | Improves as history builds; the owner's confirmed seasons help meanwhile | Ongoing |
 | **Recommendations answer only changes the diagnosis can break down (sales, number of sales, items sold, gross profit, running costs), and the library has 10 actions:** no recommendation yet for margins or customer figures, or for a stock shortage found by the stock forecast | More actions and more figures as drivers are added | Phase 9 next steps |
+| **Actions send no reminders:** overdue and due-soon work shows on the Actions page but nobody is emailed or notified, and evidence cannot be removed once attached | Needs the notification channel and scheduler; removal needs a rule on who may delete evidence | Phase 11 |
 | **The share of a gap each action wins back is Vyterlix's own starting estimate**, the same for every business; track record is neutral and the owner's budget and staffing are unknown | Replace with measured outcomes (Phase 11) and remembered constraints (Phase 12) | Phase 11-12 |
 | **Detection thresholds (15% / 30%, 3 / 8 points) are Vyterlix's own starting values**, the same for every business and sector | Tune per sector once real benchmarks and real customer data exist | When real data is available |
 | **Data-quality extras:** unusual amounts (a sale far above normal), unusual days (a quiet day inside a busy month), per-product stock-out gaps, and scoring per connected system once connectors exist | Needs enough real history to know what is "unusual"; false alarms would erode trust | Phase 5 (KPI engine) / Part B |

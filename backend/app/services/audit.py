@@ -69,6 +69,15 @@ class AuditAction(StrEnum):
     INTEGRATION_CONNECTED = "integration.connected"
     INTEGRATION_DISCONNECTED = "integration.disconnected"
     INTEGRATION_REAUTH_NEEDED = "integration.reauth_needed"
+    # Recommendations and the work they lead to
+    RECOMMENDATION_DISMISSED = "recommendation.dismissed"
+    ACTION_ACCEPTED = "action.accepted"
+    ACTION_PROPOSED = "action.proposed"
+    ACTION_APPROVED = "action.approved"
+    ACTION_REJECTED = "action.rejected"
+    ACTION_UPDATED = "action.updated"
+    ACTION_STATUS_CHANGED = "action.status_changed"
+    ACTION_EVIDENCE_ADDED = "action.evidence_added"
 
 
 def record_audit(

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from app.core.errors import ConflictError
 from app.core.permissions import Perm
-from app.services import detection, forecast, health, kpi
+from app.services import actions, detection, forecast, health, kpi
 from app.services.import_runner import run_import, undo_import
 from app.services.import_validation import validate_import
 from app.services.integrations import run_sync
@@ -96,4 +96,10 @@ def calculate_kpis(ctx: JobContext) -> BaseModel:
     except Exception:
         ctx.db.rollback()
         logger.error("Could not forecast the figures", exc_info=True)
+    # Work that has run past its date is marked overdue.
+    try:
+        actions.refresh_overdue(ctx.db, ctx.tenant)
+    except Exception:
+        ctx.db.rollback()
+        logger.error("Could not check for overdue actions", exc_info=True)
     return run
