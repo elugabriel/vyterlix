@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from app.core.errors import NotFoundError
 from app.diagnostics import evidence as diagnosis_evidence
 from app.integrations.base import utcnow
+from app.memory import rules as memory_rules
 from app.models.actions import BusinessIntervention
 from app.models.diagnostics import DetectionEvent, Diagnosis
 from app.models.kpi import KpiDefinition
@@ -38,7 +39,7 @@ from app.schemas.recommendations import (
     ScoreLineOut,
 )
 from app.services import diagnosis as diagnosis_service
-from app.services import track_record
+from app.services import memory, track_record
 from app.services.detection import get_event
 from app.services.goals import list_goals
 
@@ -89,6 +90,54 @@ def _tried(db: Session, event_id: uuid.UUID) -> set[tuple[str | None, str | None
     return {(code, target) for code, target in rows}
 
 
+def _history(recalled, record: dict, code: str) -> int:
+    """An action's track record score: its record on this figure, else in the business."""
+    score = recalled.history(code, record)
+    return rules.NEUTRAL_HISTORY if score is None else score
+
+
+def _remembered(recalled, record, candidates, left_out, kpi_name):
+    """What memory added to this recommendation: as evidence lines, and as the record of use."""
+    items: list[diagnosis_evidence.Item] = []
+    used: list[dict] = []
+    names = {c.action.code: c.action.name for c, _ in left_out} | {
+        c.action.code: c.action.name for c in candidates
+    }
+    seen = set()
+    for c, why in left_out:
+        if c.action.code in seen:
+            continue
+        seen.add(c.action.code)
+        text = f'"{c.action.name}" was left out because {why}.'
+        items.append(
+            diagnosis_evidence.Item("fact", text, {"reason": "your_limits", "code": c.action.code})
+        )
+        used.append({"kind": "limit", "statement": text})
+    for code, here in sorted(recalled.records.items()):
+        if here.decided and code in names:
+            text = (
+                f'On {kpi_name}, "{names[code]}" has been tried {here.decided} '
+                f"time{'s' if here.decided != 1 else ''} in your business: "
+                f"{here.successful} worked, {here.partially_successful} partly worked and "
+                f"{here.unsuccessful} did not."
+            )
+            items.append(diagnosis_evidence.Item("fact", text, {"reason": "pattern", "code": code}))
+            used.append({"kind": "pattern", "statement": text})
+    for case in recalled.cases:
+        text = f"Last time: {case.lesson}"
+        items.append(
+            diagnosis_evidence.Item(
+                "fact", text, {"reason": "similar_case", "outcome": case.outcome}
+            )
+        )
+        used.append({"kind": "case", "statement": text})
+    if recalled.constraints.any:
+        used.append(
+            {"kind": "limits", "statement": "Your limits on cost, effort and speed were applied."}
+        )
+    return items, used
+
+
 def _findings(drivers: dict | None) -> list[rules.Finding]:
     if not drivers:
         return []
@@ -131,6 +180,8 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
     unit = kpi.unit if not drivers else drivers["unit"]
     scored: list[rules.Scored] = []
     record: dict[str, track_record.Record] = {}
+    remembered: list[diagnosis_evidence.Item] = []  # what memory added to this recommendation
+    used: list[dict] = []
 
     if event.effect != "bad":
         status = "no_action_needed"
@@ -142,12 +193,21 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
     else:
         goals = _goals(db)
         tried = _tried(db, event.id)
-        candidates = [
-            c
-            for c in rules.generate(_library(db), findings, kpi.code)
-            if (c.action.code, c.target) not in tried
-        ]
+        recalled = memory.recall(db, kpi.code)
+        candidates, left_out = [], []
+        for c in rules.generate(_library(db), findings, kpi.code):
+            if (c.action.code, c.target) in tried:
+                continue
+            why = memory_rules.broken_limit(
+                recalled.constraints, code=c.action.code, effort=c.action.effort,
+                cost_level=c.action.cost_level, days=c.action.days,
+            )  # fmt: skip
+            if why:
+                left_out.append((c, why))
+            else:
+                candidates.append(c)
         record = track_record.load(db)
+        remembered, used = _remembered(recalled, record, candidates, left_out, kpi.name)
         change = Decimal(drivers["total_change"]) if drivers else Decimal(0)
         scored = rules.rank(
             [
@@ -158,9 +218,7 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
                     severity=event.severity,
                     diagnosis_confidence=diagnosis.confidence,
                     goals=goals,
-                    history=record[c.action.code].score
-                    if c.action.code in record
-                    else rules.NEUTRAL_HISTORY,
+                    history=_history(recalled, record, c.action.code),
                 )
                 for c in candidates
             ]
@@ -173,6 +231,11 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
                 if diagnosis.status == "insufficient_evidence" or not findings
                 else "No action in our library answers the causes we found yet."
             )
+            if left_out and findings:
+                rationale = (
+                    "Every action that answers the causes we found breaks a limit you set "
+                    f"({left_out[0][1]}). You can change your limits on the What we know page."
+                )
         else:
             status = "open"
             headline = (
@@ -236,7 +299,8 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
                 breakdown={"lines": item.breakdown, "goal": item.goal_match},
             )
         )
-    for order, piece in enumerate(_evidence(event, diagnosis, scored, record)):
+    memory.log_use(db, tenant, event.id, used)
+    for order, piece in enumerate([*_evidence(event, diagnosis, scored, record), *remembered]):
         db.add(
             RecommendationEvidence(
                 organization_id=tenant.organization_id,

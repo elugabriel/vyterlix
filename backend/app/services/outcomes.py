@@ -34,7 +34,7 @@ from app.schemas.outcomes import (
     ReportOut,
     TrackRecordOut,
 )
-from app.services import track_record
+from app.services import memory, track_record
 from app.services.audit import AuditAction, record_audit
 from app.services.email import EmailMessage, get_email_sender
 
@@ -344,6 +344,11 @@ def _store(
         details={"outcome": verdict.outcome},
     )
     db.commit()
+    try:
+        memory.learn(db, tenant, intervention.id)  # keep what this result taught us
+    except Exception:
+        db.rollback()
+        logger.warning("Could not record what was learned", exc_info=True)
     alternative = None
     if verdict.outcome in ("partially_successful", "unsuccessful"):
         alternative = _suggest_alternative(db, tenant, intervention)

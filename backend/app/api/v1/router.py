@@ -20,6 +20,7 @@ from app.api.v1 import (
     jobs,
     kpis,
     me,
+    memory,
     onboarding,
     organizations,
     recommendations,
@@ -65,3 +66,4 @@ api_router.include_router(trading.suppliers_router)
 api_router.include_router(trading.products_router)
 api_router.include_router(trading.stock_router)
 api_router.include_router(data_quality.router)
+api_router.include_router(memory.router)

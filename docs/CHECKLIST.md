@@ -26,7 +26,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 10 | Action management | **Step 1 done (accept a recommendation, change it first, give it to someone, dates, steps, statuses, notes, evidence files, approval of a manager's suggestion, overdue detection, the Actions screen)** |
 | 11 | Follow-up + outcome measurement | **Step 1 done (follow-up plan, timed round in the worker, result emails, expected vs actual with the season taken out, four outcomes, intervention report, another suggestion after a non-success, track record feeding the recommendations, the results on the Actions screen)** |
 | ⚑ | Vertical slice proof | Not started |
-| 12 | Business memory / learning | Not started |
+| 12 | Business memory / learning | **Step 1 done (what is normal, customer patterns, goals and seasons, the owner's limits, lessons and patterns from results, similar cases, a record of what memory was used, memory feeding the recommendations, the What we know screen)** |
 | 13 | AI consultation | Not started |
 | 14 | Alerts + notifications | Not started |
 | — | Core UX screens | Not started |
@@ -323,16 +323,19 @@ Two honest limits: the data ends in September 2026, so the action is treated as 
 
 ## Phase 12: Business memory / learning
 
-- [ ] Tables: business_memory, business_learning, intervention_patterns, memory_retrieval_events
-- [ ] Goals, normal KPI ranges, seasonality in memory
-- [ ] Successful interventions
-- [ ] Unsuccessful interventions
-- [ ] Customer-behaviour patterns
-- [ ] Historical recommendations + outcomes
-- [ ] User preferences
-- [ ] Business constraints
-- [ ] Similar-case retrieval
-- [ ] Memory feeds recommendation evaluation
+Design (step 1): **memory is rules and records, not a language model.** It has four parts, all kept per business and never shared. (1) **What is normal:** from the last 12 finished months of each figure (at least 6 needed, and a figure that never moves has no band), the average and the band one standard deviation either side, and whether the latest month is below, within or above it. (2) **Patterns in customers**, from the sales records: the busiest and quietest weekdays, how many named customers have bought more than once, and how much of sales the three best sellers bring in (refunds are not counted). Goals and the active busy and quiet seasons are copied in so they can be shown and used together. All of this is worked out again after every figures calculation and with the "Refresh what we know" button, and facts that no longer hold are removed. (3) **The owner's limits** (owner only): the most an action may cost, the most effort, actions never to suggest, and only quick results (within 30 days). An action that breaks a limit is left out of the recommendation, and the recommendation says which and why; if every answer breaks a limit it says that instead of guessing. (4) **What was learned from results:** every measured outcome leaves a lesson in words and updates a count per kind of action per figure (always counted afresh from the lessons). Next time that figure falls, an action's track record on **that figure** counts first, then its record anywhere in the business, then the neutral 50; the lessons from earlier cases on the same figure are shown as "Last time: ..." and the counts as "has been tried n times in your business". Every time memory is used for a recommendation what was used is written down and shown on the What we know page.
+
+- [x] Tables: business_memory, business_learning, intervention_patterns, memory_retrieval_events
+- [x] Goals, normal KPI ranges, seasonality in memory
+- [x] Successful interventions
+- [x] Unsuccessful interventions
+- [x] Customer-behaviour patterns (weekdays, repeat customers, best sellers)
+- [x] Historical recommendations + outcomes (the lessons and the counts per kind of action)
+- [x] User preferences (quick results only)
+- [x] Business constraints (cost, effort, actions never to suggest)
+- [x] Similar-case retrieval (earlier results on the same figure)
+- [x] Memory feeds recommendation evaluation (limits, track record on the figure, "last time" lines, a record of use)
+- [x] Screen: What we know
 
 ## Phase 13: AI consultation
 
@@ -571,6 +574,8 @@ weeks, Europe/London, en-GB wording.
 | **Recommendations answer only changes the diagnosis can break down (sales, number of sales, items sold, gross profit, running costs), and the library has 10 actions:** no recommendation yet for margins or customer figures, or for a stock shortage found by the stock forecast | More actions and more figures as drivers are added | Phase 9 next steps |
 | **Actions are only emailed about when their follow-up is due or a result is in:** overdue and due-soon work shows on the Actions page but nobody is emailed about it, nothing appears in the app or on a phone, and evidence cannot be removed once attached | Needs the notification centre (Phase 14); removal needs a rule on who may delete evidence | Phase 14 |
 | **Outcomes compare one month with one month** and say nothing about other things that changed at the same time (a price rise, a new shop nearby); the 80% / 30% lines and the 60 data-quality limit are Vyterlix's own starting values | Longer windows, several months and comparison with similar businesses once there is data to calibrate on | Phase 12 |
+| **Similar cases means the same figure only:** it does not yet look at the same cause, the same product or day, or other businesses; and no staff or budget amounts are asked for (only levels of cost and effort) | Match on cause and target; real budget and hours once the owner has told us | Phase 13-14 |
+| **Customer patterns are three simple ones**, not segments or buying habits over time | More patterns once customers are segmented | Later |
 | **The share of a gap each action wins back is Vyterlix's own starting estimate**, the same for every business; track record is neutral and the owner's budget and staffing are unknown | Replace with measured outcomes (Phase 11) and remembered constraints (Phase 12) | Phase 11-12 |
 | **Detection thresholds (15% / 30%, 3 / 8 points) are Vyterlix's own starting values**, the same for every business and sector | Tune per sector once real benchmarks and real customer data exist | When real data is available |
 | **Data-quality extras:** unusual amounts (a sale far above normal), unusual days (a quiet day inside a busy month), per-product stock-out gaps, and scoring per connected system once connectors exist | Needs enough real history to know what is "unusual"; false alarms would erode trust | Phase 5 (KPI engine) / Part B |

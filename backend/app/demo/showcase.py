@@ -500,7 +500,7 @@ def _stock(api: Api, org_id: uuid.UUID, say: Callable[[str], None]) -> None:
 def _analytics(
     api: Api, db: Session, org_id: uuid.UUID, manager_password: str, say: Callable[[str], None]
 ) -> None:
-    from app.services import detection, forecast, health, kpi
+    from app.services import detection, forecast, health, kpi, memory
     from app.services.jobs import JobTenant
 
     say("  key figures, health, changes, explanations and forecasts")
@@ -513,6 +513,7 @@ def _analytics(
         kpi.calculate(db, tenant, granularity="month", trigger="manual")
         health.calculate(db, tenant)
         detection.detect(db, tenant)
+        memory.rebuild(db, tenant)  # what is normal, patterns, goals and seasons
         # Forecasts made as if at earlier months, so the accuracy section has months to check
         for code in forecast.forecastable():
             for month in range(3, 9):

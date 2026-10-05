@@ -99,6 +99,7 @@ function renderData(orgId, role) {
       el("a", { class: "button secondary", href: `changes.html?org=${orgId}` }, "What changed"),
       el("a", { class: "button secondary", href: `forecast.html?org=${orgId}` }, "Forecast"),
       el("a", { class: "button secondary", href: `actions.html?org=${orgId}` }, "Actions"),
+      el("a", { class: "button secondary", href: `memory.html?org=${orgId}` }, "What we know"),
       el("a", { class: "button secondary", href: `data.html?org=${orgId}` }, "Data overview"),
       ...(manager
         ? [
