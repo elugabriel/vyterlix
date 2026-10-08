@@ -105,6 +105,11 @@ def test_every_api_method_the_pages_call_exists():
         "changes",
         "forecast",
         "actions",
+        "memory",
+        "assistant",
+        "alerts",
+        "notifications",
+        "dashboard",
     ],
 )
 def test_data_pages_start_last_so_their_constants_are_ready(name):
@@ -125,3 +130,60 @@ def test_the_connection_callback_page_runs_last_and_clears_the_address_bar():
     assert not re.search(r"^(const|let|class|function) ", after, re.MULTILINE)
     body = source[source.index("async function finish()") : run]
     assert body.index("history.replaceState") < body.index("api.post")
+
+
+# --- one shell for every page of a business -------------------------------------
+
+
+BUSINESS_PAGES = sorted(
+    p
+    for p in PAGES
+    if "openBusiness" in (FRONTEND / "js" / "pages" / f"{p.stem}.js").read_text(encoding="utf-8")
+)
+
+
+def test_every_business_page_is_found():
+    assert len(BUSINESS_PAGES) >= 17 and "dashboard.html" in {p.name for p in BUSINESS_PAGES}
+
+
+@pytest.mark.parametrize("page", BUSINESS_PAGES, ids=lambda p: p.name)
+def test_every_business_page_has_the_same_shell(page):
+    """The same top bar, the same place for messages and a title that says which business: so that a
+    page cannot drift from the rest (the navigation bar is added to all of them by openBusiness)."""
+    html = page.read_text(encoding="utf-8")
+    assert (
+        '<header class="topbar">' in html
+        and '<a class="brand" href="app.html">Vyterlix</a>' in html
+    )
+    assert 'id="user-name"' in html and 'id="logout"' in html
+    assert '<main class="container stack">' in html
+    assert 'id="message" class="message" role="alert" hidden' in html
+    assert 'id="org-name"' in html
+    assert '<link rel="stylesheet" href="css/base.css">' in html
+    assert re.search(r"<title>[^<]+ · Vyterlix</title>", html)
+    assert '<html lang="en-GB">' in html
+
+
+def test_the_navigation_bar_only_points_at_pages_that_exist():
+    source = (FRONTEND / "js" / "nav.js").read_text(encoding="utf-8")
+    targets = re.findall(r'\["([a-z-]+\.html)", "', source) + re.findall(
+        r'"([a-z-]+\.html)"', source
+    )
+    assert len(set(targets)) >= 12
+    for target in set(targets):
+        assert (FRONTEND / target).is_file(), target
+
+
+def test_the_navigation_bar_is_added_by_the_one_shared_opener():
+    business = (FRONTEND / "js" / "business.js").read_text(encoding="utf-8")
+    assert "mountNav(orgId)" in business and 'from "./nav.js"' in business
+    for script in (FRONTEND / "js" / "pages").glob("*.js"):
+        assert "mountNav" not in script.read_text(encoding="utf-8"), (
+            script.name
+        )  # never done by hand
+
+
+def test_the_list_of_businesses_opens_the_front_screen():
+    assert "dashboard.html?org=" in (FRONTEND / "js" / "pages" / "app.js").read_text(
+        encoding="utf-8"
+    )

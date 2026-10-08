@@ -10,6 +10,7 @@ from app.api.v1 import (
     business,
     business_health,
     business_lists,
+    dashboard,
     data_quality,
     detections,
     drivers,
@@ -72,3 +73,4 @@ api_router.include_router(memory.router)
 api_router.include_router(assistant.router)
 api_router.include_router(alerts.router)
 api_router.include_router(alerts.inbox_router)
+api_router.include_router(dashboard.router)

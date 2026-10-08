@@ -2,6 +2,7 @@
 
 import { ApiError } from "./api.js";
 import { api, logout, requireLogin } from "./auth.js";
+import { mountNav } from "./nav.js";
 import { showMessage } from "./ui.js";
 
 /** The business id from ?org=, only if it looks like a real id (it goes into API paths). */
@@ -27,6 +28,7 @@ export async function openBusiness(message) {
   try {
     const org = await api.get(`/organizations/${orgId}`);
     document.title = `${org.name} · Vyterlix`;
+    mountNav(orgId);
     return { user, org };
   } catch (err) {
     if (!(err instanceof ApiError)) throw err;

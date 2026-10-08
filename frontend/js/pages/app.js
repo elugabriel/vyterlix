@@ -23,7 +23,7 @@ function renderOrgs(orgs) {
       el(
         "li",
         {},
-        el("a", { href: `business.html?org=${org.id}` }, org.name),
+        el("a", { href: `dashboard.html?org=${org.id}` }, org.name),
         el("span", { class: "badge" }, org.role),
       ),
     ),

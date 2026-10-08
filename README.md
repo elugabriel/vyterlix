@@ -143,6 +143,7 @@ Open http://localhost:5500 — you'll land on the login page. Pages:
 | `forgot-password.html` / `reset-password.html` | Request a reset link / choose a new password from it |
 | `accept-invite.html` | Opened from an invitation email |
 | `onboarding.html?org=…` | Setting up a business step by step; also where each section is edited later |
+| `dashboard.html?org=…` | Today: what needs your attention first (most serious first, only what you may see), then how the business is doing and your key figures |
 | `business.html?org=…` | A business's setup checklist, business settings and your notification choices |
 | `data.html?org=…` | Data overview: quality score, what to fix first, month by month |
 | `import.html?org=…` | Upload a CSV or Excel file: match columns, check, import, undo (needs the worker) |

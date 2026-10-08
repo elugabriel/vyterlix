@@ -294,3 +294,28 @@ input[type="file"] { width: 100%; padding: 8px 0; }
 .chart .ring { fill: none; stroke: var(--text); stroke-width: 2; vector-effect: non-scaling-stroke; }
 .key { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.875rem; color: var(--muted); }
 .badge.plain { text-transform: none; }
+
+/* The bar under the top bar on every page of a business */
+.subnav {
+  display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 16px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+}
+.subnav a {
+  padding: 6px 10px; border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 0.925rem;
+}
+.subnav a:hover { background: var(--bg); color: var(--text); }
+.subnav a.active { background: var(--accent); color: #fff; }
+.subnav a.bell { margin-left: auto; }
+@media (max-width: 640px) { .subnav { overflow-x: auto; flex-wrap: nowrap; } .subnav a { white-space: nowrap; } .subnav a.bell { margin-left: 0; } }
+
+/* The front screen */
+.today-line { font-size: 1.15rem; margin: 0; }
+.attention { display: grid; gap: 8px; }
+.attention-item { border: 1px solid var(--border); border-left-width: 4px; border-radius: var(--radius); padding: 10px 14px; background: var(--surface); }
+.attention-item.sev-high, .attention-item.sev-critical { border-left-color: var(--bad); }
+.attention-item.sev-medium { border-left-color: var(--warn); }
+.attention-item.sev-low, .attention-item.sev-info { border-left-color: var(--border); }
+.attention-item p { margin: 4px 0; }
+.figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.figure { border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; background: var(--surface); }
+.figure .big { font-size: 1.4rem; font-weight: 600; }

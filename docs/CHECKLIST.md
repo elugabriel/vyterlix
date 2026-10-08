@@ -29,7 +29,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 12 | Business memory / learning | **Step 1 done (what is normal, customer patterns, goals and seasons, the owner's limits, lessons and patterns from results, similar cases, a record of what memory was used, memory feeding the recommendations, the What we know screen)** |
 | 13 | AI consultation | **Step 1 done (a grounded assistant: questions understood by rules, answered only from the business's own results, every answer sourced, conversations kept, role-based, per-business AI controls, Claude behind a wrapper that may only reword and is checked)** |
 | 14 | Alerts + notifications | **Step 1 done (alert rules and history, nine areas and five severities, duplicate suppression, one service that owns delivery, in-app inbox, email through SMTP, quiet hours, per-person choices, the Alerts and Notifications screens); mobile push comes with Phase 18** |
-| — | Core UX screens | Not started |
+| — | Core UX screens | **Step 1 done (the Today front screen, role-differentiated, one navigation bar and shell on every business page); a single guided page for one change is still to do** |
 | 15 | Reporting | Not started |
 | 16 | Subscription / billing | Not started |
 | 17 | Admin portal | Not started |
@@ -375,11 +375,13 @@ Design (step 1): **modules raise alerts or hand over a message; only the notific
 
 ## Core UX screens
 
-- [ ] Dashboard: "what needs my attention today" first
-- [ ] Business Insight screen: what happened → why → what next → options → recommended → accept
-- [ ] Role-differentiated views
-- [ ] Shared JS modules (nav, auth, API client, formatters)
-- [ ] Consistent page shell across pages (check for drift)
+Design (step 1): **Today is the front screen** (`dashboard.html`, reached from the list of businesses). It opens with one sentence ("5 things need your attention today, 4 of them serious.") and then the things themselves, most serious first, each with a button to the screen that deals with it: alerts of medium seriousness or more, overdue work (high once 14 days late), work due within a week, suggestions waiting for the owner's approval, follow-ups that are due, and open suggestions for falls in the figures. Only after that does it show how the business is doing (the health score and the area pulling it down) and five key figures with how each moved. Everything is read from results other parts already worked out. **Who sees what:** the owner sees everything and is asked to approve; a Manager sees only their own area (and what belongs to no area), figures included; a Viewer sees what is going on but is given nothing to do and is not shown things that wait on a decision. The owner also sees a "finish setting up" card until the business is set up. **One shell:** a navigation bar (Today, What changed, Actions, Forecast, Key figures, Health, Alerts, Ask Vyterlix, What we know, Your data, Settings, and Notifications with how many are unread) is added under the top bar of every business page by the one shared opener, so no page can forget it, and a test checks that all 17 business pages have the same top bar, message area, heading and title.
+
+- [x] Dashboard: "what needs my attention today" first
+- [~] Business Insight screen: what happened → why → what next → options → recommended → accept (the **What changed** page does all of this in order for each change, one section after another, and Today links straight to it; there is not yet a single guided page for one change)
+- [x] Role-differentiated views (the front screen, the figures and the assistant; the other screens already offer buttons only to those who may use them)
+- [x] Shared JS modules (nav, auth, API client, formatters)
+- [x] Consistent page shell across pages (checked by a test; no page had drifted)
 
 ## Phase 15: Reporting
 
