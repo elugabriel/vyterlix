@@ -277,8 +277,9 @@ def test_seen_again_on_another_day_is_counted_once_for_that_day(api, db, march, 
     outbox.clear()
     with scoped(db, march):
         tenant = owner_tenant(db, march)
-        alerts.evaluate(db, tenant, now=utcnow() + timedelta(days=1), sender=outbox)
-        alerts.evaluate(db, tenant, now=utcnow() + timedelta(days=1, hours=1), sender=outbox)
+        tomorrow = utcnow() + timedelta(days=1)  # the same moment twice: whatever the time of day
+        alerts.evaluate(db, tenant, now=tomorrow, sender=outbox)
+        alerts.evaluate(db, tenant, now=tomorrow, sender=outbox)
     assert {a["occurrences"] for a in alerts_of(api, march)} == {2} and outbox == []
     detail = api.get(
         f"{ORGS}/{march[0]}/alerts/{alerts_of(api, march)[0]['id']}", headers=march[2]["owner"]
