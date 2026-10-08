@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from app.core.errors import ConflictError
 from app.core.permissions import Perm
-from app.services import actions, detection, forecast, health, kpi, memory, outcomes
+from app.services import actions, alerts, detection, forecast, health, kpi, memory, outcomes
 from app.services.import_runner import run_import, undo_import
 from app.services.import_validation import validate_import
 from app.services.integrations import run_sync
@@ -96,6 +96,12 @@ def calculate_kpis(ctx: JobContext) -> BaseModel:
     except Exception:
         ctx.db.rollback()
         logger.error("Could not forecast the figures", exc_info=True)
+    # Anything in the new figures that needs attention becomes an alert.
+    try:
+        alerts.evaluate(ctx.db, ctx.tenant)
+    except Exception:
+        ctx.db.rollback()
+        logger.error("Could not look for things that need attention", exc_info=True)
     # What is normal for the business is worked out again from the new figures.
     try:
         memory.rebuild(ctx.db, ctx.tenant)

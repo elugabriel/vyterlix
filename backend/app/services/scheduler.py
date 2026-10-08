@@ -10,7 +10,7 @@ minutes, and everything it does is safe to repeat.
 """
 
 import logging
-from datetime import date
+from datetime import date, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -19,9 +19,10 @@ from app.actions import rules as action_rules
 from app.core.uk import today_uk
 from app.db.tenant import ACROSS_TENANTS, tenant_scope
 from app.models.actions import BusinessAction
+from app.models.alerts import Notification
 from app.models.identity import OrganizationUser, Role, User
 from app.models.outcomes import FollowUpSchedule
-from app.services import actions, outcomes
+from app.services import actions, alerts, notifications, outcomes
 from app.services.jobs import JobTenant
 
 logger = logging.getLogger("vyterlix.scheduler")
@@ -38,7 +39,12 @@ def _businesses_with_work(db: Session, today: date) -> set:
         .where(BusinessAction.status.in_(sorted(action_rules.OPEN)))
         .execution_options(**ACROSS_TENANTS)
     ).all()
-    return set(due) | set(open_work)
+    waiting = db.scalars(
+        select(Notification.organization_id)
+        .where(Notification.email_status == "pending")
+        .execution_options(**ACROSS_TENANTS)
+    ).all()
+    return set(due) | set(open_work) | set(waiting)
 
 
 def _owner(db: Session, organization_id) -> User | None:
@@ -52,7 +58,7 @@ def _owner(db: Session, organization_id) -> User | None:
         ).first()
 
 
-def tick(db: Session, *, today: date | None = None) -> dict[str, int]:
+def tick(db: Session, *, today: date | None = None, now: datetime | None = None) -> dict[str, int]:
     """One round across every business. A problem in one business never stops the others."""
     today = today or today_uk()
     totals = {"businesses": 0, "overdue": 0, "followed_up": 0, "measured": 0}
@@ -65,6 +71,9 @@ def tick(db: Session, *, today: date | None = None) -> dict[str, int]:
             with tenant_scope(db, organization_id):
                 totals["overdue"] += actions.refresh_overdue(db, tenant, today=today)
                 result = outcomes.sweep(db, tenant, today=today)
+                alerts.evaluate(db, tenant, today=today, now=now)
+                notifications.send_due_emails(db, now=now)
+                db.commit()
             totals["followed_up"] += result["told"]
             totals["measured"] += result["measured"]
             totals["businesses"] += 1

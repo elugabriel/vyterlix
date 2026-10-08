@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.v1 import (
     actions,
+    alerts,
     assistant,
     audit,
     auth,
@@ -69,3 +70,5 @@ api_router.include_router(trading.stock_router)
 api_router.include_router(data_quality.router)
 api_router.include_router(memory.router)
 api_router.include_router(assistant.router)
+api_router.include_router(alerts.router)
+api_router.include_router(alerts.inbox_router)

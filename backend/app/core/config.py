@@ -29,7 +29,14 @@ class Settings(BaseSettings):
     frontend_base_url: str = "http://localhost:5500"
 
     # "console" writes emails to the log instead of sending them. Dev/test only.
-    email_backend: Literal["console"] = "console"
+    # "smtp": any provider that offers SMTP (Amazon SES, Postmark, Mailgun, Microsoft...).
+    email_backend: Literal["console", "smtp"] = "console"
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: SecretStr | None = None  # only ever from the environment
+    smtp_use_tls: bool = True  # STARTTLS on the port above
+    smtp_timeout_seconds: float = 20.0
     email_from: str = "Vyterlix <no-reply@vyterlix.com>"
     email_verification_ttl_hours: int = 24
     password_reset_ttl_minutes: int = 60
@@ -105,6 +112,12 @@ class Settings(BaseSettings):
         # The console backend logs live tokens; that must never happen in production.
         if self.env == "prod" and self.email_backend == "console":
             raise ValueError("Console email backend is not allowed in prod")
+        return self
+
+    @model_validator(mode="after")
+    def _smtp_needs_a_host(self) -> "Settings":
+        if self.email_backend == "smtp" and not self.smtp_host:
+            raise ValueError("Set VYTERLIX_SMTP_HOST to send email through SMTP")
         return self
 
 

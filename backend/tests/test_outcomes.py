@@ -403,8 +403,9 @@ def test_the_sweep_tells_the_person_responsible_once_and_measures_when_the_figur
             "due": 1, "told": 0, "measured": 1, "waiting": 0,
         }  # fmt: skip
         assert outcomes.sweep(db, tenant, today=due, sender=outbox)["due"] == 0
-    assert len(outbox) == 2 and outbox[1].subject == f'The result of "{done["title"]}"'
-    assert outbox[1].body.startswith("It worked: It won back")
+    assert len(outbox) == 2 and outbox[1].subject == f'[Vyterlix] The result of "{done["title"]}"'
+    assert f'- The result of "{done["title"]}": It worked: It won back' in outbox[1].body
+    assert "/actions.html?org=" in outbox[1].body  # and where to look
     body = act(api, march, done["id"]).json()
     assert body["outcome"]["measured_by"] is None and body["follow_up"]["notified"] is True
 

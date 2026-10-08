@@ -101,6 +101,8 @@ function renderData(orgId, role) {
       el("a", { class: "button secondary", href: `actions.html?org=${orgId}` }, "Actions"),
       el("a", { class: "button secondary", href: `memory.html?org=${orgId}` }, "What we know"),
       el("a", { class: "button secondary", href: `assistant.html?org=${orgId}` }, "Ask Vyterlix"),
+      el("a", { class: "button secondary", href: `alerts.html?org=${orgId}` }, "Alerts"),
+      el("a", { class: "button secondary", id: "notifications-link", href: `notifications.html?org=${orgId}` }, "Notifications"),
       el("a", { class: "button secondary", href: `data.html?org=${orgId}` }, "Data overview"),
       ...(manager
         ? [
@@ -112,6 +114,13 @@ function renderData(orgId, role) {
         : []),
     ),
   );
+  // How many notifications are waiting, on the button that opens them
+  api
+    .get(`/organizations/${orgId}/notifications?limit=1`)
+    .then((box) => {
+      if (box.unread) document.getElementById("notifications-link").textContent = `Notifications (${box.unread} new)`;
+    })
+    .catch(() => {});
 }
 
 async function renderSettings(orgId, isOwner) {

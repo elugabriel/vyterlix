@@ -118,10 +118,12 @@ def reset_password(
         details={"sessions_revoked": revoked},
     )
     db.commit()
-    send_password_changed_alert(sender, user, logged_out="on all devices")
+    send_password_changed_alert(sender, user, logged_out="on all devices", db=db)
 
 
-def send_password_changed_alert(sender: EmailSender, user: User, *, logged_out: str) -> None:
+def send_password_changed_alert(
+    sender: EmailSender, user: User, *, logged_out: str, db: Session | None = None
+) -> None:
     """Security alert after any password change, so the owner hears about one they didn't make."""
     sender.send(
         EmailMessage(
@@ -137,3 +139,17 @@ def send_password_changed_alert(sender: EmailSender, user: User, *, logged_out: 
             ),
         )
     )
+    if db is not None:  # and where they will see it next time they look at the app
+        try:
+            from app.services import notifications
+
+            notifications.record_security(
+                db,
+                user,
+                "Your password was changed",
+                f"The password for your account was just changed and you were logged out "
+                f"{logged_out}. If this was not you, reset your password now.",
+            )
+            db.commit()
+        except Exception:
+            db.rollback()  # the email has gone; the inbox note is a bonus

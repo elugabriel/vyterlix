@@ -535,6 +535,11 @@ def _analytics(
             api.call("POST", f"{base}/changes/{event['id']}/diagnosis")
         api.call("POST", f"{base}/changes/{event['id']}/recommendation")
     _actions(api, db, org_id, bad, manager_password, say)
+    say("  alerts for the things that need attention")
+    from app.services import alerts
+
+    with tenant_scope(db, org_id):
+        alerts.evaluate(db, tenant)
 
 
 def _actions(

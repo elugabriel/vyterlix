@@ -153,6 +153,8 @@ Open http://localhost:5500 — you'll land on the login page. Pages:
 | `actions.html?org=…` | Actions: the work decided on after a change, who is doing it and by when, steps, status, notes, evidence files, and anything waiting for the owner to approve, and (once finished) when it will be checked and what came of it |
 | `memory.html?org=…` | What we know: what is normal for each figure, patterns in customers, goals and seasons, what has been tried and how it went, what was remembered for recent suggestions, and the owner's limits on what may be suggested |
 | `assistant.html?org=…` | Ask Vyterlix: questions about the business answered only from its own results, with the source of every answer, your earlier conversations, and the controls over AI and your data |
+| `alerts.html?org=…` | Alerts: everything that needed attention, how serious it was and what happened to it, close or acknowledge it, and the settings for each kind of alert |
+| `notifications.html?org=…` | Notifications: what you have been told, mark as read, and how you want to be told (in the app, by email) |
 | `changes.html?org=…` | What changed: the figures that moved by more than normal, newest month first, good or bad news, where each came from, why it happened (with the evidence and how sure we are), and what to do about it |
 | `kpis.html?org=…` | Key figures: sales, profit, margins and more, each with its change since last month (the owner can recalculate; needs the worker) |
 | `connections.html?org=…` | Connect another system (shows what will be read first), update it, disconnect (needs the worker). Only a practice "Sandbox" provider exists until the real connectors are built |
@@ -174,6 +176,8 @@ All backend settings come from `VYTERLIX_*` environment variables or `backend/.e
 | `VYTERLIX_CORS_ORIGINS` | `["http://localhost:5500","http://127.0.0.1:5500"]` | JSON list. `*` is rejected in staging/prod. |
 | `VYTERLIX_FRONTEND_BASE_URL` | `http://localhost:5500` | Used to build links in emails. |
 | `VYTERLIX_EMAIL_BACKEND` | `console` | `console` logs emails instead of sending them. Refused in `prod`. |
+| `VYTERLIX_EMAIL_BACKEND=smtp` and `VYTERLIX_SMTP_HOST`, `_PORT` (587), `_USERNAME`, `_PASSWORD`, `_USE_TLS` (true) | unset | Sends real email through any SMTP provider. The password is only ever read from the environment. |
+| `VYTERLIX_AI_PROVIDER=anthropic` and `VYTERLIX_ANTHROPIC_API_KEY`, `_ANTHROPIC_MODEL` | `offline` | Lets Claude reword assistant answers, only for businesses whose owner has allowed it. The key is only ever read from the environment. |
 | `VYTERLIX_EMAIL_FROM` | `Vyterlix <no-reply@vyterlix.com>` | Sender address. |
 | `VYTERLIX_EMAIL_VERIFICATION_TTL_HOURS` | `24` | How long a verification link works. |
 | `VYTERLIX_PASSWORD_RESET_TTL_MINUTES` | `60` | How long a password-reset link works. |

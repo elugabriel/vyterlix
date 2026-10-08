@@ -20,7 +20,6 @@ from app.core.errors import ConflictError, NotFoundError
 from app.core.uk import UK_TZ, today_uk
 from app.integrations.base import utcnow
 from app.models.actions import ActionEvidence, ActionUpdate, BusinessAction, BusinessIntervention
-from app.models.business import NotificationPreference
 from app.models.diagnostics import DetectionEvent
 from app.models.identity import User
 from app.models.kpi import KpiDefinition, KpiValue
@@ -34,9 +33,8 @@ from app.schemas.outcomes import (
     ReportOut,
     TrackRecordOut,
 )
-from app.services import memory, track_record
+from app.services import memory, notifications, track_record
 from app.services.audit import AuditAction, record_audit
-from app.services.email import EmailMessage, get_email_sender
 
 logger = logging.getLogger("vyterlix.outcomes")
 
@@ -381,50 +379,37 @@ def _suggest_alternative(db: Session, tenant, intervention: BusinessIntervention
 # --- telling people ------------------------------------------------------------------------------
 
 
-def _wants_email(db: Session, user_id: uuid.UUID) -> bool:
-    row = db.scalars(
-        select(NotificationPreference).where(
-            NotificationPreference.user_id == user_id, NotificationPreference.category == "action"
-        )
-    ).first()
-    return row is None or row.email
-
-
-def _send(db: Session, user_id: uuid.UUID | None, subject: str, body: str, sender=None) -> bool:
-    user = db.get(User, user_id) if user_id else None
-    if user is None or not _wants_email(db, user.id):
-        return False
-    (get_email_sender() if sender is None else sender).send(
-        EmailMessage(to=user.email, subject=subject, body=body)
-    )
-    return True
-
-
 def _tell(
     db: Session, plan: FollowUpSchedule, action: BusinessAction, verdict, alternative, sender=None
 ) -> None:
+    """Hand the result to the notification service, which decides how the person is told."""
     text = f"{rules.OUTCOME_LABELS[verdict.outcome]}: {verdict.reason}"
     if alternative:
         text += f"\n\nWe now suggest something different: {alternative}."
     try:
-        _send(db, plan.responsible_user_id, f'The result of "{action.title}"', text, sender)
+        notifications.notify_user(
+            db, action.organization_id, plan.responsible_user_id, category="action",
+            severity="medium", title=f'The result of "{action.title}"', body=text,
+            link=f"actions.html#{action.id}", sender=sender,
+        )  # fmt: skip
     except Exception:
-        logger.warning("Could not send the result email", exc_info=True)
+        logger.warning("Could not tell anyone the result", exc_info=True)
 
 
 def _tell_due(db: Session, plan: FollowUpSchedule, action: BusinessAction, sender=None) -> None:
     try:
-        _send(
-            db,
-            plan.responsible_user_id,
-            f'Time to check "{action.title}"',
-            f'It has been long enough to see whether "{action.title}" worked. We will compare '
-            f"{_month(plan.measure_month)} with the month you accepted it as soon as the figures "
-            "are in.",
-            sender,
-        )
+        notifications.notify_user(
+            db, action.organization_id, plan.responsible_user_id, category="action",
+            severity="medium", title=f'Time to check "{action.title}"',
+            body=(
+                f'It has been long enough to see whether "{action.title}" worked. We will compare '
+                f"{_month(plan.measure_month)} with the month you accepted it as soon as the "
+                "figures are in."
+            ),
+            link=f"actions.html#{action.id}", sender=sender,
+        )  # fmt: skip
     except Exception:
-        logger.warning("Could not send the follow-up email", exc_info=True)
+        logger.warning("Could not tell anyone the follow-up is due", exc_info=True)
     plan.notified_at = utcnow()
 
 

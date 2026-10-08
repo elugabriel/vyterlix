@@ -107,4 +107,4 @@ def change_password(
         details={"other_sessions_revoked": revoked},
     )
     db.commit()
-    send_password_changed_alert(sender, user, logged_out="on your other devices")
+    send_password_changed_alert(sender, user, logged_out="on your other devices", db=db)

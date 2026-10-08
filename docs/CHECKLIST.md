@@ -28,7 +28,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | ⚑ | Vertical slice proof | Not started |
 | 12 | Business memory / learning | **Step 1 done (what is normal, customer patterns, goals and seasons, the owner's limits, lessons and patterns from results, similar cases, a record of what memory was used, memory feeding the recommendations, the What we know screen)** |
 | 13 | AI consultation | **Step 1 done (a grounded assistant: questions understood by rules, answered only from the business's own results, every answer sourced, conversations kept, role-based, per-business AI controls, Claude behind a wrapper that may only reword and is checked)** |
-| 14 | Alerts + notifications | Not started |
+| 14 | Alerts + notifications | **Step 1 done (alert rules and history, nine areas and five severities, duplicate suppression, one service that owns delivery, in-app inbox, email through SMTP, quiet hours, per-person choices, the Alerts and Notifications screens); mobile push comes with Phase 18** |
 | — | Core UX screens | Not started |
 | 15 | Reporting | Not started |
 | 16 | Subscription / billing | Not started |
@@ -355,20 +355,23 @@ Design (step 1): **the assistant answers from the business's own results, never 
 
 ## Phase 14: Alerts + notifications
 
-- [ ] Tables: alert_rules, alerts, alert_events, notification_preferences, notifications
-- [ ] Alert rule configuration
-- [ ] Severities: INFO, LOW, MEDIUM, HIGH, CRITICAL
-- [ ] Types: Sales, Financial, Customer, Inventory, Marketing, Forecast, Action, Data, Security
-- [ ] Alert generation
-- [ ] Grouping / duplicate suppression
-- [ ] Only security alerts un-suppressible
-- [ ] Notification Service owns delivery (modules emit events)
-- [ ] **Real email provider** (replaces console backend)
-- [ ] In-app notifications
+Design (step 1): **modules raise alerts or hand over a message; only the notification service decides who is told, how and when.** Each round (after every figures calculation and on the worker's 15-minute round) looks at the business's own results and raises an alert for: a figure that moved against you by more than usual (one kind per area: sales, money, customers, stock, marketing; only the latest two months count, changes the owner's seasons explain are left out), a forecast that says next month's sales will fall by more than a chosen amount, work that is overdue, no new sales for a chosen number of days, incomplete data, a fall in business health, and (always on) a changed password. Each kind has defaults the owner can change (on or off, how serious, the threshold); security alerts can be made more serious but never switched off. **Severity:** info, low, medium, high, critical. **No duplicates:** the same thing is one alert for as long as it is open, counted once for each day it is seen again and made more serious (never less) if it gets worse; an alert about a state of affairs (overdue work, stale data) closes itself when it stops being true and comes back as a new alert if it returns; an alert about a change in a figure is one alert for good, so once closed it is not raised again. **Who is told:** owners hear everything; a Manager hears what is in their own area (and what belongs to no area); Viewers are not sent alerts but can read the history. **How:** each person's own choices for each kind (in the app, by email; push is stored for Phase 18) are respected; only medium and above are emailed; several emails for one person in one round become one summary; the business's quiet hours (UK time, may cross midnight) hold emails until they end, but not the in-app message; critical alerts ignore quiet hours; **security messages ignore all choices and quiet hours**. The follow-up and result messages of Phase 11 now go through the same service. Email goes through any SMTP provider (`VYTERLIX_EMAIL_BACKEND=smtp` with `VYTERLIX_SMTP_HOST`, port, username, `VYTERLIX_SMTP_PASSWORD` from the environment, STARTTLS by default); production refuses the console backend. Every alert has a link to the screen that explains it, a history of what happened to it, and can be acknowledged or closed by an owner or a manager in its area.
+
+- [x] Tables: alert_rules, alerts, alert_events, notification_preferences (Phase 3), notifications
+- [x] Alert rule configuration
+- [x] Severities: INFO, LOW, MEDIUM, HIGH, CRITICAL
+- [x] Types: Sales, Financial, Customer, Inventory, Marketing, Forecast, Action, Data, Security (marketing has no data to alert on yet)
+- [x] Alert generation
+- [x] Grouping / duplicate suppression
+- [x] Only security alerts un-suppressible
+- [x] Notification Service owns delivery (modules emit events)
+- [x] **Real email provider** (replaces console backend): SMTP, works with any provider; **not yet tried against a real mail service** (needs a provider account and a sending domain from Dolaris)
+- [x] In-app notifications
 - [ ] Mobile push (with Phase 18)
-- [ ] Per-user preferences, quiet hours
-- [ ] Alert history
-- [ ] Alerts link to the relevant analysis screen
+- [x] Per-user preferences, quiet hours
+- [x] Alert history
+- [x] Alerts link to the relevant analysis screen
+- [x] Screens: Alerts (history, what happened, settings) and Notifications (inbox, how you want to be told); unread count on the Business page
 
 ## Core UX screens
 
@@ -579,6 +582,9 @@ weeks, Europe/London, en-GB wording.
 | **Outcomes compare one month with one month** and say nothing about other things that changed at the same time (a price rise, a new shop nearby); the 80% / 30% lines and the 60 data-quality limit are Vyterlix's own starting values | Longer windows, several months and comparison with similar businesses once there is data to calibrate on | Phase 12 |
 | **Similar cases means the same figure only:** it does not yet look at the same cause, the same product or day, or other businesses; and no staff or budget amounts are asked for (only levels of cost and effort) | Match on cause and target; real budget and hours once the owner has told us | Phase 13-14 |
 | **The assistant answers one question about one figure at a time** and understands a fixed set of phrasings; there is no rate limit on questions, no streaming, no voice, and no way to ask for work to be done (it only reads) | Wider phrasing and multi-part questions; a limit per person; actions from chat | Phase 13 next steps |
+| **Alerts are checked every 15 minutes at best, not the instant something happens**, and there is no snooze, no weekly digest, and no alert for marketing (no marketing data yet) | A digest schedule, snoozing, and marketing alerts when marketing data arrives | Phase 14 next steps |
+| **A failed email is marked failed and not retried** | A retry with a delay, and a bounce check, once a real mail provider is in use | L1 |
+| **Quiet hours are for the whole business**, not per person | Per-person quiet hours | Phase 14 next steps |
 | **The outside provider (Claude) has not been tried against the real service:** only against a pretend one | Needs an Anthropic API key and a documented purpose and subprocessor entry before any real data is sent | L1 |
 | **Customer patterns are three simple ones**, not segments or buying habits over time | More patterns once customers are segmented | Later |
 | **The share of a gap each action wins back is Vyterlix's own starting estimate**, the same for every business; track record is neutral and the owner's budget and staffing are unknown | Replace with measured outcomes (Phase 11) and remembered constraints (Phase 12) | Phase 11-12 |
