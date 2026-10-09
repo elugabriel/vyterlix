@@ -87,6 +87,18 @@ class AuditAction(StrEnum):
     REPORT_SCHEDULE_CHANGED = "report.schedule_changed"
     BILLING_CHECKOUT_STARTED = "billing.checkout_started"
     BILLING_SUBSCRIPTION_CHANGED = "billing.subscription_changed"
+    # Platform staff (every look at an account and every change is recorded)
+    ADMIN_STAFF_GRANTED = "admin.staff_granted"
+    ADMIN_STAFF_REVOKED = "admin.staff_revoked"
+    ADMIN_ORGANIZATION_VIEWED = "admin.organization_viewed"
+    ADMIN_ORGANIZATION_SUSPENDED = "admin.organization_suspended"
+    ADMIN_ORGANIZATION_REACTIVATED = "admin.organization_reactivated"
+    ADMIN_USER_VIEWED = "admin.user_viewed"
+    ADMIN_USER_DISABLED = "admin.user_disabled"
+    ADMIN_USER_ENABLED = "admin.user_enabled"
+    ADMIN_MEMBER_ROLE_CHANGED = "admin.member_role_changed"
+    ADMIN_TRIAL_EXTENDED = "admin.trial_extended"
+    ADMIN_PLAN_CHANGED = "admin.plan_changed"
 
 
 def record_audit(

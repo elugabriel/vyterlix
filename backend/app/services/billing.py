@@ -979,6 +979,8 @@ def set_plan(
     price_month: int | None = None,
     price_year: int | None = None,
     provider_price: tuple[str, str, str] | None = None,
+    is_public: bool | None = None,
+    is_active: bool | None = None,
 ) -> Plan:
     """Change a plan's prices (in pence, excluding VAT) or a provider's own price id for it
     (provider, interval, id). Nobody already paying is affected: they pay what they signed up for."""
@@ -989,6 +991,10 @@ def set_plan(
         plan.price_month_pence = price_month
     if price_year is not None:
         plan.price_year_pence = price_year
+    if is_public is not None:
+        plan.is_public = is_public
+    if is_active is not None:
+        plan.is_active = is_active
     if provider_price is not None:
         provider, interval, ref = provider_price
         if provider not in ("stripe", "paystack") or interval not in ("month", "year"):
@@ -1048,5 +1054,19 @@ def grant_demo_plan(db: Session, org_id: uuid.UUID, plan_code: str, now: datetim
          "lines": [{"description": f"{plan.name} plan, billed yearly (demo)", "amount_pence": net}]},
         now,
     )  # fmt: skip
+    db.flush()
+    return sub
+
+
+def extend_trial(db: Session, org_id: uuid.UUID, days: int, now: datetime) -> Subscription:
+    """Give a business more free-trial time (staff only). It also brings back a trial that has ended.
+    A business that is already paying has no trial to extend."""
+    sub = ensure_subscription(db, org_id, now)
+    if sub.status not in ("trialing",):
+        raise ConflictError(
+            "Only a business on a free trial can be given more trial time.", code="not_on_trial"
+        )
+    start = max(now, sub.trial_ends_at) if sub.trial_ends_at else now
+    sub.trial_ends_at = start + timedelta(days=days)
     db.flush()
     return sub

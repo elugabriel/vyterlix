@@ -32,7 +32,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | — | Core UX screens | **Step 1 done (the Today front screen, role-differentiated, one navigation bar and shell on every business page); a single guided page for one change is still to do** |
 | 15 | Reporting | **Step 1 done (four reports, kept exactly as written, PDF and CSV downloads, weekly or monthly emailed delivery, the Reports screen)** |
 | 16 | Subscription / billing | **Step 1 done (plans and what they include as data, a 14-day trial, gating of four features, sandbox, Stripe and Paystack behind one interface with signed and never-twice messages, upgrade, downgrade, cancel, invoices, the Plan and billing screen); real Stripe and Paystack untried until accounts exist; prices are placeholders** |
-| 17 | Admin portal | Not started |
+| 17 | Admin portal | **Step 1 done (platform staff made from the command line, businesses, people, roles, trials, the audit trail across businesses, the plans screen, everything recorded with a reason); feature flags, support cases, notes and the system health page are step 2** |
 | 18 | Mobile apps (iOS + Android, Flutter) | **Confirmed in scope** — not started |
 | L1 | Security & privacy hardening | Not started |
 | L2 | Automated QA & testing | Ongoing |
@@ -398,7 +398,7 @@ Design (step 1): **a report is written once, stored whole, and everything else i
 Design (step 1): **plans and what they include are rows in the database, never written into the code**, and every price and limit the system starts with is a **placeholder to be confirmed before launch**: Starter £99 a month (£990 a year; 3 team members, 1 connection, 1 scheduled report, no AI assistant), Growth £199 (£1,990; 10, 3, 5, assistant), Scale £299 (£2,990; 25, 10, 20, assistant) and Corporate (by arrangement; no limits). Prices exclude VAT (20%), which is added at checkout. **A new business gets a 14-day free trial** (the `VYTERLIX_TRIAL_DAYS` setting) with the Scale plan's allowances, started the first time anything needs to know. **When a trial or a plan ends, only four things switch off: adding team members, adding connections, adding scheduled reports and the AI assistant.** Everything already there stays readable (figures, reports, downloads). A failed payment keeps the plan for a week after the period ended (the provider retries in that time), then it ends. **Moving to a dearer plan starts now; moving to a cheaper one waits for the end of the period paid for, and is refused if what the business has now would not fit.** The owner (only) chooses, changes, cancels and sees invoices; everyone in the business can see the plan and how much of it they use. Payment providers are pluggable per business: **Stripe** (card), **Paystack** and a **sandbox** (development only, refused in production, no money moves; it makes the same messages a real provider would). **Nothing a provider sends is believed without a genuine signature** (Stripe's time-stamped HMAC-SHA256 with a five-minute window, Paystack's HMAC-SHA512, the sandbox's own), and **a message is never acted on twice** (every one is recorded by provider and id). Paystack changes a plan with a fresh checkout and the old subscription is cancelled afterwards. A business with a problem payment, an ending trial (the last five days) or an ended plan is told by an alert and, for a failed payment, a notification to the owner.
 
 - [x] Tables: plans, subscriptions, subscription_items, feature_entitlements, billing_events, invoices
-- [~] Plans configurable in admin (never hard-coded prices): the prices and limits are rows and a staff command changes them (`python -m app.cli.billing plans|price|provider-price|include`); the admin screen for it comes with Phase 17
+- [x] Plans configurable in admin (never hard-coded prices): the prices and limits are rows, changed on the Admin screen (Plans tab) or with `python -m app.cli.billing plans|price|provider-price|include`
 - [x] Feature gating per tier (team members, connections, scheduled reports, AI assistant)
 - [~] Stripe integration: written from Stripe's documentation and exercised against a pretend server and signed test messages; **never run against real Stripe** (needs the business's own Stripe account, keys and price ids)
 - [~] Paystack integration (pluggable per organisation): the same, written from Paystack's documentation; never run against real Paystack
@@ -409,11 +409,15 @@ Design (step 1): **plans and what they include are rows in the database, never w
 
 ## Phase 17: Admin portal
 
-- [ ] Tables: feature_flags, support_cases, admin_notes, system_events
-- [ ] Organisation/tenant management
-- [ ] Cross-tenant user/role management
-- [ ] Internal system health dashboard
-- [ ] Audit log viewer
+Design (step 1): **platform staff are a separate list, not members of any business, and are made only from the command line** (`python -m app.cli.staff grant|revoke|list`, never from the website). There are two kinds: **support** (look only) and **admin** (look and change). Anyone who is not staff is told every admin page "does not exist" (404), and staff must have a verified email. **Staff see accounts and plans, never the figures inside a business** (no sales, costs, customers or reports; a test checks the shape of what comes back and that no secrets are in it). **Every look at a business or a person, and every change, is written to the audit log** (`admin.*` actions, with who, which business, and for changes the reason), and a business's own owner can see in their audit log that staff looked. **Every change needs a reason** of at least five characters. What staff can do: search and open businesses (people, plan and trial, how much is used, last activity); **suspend and reactivate** a business (its people are locked out with a clear message until it is reactivated); **give more trial time** (also brings back a trial that ended; not for a business that already pays); **change someone's role in a business** by the same rules the owner would face (a business always keeps an owner); **lock and unlock a person's account** (locking ends every session at once; staff accounts cannot be locked, which also stops anyone locking themselves out); read the **audit trail across every business** (filter by business, who, what and when, a page at a time); and **look after the plans** (prices, hidden or shown, what each includes; a price change never changes what a business already paying is charged). The Admin screen has Businesses, People, Audit log and Plans tabs, and a link on "Your businesses" that only staff see.
+
+- [~] Tables: platform_staff (done); feature_flags, support_cases, admin_notes, system_events (step 2)
+- [x] Organisation/tenant management (list, search, detail, suspend/reactivate, more trial time)
+- [x] Cross-tenant user/role management (find people, lock/unlock, change a role in a business)
+- [ ] Internal system health dashboard (step 2: background work waiting or failed, emails not sent, connections failing)
+- [x] Audit log viewer
+- [x] Plans management screen (closes the Phase 16 "configurable in admin" item)
+- [ ] Feature flags, support cases and notes (step 2)
 
 ## Phase 18: Mobile apps
 
@@ -595,6 +599,8 @@ weeks, Europe/London, en-GB wording.
 | **A failed email is marked failed and not retried** | A retry with a delay, and a bounce check, once a real mail provider is in use | L1 |
 | **Reports are one fixed set of four, not designed by the owner**; charts are not drawn in them; the PDF uses built-in fonts, so letters outside Western European languages print as a question mark; a scheduled report goes to people, not to an outside email address | Custom reports, charts, a Unicode font and outside recipients (with consent) | Phase 15 next steps |
 | **Every plan name, price and limit is a placeholder** (Starter £99, Growth £199, Scale £299 a month, yearly at ten months' price, and the limits on people, connections and scheduled reports); the 14-day trial length and the one-week grace after a failed payment are also assumptions | The client confirming the tiers, prices and limits (changed with `python -m app.cli.billing`, no code change) | Before L6 |
+| **Staff cannot yet "see as" a business** (no impersonation) and cannot see its figures, only its accounts and plan | Whether support needs to look at a business's screens; if so, a consent-based, time-limited, fully audited way | Phase 17 step 2 / L1 |
+| **Staff sign in with a password only**; there is no second step yet for the accounts that can lock people out and suspend businesses | Two-step sign-in for staff at least | L1 |
 | **Stripe and Paystack have never been run for real**: they were written from the providers' documents and tried only against pretend servers and test-signed messages | Stripe and Paystack accounts, price ids for each plan (`provider-price`), webhook addresses set up, and a real test-mode payment end to end | L6 |
 | **Paystack may not take pounds** (it supports other currencies, depending on the account's country); a business that pays through it is charged in the plan's currency | Deciding which gateway a UK business uses | Before L6 |
 | **Only four features are gated**; extras on top of a plan (more people for a fee), usage-based charges, coupons, and a UK VAT invoice in our own layout (the invoice shown is the provider's copy) are not built | Client decision on whether any of these are wanted | After launch |

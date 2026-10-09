@@ -112,13 +112,14 @@ def test_every_api_method_the_pages_call_exists():
         "dashboard",
         "reports",
         "billing",
+        "admin",
     ],
 )
 def test_data_pages_start_last_so_their_constants_are_ready(name):
     """A top-level `await start()` before later `const`s run makes a reload crash with
     "Cannot access ... before initialization" (found in a real browser)."""
     source = (FRONTEND / "js" / "pages" / f"{name}.js").read_text(encoding="utf-8")
-    start = source.index("await start(opened)")
+    start = source.index("await start(opened)" if name != "admin" else "await start()")
     after = source[start:]
     assert not re.search(r"^(const|let|class) ", after, re.MULTILINE), name
     assert not re.search(r"^function ", after, re.MULTILINE), name

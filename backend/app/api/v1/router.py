@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.v1 import (
     actions,
+    admin,
     alerts,
     assistant,
     audit,
@@ -78,4 +79,5 @@ api_router.include_router(alerts.inbox_router)
 api_router.include_router(dashboard.router)
 api_router.include_router(reports.router)
 api_router.include_router(billing.router)
+api_router.include_router(admin.router)
 api_router.include_router(billing.webhook_router)

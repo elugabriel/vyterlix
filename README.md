@@ -155,6 +155,7 @@ Open http://localhost:5500 — you'll land on the login page. Pages:
 | `memory.html?org=…` | What we know: what is normal for each figure, patterns in customers, goals and seasons, what has been tried and how it went, what was remembered for recent suggestions, and the owner's limits on what may be suggested |
 | `assistant.html?org=…` | Ask Vyterlix: questions about the business answered only from its own results, with the source of every answer, your earlier conversations, and the controls over AI and your data |
 | `reports.html?org=…` | Reports: write a monthly report, business health, key figures or what you tried, download it as a PDF or spreadsheet, and have it emailed every week or month |
+| `admin.html` | Admin (platform staff only): businesses, people, the audit log across businesses and the plans. Staff are made with `python -m app.cli.staff grant <email> --role admin` |
 | `billing.html?org=…` | Plan and billing: your plan or free trial and how much of it you use, the plans you can move to (monthly or yearly, prices before VAT), cancel or keep your plan, and what you have been charged |
 | `alerts.html?org=…` | Alerts: everything that needed attention, how serious it was and what happened to it, close or acknowledge it, and the settings for each kind of alert |
 | `notifications.html?org=…` | Notifications: what you have been told, mark as read, and how you want to be told (in the app, by email) |

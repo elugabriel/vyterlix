@@ -40,6 +40,16 @@ async function loadOrgs() {
   }
 }
 
+// Platform staff get a way into the admin pages (everyone else never sees it).
+if (user.email_verified) {
+  api
+    .get("/admin/me")
+    .then((me) => {
+      if (me.is_staff) document.querySelector(".topbar-user").prepend(el("a", { href: "admin.html" }, "Admin"));
+    })
+    .catch(() => {});
+}
+
 if (user.email_verified) {
   await loadOrgs();
 } else {
