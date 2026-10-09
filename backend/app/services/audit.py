@@ -85,6 +85,8 @@ class AuditAction(StrEnum):
     REPORT_GENERATED = "report.generated"
     REPORT_EXPORTED = "report.exported"
     REPORT_SCHEDULE_CHANGED = "report.schedule_changed"
+    BILLING_CHECKOUT_STARTED = "billing.checkout_started"
+    BILLING_SUBSCRIPTION_CHANGED = "billing.subscription_changed"
 
 
 def record_audit(

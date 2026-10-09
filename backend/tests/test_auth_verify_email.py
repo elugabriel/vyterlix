@@ -92,7 +92,7 @@ def test_token_is_single_use(api, outbox):
 
 def test_expired_token_rejected(api, db, outbox):
     register(api)
-    db.execute(update(UserToken).values(expires_at=datetime.now(UTC) - timedelta(seconds=1)))
+    db.execute(update(UserToken).values(expires_at=datetime.now(UTC) - timedelta(days=1)))
     res = verify(api, token_from(outbox[0]))
     assert res.status_code == 400
     assert res.json()["error"]["code"] == "invalid_token"

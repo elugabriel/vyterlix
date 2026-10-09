@@ -129,6 +129,15 @@ RULES: tuple[RuleDef, ...] = (
         {"points": "How many points the score has to fall"},
     ),
     RuleDef(
+        "billing_status",
+        "Your plan needs attention",
+        "data",
+        "high",
+        "Your free trial is about to end, a payment did not go through, or your plan has ended.",
+        {"days": 5},
+        {"days": "Days before your free trial ends that you are told"},
+    ),
+    RuleDef(
         "security_password_changed",
         "Your password was changed",
         SECURITY,
@@ -190,6 +199,10 @@ def key_health(period: date) -> str:
 
 
 KEY_STALE = "data:stale"
+
+
+def key_billing(state: str) -> str:
+    return f"billing:{state}"
 
 
 def key_quality(period: date) -> str:

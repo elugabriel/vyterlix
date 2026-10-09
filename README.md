@@ -155,6 +155,7 @@ Open http://localhost:5500 — you'll land on the login page. Pages:
 | `memory.html?org=…` | What we know: what is normal for each figure, patterns in customers, goals and seasons, what has been tried and how it went, what was remembered for recent suggestions, and the owner's limits on what may be suggested |
 | `assistant.html?org=…` | Ask Vyterlix: questions about the business answered only from its own results, with the source of every answer, your earlier conversations, and the controls over AI and your data |
 | `reports.html?org=…` | Reports: write a monthly report, business health, key figures or what you tried, download it as a PDF or spreadsheet, and have it emailed every week or month |
+| `billing.html?org=…` | Plan and billing: your plan or free trial and how much of it you use, the plans you can move to (monthly or yearly, prices before VAT), cancel or keep your plan, and what you have been charged |
 | `alerts.html?org=…` | Alerts: everything that needed attention, how serious it was and what happened to it, close or acknowledge it, and the settings for each kind of alert |
 | `notifications.html?org=…` | Notifications: what you have been told, mark as read, and how you want to be told (in the app, by email) |
 | `changes.html?org=…` | What changed: the figures that moved by more than normal, newest month first, good or bad news, where each came from, why it happened (with the evidence and how sure we are), and what to do about it |
@@ -180,6 +181,9 @@ All backend settings come from `VYTERLIX_*` environment variables or `backend/.e
 | `VYTERLIX_EMAIL_BACKEND` | `console` | `console` logs emails instead of sending them. Refused in `prod`. |
 | `VYTERLIX_EMAIL_BACKEND=smtp` and `VYTERLIX_SMTP_HOST`, `_PORT` (587), `_USERNAME`, `_PASSWORD`, `_USE_TLS` (true) | unset | Sends real email through any SMTP provider. The password is only ever read from the environment. |
 | `VYTERLIX_AI_PROVIDER=anthropic` and `VYTERLIX_ANTHROPIC_API_KEY`, `_ANTHROPIC_MODEL` | `offline` | Lets Claude reword assistant answers, only for businesses whose owner has allowed it. The key is only ever read from the environment. |
+| `VYTERLIX_TRIAL_DAYS` | `14` | Length of the free trial every new business gets. |
+| `VYTERLIX_STRIPE_SECRET_KEY` and `VYTERLIX_STRIPE_WEBHOOK_SECRET` | unset | Turn on paying by card through Stripe (both are needed). Only ever read from the environment. |
+| `VYTERLIX_PAYSTACK_SECRET_KEY` | unset | Turns on paying through Paystack. Only ever read from the environment. |
 | `VYTERLIX_EMAIL_FROM` | `Vyterlix <no-reply@vyterlix.com>` | Sender address. |
 | `VYTERLIX_EMAIL_VERIFICATION_TTL_HOURS` | `24` | How long a verification link works. |
 | `VYTERLIX_PASSWORD_RESET_TTL_MINUTES` | `60` | How long a password-reset link works. |

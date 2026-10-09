@@ -21,10 +21,11 @@ from app.db.tenant import ACROSS_TENANTS, tenant_scope
 from app.integrations.base import utcnow
 from app.models.actions import BusinessAction
 from app.models.alerts import Notification
+from app.models.billing import Subscription
 from app.models.identity import OrganizationUser, Role, User
 from app.models.outcomes import FollowUpSchedule
 from app.models.reports import ReportSchedule
-from app.services import actions, alerts, notifications, outcomes, reports
+from app.services import actions, alerts, billing, notifications, outcomes, reports
 from app.services.jobs import JobTenant
 
 logger = logging.getLogger("vyterlix.scheduler")
@@ -51,7 +52,16 @@ def _businesses_with_work(db: Session, today: date, now: datetime | None = None)
         .where(ReportSchedule.enabled.is_(True), ReportSchedule.next_run_at <= (now or utcnow()))
         .execution_options(**ACROSS_TENANTS)
     ).all()
-    return set(due) | set(open_work) | set(waiting) | set(reports_due)
+    renewals = db.scalars(
+        select(Subscription.organization_id)
+        .where(
+            Subscription.provider == "sandbox",
+            Subscription.status == "active",
+            Subscription.current_period_end <= (now or utcnow()),
+        )
+        .execution_options(**ACROSS_TENANTS)
+    ).all()
+    return set(due) | set(open_work) | set(waiting) | set(reports_due) | set(renewals)
 
 
 def _owner(db: Session, organization_id) -> User | None:
@@ -68,7 +78,14 @@ def _owner(db: Session, organization_id) -> User | None:
 def tick(db: Session, *, today: date | None = None, now: datetime | None = None) -> dict[str, int]:
     """One round across every business. A problem in one business never stops the others."""
     today = today or today_uk()
-    totals = {"businesses": 0, "overdue": 0, "followed_up": 0, "measured": 0, "reports": 0}
+    totals = {
+        "businesses": 0,
+        "overdue": 0,
+        "followed_up": 0,
+        "measured": 0,
+        "reports": 0,
+        "renewed": 0,
+    }
     for organization_id in sorted(_businesses_with_work(db, today, now), key=str):
         owner = _owner(db, organization_id)
         if owner is None:
@@ -76,6 +93,7 @@ def tick(db: Session, *, today: date | None = None, now: datetime | None = None)
         tenant = JobTenant(organization_id=organization_id, user=owner)
         try:
             with tenant_scope(db, organization_id):
+                totals["renewed"] += billing.roll_sandbox(db, organization_id, now or utcnow())
                 totals["overdue"] += actions.refresh_overdue(db, tenant, today=today)
                 result = outcomes.sweep(db, tenant, today=today)
                 alerts.evaluate(db, tenant, today=today, now=now)

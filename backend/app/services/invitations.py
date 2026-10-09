@@ -25,6 +25,7 @@ from app.models.identity import (
 )
 from app.schemas.invitations import InvitationOut, InvitationPreviewOut, InvitationStatus
 from app.schemas.organizations import OrganizationOut, Remit
+from app.services import billing
 from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
 from app.services.email import EmailMessage, EmailSender
@@ -96,6 +97,7 @@ def create_invitation(
         )
         .values(revoked_at=func.now())
     )
+    billing.check(db, org.id, "members")  # the plan has room for one more person
 
     role = db.scalars(
         select(Role).where(Role.code == role_code, Role.organization_id.is_(None))

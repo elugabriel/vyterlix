@@ -37,14 +37,21 @@ from app.schemas.alerts import (
     RuleOut,
 )
 from app.services import actions as actions_service
-from app.services import detection, forecast, health, notifications
+from app.services import billing, detection, forecast, health, notifications
 from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
 from app.services.email import EmailSender
 
 logger = logging.getLogger("vyterlix.alerts")
 
-STATE_BASED = ("forecast_decline", "action_overdue", "data_stale", "data_quality", "health_drop")
+STATE_BASED = (
+    "forecast_decline",
+    "action_overdue",
+    "data_stale",
+    "data_quality",
+    "health_drop",
+    "billing_status",
+)
 RECENT_MONTHS = 2  # changes older than this are history, not news
 
 
@@ -338,6 +345,34 @@ def _stale(db: Session, settings: dict, today: date) -> list[Candidate]:
     ]
 
 
+def _billing(db: Session, tenant, settings: dict, now: datetime) -> list[Candidate]:
+    enabled, severity, params = settings["billing_status"]
+    if not enabled:
+        return []
+    st = billing.standing(db, tenant.organization_id, now)
+    sub, state, link = st.subscription, st.effective, "billing.html"
+    if state == "trialing":
+        days = billing.rules.trial_days_left(sub.trial_ends_at, now)
+        if days > params["days"]:
+            return []
+        title = f"Your free trial ends in {days} day{'s' if days != 1 else ''}"
+        body = f"Choose a plan before {sub.trial_ends_at:%d/%m/%Y} to keep adding people, connections, scheduled reports and the AI assistant."
+        key = rules.key_billing("trial_ending")
+    elif state == "past_due":
+        title, key = "Your last payment did not go through", rules.key_billing("past_due")
+        body = "Update your payment details to keep your plan."
+    elif state in ("expired", "canceled"):
+        title, key = "Your plan has ended", rules.key_billing("ended")
+        body = "Choose a plan to carry on adding to your business. Everything you already have stays readable."
+    else:
+        return []
+    return [
+        Candidate(
+            "billing_status", "data", severity, title, body, key, link, None, {"state": state}
+        )
+    ]
+
+
 def _quality(db: Session, settings: dict, latest: date | None) -> list[Candidate]:
     enabled, severity, params = settings["data_quality"]
     value = None if latest is None else _revenue_value(db, latest)
@@ -390,13 +425,14 @@ def _health(db: Session, settings: dict) -> list[Candidate]:
     ]
 
 
-def candidates(db: Session, tenant, today: date) -> list[Candidate]:
+def candidates(db: Session, tenant, today: date, now: datetime | None = None) -> list[Candidate]:
     rows = _rows(db)
     settings = {d.code: rules.settings_for(d, rows.get(d.code)) for d in rules.RULES}
     latest = _latest_month(db)
     return [
         *_changes(db, settings, latest), *_forecast(db, settings, latest), *_overdue(db, tenant, settings, today),
         *_stale(db, settings, today), *_quality(db, settings, latest), *_health(db, settings),
+        *_billing(db, tenant, settings, now or utcnow()),
     ]  # fmt: skip
 
 
@@ -410,7 +446,7 @@ def evaluate(
 ) -> EvaluateOut:
     """Look at everything and raise, count or close alerts. Safe to run as often as you like."""
     today, now = today or today_uk(), now or utcnow()
-    current = candidates(db, tenant, today)
+    current = candidates(db, tenant, today, now)
     raised = repeated = notified = 0
     for c in current:
         alert, new = raise_alert(db, tenant.organization_id, c, now)

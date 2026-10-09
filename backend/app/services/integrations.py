@@ -44,6 +44,7 @@ from app.integrations.base import (
 from app.integrations.registry import PROVIDERS, get_provider
 from app.models.integrations import Integration, IntegrationOAuthState, IntegrationSync
 from app.schemas.integrations import ConnectOut, IntegrationOut, SyncOut
+from app.services import billing
 from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
 from app.services.crypto import CryptoError, decrypt_json, decrypt_text, encrypt_json, encrypt_text
@@ -141,6 +142,8 @@ def start_connect(
 ) -> ConnectOut:
     now = now or utcnow()
     provider = get_provider(provider_key)
+    if integration_id is None:  # a new connection: the plan has room for one more
+        billing.check(db, tenant.organization_id, "integrations")
     if integration_id is not None:
         existing = get_integration(db, integration_id)
         if existing.provider != provider.key:

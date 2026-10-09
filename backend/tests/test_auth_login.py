@@ -252,7 +252,7 @@ def test_refresh_without_cookie_fails(api):
 
 def test_refresh_fails_for_expired_session(api, db, user):
     login(api)
-    db.execute(update(UserSession).values(expires_at=datetime.now(UTC) - timedelta(seconds=1)))
+    db.execute(update(UserSession).values(expires_at=datetime.now(UTC) - timedelta(days=1)))
     assert api.post("/api/v1/auth/refresh").status_code == 401
 
 

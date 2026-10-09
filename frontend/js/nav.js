@@ -19,6 +19,7 @@ export const NAV = [
   ["memory.html", "What we know"],
   ["data.html", "Your data"],
   ["business.html", "Settings"],
+  ["billing.html", "Billing"],
 ];
 // Screens that belong under another entry, so that entry stays lit while you are on them
 const BELONGS_TO = {

@@ -130,7 +130,7 @@ def test_reset_link_is_single_use(api, user, outbox):
 
 def test_expired_link_rejected(api, db, user, outbox):
     forgot(api)
-    db.execute(update(UserToken).values(expires_at=datetime.now(UTC) - timedelta(seconds=1)))
+    db.execute(update(UserToken).values(expires_at=datetime.now(UTC) - timedelta(days=1)))
     assert reset(api, reset_token(outbox[0])).status_code == 400
     assert login(api, OLD_PASSWORD).status_code == 200  # password unchanged
 

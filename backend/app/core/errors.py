@@ -53,6 +53,13 @@ class ConflictError(AppError):
     code = "conflict"
 
 
+class PlanLimitError(AppError):
+    """The plan does not allow this (a limit reached, or a feature that is not included)."""
+
+    status_code = 402
+    code = "plan_limit"
+
+
 class ServiceUnavailableError(AppError):
     status_code = 503
     code = "service_unavailable"

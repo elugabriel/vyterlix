@@ -68,6 +68,13 @@ class Settings(BaseSettings):
     anthropic_api_key: SecretStr | None = None  # only ever from the environment, never stored
     anthropic_model: str = "claude-sonnet-5-5"
     ai_timeout_seconds: float = 20.0
+
+    # Billing. The sandbox (no money moves) exists in dev and test only. A real provider is used
+    # only when its keys are set; every key comes from the environment, never stored or shown.
+    trial_days: int = 14
+    stripe_secret_key: SecretStr | None = None
+    stripe_webhook_secret: SecretStr | None = None
+    paystack_secret_key: SecretStr | None = None
     previous_encryption_keys: list[str] = []
     oauth_state_ttl_minutes: int = 10  # how long a "connect" attempt stays valid
     token_refresh_margin_seconds: int = 120  # refresh access tokens this long before they expire
@@ -112,6 +119,14 @@ class Settings(BaseSettings):
         # The console backend logs live tokens; that must never happen in production.
         if self.env == "prod" and self.email_backend == "console":
             raise ValueError("Console email backend is not allowed in prod")
+        return self
+
+    @model_validator(mode="after")
+    def _stripe_needs_both_keys(self) -> "Settings":
+        if (self.stripe_secret_key is None) != (self.stripe_webhook_secret is None):
+            raise ValueError(
+                "Set both VYTERLIX_STRIPE_SECRET_KEY and VYTERLIX_STRIPE_WEBHOOK_SECRET"
+            )
         return self
 
     @model_validator(mode="after")

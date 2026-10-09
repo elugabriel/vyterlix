@@ -268,6 +268,18 @@ def _setup(api: Api, org_id: uuid.UUID, say: Callable[[str], None]) -> None:
     )  # fmt: skip
 
 
+def _plan(db: Session, org_id: uuid.UUID, say: Callable[[str], None]) -> None:
+    """A paid sandbox plan (no money moves), so the team, connections, scheduled reports and the
+    assistant are all on for the demonstration."""
+    from app.integrations.base import utcnow
+    from app.services import billing
+
+    with tenant_scope(db, org_id):
+        billing.grant_demo_plan(db, org_id, "scale", utcnow())
+        db.commit()
+    say("  a paid sandbox plan (Scale), with one demo invoice")
+
+
 def _invitations(api: Api, org_id: uuid.UUID, say: Callable[[str], None]) -> None:
     say("  invitations waiting to be accepted")
     base = f"/organizations/{org_id}/invitations"
@@ -760,6 +772,8 @@ def run(
     for org_id in org_ids:
         with sessions() as db:
             say(db.get(Organization, org_id).name)
+        with sessions() as db:
+            _plan(db, org_id, say)
         _setup(owner, org_id, say)
         _invitations(owner, org_id, say)
         _finish_onboarding(owner, org_id, say)

@@ -41,6 +41,7 @@ from app.schemas.assistant import (
     ToolCallOut,
 )
 from app.services import assistant_tools as tools
+from app.services import billing
 from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
 
@@ -215,6 +216,7 @@ def ask(
     row = _settings_row(db)
     if row is not None and not row.ai_enabled:
         raise PermissionDeniedError(answers.SWITCHED_OFF, code="ai_disabled")
+    billing.check(db, tenant.organization_id, "ai_assistant")  # the plan includes it
     external = provider is not None and row is not None and row.allow_external_ai
 
     now = utcnow()

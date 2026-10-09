@@ -29,7 +29,7 @@ from app.schemas.reports import (
     ScheduleOut,
     SchedulePatch,
 )
-from app.services import notifications
+from app.services import billing, notifications
 from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
 from app.services.email import EmailMessage, EmailSender, get_email_sender
@@ -291,6 +291,7 @@ def create_schedule(
     now: datetime | None = None,
 ) -> ScheduleOut:
     report = _get(db, report_id)
+    billing.check(db, tenant.organization_id, "scheduled_reports")
     _check_when(body.frequency, body.weekday, body.day_of_month)
     recipients = _check_recipients(db, body.recipients)
     schedule = ReportSchedule(

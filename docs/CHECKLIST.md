@@ -31,7 +31,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 14 | Alerts + notifications | **Step 1 done (alert rules and history, nine areas and five severities, duplicate suppression, one service that owns delivery, in-app inbox, email through SMTP, quiet hours, per-person choices, the Alerts and Notifications screens); mobile push comes with Phase 18** |
 | — | Core UX screens | **Step 1 done (the Today front screen, role-differentiated, one navigation bar and shell on every business page); a single guided page for one change is still to do** |
 | 15 | Reporting | **Step 1 done (four reports, kept exactly as written, PDF and CSV downloads, weekly or monthly emailed delivery, the Reports screen)** |
-| 16 | Subscription / billing | Not started |
+| 16 | Subscription / billing | **Step 1 done (plans and what they include as data, a 14-day trial, gating of four features, sandbox, Stripe and Paystack behind one interface with signed and never-twice messages, upgrade, downgrade, cancel, invoices, the Plan and billing screen); real Stripe and Paystack untried until accounts exist; prices are placeholders** |
 | 17 | Admin portal | Not started |
 | 18 | Mobile apps (iOS + Android, Flutter) | **Confirmed in scope** — not started |
 | L1 | Security & privacy hardening | Not started |
@@ -395,13 +395,17 @@ Design (step 1): **a report is written once, stored whole, and everything else i
 
 ## Phase 16: Subscription / billing
 
-- [ ] Tables: plans, subscriptions, subscription_items, feature_entitlements, billing_events, invoices
-- [ ] Plans configurable in admin (never hard-coded prices)
-- [ ] Feature gating per tier
-- [ ] Stripe integration
-- [ ] Paystack integration (pluggable per organisation)
-- [ ] Upgrade / downgrade
-- [ ] Billing history
+Design (step 1): **plans and what they include are rows in the database, never written into the code**, and every price and limit the system starts with is a **placeholder to be confirmed before launch**: Starter £99 a month (£990 a year; 3 team members, 1 connection, 1 scheduled report, no AI assistant), Growth £199 (£1,990; 10, 3, 5, assistant), Scale £299 (£2,990; 25, 10, 20, assistant) and Corporate (by arrangement; no limits). Prices exclude VAT (20%), which is added at checkout. **A new business gets a 14-day free trial** (the `VYTERLIX_TRIAL_DAYS` setting) with the Scale plan's allowances, started the first time anything needs to know. **When a trial or a plan ends, only four things switch off: adding team members, adding connections, adding scheduled reports and the AI assistant.** Everything already there stays readable (figures, reports, downloads). A failed payment keeps the plan for a week after the period ended (the provider retries in that time), then it ends. **Moving to a dearer plan starts now; moving to a cheaper one waits for the end of the period paid for, and is refused if what the business has now would not fit.** The owner (only) chooses, changes, cancels and sees invoices; everyone in the business can see the plan and how much of it they use. Payment providers are pluggable per business: **Stripe** (card), **Paystack** and a **sandbox** (development only, refused in production, no money moves; it makes the same messages a real provider would). **Nothing a provider sends is believed without a genuine signature** (Stripe's time-stamped HMAC-SHA256 with a five-minute window, Paystack's HMAC-SHA512, the sandbox's own), and **a message is never acted on twice** (every one is recorded by provider and id). Paystack changes a plan with a fresh checkout and the old subscription is cancelled afterwards. A business with a problem payment, an ending trial (the last five days) or an ended plan is told by an alert and, for a failed payment, a notification to the owner.
+
+- [x] Tables: plans, subscriptions, subscription_items, feature_entitlements, billing_events, invoices
+- [~] Plans configurable in admin (never hard-coded prices): the prices and limits are rows and a staff command changes them (`python -m app.cli.billing plans|price|provider-price|include`); the admin screen for it comes with Phase 17
+- [x] Feature gating per tier (team members, connections, scheduled reports, AI assistant)
+- [~] Stripe integration: written from Stripe's documentation and exercised against a pretend server and signed test messages; **never run against real Stripe** (needs the business's own Stripe account, keys and price ids)
+- [~] Paystack integration (pluggable per organisation): the same, written from Paystack's documentation; never run against real Paystack
+- [x] Upgrade / downgrade (now for a dearer plan, at the period's end for a cheaper one, refused if it would not fit)
+- [x] Billing history (invoices, with net, VAT and total)
+- [x] Screen: Plan and billing (the plan and trial countdown, what is used of what is allowed, plan cards with monthly or yearly, cancel or keep, invoices)
+- [x] Demo businesses are put on a paid sandbox Scale plan by the showcase so every feature stays on (removed with the other demo data, see L6)
 
 ## Phase 17: Admin portal
 
@@ -511,7 +515,7 @@ weeks, Europe/London, en-GB wording.
 
 ## L6: UAT & go-live
 
-- [ ] **Remove all demo information before going live**: the demo businesses (names ending "(demo data)"), the demo accounts (`e2e-ui@acme.co.uk`, `manager@` and `viewer@fakeham-bakery.example`), the DEMO sector benchmarks (`python -m app.cli.demo unshowcase`), the local `.demo-logins.local.md` file, and any account given owner rights to a demo business for testing
+- [ ] **Remove all demo information before going live**: the demo businesses (names ending "(demo data)"), the demo accounts (`e2e-ui@acme.co.uk`, `manager@` and `viewer@fakeham-bakery.example`), the DEMO sector benchmarks (`python -m app.cli.demo unshowcase`), the local `.demo-logins.local.md` file, the paid sandbox plan and demo invoice the showcase gave each demo business (they go with the business), and any account given owner rights to a demo business for testing
 - [ ] UAT: registration, onboarding, CSV import, KPIs, health, diagnosis, forecast, recommendation, approval, action, follow-up, outcome, learning, AI, alerts, reports, billing, mobile
 - [ ] Production smoke test
 - [ ] Backup and restore verified
@@ -559,7 +563,7 @@ weeks, Europe/London, en-GB wording.
 | Clean-up job for old `login_attempts` / expired sessions / used tokens | Tables grow slowly; needs the background-job runner | Phase 11 |
 | Email-based lockout can be triggered by an attacker (15-min lockout of a victim) | Standard trade-off; mitigated by forgot-password + short window | L1 review |
 | Change email address (verify the new address before switching, alert the old one) | Needs its own verified flow; not required for MVP sign-up | Before L6 (UAT) |
-| Limit on businesses one user can create | Abuse guard; ties into plan/tier limits | Phase 16 (billing) |
+| Limit on businesses one user can create | Abuse guard; ties into plan/tier limits (plans now exist, but a user is not tied to one plan across businesses) | Phase 17 / L1 |
 | Limit on pending invitations per business / invite rate | Abuse guard against using invites to send spam | Phase 16 / L1 |
 | **UK GDPR erasure vs audit trail:** audit `details` can hold email addresses and survive account deletion — decide what to anonymise vs keep (legal basis), and build retention clean-up using `vyterlix.allow_audit_delete` | Needs a legal/retention decision | L1 (before launch) |
 | Audit-row volume from repeated blocked logins | Edge rate limiting will absorb it | L1 / L3 |
@@ -590,6 +594,11 @@ weeks, Europe/London, en-GB wording.
 | **Alerts are checked every 15 minutes at best, not the instant something happens**, and there is no snooze, no weekly digest, and no alert for marketing (no marketing data yet) | A digest schedule, snoozing, and marketing alerts when marketing data arrives | Phase 14 next steps |
 | **A failed email is marked failed and not retried** | A retry with a delay, and a bounce check, once a real mail provider is in use | L1 |
 | **Reports are one fixed set of four, not designed by the owner**; charts are not drawn in them; the PDF uses built-in fonts, so letters outside Western European languages print as a question mark; a scheduled report goes to people, not to an outside email address | Custom reports, charts, a Unicode font and outside recipients (with consent) | Phase 15 next steps |
+| **Every plan name, price and limit is a placeholder** (Starter £99, Growth £199, Scale £299 a month, yearly at ten months' price, and the limits on people, connections and scheduled reports); the 14-day trial length and the one-week grace after a failed payment are also assumptions | The client confirming the tiers, prices and limits (changed with `python -m app.cli.billing`, no code change) | Before L6 |
+| **Stripe and Paystack have never been run for real**: they were written from the providers' documents and tried only against pretend servers and test-signed messages | Stripe and Paystack accounts, price ids for each plan (`provider-price`), webhook addresses set up, and a real test-mode payment end to end | L6 |
+| **Paystack may not take pounds** (it supports other currencies, depending on the account's country); a business that pays through it is charged in the plan's currency | Deciding which gateway a UK business uses | Before L6 |
+| **Only four features are gated**; extras on top of a plan (more people for a fee), usage-based charges, coupons, and a UK VAT invoice in our own layout (the invoice shown is the provider's copy) are not built | Client decision on whether any of these are wanted | After launch |
+| **The Billing page was loaded in a browser and its code checked, but not clicked through with a real plan change** | A look at the page with demo logins | L6 |
 | **Reports are not yet checked by eye in a PDF viewer on paper**: the tests read the text back and check the layout rules (sideways pages, page numbers, repeated headings) | A look at a printed copy by the client | L6 |
 | **Quiet hours are for the whole business**, not per person | Per-person quiet hours | Phase 14 next steps |
 | **The outside provider (Claude) has not been tried against the real service:** only against a pretend one | Needs an Anthropic API key and a documented purpose and subprocessor entry before any real data is sent | L1 |

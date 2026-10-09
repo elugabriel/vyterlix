@@ -7,6 +7,7 @@ from app.api.v1 import (
     audit,
     auth,
     benchmarks,
+    billing,
     business,
     business_health,
     business_lists,
@@ -76,3 +77,5 @@ api_router.include_router(alerts.router)
 api_router.include_router(alerts.inbox_router)
 api_router.include_router(dashboard.router)
 api_router.include_router(reports.router)
+api_router.include_router(billing.router)
+api_router.include_router(billing.webhook_router)
