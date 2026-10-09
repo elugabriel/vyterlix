@@ -22,6 +22,7 @@ from app.models import (
     memory,
     outcomes,
     recommendations,
+    reports,
 )
 
 __all__ = [
@@ -42,4 +43,5 @@ __all__ = [
     "memory",
     "outcomes",
     "recommendations",
+    "reports",
 ]

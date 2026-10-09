@@ -110,6 +110,7 @@ def test_every_api_method_the_pages_call_exists():
         "alerts",
         "notifications",
         "dashboard",
+        "reports",
     ],
 )
 def test_data_pages_start_last_so_their_constants_are_ready(name):

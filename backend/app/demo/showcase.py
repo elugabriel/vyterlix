@@ -540,6 +540,20 @@ def _analytics(
 
     with tenant_scope(db, org_id):
         alerts.evaluate(db, tenant)
+    say("  written reports and a weekly schedule")
+    reports = api.call("GET", f"{base}/reports")
+    for report in reports:
+        api.call("POST", f"{base}/reports/{report['id']}/generate")
+    if not api.call("GET", f"{base}/reports/schedules"):
+        members = api.call("GET", f"{base}/members")
+        weekly = next(r for r in reports if r["kind"] == "monthly")
+        api.call(
+            "POST",
+            f"{base}/reports/{weekly['id']}/schedules",
+            json={
+                "frequency": "weekly", "weekday": 1, "recipients": [m["user_id"] for m in members if m["role"] in ("owner", "manager")],
+            },
+        )  # fmt: skip
 
 
 def _actions(

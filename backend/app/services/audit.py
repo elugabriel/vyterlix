@@ -82,6 +82,9 @@ class AuditAction(StrEnum):
     ASSISTANT_SETTINGS_CHANGED = "assistant.settings_changed"
     ASSISTANT_SENT_OUTSIDE = "assistant.sent_outside"
     ALERT_RULE_CHANGED = "alert.rule_changed"
+    REPORT_GENERATED = "report.generated"
+    REPORT_EXPORTED = "report.exported"
+    REPORT_SCHEDULE_CHANGED = "report.schedule_changed"
 
 
 def record_audit(

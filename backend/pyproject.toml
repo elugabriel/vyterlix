@@ -18,12 +18,14 @@ dependencies = [
     "defusedxml>=0.7",  # makes openpyxl refuse XML entity attacks in uploaded workbooks
     "tzdata>=2024.1",  # Europe/London rules on Windows, which has no system tz database
     "cryptography>=43",  # encrypts the keys that let us read a connected system (Fernet)
+    "httpx>=0.27",  # talks to the outside AI provider (when the owner allows it)
+    "fpdf2>=2.8",  # writes the PDF reports (pure Python)
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8",
-    "httpx>=0.27",
+    "pypdf>=5",  # reads PDF reports back in tests
     "ruff>=0.6",
 ]
 

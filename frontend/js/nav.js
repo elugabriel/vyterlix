@@ -13,6 +13,7 @@ export const NAV = [
   ["forecast.html", "Forecast"],
   ["kpis.html", "Key figures"],
   ["health.html", "Health"],
+  ["reports.html", "Reports"],
   ["alerts.html", "Alerts"],
   ["assistant.html", "Ask Vyterlix"],
   ["memory.html", "What we know"],

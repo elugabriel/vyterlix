@@ -18,17 +18,19 @@ from sqlalchemy.orm import Session
 from app.actions import rules as action_rules
 from app.core.uk import today_uk
 from app.db.tenant import ACROSS_TENANTS, tenant_scope
+from app.integrations.base import utcnow
 from app.models.actions import BusinessAction
 from app.models.alerts import Notification
 from app.models.identity import OrganizationUser, Role, User
 from app.models.outcomes import FollowUpSchedule
-from app.services import actions, alerts, notifications, outcomes
+from app.models.reports import ReportSchedule
+from app.services import actions, alerts, notifications, outcomes, reports
 from app.services.jobs import JobTenant
 
 logger = logging.getLogger("vyterlix.scheduler")
 
 
-def _businesses_with_work(db: Session, today: date) -> set:
+def _businesses_with_work(db: Session, today: date, now: datetime | None = None) -> set:
     due = db.scalars(
         select(FollowUpSchedule.organization_id)
         .where(FollowUpSchedule.status == "scheduled", FollowUpSchedule.due_date <= today)
@@ -44,7 +46,12 @@ def _businesses_with_work(db: Session, today: date) -> set:
         .where(Notification.email_status == "pending")
         .execution_options(**ACROSS_TENANTS)
     ).all()
-    return set(due) | set(open_work) | set(waiting)
+    reports_due = db.scalars(
+        select(ReportSchedule.organization_id)
+        .where(ReportSchedule.enabled.is_(True), ReportSchedule.next_run_at <= (now or utcnow()))
+        .execution_options(**ACROSS_TENANTS)
+    ).all()
+    return set(due) | set(open_work) | set(waiting) | set(reports_due)
 
 
 def _owner(db: Session, organization_id) -> User | None:
@@ -61,8 +68,8 @@ def _owner(db: Session, organization_id) -> User | None:
 def tick(db: Session, *, today: date | None = None, now: datetime | None = None) -> dict[str, int]:
     """One round across every business. A problem in one business never stops the others."""
     today = today or today_uk()
-    totals = {"businesses": 0, "overdue": 0, "followed_up": 0, "measured": 0}
-    for organization_id in sorted(_businesses_with_work(db, today), key=str):
+    totals = {"businesses": 0, "overdue": 0, "followed_up": 0, "measured": 0, "reports": 0}
+    for organization_id in sorted(_businesses_with_work(db, today, now), key=str):
         owner = _owner(db, organization_id)
         if owner is None:
             continue
@@ -73,6 +80,7 @@ def tick(db: Session, *, today: date | None = None, now: datetime | None = None)
                 result = outcomes.sweep(db, tenant, today=today)
                 alerts.evaluate(db, tenant, today=today, now=now)
                 notifications.send_due_emails(db, now=now)
+                totals["reports"] += reports.run_due(db, organization_id, now=now)
                 db.commit()
             totals["followed_up"] += result["told"]
             totals["measured"] += result["measured"]

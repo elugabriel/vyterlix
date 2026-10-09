@@ -30,7 +30,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 13 | AI consultation | **Step 1 done (a grounded assistant: questions understood by rules, answered only from the business's own results, every answer sourced, conversations kept, role-based, per-business AI controls, Claude behind a wrapper that may only reword and is checked)** |
 | 14 | Alerts + notifications | **Step 1 done (alert rules and history, nine areas and five severities, duplicate suppression, one service that owns delivery, in-app inbox, email through SMTP, quiet hours, per-person choices, the Alerts and Notifications screens); mobile push comes with Phase 18** |
 | — | Core UX screens | **Step 1 done (the Today front screen, role-differentiated, one navigation bar and shell on every business page); a single guided page for one change is still to do** |
-| 15 | Reporting | Not started |
+| 15 | Reporting | **Step 1 done (four reports, kept exactly as written, PDF and CSV downloads, weekly or monthly emailed delivery, the Reports screen)** |
 | 16 | Subscription / billing | Not started |
 | 17 | Admin portal | Not started |
 | 18 | Mobile apps (iOS + Android, Flutter) | **Confirmed in scope** — not started |
@@ -385,10 +385,13 @@ Design (step 1): **Today is the front screen** (`dashboard.html`, reached from t
 
 ## Phase 15: Reporting
 
-- [ ] Tables: reports, report_runs, report_schedules
-- [ ] Health, KPI and intervention-outcome reports
-- [ ] PDF and CSV export
-- [ ] Scheduled delivery
+Design (step 1): **a report is written once, stored whole, and everything else is made from that copy.** There are four standard reports, made the first time they are wanted: the **monthly business report** (one month: how you are doing, five key figures against the month before, what changed, your actions, what was learned, open alerts), **business health** (the score, each area, how it has moved over the months, and what holds it back), **key figures** (every figure month by month with how the latest moved, one table per area; shown sideways when it has seven or more columns) and **what you tried and how it went** (what was taken up in the period, what came of it, what was learned, how each kind of action has worked for you). The owner can change how many months the last three cover (1 to 24). All of it is read from results other parts already worked out, and where there is nothing to say the report says so. Each copy keeps its content, the report rules version and who it was written for; **a copy belongs to the person it was written for** (to anyone else, even the owner, it does not exist), and a stored copy never changes even if the figures later do. Downloads are made from the stored copy: a **PDF** (built-in fonts, page numbers, headings repeated on each page, the same bytes every time for the same copy) and a **CSV** (with a byte-order mark so Excel reads the pound signs; any text that a spreadsheet would run as a formula, such as an action named `=HYPERLINK(...)`, gets a quote in front). Downloads are always attachments, never shown in the page, and every write and download is in the audit log. **Scheduled delivery** (owner only): a report is written and emailed weekly (on a chosen weekday) or monthly (on a chosen day, 1 to 28) at 7am UK time (06:00 or 07:00 UTC with the clocks), to chosen people who are still in the business; a separate copy is written for each, and the email holds only a link to it (nothing attached, no figures in the email), so it can only be opened by someone logged in. The worker's timed round does the writing; a schedule moves to its next time as soon as it has run, a paused one does not catch up when resumed, and a failed email leaves the report to read and marked as not emailed.
+
+- [x] Tables: reports, report_runs, report_schedules
+- [x] Health, KPI and intervention-outcome reports (and a monthly report that gathers them)
+- [x] PDF and CSV export
+- [x] Scheduled delivery
+- [x] Screen: Reports (write now, read on the page, download, your earlier reports, and for the owner the months and the schedules)
 
 ## Phase 16: Subscription / billing
 
@@ -586,6 +589,8 @@ weeks, Europe/London, en-GB wording.
 | **The assistant answers one question about one figure at a time** and understands a fixed set of phrasings; there is no rate limit on questions, no streaming, no voice, and no way to ask for work to be done (it only reads) | Wider phrasing and multi-part questions; a limit per person; actions from chat | Phase 13 next steps |
 | **Alerts are checked every 15 minutes at best, not the instant something happens**, and there is no snooze, no weekly digest, and no alert for marketing (no marketing data yet) | A digest schedule, snoozing, and marketing alerts when marketing data arrives | Phase 14 next steps |
 | **A failed email is marked failed and not retried** | A retry with a delay, and a bounce check, once a real mail provider is in use | L1 |
+| **Reports are one fixed set of four, not designed by the owner**; charts are not drawn in them; the PDF uses built-in fonts, so letters outside Western European languages print as a question mark; a scheduled report goes to people, not to an outside email address | Custom reports, charts, a Unicode font and outside recipients (with consent) | Phase 15 next steps |
+| **Reports are not yet checked by eye in a PDF viewer on paper**: the tests read the text back and check the layout rules (sideways pages, page numbers, repeated headings) | A look at a printed copy by the client | L6 |
 | **Quiet hours are for the whole business**, not per person | Per-person quiet hours | Phase 14 next steps |
 | **The outside provider (Claude) has not been tried against the real service:** only against a pretend one | Needs an Anthropic API key and a documented purpose and subprocessor entry before any real data is sent | L1 |
 | **Customer patterns are three simple ones**, not segments or buying habits over time | More patterns once customers are segmented | Later |
