@@ -64,6 +64,6 @@ Google developer accounts exist; change them before anything is published.
 
 ## Not built yet
 
- data upload
-and quick entry, reports, what we know, settings and billing, fingerprint / Face ID unlock, push
-notifications, working without a signal, and links in emails that open the app. They are listed in `docs/CHECKLIST.md` under Phase 18.
+Data upload and quick entry, reports, what we know, settings, team and billing, fingerprint / Face ID
+unlock, push notifications, working without a signal, and links in emails that open the app. They are
+listed in `docs/CHECKLIST.md` under Phase 18.
