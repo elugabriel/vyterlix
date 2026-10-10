@@ -99,6 +99,11 @@ class AuditAction(StrEnum):
     ADMIN_MEMBER_ROLE_CHANGED = "admin.member_role_changed"
     ADMIN_TRIAL_EXTENDED = "admin.trial_extended"
     ADMIN_PLAN_CHANGED = "admin.plan_changed"
+    ADMIN_CASE_CREATED = "admin.case_created"
+    ADMIN_CASE_UPDATED = "admin.case_updated"
+    ADMIN_NOTE_ADDED = "admin.note_added"
+    ADMIN_FLAG_CHANGED = "admin.flag_changed"
+    ADMIN_EVENT_RESOLVED = "admin.event_resolved"
 
 
 def record_audit(

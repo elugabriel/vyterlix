@@ -44,7 +44,7 @@ from app.integrations.base import (
 from app.integrations.registry import PROVIDERS, get_provider
 from app.models.integrations import Integration, IntegrationOAuthState, IntegrationSync
 from app.schemas.integrations import ConnectOut, IntegrationOut, SyncOut
-from app.services import billing
+from app.services import billing, system_events
 from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
 from app.services.crypto import CryptoError, decrypt_json, decrypt_text, encrypt_json, encrypt_text
@@ -52,6 +52,7 @@ from app.services.jobs import JobContext, enqueue
 
 logger = logging.getLogger("vyterlix.integrations")
 
+FAILING_AFTER = 3  # failures in a row before staff are told
 GENERIC_SYNC_FAILURE = "Something went wrong while fetching your data. We'll try again."
 
 
@@ -479,7 +480,23 @@ def _record_failure(
     integration.last_error_code, integration.last_error_message = code, message[:500]
     integration.last_error_at = now
     integration.consecutive_failures += 1
+    if integration.consecutive_failures == FAILING_AFTER and not needs_reauth:
+        system_events.record(
+            db,
+            "integration_failing",
+            "A connection keeps failing",
+            organization_id=integration.organization_id,
+            details={"provider": integration.provider, "error_code": code},
+        )
     if needs_reauth:
+        system_events.record(
+            db,
+            "integration_needs_signing_in",
+            "A connection needs signing in again",
+            severity="warning",
+            organization_id=integration.organization_id,
+            details={"provider": integration.provider, "error_code": code},
+        )
         integration.status = "needs_reauth"
         record_audit(
             db,

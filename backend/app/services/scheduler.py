@@ -25,7 +25,15 @@ from app.models.billing import Subscription
 from app.models.identity import OrganizationUser, Role, User
 from app.models.outcomes import FollowUpSchedule
 from app.models.reports import ReportSchedule
-from app.services import actions, alerts, billing, notifications, outcomes, reports
+from app.services import (
+    actions,
+    alerts,
+    billing,
+    notifications,
+    outcomes,
+    reports,
+    system_events,
+)
 from app.services.jobs import JobTenant
 
 logger = logging.getLogger("vyterlix.scheduler")
@@ -106,4 +114,11 @@ def tick(db: Session, *, today: date | None = None, now: datetime | None = None)
         except Exception:
             db.rollback()
             logger.error("The scheduled round failed for %s", organization_id, exc_info=True)
+            system_events.record(
+                db,
+                "scheduled_round_failed",
+                "The timed round failed for a business",
+                organization_id=organization_id,
+            )
+            db.commit()
     return totals

@@ -26,6 +26,7 @@ from app.models.alerts import Alert, Notification
 from app.models.identity import OrganizationUser, Role, User
 from app.schemas.alerts import InboxOut, NotificationOut
 from app.services import settings as settings_service
+from app.services import system_events
 from app.services.email import EmailMessage, EmailSender, get_email_sender
 from app.services.organizations import _membership_query
 
@@ -215,6 +216,10 @@ def send_due_emails(
         except Exception:
             logger.error("Could not send a notification email", exc_info=True)
             status = "failed"
+            system_events.record(
+                db, "email_failed", "An email could not be sent",
+                organization_id=rows[0].organization_id, details={"notifications": len(rows)},
+            )  # fmt: skip
         for n in rows:
             n.email_status, n.email_sent_at = status, utcnow()
         sent += len(rows) if status == "sent" else 0

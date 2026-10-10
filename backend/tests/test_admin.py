@@ -170,6 +170,8 @@ def test_one_business_shows_its_people_plan_and_use_but_nothing_from_inside_it(
         "subscription",
         "usage",
         "last_activity_at",
+        "open_cases",
+        "notes",
     }
     assert body["name"] == "Acme" and body["created_by_email"] == "owner@acme.co.uk"
     members = {m["email"]: m for m in body["members"]}

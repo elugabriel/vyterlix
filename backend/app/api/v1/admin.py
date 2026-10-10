@@ -9,18 +9,31 @@ from app.api.deps import DB, Meta, VerifiedUser
 from app.core.errors import NotFoundError
 from app.schemas.admin import (
     AdminAuditPage,
+    AdminNoteOut,
     AdminOrgDetail,
     AdminOrgPage,
     AdminPlan,
     AdminSubscription,
     AdminUserDetail,
     AdminUserPage,
+    CaseChangeIn,
+    CaseDetail,
+    CaseIn,
+    CaseNoteIn,
+    CasePage,
     EntitlementIn,
     ExtendTrialIn,
+    FlagChangeIn,
+    FlagIn,
+    FlagOut,
+    FlagOverrideIn,
+    HealthOut,
+    NoteIn,
     PlanChangeIn,
     ReasonIn,
     RoleChangeIn,
     StaffMeOut,
+    SystemEventPage,
 )
 from app.services import admin as service
 
@@ -157,3 +170,127 @@ def change_feature(code: str, feature: str, body: EntitlementIn, staff: Staff, d
     return service.change_entitlement(
         db, staff, code, feature, body.enabled, body.limit, body.reason, meta
     )
+
+
+# --- notes, support cases ------------------------------------------------------------------------------------------
+
+
+@router.post("/notes", response_model=AdminNoteOut, status_code=201)
+def add_note(body: NoteIn, staff: Staff, db: DB, meta: Meta):
+    """A note about a business or a person. Only staff ever see it."""
+    return service.add_note(db, staff, body.body, body.organization_id, body.user_id, meta)
+
+
+@router.get("/cases", response_model=CasePage)
+def cases(
+    staff: Staff,
+    db: DB,
+    status: Annotated[str | None, Query(pattern="^(open|waiting|resolved)$")] = None,
+    mine: bool = False,
+    organization_id: uuid.UUID | None = None,
+    limit: Page = 25,
+    offset: Annotated[int, Query(ge=0)] = 0,
+):
+    return service.list_cases(
+        db, status=status, assigned_to=staff.user.id if mine else None,
+        organization_id=organization_id, limit=limit, offset=offset,
+    )  # fmt: skip
+
+
+@router.post("/cases", response_model=CaseDetail, status_code=201)
+def open_case(body: CaseIn, staff: Staff, db: DB, meta: Meta):
+    return service.create_case(
+        db, staff, subject=body.subject, organization_id=body.organization_id,
+        requester_email=body.requester_email, priority=body.priority, note=body.note, meta=meta,
+    )  # fmt: skip
+
+
+@router.get("/cases/{case_id}", response_model=CaseDetail)
+def case(case_id: uuid.UUID, staff: Staff, db: DB):
+    return service.case_detail(db, case_id)
+
+
+@router.patch("/cases/{case_id}", response_model=CaseDetail)
+def change_case(case_id: uuid.UUID, body: CaseChangeIn, staff: Staff, db: DB, meta: Meta):
+    return service.update_case(db, staff, case_id, body.model_dump(exclude_unset=True), meta)
+
+
+@router.post("/cases/{case_id}/notes", response_model=CaseDetail, status_code=201)
+def case_note(case_id: uuid.UUID, body: CaseNoteIn, staff: Staff, db: DB, meta: Meta):
+    return service.add_case_note(db, staff, case_id, body.body, meta)
+
+
+# --- feature flags ---------------------------------------------------------------------------------------------------------
+
+
+Why = Annotated[str, Query(min_length=5, max_length=500)]
+
+
+@router.get("/flags", response_model=list[FlagOut])
+def flags(staff: Staff, db: DB):
+    return service.list_flags(db)
+
+
+@router.post("/flags", response_model=FlagOut, status_code=201)
+def create_flag(body: FlagIn, staff: Staff, db: DB, meta: Meta):
+    return service.create_flag(
+        db, staff, body.key, body.description, body.enabled, body.reason, meta
+    )
+
+
+@router.patch("/flags/{key}", response_model=FlagOut)
+def change_flag(key: str, body: FlagChangeIn, staff: Staff, db: DB, meta: Meta):
+    changes = body.model_dump(exclude_unset=True, exclude={"reason"})
+    return service.change_flag(db, staff, key, changes, body.reason, meta)
+
+
+@router.delete("/flags/{key}", status_code=204)
+def delete_flag(key: str, reason: Why, staff: Staff, db: DB, meta: Meta):
+    service.delete_flag(db, staff, key, reason, meta)
+    return Response(status_code=204)
+
+
+@router.put("/flags/{key}/organizations/{organization_id}", response_model=FlagOut)
+def set_override(
+    key: str, organization_id: uuid.UUID, body: FlagOverrideIn, staff: Staff, db: DB, meta: Meta
+):
+    return service.set_flag_override(
+        db, staff, key, organization_id, body.enabled, body.reason, meta
+    )
+
+
+@router.delete("/flags/{key}/organizations/{organization_id}", response_model=FlagOut)
+def clear_override(
+    key: str, organization_id: uuid.UUID, reason: Why, staff: Staff, db: DB, meta: Meta
+):
+    return service.clear_flag_override(db, staff, key, organization_id, reason, meta)
+
+
+# --- how the system is -----------------------------------------------------------------------------------------------------
+
+
+@router.get("/health", response_model=HealthOut)
+def health(staff: Staff, db: DB):
+    """Background work, emails, connections and accounts at a glance."""
+    return service.system_health(db)
+
+
+@router.get("/events", response_model=SystemEventPage)
+def events(
+    staff: Staff,
+    db: DB,
+    severity: Annotated[str | None, Query(pattern="^(info|warning|error)$")] = None,
+    kind: Annotated[str | None, Query(max_length=40)] = None,
+    open_only: bool = False,
+    before: uuid.UUID | None = None,
+    limit: Page = 50,
+):
+    return service.list_events(
+        db, severity=severity, kind=kind, open_only=open_only, before=before, limit=limit
+    )
+
+
+@router.post("/events/{event_id}/resolve", status_code=204)
+def resolve_event(event_id: uuid.UUID, staff: Staff, db: DB, meta: Meta):
+    service.resolve_event(db, staff, event_id, meta)
+    return Response(status_code=204)

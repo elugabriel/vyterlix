@@ -16,6 +16,7 @@ from app.api.v1 import (
     data_quality,
     detections,
     drivers,
+    features,
     forecasts,
     goals,
     health,
@@ -80,4 +81,5 @@ api_router.include_router(dashboard.router)
 api_router.include_router(reports.router)
 api_router.include_router(billing.router)
 api_router.include_router(admin.router)
+api_router.include_router(features.router)
 api_router.include_router(billing.webhook_router)

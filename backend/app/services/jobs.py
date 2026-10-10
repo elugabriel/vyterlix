@@ -21,7 +21,7 @@ from typing import Any
 from pydantic import BaseModel
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, object_session
 
 from app.core.config import get_settings
 from app.core.errors import AppError, ConflictError, NotFoundError
@@ -29,6 +29,7 @@ from app.core.permissions import Perm
 from app.db.tenant import ACROSS_TENANTS, tenant_scope
 from app.models.identity import User
 from app.models.jobs import Job
+from app.services import system_events
 from app.services.auth import RequestMeta
 from app.services.organizations import resolve_membership
 from app.services.storage import FileStorage, get_file_storage
@@ -205,6 +206,13 @@ def _requeue(job: Job, now: datetime, message: str, code: str) -> None:
 def _fail(job: Job, now: datetime, message: str, code: str) -> None:
     job.status, job.finished_at = "failed", now
     job.error_code, job.error_message = code, message
+    session = object_session(job)
+    if session is not None:  # staff are told, without the details of the failure
+        system_events.record(
+            session, "job_failed", "Background work failed for good",
+            organization_id=job.organization_id,
+            details={"job_kind": job.kind, "job_id": str(job.id), "error_code": code},
+        )  # fmt: skip
 
 
 def _authorise(db: Session, job: Job, permission: Perm) -> JobTenant:

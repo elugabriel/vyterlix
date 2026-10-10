@@ -13,11 +13,11 @@ import { showMessage } from "../ui.js";
 
 const message = document.getElementById("message");
 const content = document.getElementById("content");
-const TABS = [["organizations", "Businesses"], ["users", "People"], ["audit", "Audit log"], ["plans", "Plans"]];
+const TABS = [["health", "Health"], ["organizations", "Businesses"], ["users", "People"], ["cases", "Support cases"], ["flags", "Feature switches"], ["audit", "Audit log"], ["plans", "Plans"]];
 const FEATURE_LABEL = { members: "Team members", integrations: "Connections", scheduled_reports: "Scheduled reports", ai_assistant: "AI assistant" };
 
 let canChange = false;
-let tab = "organizations";
+let tab = "health";
 const tabBar = el("div", { class: "tabs", role: "tablist" });
 const panel = el("div", { class: "stack" });
 
@@ -129,9 +129,10 @@ async function showOrganizations() {
         o.subscription
           ? el("p", {}, `Plan: ${o.subscription.plan_name} (${o.subscription.status}, paid ${o.subscription.interval === "year" ? "yearly" : "monthly"}${o.subscription.provider !== "none" ? ` through ${o.subscription.provider}` : ""})${o.subscription.trial_ends_at ? `. Trial ends ${ukDate(o.subscription.trial_ends_at)}` : ""}${o.subscription.current_period_end ? `. Period ends ${ukDate(o.subscription.current_period_end)}` : ""}.`)
           : el("p", { class: "muted" }, "Nobody has looked at the plan yet, so no trial has started."),
-        el("p", {}, `Using ${o.usage.members} of the places for people, ${o.usage.integrations} connections and ${o.usage.scheduled_reports} scheduled reports.`),
+        el("p", {}, `Using ${o.usage.members} of the places for people, ${o.usage.integrations} connections and ${o.usage.scheduled_reports} scheduled reports. ${o.open_cases} open support case${o.open_cases === 1 ? "" : "s"}.`),
         buttons.length ? el("div", { class: "actions" }, ...buttons) : null,
       ),
+      noteBox({ organization_id: id }, o.notes, reload),
       el("h3", {}, "People"),
       table(
         ["Name", "Email", "Role", "Status", "Last login", ""],
@@ -222,6 +223,7 @@ async function showUsers() {
         el("p", {}, `${u.email} (${u.email_verified ? "verified" : "not verified"}). Joined ${ukDate(u.created_at)}. ${u.active_sessions} open session${u.active_sessions === 1 ? "" : "s"}.`),
         buttons.length ? el("div", { class: "actions" }, ...buttons) : null,
       ),
+      noteBox({ user_id: id }, u.notes, reload),
       el("h3", {}, "Businesses"),
       table(["Business", "Role", "Membership", "Business status"], u.memberships.map((m) => [m.organization_name, m.role, m.status, m.organization_status]), { empty: "Not in any business." }),
     );
@@ -326,9 +328,247 @@ function featureEditor(plan, reload) {
   return el("details", {}, el("summary", {}, "What it includes"), ...rows);
 }
 
+
+// --- notes ------------------------------------------------------------------------------------------------------------
+
+/** Staff-only notes about a business or a person, and a box to add one. `subject` is { organization_id } or { user_id }. */
+function noteBox(subject, notes, reload) {
+  const box = el("textarea", { name: "note", rows: 2, maxlength: 4000, "aria-label": "New note" });
+  const add = el("button", { type: "button", class: "secondary" }, "Add note");
+  add.addEventListener("click", async () => {
+    if (!box.value.trim()) return;
+    add.disabled = true;
+    try {
+      const ok = await guard(message, () => api.post("/admin/notes", { ...subject, body: box.value.trim() }));
+      if (ok) await reload();
+    } finally {
+      add.disabled = false;
+    }
+  });
+  return el("div", { class: "kpi stack" },
+    el("div", { class: "kpi-name" }, "Staff notes (never shown to the business)"),
+    ...notes.map((n) => el("p", {}, el("span", { class: "muted" }, `${ukDateTime(n.created_at)}, ${n.author_email ?? "someone"}: `), n.body)),
+    notes.length ? null : el("p", { class: "muted" }, "No notes yet."),
+    box,
+    el("div", { class: "actions" }, add),
+  );
+}
+
+// --- health -----------------------------------------------------------------------------------------------------------
+
+function stat(label, value, note) {
+  return el("div", { class: "kpi" }, el("div", { class: "kpi-name" }, label), el("div", {}, String(value)), note ? el("div", { class: "muted" }, note) : null);
+}
+
+async function showHealth() {
+  const [h, events] = await Promise.all([guard(message, () => api.get("/admin/health")), guard(message, () => api.get("/admin/events?open_only=true&limit=50"))]);
+  if (!h || !events) return;
+  const waiting = h.jobs.oldest_waiting_seconds == null ? "" : `oldest has waited ${h.jobs.oldest_waiting_seconds} seconds`;
+  const rows = events.items.map((e) => {
+    const done = el("button", { type: "button", class: "secondary" }, "Dealt with");
+    done.addEventListener("click", async () => {
+      done.disabled = true;
+      try {
+        const ok = await guard(message, () => api.post(`/admin/events/${e.id}/resolve`));
+        if (ok !== undefined) await showHealth();
+      } finally {
+        done.disabled = false;
+      }
+    });
+    return [ukDateTime(e.created_at), badge(e.severity), e.message, e.organization_name ?? "", e.details ? JSON.stringify(e.details) : "", done];
+  });
+  panel.replaceChildren(
+    el("div", { class: `message message-${h.status === "ok" ? "success" : "error"}` }, h.status === "ok" ? "Everything looks fine." : "Something needs attention."),
+    el("div", { class: "kpi-grid" },
+      stat("Database", h.database_ok ? "Working" : "NOT WORKING", h.migration ? `version ${h.migration}` : ""),
+      stat("Background work waiting", h.jobs.queued, waiting),
+      stat("Running", h.jobs.running, h.jobs.stuck ? `${h.jobs.stuck} not heard from for 5 minutes` : ""),
+      stat("Failed in the last day", h.jobs.failed_last_day),
+      stat("Emails waiting to go", h.emails.waiting),
+      stat("Emails that failed (last day)", h.emails.failed_last_day),
+      stat("Connections", h.integrations.connected, `${h.integrations.needing_attention} need attention`),
+      stat("People", h.accounts.people, `${h.accounts.locked_people} locked`),
+      stat("Businesses", Object.entries(h.accounts.businesses).map(([k, v]) => `${v} ${k}`).join(", ") || "none"),
+      stat("Plans", Object.entries(h.accounts.subscriptions).map(([k, v]) => `${v} ${k}`).join(", ") || "none yet"),
+      stat("Open support cases", h.open_cases),
+    ),
+    el("p", { class: "muted" }, `Environment: ${h.environment}. Email: ${h.email_backend}. AI: ${h.ai_provider}. Checked ${ukDateTime(h.checked_at)}.`),
+    el("h3", {}, `Things that went wrong and have not been dealt with (${h.open_errors} errors, ${h.open_warnings} warnings)`),
+    table(["When", "How bad", "What", "Business", "Details", ""], rows, { empty: "Nothing outstanding." }),
+  );
+}
+
+// --- support cases --------------------------------------------------------------------------------------------------------
+
+async function showCases() {
+  const status = select("status", [["", "Any status"], ["open", "Open"], ["waiting", "Waiting"], ["resolved", "Resolved"]], { "aria-label": "Status" });
+  const mine = el("input", { type: "checkbox", "aria-label": "Only mine" });
+  const list = el("div", { class: "stack" });
+  const detail = el("div", { class: "stack" });
+  const orgs = (await guard(message, () => api.get("/admin/organizations?limit=100")))?.items ?? [];
+  const limit = 25;
+
+  async function load(offset = 0) {
+    const params = new URLSearchParams({ limit, offset });
+    if (status.value) params.set("status", status.value);
+    if (mine.checked) params.set("mine", "true");
+    const page = await guard(message, () => api.get(`/admin/cases?${params}`));
+    if (!page) return;
+    page.offset = offset;
+    list.replaceChildren(
+      table(
+        ["Case", "Status", "Priority", "Business", "Assigned to", "Opened", ""],
+        page.items.map((c) => {
+          const open = el("button", { type: "button", class: "link" }, "Open");
+          open.addEventListener("click", () => openCase(c.id));
+          return [c.subject, badge(c.status), c.priority, c.organization_name ?? "", c.assigned_to_email ?? "nobody", ukDate(c.created_at), open];
+        }),
+        { empty: "No cases match." },
+      ),
+      pager(page, limit, load),
+    );
+  }
+
+  async function openCase(id) {
+    const c = await guard(message, () => api.get(`/admin/cases/${id}`));
+    if (!c) return;
+    const reload = async () => {
+      await openCase(id);
+      await load();
+    };
+    const state = select("status", [["open", "Open"], ["waiting", "Waiting"], ["resolved", "Resolved"]], { selected: c.status, "aria-label": "Status" });
+    const priority = select("priority", [["low", "Low"], ["normal", "Normal"], ["high", "High"]], { selected: c.priority, "aria-label": "Priority" });
+    const who = input("assignee", { type: "text", value: c.assigned_to_email ?? "", placeholder: "Give to (staff email)", "aria-label": "Give to" });
+    const save = el("button", { type: "button" }, "Save changes");
+    save.addEventListener("click", async () => {
+      const changes = { status: state.value, priority: priority.value };
+      if (who.value.trim() && who.value.trim().toLowerCase() !== (c.assigned_to_email ?? "")) changes.assigned_to_email = who.value.trim();
+      if (!who.value.trim() && c.assigned_to_email) changes.unassign = true;
+      save.disabled = true;
+      try {
+        const ok = await guard(message, () => api.patch(`/admin/cases/${id}`, changes));
+        if (ok) {
+          showMessage(message, "success", "Saved.");
+          await reload();
+        }
+      } finally {
+        save.disabled = false;
+      }
+    });
+    const note = el("textarea", { name: "note", rows: 3, maxlength: 4000, "aria-label": "New note" });
+    const addNote = el("button", { type: "button", class: "secondary" }, "Add note");
+    addNote.addEventListener("click", async () => {
+      if (!note.value.trim()) return;
+      addNote.disabled = true;
+      try {
+        const ok = await guard(message, () => api.post(`/admin/cases/${id}/notes`, { body: note.value.trim() }));
+        if (ok) await reload();
+      } finally {
+        addNote.disabled = false;
+      }
+    });
+    detail.replaceChildren(
+      el("div", { class: "kpi stack" },
+        el("div", { class: "kpi-name" }, c.subject, " ", badge(c.status)),
+        el("p", { class: "muted" }, `Opened ${ukDateTime(c.created_at)}${c.created_by_email ? ` by ${c.created_by_email}` : ""}${c.organization_name ? ` about ${c.organization_name}` : ""}${c.requester_email ? `, asked by ${c.requester_email}` : ""}.${c.resolved_at ? ` Resolved ${ukDateTime(c.resolved_at)}.` : ""}`),
+        el("div", { class: "actions" }, state, priority, who, save),
+      ),
+      el("div", { class: "kpi stack" },
+        el("div", { class: "kpi-name" }, "Notes"),
+        ...c.notes.map((n) => el("p", {}, el("span", { class: "muted" }, `${ukDateTime(n.created_at)}, ${n.author_email ?? "someone"}: `), n.body)),
+        c.notes.length ? null : el("p", { class: "muted" }, "No notes yet."),
+        note,
+        el("div", { class: "actions" }, addNote),
+      ),
+    );
+    detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  const subject = input("subject", { type: "text", placeholder: "What is it about?", maxlength: 200, "aria-label": "Subject" });
+  const about = select("organization_id", orgs.map((o) => [o.id, o.name]), { placeholder: "A business (optional)", "aria-label": "Business" });
+  const urgency = select("priority", [["low", "Low"], ["normal", "Normal"], ["high", "High"]], { selected: "normal", "aria-label": "Priority" });
+  const first = el("textarea", { name: "first_note", rows: 2, maxlength: 4000, placeholder: "First note (optional)", "aria-label": "First note" });
+  const create = el("button", { type: "button" }, "Open a case");
+  create.addEventListener("click", async () => {
+    if (subject.value.trim().length < 3) return showMessage(message, "error", "Give the case a subject of at least three letters.");
+    create.disabled = true;
+    try {
+      const body = { subject: subject.value.trim(), priority: urgency.value };
+      if (about.value) body.organization_id = about.value;
+      if (first.value.trim()) body.note = first.value.trim();
+      const made = await guard(message, () => api.post("/admin/cases", body));
+      if (made) {
+        subject.value = first.value = "";
+        showMessage(message, "success", "The case is open.");
+        await load();
+        await openCase(made.id);
+      }
+    } finally {
+      create.disabled = false;
+    }
+  });
+  const go = el("button", { type: "button" }, "Show");
+  go.addEventListener("click", () => load());
+  panel.replaceChildren(
+    el("div", { class: "kpi stack" }, el("div", { class: "kpi-name" }, "New case"), el("div", { class: "actions" }, subject, about, urgency), first, el("div", { class: "actions" }, create)),
+    el("div", { class: "actions" }, status, el("label", {}, mine, " Only mine"), go),
+    list,
+    detail,
+  );
+  await load();
+}
+
+// --- feature switches ---------------------------------------------------------------------------------------------------------
+
+async function showFlags() {
+  const flags = await guard(message, () => api.get("/admin/flags"));
+  if (!flags) return;
+  const orgs = canChange ? ((await guard(message, () => api.get("/admin/organizations?limit=100")))?.items ?? []) : [];
+  const children = [el("p", { class: "muted" }, "A feature switch turns something on for everyone, or only for the businesses you choose. A business's own entry wins over the general setting.")];
+  if (canChange) children.push(newFlagForm());
+  children.push(...(flags.length ? flags.map((f) => flagCard(f, orgs)) : [el("p", { class: "muted" }, "No switches yet.")]));
+  panel.replaceChildren(...children);
+}
+
+function newFlagForm() {
+  const key = input("key", { type: "text", placeholder: "name_with_underscores", maxlength: 41, "aria-label": "Switch name" });
+  const description = input("description", { type: "text", placeholder: "What it switches", maxlength: 300, "aria-label": "Description" });
+  const on = el("input", { type: "checkbox", "aria-label": "On for everyone to begin with" });
+  const create = el("button", { type: "button" }, "Create switch");
+  create.addEventListener("click", () => change(`Create the switch ${key.value.trim()}?`, (reason) => api.post("/admin/flags", { key: key.value.trim(), description: description.value.trim(), enabled: on.checked, reason }), "The switch is created.", showFlags));
+  return el("div", { class: "kpi stack" }, el("div", { class: "kpi-name" }, "New switch"), el("div", { class: "actions" }, key, description, el("label", {}, on, " On for everyone"), create));
+}
+
+function flagCard(flag, orgs) {
+  const kids = [
+    el("div", { class: "kpi-name" }, flag.key, " ", badge(flag.enabled ? "On for everyone" : "Off unless chosen")),
+    el("p", {}, flag.description),
+  ];
+  for (const o of flag.overrides) {
+    const clear = actionButton("Remove", () => change(`Remove ${o.organization_name ?? "this business"}'s own entry for ${flag.key}?`, (reason) => api.delete(`/admin/flags/${flag.key}/organizations/${o.organization_id}?reason=${encodeURIComponent(reason)}`), "Removed.", showFlags));
+    kids.push(el("div", { class: "actions" }, el("span", {}, `${o.organization_name ?? o.organization_id}: ${o.enabled ? "on" : "off"}`), canChange ? clear : null));
+  }
+  if (canChange) {
+    const who = select("organization_id", orgs.map((o) => [o.id, o.name]), { placeholder: "Choose a business", "aria-label": "Business" });
+    const how = select("enabled", [["true", "On"], ["false", "Off"]], { "aria-label": "On or off" });
+    const set = actionButton("Set for this business", async () => {
+      if (!who.value) return showMessage(message, "error", "Choose a business first.");
+      await change(`Set ${flag.key} ${how.value === "true" ? "on" : "off"} for this business?`, (reason) => api.put(`/admin/flags/${flag.key}/organizations/${who.value}`, { enabled: how.value === "true", reason }), "Saved.", showFlags);
+    });
+    kids.push(
+      el("div", { class: "actions" }, who, how, set),
+      el("div", { class: "actions" },
+        actionButton(flag.enabled ? "Turn off for everyone" : "Turn on for everyone", () => change(`${flag.enabled ? "Turn off" : "Turn on"} ${flag.key} for everyone?`, (reason) => api.patch(`/admin/flags/${flag.key}`, { enabled: !flag.enabled, reason }), "Saved.", showFlags)),
+        actionButton("Delete this switch", () => change(`Delete the switch ${flag.key}?`, (reason) => api.delete(`/admin/flags/${flag.key}?reason=${encodeURIComponent(reason)}`), "Deleted.", showFlags), true),
+      ),
+    );
+  }
+  return el("div", { class: "kpi stack" }, ...kids);
+}
+
 // --- the page -------------------------------------------------------------------------------------------------------
 
-const SHOW = { organizations: showOrganizations, users: showUsers, audit: showAudit, plans: showPlans };
+const SHOW = { health: showHealth, organizations: showOrganizations, users: showUsers, cases: showCases, flags: showFlags, audit: showAudit, plans: showPlans };
 
 function drawTabs() {
   tabBar.replaceChildren(
@@ -344,7 +584,7 @@ function drawTabs() {
 
 async function show() {
   const wanted = location.hash.slice(1);
-  tab = SHOW[wanted] ? wanted : "organizations";
+  tab = SHOW[wanted] ? wanted : "health";
   drawTabs();
   showMessage(message, "info", "");
   await SHOW[tab]();
