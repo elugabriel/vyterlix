@@ -9,6 +9,10 @@ abstract class SessionStore {
   Future<String?> readLastBusiness();
   Future<void> writeLastBusiness(String? id);
 
+  /// Whether the app asks for the phone's fingerprint, face or PIN to open.
+  Future<bool> readLockEnabled();
+  Future<void> writeLockEnabled(bool on);
+
   /// Forget the sign-in (the choice of business is kept for next time on this phone).
   Future<void> clearSignIn();
 }
@@ -21,6 +25,7 @@ class SecureSessionStore implements SessionStore {
 
   static const _refresh = 'vyterlix.refresh_token';
   static const _business = 'vyterlix.last_business';
+  static const _lock = 'vyterlix.lock_enabled';
 
   @override
   Future<String?> readRefreshToken() => _storage.read(key: _refresh);
@@ -38,6 +43,15 @@ class SecureSessionStore implements SessionStore {
       : _storage.write(key: _business, value: id);
 
   @override
+  Future<bool> readLockEnabled() async =>
+      await _storage.read(key: _lock) == 'on';
+
+  @override
+  Future<void> writeLockEnabled(bool on) => on
+      ? _storage.write(key: _lock, value: 'on')
+      : _storage.delete(key: _lock);
+
+  @override
   Future<void> clearSignIn() => _storage.delete(key: _refresh);
 }
 
@@ -45,6 +59,7 @@ class SecureSessionStore implements SessionStore {
 class MemorySessionStore implements SessionStore {
   String? refreshToken;
   String? lastBusiness;
+  bool lockEnabled = false;
 
   @override
   Future<String?> readRefreshToken() async => refreshToken;
@@ -57,6 +72,12 @@ class MemorySessionStore implements SessionStore {
 
   @override
   Future<void> writeLastBusiness(String? id) async => lastBusiness = id;
+
+  @override
+  Future<bool> readLockEnabled() async => lockEnabled;
+
+  @override
+  Future<void> writeLockEnabled(bool on) async => lockEnabled = on;
 
   @override
   Future<void> clearSignIn() async => refreshToken = null;

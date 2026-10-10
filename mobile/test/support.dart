@@ -9,6 +9,7 @@ import 'package:vyterlix_mobile/app.dart';
 import 'package:vyterlix_mobile/auth/auth_controller.dart';
 import 'package:vyterlix_mobile/auth/session_store.dart';
 import 'package:vyterlix_mobile/files.dart';
+import 'package:vyterlix_mobile/lock.dart';
 
 const baseUrl = 'http://test.local/api/v1';
 
@@ -1217,6 +1218,7 @@ class Harness {
   final SessionStore store;
   late final ApiClient api;
   late final AuthController auth;
+  late AppLock lock;
 
   MemorySessionStore get memory => store as MemorySessionStore;
 }
@@ -1227,13 +1229,23 @@ Future<Harness> pumpApp(
   SessionStore? store,
   bool start = true,
   FileChooser? files,
+  PhoneLock? phone,
+  Duration lockAfter = const Duration(seconds: 30),
 }) async {
   final harness = Harness(server, store: store);
+  final lock = AppLock(
+    phone: phone ?? FakePhoneLock(supported: false),
+    store: harness.store,
+    after: lockAfter,
+  );
+  harness.lock = lock;
+  await lock.load();
   await tester.pumpWidget(
     VyterlixApp(
       auth: harness.auth,
       api: harness.api,
       store: harness.store,
+      lock: lock,
       files: files ?? const PhoneFileChooser(),
     ),
   );
@@ -1259,4 +1271,22 @@ Future<void> logIn(
   );
   await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
   await tester.pumpAndSettle();
+}
+
+/// A phone whose lock check can be made to pass or fail.
+class FakePhoneLock implements PhoneLock {
+  FakePhoneLock({this.supported = true, this.passes = true});
+
+  bool supported;
+  bool passes;
+  final reasons = <String>[];
+
+  @override
+  Future<bool> available() async => supported;
+
+  @override
+  Future<bool> check(String reason) async {
+    reasons.add(reason);
+    return passes;
+  }
 }

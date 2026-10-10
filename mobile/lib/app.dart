@@ -5,10 +5,12 @@ import 'api/api_client.dart';
 import 'auth/auth_controller.dart';
 import 'auth/session_store.dart';
 import 'files.dart';
+import 'lock.dart';
 import 'screens/businesses_screen.dart';
 import 'screens/login_screen.dart';
 import 'theme.dart';
 import 'widgets/common.dart';
+import 'widgets/lock_layer.dart';
 
 class VyterlixApp extends StatelessWidget {
   const VyterlixApp({
@@ -16,12 +18,14 @@ class VyterlixApp extends StatelessWidget {
     required this.auth,
     required this.api,
     required this.store,
+    required this.lock,
     this.files = const PhoneFileChooser(),
   });
 
   final AuthController auth;
   final ApiClient api;
   final SessionStore store;
+  final AppLock lock;
 
   /// How a spreadsheet is chosen on this phone (tests give it a made-up one).
   final FileChooser files;
@@ -33,6 +37,7 @@ class VyterlixApp extends StatelessWidget {
         ChangeNotifierProvider<AuthController>.value(value: auth),
         Provider<ApiClient>.value(value: api),
         Provider<SessionStore>.value(value: store),
+        ChangeNotifierProvider<AppLock>.value(value: lock),
         Provider<FileChooser>.value(value: files),
       ],
       child: MaterialApp(
@@ -40,6 +45,8 @@ class VyterlixApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: buildTheme(Brightness.light),
         darkTheme: buildTheme(Brightness.dark),
+        builder: (context, child) =>
+            LockLayer(child: child ?? const SizedBox()),
         home: const _Gate(),
       ),
     );

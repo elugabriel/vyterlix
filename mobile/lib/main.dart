@@ -7,6 +7,7 @@ import 'app.dart';
 import 'auth/auth_controller.dart';
 import 'auth/session_store.dart';
 import 'config.dart';
+import 'lock.dart';
 
 /// What this phone is called in the list of devices signed in to the account.
 String _deviceName() {
@@ -28,6 +29,8 @@ void main() {
     store: store,
     deviceName: _deviceName(),
   );
-  runApp(VyterlixApp(auth: auth, api: api, store: store));
+  final lock = AppLock(phone: const SystemPhoneLock(), store: store);
+  runApp(VyterlixApp(auth: auth, api: api, store: store, lock: lock));
+  lock.load();
   auth.start();
 }

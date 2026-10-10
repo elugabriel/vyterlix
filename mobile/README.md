@@ -67,3 +67,7 @@ Google developer accounts exist; change them before anything is published.
 Data upload and quick entry, reports, what we know, settings, team and billing, fingerprint / Face ID
 unlock, push notifications, working without a signal, and links in emails that open the app. They are
 listed in `docs/CHECKLIST.md` under Phase 18.
+
+## Phone lock (fingerprint, face or PIN)
+
+The person icon menu offers "Open with fingerprint, face or PIN" on phones that can check. It is off by default; turning it on asks the phone to check the person once, then the app starts locked and locks again after 30 seconds out of sight. Logging out turns it off. Platform changes made for `local_auth`: Android `MainActivity` is a `FlutterFragmentActivity`, the themes use AppCompat and `USE_BIOMETRIC` is requested; iOS has `NSFaceIDUsageDescription`. Only the Windows build has been compiled so far, so check an Android and an iPhone build before release.

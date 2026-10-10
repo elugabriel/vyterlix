@@ -39,6 +39,7 @@ dependencies:
   provider: ^6.1.5+1
   intl: ^0.20.3
   file_picker: ^13.1.0
+  local_auth: ^3.0.2
 
 dev_dependencies:
   flutter_test:
