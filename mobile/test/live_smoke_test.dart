@@ -15,6 +15,7 @@ import 'package:vyterlix_mobile/auth/auth_controller.dart';
 import 'package:vyterlix_mobile/auth/session_store.dart';
 import 'package:vyterlix_mobile/models.dart';
 import 'package:vyterlix_mobile/models_actions.dart';
+import 'package:vyterlix_mobile/models_assistant.dart';
 import 'package:vyterlix_mobile/models_insights.dart';
 
 const _base = String.fromEnvironment('LIVE_API_BASE_URL');
@@ -163,6 +164,22 @@ void main() {
         expect(error.status, 404); // not explained yet is allowed
       }
     }
+
+    final conversations = [
+      for (final c in await api.get('$base/assistant/conversations') as List)
+        Conversation.fromJson(c as Map<String, dynamic>),
+    ];
+    if (conversations.isNotEmpty) {
+      final detail = await api.get(
+        '$base/assistant/conversations/${conversations.first.id}',
+      ) as Map<String, dynamic>;
+      for (final m in detail['messages'] as List) {
+        ChatMessage.fromJson(m as Map<String, dynamic>);
+      }
+    }
+    AiSettings.fromJson(
+      await api.get('$base/assistant/settings') as Map<String, dynamic>,
+    );
 
     await auth.logout();
     expect(auth.status, AuthStatus.signedOut);

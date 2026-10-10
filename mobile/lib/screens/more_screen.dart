@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models.dart';
+import 'ask_screen.dart';
 import 'changes_screen.dart';
 import 'forecast_screen.dart';
 import 'health_screen.dart';
@@ -15,6 +16,12 @@ class MoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final entries = <(IconData, String, String, WidgetBuilder)>[
+      (
+        Icons.auto_awesome_outlined,
+        'Ask Vyterlix',
+        'Ask a question about your business and get an answer from your own results.',
+        (_) => AskScreen(business: business),
+      ),
       (
         Icons.bar_chart_rounded,
         'Key figures',

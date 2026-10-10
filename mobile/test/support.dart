@@ -1197,6 +1197,9 @@ FakeServer happyServer() {
   return server;
 }
 
+Map<String, dynamic> jsonBodyOf(http.Request request) =>
+    jsonDecode(request.body) as Map<String, dynamic>;
+
 class Harness {
   Harness(this.server, {SessionStore? store})
     : store = store ?? MemorySessionStore() {

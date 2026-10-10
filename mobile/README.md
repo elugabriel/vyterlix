@@ -8,7 +8,7 @@ look. What is in it so far: log in (with forgot password), a list of the person'
 last time opens by itself), and inside a business a bar along the bottom with **Today** (what needs
 attention, the health score and the key figures), **Actions** (the work decided on, with its steps and
 results, and Vyterlix's ideas to take up or leave), **Alerts** (see, take on and close them), **Inbox**
-(what you have been told) and **More** (key figures, business health, forecast with what to stock, and what changed). The refresh token is kept in the iOS Keychain / Android Keystore and swapped for a new one each
+(what you have been told) and **More** (Ask Vyterlix, key figures, business health, forecast with what to stock, and what changed). The refresh token is kept in the iOS Keychain / Android Keystore and swapped for a new one each
 time; the app signs the person out if the server ends the session from anywhere.
 
 ## Run it
@@ -64,6 +64,6 @@ Google developer accounts exist; change them before anything is published.
 
 ## Not built yet
 
-The AI assistant, data upload
+ data upload
 and quick entry, reports, what we know, settings and billing, fingerprint / Face ID unlock, push
 notifications, working without a signal, and links in emails that open the app. They are listed in `docs/CHECKLIST.md` under Phase 18.
