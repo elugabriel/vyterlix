@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models.dart';
 import 'ask_screen.dart';
 import 'changes_screen.dart';
+import 'data_screen.dart';
 import 'forecast_screen.dart';
 import 'health_screen.dart';
 import 'key_figures_screen.dart';
@@ -39,6 +40,12 @@ class MoreScreen extends StatelessWidget {
         'Forecast',
         'What to expect over the next months, and what to stock.',
         (_) => ForecastScreen(business: business),
+      ),
+      (
+        Icons.storage_rounded,
+        'Your data',
+        'How complete your data is, and bring in more from a file.',
+        (_) => DataScreen(business: business),
       ),
       (
         Icons.show_chart_rounded,

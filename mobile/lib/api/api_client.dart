@@ -68,14 +68,45 @@ class ApiClient {
     Object? body,
     Map<String, String>? query,
     bool auth = true,
+  }) {
+    return _dispatch(() {
+      final request = http.Request(method, _uri(path, query))
+        ..headers['Accept'] = 'application/json';
+      if (body != null) {
+        request.headers['Content-Type'] = 'application/json';
+        request.body = jsonEncode(body);
+      }
+      return request;
+    }, auth: auth);
+  }
+
+  /// Send a file (a spreadsheet to import, say) along with some text fields.
+  Future<dynamic> postFile(
+    String path, {
+    required Map<String, String> fields,
+    required String fileField,
+    required List<int> bytes,
+    required String filename,
+  }) {
+    return _dispatch(() {
+      final request = http.MultipartRequest('POST', _uri(path, null))
+        ..headers['Accept'] = 'application/json'
+        ..fields.addAll(fields)
+        ..files.add(
+          http.MultipartFile.fromBytes(fileField, bytes, filename: filename),
+        );
+      return request;
+    });
+  }
+
+  /// Make the request (built afresh each time, since a request can only be sent once), and if the
+  /// server says the access token has run out, get a new one and try once more.
+  Future<dynamic> _dispatch(
+    http.BaseRequest Function() build, {
+    bool auth = true,
     bool retried = false,
   }) async {
-    final request = http.Request(method, _uri(path, query))
-      ..headers['Accept'] = 'application/json';
-    if (body != null) {
-      request.headers['Content-Type'] = 'application/json';
-      request.body = jsonEncode(body);
-    }
+    final request = build();
     if (auth && accessToken != null) {
       request.headers['Authorization'] = 'Bearer $accessToken';
     }
@@ -92,14 +123,7 @@ class ApiClient {
 
     if (response.statusCode == 401 && auth && !retried && refresher != null) {
       if (await refresher!()) {
-        return _send(
-          method,
-          path,
-          body: body,
-          query: query,
-          auth: auth,
-          retried: true,
-        );
+        return _dispatch(build, auth: auth, retried: true);
       }
     }
     return _decode(response);

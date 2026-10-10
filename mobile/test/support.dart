@@ -8,6 +8,7 @@ import 'package:vyterlix_mobile/api/api_client.dart';
 import 'package:vyterlix_mobile/app.dart';
 import 'package:vyterlix_mobile/auth/auth_controller.dart';
 import 'package:vyterlix_mobile/auth/session_store.dart';
+import 'package:vyterlix_mobile/files.dart';
 
 const baseUrl = 'http://test.local/api/v1';
 
@@ -1225,10 +1226,16 @@ Future<Harness> pumpApp(
   FakeServer server, {
   SessionStore? store,
   bool start = true,
+  FileChooser? files,
 }) async {
   final harness = Harness(server, store: store);
   await tester.pumpWidget(
-    VyterlixApp(auth: harness.auth, api: harness.api, store: harness.store),
+    VyterlixApp(
+      auth: harness.auth,
+      api: harness.api,
+      store: harness.store,
+      files: files ?? const PhoneFileChooser(),
+    ),
   );
   if (start) {
     await harness.auth.start();

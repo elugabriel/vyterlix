@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'api/api_client.dart';
 import 'auth/auth_controller.dart';
 import 'auth/session_store.dart';
+import 'files.dart';
 import 'screens/businesses_screen.dart';
 import 'screens/login_screen.dart';
 import 'theme.dart';
@@ -15,11 +16,15 @@ class VyterlixApp extends StatelessWidget {
     required this.auth,
     required this.api,
     required this.store,
+    this.files = const PhoneFileChooser(),
   });
 
   final AuthController auth;
   final ApiClient api;
   final SessionStore store;
+
+  /// How a spreadsheet is chosen on this phone (tests give it a made-up one).
+  final FileChooser files;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +33,7 @@ class VyterlixApp extends StatelessWidget {
         ChangeNotifierProvider<AuthController>.value(value: auth),
         Provider<ApiClient>.value(value: api),
         Provider<SessionStore>.value(value: store),
+        Provider<FileChooser>.value(value: files),
       ],
       child: MaterialApp(
         title: 'Vyterlix',
