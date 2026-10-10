@@ -185,6 +185,8 @@ All backend settings come from `VYTERLIX_*` environment variables or `backend/.e
 | `VYTERLIX_TRIAL_DAYS` | `14` | Length of the free trial every new business gets. |
 | `VYTERLIX_STRIPE_SECRET_KEY` and `VYTERLIX_STRIPE_WEBHOOK_SECRET` | unset | Turn on paying by card through Stripe (both are needed). Only ever read from the environment. |
 | `VYTERLIX_PAYSTACK_SECRET_KEY` | unset | Turns on paying through Paystack. Only ever read from the environment. |
+| `VYTERLIX_MOBILE_MIN_VERSION`, `VYTERLIX_MOBILE_LATEST_VERSION` | `1.0.0` | The oldest mobile app version allowed to sign in, and the newest one out. An app below the minimum is told to update. |
+| `VYTERLIX_IOS_STORE_URL`, `VYTERLIX_ANDROID_STORE_URL` | unset | Where the app is in each store (shown to an app that must update). |
 | `VYTERLIX_EMAIL_FROM` | `Vyterlix <no-reply@vyterlix.com>` | Sender address. |
 | `VYTERLIX_EMAIL_VERIFICATION_TTL_HOURS` | `24` | How long a verification link works. |
 | `VYTERLIX_PASSWORD_RESET_TTL_MINUTES` | `60` | How long a password-reset link works. |

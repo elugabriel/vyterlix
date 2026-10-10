@@ -79,13 +79,17 @@ def check_login_rate_limits(db: Session, email: str, meta: RequestMeta) -> None:
         )
 
 
-def _start_session(db: Session, user: User, meta: RequestMeta) -> IssuedTokens:
+def _start_session(
+    db: Session, user: User, meta: RequestMeta, client: str = "web", device_name: str | None = None
+) -> IssuedTokens:
     raw_refresh, refresh_hash = new_token()
     session = UserSession(
         user_id=user.id,
         refresh_token_hash=refresh_hash,
         user_agent=meta.user_agent[:500] if meta.user_agent else None,
         ip_address=meta.ip_address,
+        client=client,
+        device_name=device_name.strip()[:100] if device_name and device_name.strip() else None,
         expires_at=datetime.now(UTC) + timedelta(days=get_settings().refresh_token_ttl_days),
     )
     db.add(session)
@@ -94,7 +98,14 @@ def _start_session(db: Session, user: User, meta: RequestMeta) -> IssuedTokens:
     return IssuedTokens(user, session.id, access, lifetime, raw_refresh)
 
 
-def login(db: Session, email: str, password: str, meta: RequestMeta) -> IssuedTokens:
+def login(
+    db: Session,
+    email: str,
+    password: str,
+    meta: RequestMeta,
+    client: str = "web",
+    device_name: str | None = None,
+) -> IssuedTokens:
     """`email` must already be normalised. Unverified users may log in (limited access)."""
     check_login_rate_limits(db, email, meta)
 
@@ -133,7 +144,7 @@ def login(db: Session, email: str, password: str, meta: RequestMeta) -> IssuedTo
     if password_needs_rehash(user.password_hash):
         user.password_hash = hash_password(password)
     user.last_login_at = func.now()
-    tokens = _start_session(db, user, meta)
+    tokens = _start_session(db, user, meta, client, device_name)
     record_audit(
         db,
         AuditAction.AUTH_LOGIN_SUCCEEDED,
@@ -142,16 +153,22 @@ def login(db: Session, email: str, password: str, meta: RequestMeta) -> IssuedTo
         target_id=tokens.session_id,
         ip_address=meta.ip_address,
         user_agent=meta.user_agent,
+        details={"client": client},
     )
     db.commit()
     db.refresh(user)
     return tokens
 
 
-def _live_session_by_refresh(db: Session, raw_refresh: str) -> UserSession | None:
+def _live_session_by_refresh(
+    db: Session, raw_refresh: str, client: str = "web"
+) -> UserSession | None:
+    """A session's refresh token only works the way it was issued: a browser's cookie token can't
+    be used from a phone and a phone's token can't be put in a cookie."""
     return db.scalar(
         select(UserSession)
         .where(
+            UserSession.client == client,
             UserSession.refresh_token_hash == hash_token(raw_refresh),
             UserSession.revoked_at.is_(None),
             UserSession.expires_at > func.now(),
@@ -160,9 +177,9 @@ def _live_session_by_refresh(db: Session, raw_refresh: str) -> UserSession | Non
     )
 
 
-def refresh(db: Session, raw_refresh: str | None) -> IssuedTokens:
+def refresh(db: Session, raw_refresh: str | None, client: str = "web") -> IssuedTokens:
     """Swap a valid refresh token for a new access token and a new refresh token."""
-    session = _live_session_by_refresh(db, raw_refresh) if raw_refresh else None
+    session = _live_session_by_refresh(db, raw_refresh, client) if raw_refresh else None
     if session is None:
         raise AuthenticationError("Your session has ended. Please log in again.")
 
@@ -180,9 +197,9 @@ def refresh(db: Session, raw_refresh: str | None) -> IssuedTokens:
     return IssuedTokens(user, session.id, access, lifetime, raw_new)
 
 
-def logout(db: Session, raw_refresh: str | None, meta: RequestMeta) -> None:
+def logout(db: Session, raw_refresh: str | None, meta: RequestMeta, client: str = "web") -> None:
     """End the session behind this refresh cookie. Quietly does nothing if there isn't one."""
-    session = _live_session_by_refresh(db, raw_refresh) if raw_refresh else None
+    session = _live_session_by_refresh(db, raw_refresh, client) if raw_refresh else None
     if session is None:
         return
     session.revoked_at = func.now()

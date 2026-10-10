@@ -89,6 +89,12 @@ class Settings(BaseSettings):
     # Browsers treat http://localhost as secure, so this can stay on in dev too.
     cookie_secure: bool = True
 
+    # The mobile apps. An app older than the minimum is told to update; the store links are where.
+    mobile_min_version: str = "1.0.0"
+    mobile_latest_version: str = "1.0.0"
+    ios_store_url: str | None = None
+    android_store_url: str | None = None
+
     # Failed-login limits within a rolling window.
     login_failure_window_minutes: int = 15
     login_max_failures_per_email: int = 5

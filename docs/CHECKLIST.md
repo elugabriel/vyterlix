@@ -33,7 +33,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 15 | Reporting | **Step 1 done (four reports, kept exactly as written, PDF and CSV downloads, weekly or monthly emailed delivery, the Reports screen)** |
 | 16 | Subscription / billing | **Step 1 done (plans and what they include as data, a 14-day trial, gating of four features, sandbox, Stripe and Paystack behind one interface with signed and never-twice messages, upgrade, downgrade, cancel, invoices, the Plan and billing screen); real Stripe and Paystack untried until accounts exist; prices are placeholders** |
 | 17 | Admin portal | **Done (platform staff made from the command line, businesses, people, roles, trials, the audit trail across businesses, the plans screen, feature switches, support cases and notes, system events and the health page; everything recorded)** apart from "see as a business" and two-step sign-in for staff |
-| 18 | Mobile apps (iOS + Android, Flutter) | **Confirmed in scope** — not started |
+| 18 | Mobile apps (iOS + Android, Flutter) | **Confirmed in scope** — server-side prerequisites started (phone sign-in, devices, app-version check, push addresses); the app itself and email links that open it are not started |
 | L1 | Security & privacy hardening | Not started |
 | L2 | Automated QA & testing | Ongoing |
 | L3 | Production infrastructure | Not started |
@@ -429,12 +429,14 @@ weeks, Europe/London, en-GB wording.
 
 **Before building (backend prerequisites: the API is browser-shaped today)**
 
-- [ ] Mobile sign-in: today the refresh token lives in an httpOnly browser cookie. Phones need the refresh token returned in the response body (for clients that ask for it) and kept in the phone's secure storage (iOS Keychain / Android Keystore), still rotating and revocable per device
-- [ ] Per-device sessions: name each session ("Jo's iPhone"), show and revoke them in settings
+Step 1 (done, server side): **a phone signs in with `client: "mobile"` and gets its refresh token in the answer** (to keep in the phone's secure storage) instead of in a browser cookie; it refreshes and signs out by sending that token in the body. **A token only works the way it was issued**: a phone's token cannot be put in a cookie and a browser's cookie token cannot be sent in a body. Each session records whether it is web or mobile and an optional device name ("Jo's iPhone"). The person can **see every device signed in (this one first), sign one out, or sign out all the others** (`/me/sessions`), each recorded in the audit log. **`GET /app-config?platform=&version=`** (no login) tells an app whether it must update (below the minimum version) or may (a newer one exists) and where the store page is, and **a phone app below the minimum is refused at sign-in with a clear "please update" message (426) before its password is even checked**; versions are compared as numbers. **Push addresses** are registered per phone and tied to the sign-in they came from (`/me/push-devices`): the same address always belongs to whoever registered it last, only the ten most recent per person are kept, and a phone stops being reachable the moment its session ends. Settings: `VYTERLIX_MOBILE_MIN_VERSION`, `VYTERLIX_MOBILE_LATEST_VERSION`, `VYTERLIX_IOS_STORE_URL`, `VYTERLIX_ANDROID_STORE_URL`.
+
+- [x] Mobile sign-in: today the refresh token lives in an httpOnly browser cookie. Phones need the refresh token returned in the response body (for clients that ask for it) and kept in the phone's secure storage (iOS Keychain / Android Keystore), still rotating and revocable per device (the server side is done; keeping it in the Keychain/Keystore is the app's job)
+- [~] Per-device sessions: name each session ("Jo's iPhone"), show and revoke them in settings (the server side is done; the settings screen on the web and in the app is not)
 - [ ] Email links (verify email, reset password, accept invitation) open the app when installed: universal links (iOS) and app links (Android), falling back to the web pages
-- [ ] Forgot-password in the app (standing rule: every client has it)
-- [ ] API versioning and a minimum-supported-app-version check, so an old app can be told to update
-- [ ] Push token registration endpoints (device, platform, last seen) and the sending side (with Phase 14)
+- [~] Forgot-password in the app (standing rule: every client has it): the server side already exists; the app screen is part of the app
+- [x] API versioning and a minimum-supported-app-version check, so an old app can be told to update
+- [~] Push token registration endpoints (device, platform, last seen) and the sending side (with Phase 14): registration is done; sending needs Firebase (Android) and Apple push credentials, which need the developer accounts
 - [ ] Rate limits and error messages checked for mobile (flaky connections, retries are safe: idempotent where it matters)
 
 **The app**
@@ -604,6 +606,9 @@ weeks, Europe/London, en-GB wording.
 | **No feature switch is used by the product yet** (the mechanism and the screens exist; the first real use is whichever feature is released to a few businesses first) | A feature to roll out gradually | When wanted |
 | **Staff cannot yet "see as" a business** (no impersonation) and cannot see its figures, only its accounts and plan | Whether support needs to look at a business's screens; if so, a consent-based, time-limited, fully audited way | Not planned; ask the client / L1 |
 | **Staff sign in with a password only**; there is no second step yet for the accounts that can lock people out and suspend businesses | Two-step sign-in for staff at least | L1 |
+| **Push notifications cannot be sent yet**: phones can register, but sending needs a Firebase project (Android) and an Apple push key (iOS) | The Apple Developer and Google accounts, then the sending side in the notification service | Phase 18 step 2 |
+| **Links in emails open the web page, not the app**: opening the app from them needs the app's identifiers (bundle id and package name) and signing details published on the website | The app identifiers and store accounts | Phase 18 step 2 |
+| **The devices list has no screen yet** (the website's Settings and the app) | A Sessions section in Settings | Phase 18 step 2 |
 | **Stripe and Paystack have never been run for real**: they were written from the providers' documents and tried only against pretend servers and test-signed messages | Stripe and Paystack accounts, price ids for each plan (`provider-price`), webhook addresses set up, and a real test-mode payment end to end | L6 |
 | **Paystack may not take pounds** (it supports other currencies, depending on the account's country); a business that pays through it is charged in the plan's currency | Deciding which gateway a UK business uses | Before L6 |
 | **Only four features are gated**; extras on top of a plan (more people for a fee), usage-based charges, coupons, and a UK VAT invoice in our own layout (the invoice shown is the provider's copy) are not built | Client decision on whether any of these are wanted | After launch |

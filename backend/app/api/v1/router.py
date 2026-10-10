@@ -4,6 +4,7 @@ from app.api.v1 import (
     actions,
     admin,
     alerts,
+    app_config,
     assistant,
     audit,
     auth,
@@ -81,5 +82,6 @@ api_router.include_router(dashboard.router)
 api_router.include_router(reports.router)
 api_router.include_router(billing.router)
 api_router.include_router(admin.router)
+api_router.include_router(app_config.router)
 api_router.include_router(features.router)
 api_router.include_router(billing.webhook_router)

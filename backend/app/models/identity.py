@@ -147,6 +147,7 @@ class UserSession(UUIDPrimaryKeyMixin, Base):
     """One row per logged-in device. Refresh token stored hashed."""
 
     __tablename__ = "user_sessions"
+    __table_args__ = (CheckConstraint(_one_of("client", ("web", "mobile")), name="client_valid"),)
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), index=True
@@ -158,6 +159,9 @@ class UserSession(UUIDPrimaryKeyMixin, Base):
     last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # "web" sessions keep their refresh token in a browser cookie; "mobile" ones in the phone.
+    client: Mapped[str] = mapped_column(String(10), server_default="web")
+    device_name: Mapped[str | None] = mapped_column(String(100))
 
 
 class UserToken(UUIDPrimaryKeyMixin, Base):

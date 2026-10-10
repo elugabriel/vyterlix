@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import (
     AfterValidator,
@@ -9,6 +9,7 @@ from pydantic import (
     EmailStr,
     Field,
     StringConstraints,
+    model_serializer,
     model_validator,
 )
 
@@ -74,6 +75,21 @@ class LoginRequest(BaseModel):
     email: NormalizedEmail
     # No minimum here: old accounts may pre-date today's rules. Max stops huge hash inputs.
     password: str = Field(min_length=1, max_length=PASSWORD_MAX_LENGTH)
+    # A phone says so, and then gets its refresh token in the answer (to keep in its secure
+    # storage) instead of in a browser cookie. It may name itself for the list of devices.
+    client: Literal["web", "mobile"] = "web"
+    device_name: Annotated[str, StringConstraints(strip_whitespace=True, max_length=100)] | None = (
+        None
+    )
+    app_version: Annotated[str, Field(max_length=20)] | None = None
+
+
+class RefreshRequest(BaseModel):
+    """What a phone sends to refresh or to log out (a browser sends its cookie and no body)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    refresh_token: Annotated[str, Field(min_length=20, max_length=200)]
 
 
 class UpdateProfileRequest(BaseModel):
@@ -127,3 +143,12 @@ class TokenOut(BaseModel):
     token_type: str = "bearer"
     expires_in: int  # seconds
     user: UserOut
+    # Only for a phone: a browser's refresh token is in a cookie it can't read.
+    refresh_token: str | None = None
+
+    @model_serializer(mode="wrap")
+    def _no_empty_refresh_token(self, handler):
+        data = handler(self)
+        if data.get("refresh_token") is None:
+            data.pop("refresh_token", None)  # a browser's answer has no such field at all
+        return data

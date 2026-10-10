@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, Response, status
+from fastapi import APIRouter, Body, Cookie, Depends, Response, status
 from fastapi.responses import JSONResponse
 
 from app.api.deps import DB, Meta
@@ -10,13 +10,14 @@ from app.schemas.auth import (
     EmailRequest,
     LoginRequest,
     MessageOut,
+    RefreshRequest,
     RegisterRequest,
     ResetPasswordRequest,
     TokenOut,
     UserOut,
     VerifyEmailRequest,
 )
-from app.services import sessions
+from app.services import mobile, sessions
 from app.services.auth import (
     register_user,
     resend_verification,
@@ -60,11 +61,12 @@ def _clear_refresh_cookie(response: Response) -> None:
     )
 
 
-def _token_out(tokens: sessions.IssuedTokens) -> TokenOut:
+def _token_out(tokens: sessions.IssuedTokens, *, with_refresh: bool = False) -> TokenOut:
     return TokenOut(
         access_token=tokens.access_token,
         expires_in=tokens.expires_in,
         user=UserOut.from_user(tokens.user),
+        refresh_token=tokens.refresh_token if with_refresh else None,
     )
 
 
@@ -92,13 +94,26 @@ def resend_verification_route(body: EmailRequest, db: DB, meta: Meta, sender: Se
 
 @router.post("/login", response_model=TokenOut)
 def login(body: LoginRequest, response: Response, db: DB, meta: Meta) -> TokenOut:
-    tokens = sessions.login(db, body.email, body.password, meta)
+    mobile.check_app_version(body.client, body.app_version)
+    tokens = sessions.login(
+        db, body.email, body.password, meta, client=body.client, device_name=body.device_name
+    )
+    if body.client == "mobile":
+        return _token_out(tokens, with_refresh=True)
     _set_refresh_cookie(response, tokens.refresh_token)
     return _token_out(tokens)
 
 
 @router.post("/refresh", response_model=TokenOut)
-def refresh(response: Response, db: DB, refresh_token: RefreshCookie = None):
+def refresh(
+    response: Response,
+    db: DB,
+    refresh_token: RefreshCookie = None,
+    body: Annotated[RefreshRequest | None, Body()] = None,
+):
+    if body is not None:  # a phone: its token comes in the body and goes back in the answer
+        tokens = sessions.refresh(db, body.refresh_token, client="mobile")
+        return _token_out(tokens, with_refresh=True)
     try:
         tokens = sessions.refresh(db, refresh_token)
     except AuthenticationError as exc:
@@ -111,7 +126,16 @@ def refresh(response: Response, db: DB, refresh_token: RefreshCookie = None):
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout(response: Response, db: DB, meta: Meta, refresh_token: RefreshCookie = None) -> None:
+def logout(
+    response: Response,
+    db: DB,
+    meta: Meta,
+    refresh_token: RefreshCookie = None,
+    body: Annotated[RefreshRequest | None, Body()] = None,
+) -> None:
+    if body is not None:
+        sessions.logout(db, body.refresh_token, meta, client="mobile")
+        return
     sessions.logout(db, refresh_token, meta)
     _clear_refresh_cookie(response)
 
