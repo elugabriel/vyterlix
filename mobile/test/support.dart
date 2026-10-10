@@ -392,6 +392,396 @@ Map<String, dynamic> recommendationJson({
   'evidence': [],
 };
 
+Map<String, dynamic> kpiValueJson({
+  String start = '2026-09-01',
+  bool complete = true,
+  String status = 'ok',
+  String? value = '8717.10',
+  String? previous = '7990.00',
+  String? pct = '9.1',
+}) => {
+  'period_start': start,
+  'period_end': start,
+  'is_complete': complete,
+  'status': status,
+  'value': value,
+  'previous_value': previous,
+  'change_pct': pct,
+  'data_quality': 95,
+  'inputs': {},
+};
+
+Map<String, dynamic> kpiJson(
+  String code,
+  String name,
+  String category, {
+  String unit = 'gbp',
+  String direction = 'up_good',
+  Map<String, dynamic>? latest,
+  Map<String, dynamic>? current,
+  List<String> requires = const ['sales'],
+}) => {
+  'code': code,
+  'name': name,
+  'description': 'About $name',
+  'category': category,
+  'unit': unit,
+  'direction': direction,
+  'requires': requires,
+  'latest': latest,
+  'current': current,
+};
+
+Map<String, dynamic> kpisJson() => {
+  'granularity': 'month',
+  'last_run': {'finished_at': '2026-10-09T10:47:00'},
+  'kpis': [
+    kpiJson(
+      'sales',
+      'Sales',
+      'sales',
+      latest: kpiValueJson(),
+      current: kpiValueJson(
+        start: '2026-10-01',
+        complete: false,
+        value: '1200.00',
+      ),
+    ),
+    kpiJson(
+      'costs',
+      'Running costs',
+      'financial',
+      direction: 'down_good',
+      latest: kpiValueJson(value: '5439.00', previous: '5000.00', pct: '8.8'),
+      requires: ['expenses'],
+    ),
+    kpiJson(
+      'margin',
+      'Gross margin',
+      'financial',
+      unit: 'percent',
+      latest: kpiValueJson(value: '75.6', previous: '70.0', pct: '8.0'),
+    ),
+    kpiJson(
+      'profit',
+      'Profit',
+      'financial',
+      latest: kpiValueJson(
+        status: 'no_data',
+        value: null,
+        previous: null,
+        pct: null,
+      ),
+      requires: ['sales', 'expenses'],
+    ),
+    kpiJson(
+      'repeat',
+      'Repeat customers',
+      'customer',
+      unit: 'ratio',
+      latest: null,
+    ),
+  ],
+};
+
+Map<String, dynamic> kpiHistoryJson() => {
+  'code': 'sales',
+  'name': 'Sales',
+  'description': 'About Sales',
+  'category': 'sales',
+  'unit': 'gbp',
+  'direction': 'up_good',
+  'requires': ['sales'],
+  'granularity': 'month',
+  'formula': 'Sales: the money taken, net of VAT, after refunds.',
+  'values': [
+    kpiValueJson(
+      start: '2026-07-01',
+      value: '7000.00',
+      previous: null,
+      pct: null,
+    ),
+    kpiValueJson(
+      start: '2026-08-01',
+      value: '7990.00',
+      previous: '7000.00',
+      pct: '14.1',
+    ),
+    kpiValueJson(start: '2026-09-01'),
+    kpiValueJson(
+      start: '2026-10-01',
+      complete: false,
+      value: '1200.00',
+      previous: '8717.10',
+      pct: '-86.2',
+    ),
+  ],
+};
+
+Map<String, dynamic> healthJson() => {
+  'period_start': '2026-09-01',
+  'period_end': '2026-09-30',
+  'overall_score': 69,
+  'status': 'fair',
+  'previous_score': 89,
+  'trend': 'down',
+  'coverage_pct': 80,
+  'data_quality': 95,
+  'explanation':
+      'Your business is doing fairly well; sales are holding it back.',
+  'calculated_at': '2026-10-09T10:47:00',
+  'components': [
+    {
+      'category': 'financial',
+      'label': 'Money',
+      'score': 82,
+      'status': 'healthy',
+      'previous_score': 80,
+      'trend': 'up',
+      'weight': 0.5,
+      'contribution': 41.0,
+      'explanation': 'Money is in good shape.',
+      'metrics': [
+        {
+          'kpi_code': 'margin',
+          'name': 'Gross margin',
+          'unit': 'percent',
+          'basis': 'value',
+          'value': '75.6',
+          'baseline': null,
+          'baseline_months': 0,
+          'compared_pct': null,
+          'score': 90.0,
+          'weight': 1.0,
+          'text': 'Margin was 75.6%, which scored 90.',
+        },
+      ],
+    },
+    {
+      'category': 'sales',
+      'label': 'Sales',
+      'score': 40,
+      'status': 'at_risk',
+      'previous_score': 70,
+      'trend': 'down',
+      'weight': 0.5,
+      'contribution': 20.0,
+      'explanation': 'Sales fell a lot.',
+      'metrics': [
+        {
+          'kpi_code': 'sales',
+          'name': 'Sales growth',
+          'unit': 'percent',
+          'basis': 'vs_baseline',
+          'value': '-11.9',
+          'baseline': '-0.7',
+          'baseline_months': 6,
+          'compared_pct': '-11.2',
+          'score': 30.0,
+          'weight': 1.0,
+          'text':
+              'Sales growth was -11.9% against a usual -0.7%, which scored 30.',
+        },
+      ],
+    },
+  ],
+};
+
+Map<String, dynamic> healthHistoryJson() => {
+  'points': [
+    {
+      'period_start': '2026-06-01',
+      'overall_score': 85,
+      'status': 'healthy',
+      'trend': null,
+      'coverage_pct': 100,
+    },
+    {
+      'period_start': '2026-07-01',
+      'overall_score': 88,
+      'status': 'healthy',
+      'trend': 'up',
+      'coverage_pct': 100,
+    },
+    {
+      'period_start': '2026-08-01',
+      'overall_score': 89,
+      'status': 'healthy',
+      'trend': 'up',
+      'coverage_pct': 100,
+    },
+    {
+      'period_start': '2026-09-01',
+      'overall_score': 69,
+      'status': 'fair',
+      'trend': 'down',
+      'coverage_pct': 80,
+    },
+  ],
+};
+
+Map<String, dynamic> forecastJson({
+  String status = 'ok',
+  String name = 'Sales',
+}) => {
+  'id': 'f1',
+  'kpi_code': 'sales',
+  'kpi_name': name,
+  'unit': 'gbp',
+  'status': status,
+  'as_of': '2026-09-01',
+  'horizon': 3,
+  'interval_level': 80,
+  'history_months': 4,
+  'adjusted_for_seasons': false,
+  'method': {
+    'code': 'recent_average',
+    'name': 'Recent average',
+    'description': 'd',
+    'version': '1',
+  },
+  'explanation': status == 'ok'
+      ? 'We expect $name of about £9,117.97 in October.'
+      : 'There is not enough history to forecast yet.',
+  'calculated_at': '2026-10-09T10:00:00',
+  'predictions': status == 'ok'
+      ? [
+          {
+            'period_start': '2026-10-01',
+            'period_end': '2026-10-31',
+            'value': '9117.97',
+            'lower': '7836.51',
+            'upper': '10399.44',
+            'actual_value': null,
+          },
+          {
+            'period_start': '2026-11-01',
+            'period_end': '2026-11-30',
+            'value': '9200.00',
+            'lower': '7305.71',
+            'upper': '10930.24',
+            'actual_value': '9400.00',
+          },
+          {
+            'period_start': '2026-12-01',
+            'period_end': '2026-12-31',
+            'value': '12765.16',
+            'lower': '9657.77',
+            'upper': '15872.55',
+            'actual_value': null,
+          },
+        ]
+      : [],
+  'history': [
+    {'period_start': '2026-06-01', 'value': '7000.00'},
+    {'period_start': '2026-07-01', 'value': '7990.00'},
+    {'period_start': '2026-08-01', 'value': '8717.10'},
+    {'period_start': '2026-09-01', 'value': '8500.00'},
+  ],
+  'evaluations': [],
+};
+
+Map<String, dynamic> stockJson() => {
+  'month': '2026-10-01',
+  'as_of': '2026-09-01',
+  'level': 80,
+  'order_now': 1,
+  'watch': 1,
+  'ok': 1,
+  'not_enough_history': 0,
+  'headline': '1 product to order now, 1 to keep an eye on.',
+  'note': 'Based on what each product has sold in recent months.',
+  'rows': [
+    {
+      'product_id': 'p1',
+      'name': 'Sourdough loaf',
+      'sku': null,
+      'expected_units': 300,
+      'lower_units': 250,
+      'upper_units': 360,
+      'on_hand': 40,
+      'days_of_cover': 4,
+      'status': 'order_now',
+      'order_suggested': 320,
+      'method': 'm',
+      'history_months': 6,
+      'typical_miss_pct': '8.0',
+    },
+    {
+      'product_id': 'p2',
+      'name': 'Rye loaf',
+      'sku': null,
+      'expected_units': 100,
+      'lower_units': 80,
+      'upper_units': 130,
+      'on_hand': 90,
+      'days_of_cover': 27,
+      'status': 'ok',
+      'order_suggested': 130,
+      'method': 'm',
+      'history_months': 6,
+      'typical_miss_pct': '9.0',
+    },
+  ],
+};
+
+Map<String, dynamic> changeJson(
+  String id, {
+  String effect = 'bad',
+  String severity = 'major',
+  bool season = false,
+}) => {
+  'id': id,
+  'kpi_code': 'sales',
+  'kpi_name': 'Sales',
+  'category': 'sales',
+  'unit': 'gbp',
+  'kind': 'material_change',
+  'period_start': '2026-09-01',
+  'period_end': '2026-09-30',
+  'direction': effect == 'bad' ? 'down' : 'up',
+  'severity': severity,
+  'effect': effect,
+  'value': '8000',
+  'reference_value': '9000',
+  'change': '-11.1',
+  'change_unit': 'percent',
+  'explained_by_season': season,
+  'data_quality': 95,
+  'summary': 'Change $id summary',
+  'status': 'open',
+  'detected_at': '2026-10-01T07:00:00',
+};
+
+Map<String, dynamic> diagnosisJson() => {
+  'id': 'd1',
+  'event': changeJson('ch1'),
+  'status': 'ready',
+  'headline': 'Fewer people came in on weekdays',
+  'summary': 'Most of the fall came from Tuesdays and Wednesdays.',
+  'confidence': 72,
+  'confidence_label': 'medium',
+  'confidence_note': 'Worked out from sales alone.',
+  'rules_version': '1',
+  'diagnosed_at': '2026-10-02T07:00:00',
+  'evidence': [
+    {
+      'id': 'e1',
+      'evidence_type': 'fact',
+      'statement': 'There were 12 fewer sales on Tuesdays.',
+      'data': {},
+      'sort_order': 1,
+    },
+    {
+      'id': 'e2',
+      'evidence_type': 'statistical',
+      'statement': 'The fall is bigger than usual.',
+      'data': {},
+      'sort_order': 2,
+    },
+  ],
+};
+
 /// A server that has a signed-in person, two businesses and a dashboard.
 FakeServer happyServer() {
   final server = FakeServer()
@@ -704,6 +1094,105 @@ FakeServer happyServer() {
     ..json(
       'GET /organizations/b2/changes/ev1/recommendation',
       recommendationJson(),
+    )
+    ..json('GET /organizations/b1/kpis', kpisJson())
+    ..json('GET /organizations/b1/kpis/sales', kpiHistoryJson())
+    ..json('GET /organizations/b1/business-health', healthJson())
+    ..json('GET /organizations/b1/business-health/history', healthHistoryJson())
+    ..json('GET /organizations/b1/forecasts', {
+      'kpis': ['sales', 'customers'],
+      'figures': [
+        {'code': 'sales', 'name': 'Sales', 'unit': 'gbp', 'group': 'Sales'},
+        {
+          'code': 'customers',
+          'name': 'Customers',
+          'unit': 'count',
+          'group': 'Customer demand',
+        },
+      ],
+    })
+    ..json('GET /organizations/b1/forecasts/sales', forecastJson())
+    ..json(
+      'GET /organizations/b1/forecasts/customers',
+      forecastJson(status: 'insufficient_data', name: 'Customers'),
+    )
+    ..json('GET /organizations/b1/forecasts/sales/accuracy', {
+      'kpi_code': 'sales',
+      'kpi_name': 'Sales',
+      'unit': 'gbp',
+      'enough_data': true,
+      'checked': 5,
+      'within_range': 4,
+      'within_range_pct': '80',
+      'promised_pct': 80,
+      'typical_miss': '700',
+      'typical_miss_pct': '8.0',
+      'bias_pct': '1.0',
+      'headline':
+          'Forecasts for sales have landed in their range 4 times out of 5.',
+      'verdict': 'Good enough to plan with.',
+      'by_months_ahead': [],
+      'rows': [],
+    })
+    ..json('GET /organizations/b1/forecasts/stock-requirements', stockJson())
+    ..on('GET /organizations/b1/changes', (request) {
+      final effect = request.url.queryParameters['effect'];
+      final all = [
+        changeJson('ch1'),
+        changeJson('ch2', effect: 'good', severity: 'notable', season: true),
+      ];
+      return jsonResponse([
+        for (final c in all)
+          if (effect == null || c['effect'] == effect) c,
+      ]);
+    })
+    ..json('GET /organizations/b1/changes/ch1/diagnosis', diagnosisJson())
+    ..on(
+      'GET /organizations/b1/changes/ch2/diagnosis',
+      (_) => errorResponse(404, 'diagnosis_not_found', 'Not explained yet'),
+    )
+    ..json(
+      'GET /organizations/b1/changes/ch1/recommendation',
+      recommendationJson(),
+    )
+    ..json('GET /organizations/b2/kpis', {
+      'granularity': 'month',
+      'last_run': null,
+      'kpis': [],
+    })
+    ..on(
+      'GET /organizations/b2/business-health',
+      (_) => http.Response(
+        'null',
+        200,
+        headers: {'content-type': 'application/json'},
+      ),
+    )
+    ..json('GET /organizations/b2/business-health/history', {'points': []})
+    ..json('GET /organizations/b2/forecasts', {
+      'kpis': ['sales'],
+      'figures': [
+        {'code': 'sales', 'name': 'Sales', 'unit': 'gbp', 'group': 'Sales'},
+      ],
+    })
+    ..on(
+      'GET /organizations/b2/forecasts/sales',
+      (_) => http.Response(
+        'null',
+        200,
+        headers: {'content-type': 'application/json'},
+      ),
+    )
+    ..on(
+      'GET /organizations/b2/forecasts/stock-requirements',
+      (_) => errorResponse(404, 'no_stock', 'No stock records'),
+    )
+    ..json('GET /organizations/b2/changes', [
+      changeJson('ch2', effect: 'good', severity: 'notable'),
+    ])
+    ..on(
+      'GET /organizations/b2/changes/ch2/diagnosis',
+      (_) => errorResponse(404, 'diagnosis_not_found', 'Not explained yet'),
     );
   return server;
 }

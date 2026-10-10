@@ -53,6 +53,7 @@ Future<void> scrollTo(WidgetTester tester, Finder finder) =>
     );
 
 void main() {
+  ideaNotWorkedOut();
   group('what comes from the server', () {
     test('an action in full is read', () {
       final d = ActionDetail.fromJson(
@@ -812,11 +813,7 @@ void main() {
       final server = happyServer()
         ..on(
           'GET /organizations/b1/changes/ev1/recommendation',
-          (_) => errorResponse(
-            404,
-            'recommendation_not_found',
-            'No recommendation yet',
-          ),
+          (_) => errorResponse(500, 'internal_error', 'No recommendation yet'),
         );
       await openIdea(tester, server: server);
       expect(find.text('No recommendation yet'), findsOneWidget);
@@ -827,6 +824,79 @@ void main() {
       await tester.tap(find.text('Try again'));
       await tester.pumpAndSettle();
       expect(find.text('Re-price o1'), findsOneWidget);
+    });
+  });
+}
+
+void ideaNotWorkedOut() {
+  group('an idea that has not been worked out yet', () {
+    testWidgets('says so and an owner can work it out', (tester) async {
+      var made = false;
+      final server = happyServer()
+        ..on('GET /organizations/b1/changes/ev1/recommendation', (_) {
+          return made
+              ? jsonResponse(recommendationJson())
+              : errorResponse(
+                  404,
+                  'recommendation_not_found',
+                  'Not worked out yet',
+                );
+        })
+        ..on('POST /organizations/b1/changes/ev1/recommendation', (_) {
+          made = true;
+          return jsonResponse(recommendationJson());
+        });
+      await openBusiness(tester, server);
+      await goTo(tester, 'Actions');
+      await chip(tester, 'Ideas');
+      await tester.tap(find.text('Sales fell 11.9% in September'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('No ideas have been worked out for this change yet.'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Work out what to do'));
+      await tester.pumpAndSettle();
+      expect(
+        server.to('POST /organizations/b1/changes/ev1/recommendation'),
+        hasLength(1),
+      );
+      expect(find.text('Re-price o1'), findsOneWidget);
+    });
+
+    testWidgets('a viewer is only told', (tester) async {
+      final server = happyServer()
+        ..json('GET /organizations/b2/recommendations', [
+          {
+            'id': 'rec1',
+            'event_id': 'ev1',
+            'kpi_name': 'Sales',
+            'period_start': '2026-09-01',
+            'status': 'open',
+            'headline': 'Sales fell 11.9% in September',
+            'recommended': null,
+            'score': null,
+            'generated_at': 'x',
+          },
+        ])
+        ..on(
+          'GET /organizations/b2/changes/ev1/recommendation',
+          (_) => errorResponse(
+            404,
+            'recommendation_not_found',
+            'Not worked out yet',
+          ),
+        );
+      await openBusiness(tester, server, name: 'Second Shop');
+      await goTo(tester, 'Actions');
+      await chip(tester, 'Ideas');
+      await tester.tap(find.text('Sales fell 11.9% in September'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('No ideas have been worked out for this change yet.'),
+        findsOneWidget,
+      );
+      expect(find.text('Work out what to do'), findsNothing);
     });
   });
 }

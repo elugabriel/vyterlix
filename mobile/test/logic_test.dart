@@ -20,9 +20,9 @@ void main() {
     test('a figure is shown in its own unit', () {
       expect(formatValue('8717.1', 'gbp'), '£8,717.10');
       expect(formatValue('75.6', 'percent'), '75.6%');
-      expect(formatValue('75', 'percent'), '75%');
+      expect(formatValue('75', 'percent'), '75.0%');
       expect(formatValue('15864', 'count'), '15,864');
-      expect(formatValue('2.5', 'ratio'), '2.5');
+      expect(formatValue('2.5', 'ratio'), '2.50 times');
       expect(formatValue(null, 'gbp'), '–');
     });
 

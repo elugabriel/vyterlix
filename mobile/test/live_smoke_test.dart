@@ -15,6 +15,7 @@ import 'package:vyterlix_mobile/auth/auth_controller.dart';
 import 'package:vyterlix_mobile/auth/session_store.dart';
 import 'package:vyterlix_mobile/models.dart';
 import 'package:vyterlix_mobile/models_actions.dart';
+import 'package:vyterlix_mobile/models_insights.dart';
 
 const _base = String.fromEnvironment('LIVE_API_BASE_URL');
 const _token = String.fromEnvironment('LIVE_REFRESH_TOKEN');
@@ -109,6 +110,58 @@ void main() {
             as Map<String, dynamic>,
       );
       expect(detail.headline, isNotEmpty);
+    }
+
+    final kpiData = await api.get('$base/kpis') as Map<String, dynamic>;
+    final kpis = [
+      for (final k in kpiData['kpis'] as List)
+        Kpi.fromJson(k as Map<String, dynamic>),
+    ];
+    expect(kpis, isNotEmpty);
+    KpiHistory.fromJson(
+      await api.get('$base/kpis/${kpis.first.code}', query: {'limit': '24'})
+          as Map<String, dynamic>,
+    );
+    final health = await api.get('$base/business-health');
+    if (health != null) HealthReport.fromJson(health as Map<String, dynamic>);
+    final points =
+        (await api.get('$base/business-health/history')
+                as Map<String, dynamic>)['points']
+            as List;
+    for (final p in points) {
+      HealthPoint.fromJson(p as Map<String, dynamic>);
+    }
+    final options = await api.get('$base/forecasts') as Map<String, dynamic>;
+    final figures = [
+      for (final f in options['figures'] as List)
+        ForecastFigure.fromJson(f as Map<String, dynamic>),
+    ];
+    if (figures.isNotEmpty) {
+      final forecast = await api.get('$base/forecasts/${figures.first.code}');
+      if (forecast != null) Forecast.fromJson(forecast as Map<String, dynamic>);
+    }
+    try {
+      StockRequirements.fromJson(
+        await api.get('$base/forecasts/stock-requirements')
+            as Map<String, dynamic>,
+      );
+    } on ApiException {
+      // a business with no stock records has none to show
+    }
+    final changes = [
+      for (final c
+          in await api.get('$base/changes', query: {'limit': '5'}) as List)
+        Change.fromJson(c as Map<String, dynamic>),
+    ];
+    if (changes.isNotEmpty) {
+      try {
+        Diagnosis.fromJson(
+          await api.get('$base/changes/${changes.first.id}/diagnosis')
+              as Map<String, dynamic>,
+        );
+      } on ApiException catch (error) {
+        expect(error.status, 404); // not explained yet is allowed
+      }
     }
 
     await auth.logout();

@@ -22,3 +22,26 @@ Color severityColor(String severity) {
       return Palette.lightMuted;
   }
 }
+
+const healthText = {
+  'healthy': 'Healthy',
+  'fair': 'Fair',
+  'needs_attention': 'Needs attention',
+  'at_risk': 'At risk',
+  'not_enough_data': 'Not enough data',
+};
+
+Color healthColor(String status) {
+  switch (status) {
+    case 'healthy':
+      return Palette.ok;
+    case 'fair':
+      return Palette.warn;
+    case 'needs_attention':
+      return const Color(0xFFC2410C);
+    case 'at_risk':
+      return Palette.bad;
+    default:
+      return Palette.lightMuted;
+  }
+}

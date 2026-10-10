@@ -8,13 +8,6 @@ import '../theme.dart';
 import '../widgets/severity.dart';
 import '../widgets/common.dart';
 
-const _healthText = {
-  'healthy': 'Healthy',
-  'fair': 'Fair',
-  'needs_attention': 'Needs attention',
-  'at_risk': 'At risk',
-  'not_enough_data': 'Not enough data',
-};
 const _kindText = {
   'approval': 'Waiting for you',
   'action_overdue': 'Late',
@@ -222,7 +215,7 @@ class _Hero extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                Tag(_healthText[health.status] ?? health.status, onDark: true),
+                Tag(healthText[health.status] ?? health.status, onDark: true),
               ],
             ),
             const SizedBox(height: 8),

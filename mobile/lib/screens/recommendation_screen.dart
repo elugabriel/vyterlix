@@ -40,6 +40,7 @@ class RecommendationScreen extends StatefulWidget {
 class _RecommendationScreenState extends State<RecommendationScreen> {
   RecommendationDetail? _detail;
   String? _error;
+  bool _missing = false;
   bool _busy = false;
 
   String get _path =>
@@ -54,7 +55,10 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _error = null);
+    setState(() {
+      _error = null;
+      _missing = false;
+    });
     try {
       final data = await context.read<ApiClient>().get(_path);
       if (mounted) {
@@ -65,7 +69,34 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
         );
       }
     } on ApiException catch (error) {
-      if (mounted) setState(() => _error = error.message);
+      if (!mounted) return;
+      if (error.status == 404) {
+        setState(
+          () => _missing = true,
+        ); // nothing worked out yet: that is a state, not a failure
+      } else {
+        setState(() => _error = error.message);
+      }
+    }
+  }
+
+  Future<void> _workOut() async {
+    setState(() => _busy = true);
+    try {
+      final data = await context.read<ApiClient>().post(_path);
+      if (mounted) {
+        setState(() {
+          _missing = false;
+          _detail = RecommendationDetail.fromJson(data as Map<String, dynamic>);
+        });
+      }
+    } on ApiException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.message)));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -137,6 +168,29 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
 
   Widget _body() {
     if (_error != null) return ErrorState(message: _error!, onRetry: _load);
+    if (_missing) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'No ideas have been worked out for this change yet.',
+                textAlign: TextAlign.center,
+              ),
+              if (_canDecide) ...[
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: _busy ? null : _workOut,
+                  child: const Text('Work out what to do'),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
     final detail = _detail;
     if (detail == null) return const Center(child: CircularProgressIndicator());
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;

@@ -6,6 +6,7 @@ import '../auth/auth_controller.dart';
 import '../models.dart';
 import 'actions_screen.dart';
 import 'alerts_screen.dart';
+import 'more_screen.dart';
 import 'notifications_screen.dart';
 import 'today_screen.dart';
 
@@ -38,6 +39,7 @@ class _BusinessShellState extends State<BusinessShell> {
         if (mounted) setState(() => _unread = count);
       },
     ),
+    MoreScreen(business: widget.business),
   ];
 
   @override
@@ -77,6 +79,7 @@ class _BusinessShellState extends State<BusinessShell> {
     final auth = context.watch<AuthController>();
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           widget.business.name,
           overflow: TextOverflow.ellipsis,
@@ -139,6 +142,11 @@ class _BusinessShellState extends State<BusinessShell> {
               child: const Icon(Icons.inbox_rounded),
             ),
             label: 'Inbox',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.grid_view_outlined),
+            selectedIcon: Icon(Icons.grid_view_rounded),
+            label: 'More',
           ),
         ],
       ),
