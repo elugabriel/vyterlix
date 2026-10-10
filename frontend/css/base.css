@@ -2,16 +2,18 @@
    Cards on a soft background, a dark side menu, one accent colour and plenty of air. */
 
 :root {
-  --bg: #f4f6fb;
+  --bg: #f3f9ef;
   --surface: #ffffff;
-  --surface-2: #f8fafc;
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: #e4e8f1;
-  --border-strong: #d3d9e6;
-  --accent: #4f46e5;
-  --accent-2: #7c3aed;
-  --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
+  --surface-2: #f7fbf4;
+  --text: #12241b;
+  --muted: #5b6f64;
+  --border: #dbe8d3;
+  --border-strong: #c6d9bb;
+  --tea: #d0f0c0; /* tea green: the soft colour */
+  --accent: #2f7d52;
+  --accent-2: #1f6b4a;
+  --link: #2a7048;
+  --accent-soft: color-mix(in srgb, var(--tea) 60%, transparent);
   --ok: #059669;
   --warn: #d97706;
   --bad: #dc2626;
@@ -20,24 +22,26 @@
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
   --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -8px rgba(15, 23, 42, 0.12);
   --shadow-lg: 0 2px 4px rgba(15, 23, 42, 0.05), 0 24px 48px -16px rgba(15, 23, 42, 0.22);
-  --side-1: #0b1120;
-  --side-2: #151b36;
-  --side-text: #aeb7cc;
+  --side-1: #0c1f16;
+  --side-2: #133423;
+  --side-text: #b4cbbd;
   --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   --gradient: linear-gradient(135deg, var(--accent), var(--accent-2));
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0a0f1e;
-    --surface: #121a2e;
-    --surface-2: #0e1527;
-    --text: #e8ebf3;
-    --muted: #94a0b8;
-    --border: #212b45;
-    --border-strong: #2e3a58;
-    --accent: #818cf8;
-    --accent-2: #a78bfa;
+    --bg: #0a1510;
+    --surface: #11211a;
+    --surface-2: #0d1a14;
+    --text: #e6f0ea;
+    --muted: #93aa9c;
+    --border: #1e3328;
+    --border-strong: #2b4638;
+    --accent: #3fa575;
+    --accent-2: #2f8f5e;
+    --link: #bfe8ae;
+    --accent-soft: color-mix(in srgb, var(--accent) 20%, transparent);
     --ok: #34d399;
     --warn: #fbbf24;
     --bad: #f87171;
@@ -66,7 +70,7 @@ h1 { font-size: 1.75rem; font-weight: 700; margin: 0 0 4px; }
 h2 { font-size: 1.15rem; font-weight: 650; margin: 28px 0 12px; }
 h3 { font-size: 1rem; font-weight: 650; }
 p { margin: 0; }
-a { color: var(--accent); text-underline-offset: 3px; }
+a { color: var(--link); text-underline-offset: 3px; }
 a:hover { color: var(--accent-2); }
 
 .container { max-width: 1180px; margin: 0 auto; padding: 28px 28px 64px; }
@@ -165,7 +169,7 @@ body.shell .topbar { justify-content: flex-end; }
 }
 .side-org .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #7b869f; }
 .side-org .name { color: #fff; font-weight: 650; line-height: 1.3; margin: 2px 0 4px; word-break: break-word; }
-.side-org a { color: #9aa6ff; font-size: 0.8rem; text-decoration: none; }
+.side-org a { color: var(--tea); font-size: 0.8rem; text-decoration: none; }
 .side-org a:hover { color: #fff; }
 .nav-title {
   margin: 10px 12px 2px;
@@ -190,9 +194,10 @@ body.shell .topbar { justify-content: flex-end; }
 .sidenav a.nav-link svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
 .sidenav a.nav-link:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
 .sidenav a.nav-link.active {
-  color: #fff;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, #000), color-mix(in srgb, var(--accent-2) 85%, #000));
-  box-shadow: 0 8px 18px -8px rgba(79, 70, 229, 0.8);
+  color: #123222;
+  font-weight: 650;
+  background: var(--tea);
+  box-shadow: 0 8px 18px -8px rgba(208, 240, 192, 0.55);
 }
 .sidenav a.nav-link.active svg { opacity: 1; }
 .sidenav .spacer { flex: 1; min-height: 12px; }
@@ -563,7 +568,7 @@ input[type="file"] { width: 100%; padding: 10px 0; }
   border-radius: 20px;
   background:
     radial-gradient(520px 260px at 90% -20%, rgba(255, 255, 255, 0.22), transparent 60%),
-    linear-gradient(135deg, #3730a3, #6d28d9);
+    linear-gradient(135deg, #17492f, #2f7d52);
   box-shadow: var(--shadow-lg);
 }
 .hero h2 { margin: 0 0 6px; color: #fff; font-size: 1.35rem; }

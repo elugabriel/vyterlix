@@ -154,7 +154,7 @@ class _Hero extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF3730A3).withValues(alpha: 0.35),
+            color: const Color(0xFF17492F).withValues(alpha: 0.35),
             blurRadius: 28,
             offset: const Offset(0, 14),
           ),
