@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
+import '../widgets/account_menu.dart';
+
 import 'package:provider/provider.dart';
 
 import '../api/api_client.dart';
-import '../auth/auth_controller.dart';
 import '../models.dart';
 import 'actions_screen.dart';
 import 'alerts_screen.dart';
@@ -76,7 +78,6 @@ class _BusinessShellState extends State<BusinessShell> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthController>();
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -91,23 +92,7 @@ class _BusinessShellState extends State<BusinessShell> {
             icon: const Icon(Icons.swap_horiz_rounded),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          PopupMenuButton<String>(
-            tooltip: 'Account',
-            icon: const Icon(Icons.account_circle_outlined),
-            onSelected: (value) {
-              if (value == 'logout') auth.logout();
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem<String>(
-                enabled: false,
-                child: Text(auth.user?.email ?? ''),
-              ),
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: Text('Log out'),
-              ),
-            ],
-          ),
+          const AccountMenu(),
         ],
       ),
       body: IndexedStack(index: _tab, children: _tabs),

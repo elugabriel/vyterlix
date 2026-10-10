@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
+import '../widgets/account_menu.dart';
+
 import 'package:provider/provider.dart';
 
 import '../api/api_client.dart';
-import '../auth/auth_controller.dart';
 import '../auth/session_store.dart';
 import '../models.dart';
 import '../widgets/common.dart';
@@ -68,7 +70,6 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthController>();
     return Scaffold(
       appBar: AppBar(
         title: const Row(
@@ -78,25 +79,7 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
             Text('Vyterlix', style: TextStyle(fontWeight: FontWeight.w800)),
           ],
         ),
-        actions: [
-          PopupMenuButton<String>(
-            tooltip: 'Account',
-            icon: const Icon(Icons.account_circle_outlined),
-            onSelected: (value) {
-              if (value == 'logout') auth.logout();
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem<String>(
-                enabled: false,
-                child: Text(auth.user?.email ?? ''),
-              ),
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: Text('Log out'),
-              ),
-            ],
-          ),
-        ],
+        actions: [const AccountMenu()],
       ),
       body: _body(),
     );
