@@ -154,6 +154,70 @@ Map<String, dynamic> dashboard({
   'can_act': true,
 };
 
+Map<String, dynamic> alertJson(
+  String id, {
+  String severity = 'high',
+  String status = 'open',
+  int occurrences = 3,
+}) => {
+  'id': id,
+  'rule_code': 'change_sales',
+  'category': 'sales',
+  'kpi_category': null,
+  'severity': severity,
+  'title': 'Alert $id title',
+  'body': 'Alert $id body',
+  'link': 'changes.html',
+  'status': status,
+  'occurrences': occurrences,
+  'first_seen_at': '2026-10-01T09:30:00',
+  'last_seen_at': '2026-10-09T13:05:00',
+  'acknowledged_by': status == 'acknowledged' ? 'Jo Baker' : null,
+  'acknowledged_at': null,
+  'resolved_at': status == 'resolved' ? '2026-10-09T14:00:00' : null,
+};
+
+Map<String, dynamic> alertDetailJson(
+  String id, {
+  String status = 'open',
+  List<Map<String, dynamic>>? events,
+}) => {
+  ...alertJson(id, status: status),
+  'events':
+      events ??
+      [
+        {
+          'kind': 'raised',
+          'user': null,
+          'note': null,
+          'created_at': '2026-10-01T09:30:00',
+        },
+        {
+          'kind': 'repeated',
+          'user': null,
+          'note': null,
+          'created_at': '2026-10-09T13:05:00',
+        },
+      ],
+};
+
+Map<String, dynamic> notificationJson(
+  String id, {
+  bool read = false,
+  String severity = 'high',
+}) => {
+  'id': id,
+  'alert_id': null,
+  'category': 'sales',
+  'severity': severity,
+  'title': 'Notification $id',
+  'body': 'Body of $id',
+  'link': null,
+  'read': read,
+  'email': 'none',
+  'created_at': '2026-10-09T13:05:00',
+};
+
 /// A server that has a signed-in person, two businesses and a dashboard.
 FakeServer happyServer() {
   final server = FakeServer()
@@ -171,7 +235,79 @@ FakeServer happyServer() {
     ..json(
       'GET /organizations/b2/dashboard',
       dashboard(health: false, attention: 0),
-    );
+    )
+    ..on('GET /organizations/b1/alerts', (request) {
+      final status = request.url.queryParameters['status'];
+      return jsonResponse(switch (status) {
+        'open' => [
+          alertJson('al1'),
+          alertJson('al2', severity: 'medium', occurrences: 1),
+        ],
+        'resolved' => [alertJson('al3', status: 'resolved', severity: 'low')],
+        _ => [],
+      });
+    })
+    ..json('GET /organizations/b1/alerts/summary', {
+      'open': 2,
+      'acknowledged': 0,
+      'resolved': 1,
+      'high_or_critical_open': 1,
+    })
+    ..json('GET /organizations/b1/alerts/al1', alertDetailJson('al1'))
+    ..json(
+      'POST /organizations/b1/alerts/al1/acknowledge',
+      alertDetailJson(
+        'al1',
+        status: 'acknowledged',
+        events: [
+          {
+            'kind': 'raised',
+            'user': null,
+            'note': null,
+            'created_at': '2026-10-01T09:30:00',
+          },
+          {
+            'kind': 'acknowledged',
+            'user': 'Jo Baker',
+            'note': 'Ringing the supplier',
+            'created_at': '2026-10-09T15:00:00',
+          },
+        ],
+      ),
+    )
+    ..json(
+      'POST /organizations/b1/alerts/al1/resolve',
+      alertDetailJson('al1', status: 'resolved'),
+    )
+    ..json('GET /organizations/b2/alerts', [alertJson('al9')])
+    ..json('GET /organizations/b2/alerts/summary', {
+      'open': 1,
+      'acknowledged': 0,
+      'resolved': 0,
+      'high_or_critical_open': 1,
+    })
+    ..json('GET /organizations/b2/alerts/al9', alertDetailJson('al9'))
+    ..json('GET /organizations/b1/notifications', {
+      'unread': 2,
+      'items': [
+        notificationJson('n1'),
+        notificationJson('n2', severity: 'medium'),
+        notificationJson('n3', read: true),
+      ],
+    })
+    ..on(
+      'POST /organizations/b1/notifications/read-all',
+      (_) => http.Response('', 204),
+    )
+    ..on(
+      'POST /organizations/b1/notifications/n1/read',
+      (_) => http.Response('', 204),
+    )
+    ..on(
+      'POST /organizations/b1/notifications/n2/read',
+      (_) => http.Response('', 204),
+    )
+    ..json('GET /organizations/b2/notifications', {'unread': 0, 'items': []});
   return server;
 }
 

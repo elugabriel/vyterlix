@@ -6,7 +6,7 @@ import '../auth/auth_controller.dart';
 import '../auth/session_store.dart';
 import '../models.dart';
 import '../widgets/common.dart';
-import 'today_screen.dart';
+import 'business_shell.dart';
 
 /// The businesses this person belongs to. The one that was open last time opens straight away.
 class BusinessesScreen extends StatefulWidget {
@@ -58,7 +58,9 @@ class _BusinessesScreenState extends State<BusinessesScreen> {
     await context.read<SessionStore>().writeLastBusiness(business.id);
     if (!mounted) return;
     await Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => TodayScreen(business: business)),
+      MaterialPageRoute<void>(
+        builder: (_) => BusinessShell(business: business),
+      ),
     );
     // Coming back means "switch business": forget the choice so it is not opened again at once.
     if (mounted) await context.read<SessionStore>().writeLastBusiness(null);

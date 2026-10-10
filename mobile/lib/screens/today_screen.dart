@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../api/api_client.dart';
-import '../auth/auth_controller.dart';
 import '../format.dart';
 import '../models.dart';
 import '../theme.dart';
+import '../widgets/severity.dart';
 import '../widgets/common.dart';
 
 const _healthText = {
@@ -14,13 +14,6 @@ const _healthText = {
   'needs_attention': 'Needs attention',
   'at_risk': 'At risk',
   'not_enough_data': 'Not enough data',
-};
-const _severityText = {
-  'info': 'For information',
-  'low': 'Low',
-  'medium': 'Medium',
-  'high': 'High',
-  'critical': 'Critical',
 };
 const _kindText = {
   'approval': 'Waiting for you',
@@ -31,23 +24,14 @@ const _kindText = {
   'suggestion': 'Suggestion',
 };
 
-Color _severityColor(String severity) {
-  switch (severity) {
-    case 'critical':
-    case 'high':
-      return Palette.bad;
-    case 'medium':
-      return Palette.warn;
-    default:
-      return Palette.lightMuted;
-  }
-}
-
 /// The front screen: what needs attention first, then how the business is doing.
 class TodayScreen extends StatefulWidget {
-  const TodayScreen({super.key, required this.business});
+  const TodayScreen({super.key, required this.business, this.onOpenAlerts});
 
   final Business business;
+
+  /// Called when the person taps an alert that needs attention: the shell shows the Alerts tab.
+  final VoidCallback? onOpenAlerts;
 
   @override
   State<TodayScreen> createState() => _TodayScreenState();
@@ -80,47 +64,7 @@ class _TodayScreenState extends State<TodayScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final auth = context.watch<AuthController>();
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.business.name,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Switch business',
-            icon: const Icon(Icons.swap_horiz_rounded),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          PopupMenuButton<String>(
-            tooltip: 'Account',
-            icon: const Icon(Icons.account_circle_outlined),
-            onSelected: (value) async {
-              if (value == 'logout') {
-                final navigator = Navigator.of(context);
-                await auth.logout();
-                navigator.popUntil((route) => route.isFirst);
-              }
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem<String>(
-                enabled: false,
-                child: Text(auth.user?.email ?? ''),
-              ),
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: Text('Log out'),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: _body(),
-    );
-  }
+  Widget build(BuildContext context) => _body();
 
   Widget _body() {
     if (_error != null) return ErrorState(message: _error!, onRetry: _load);
@@ -147,7 +91,10 @@ class _TodayScreenState extends State<TodayScreen> {
               ),
             ),
           for (final item in dashboard.attention) ...[
-            _AttentionCard(item: item),
+            _AttentionCard(
+              item: item,
+              onTap: item.kind == 'alert' ? widget.onOpenAlerts : null,
+            ),
             const SizedBox(height: 12),
           ],
           if (dashboard.moreAttention > 0)
@@ -304,53 +251,57 @@ class _SetupCard extends StatelessWidget {
 }
 
 class _AttentionCard extends StatelessWidget {
-  const _AttentionCard({required this.item});
+  const _AttentionCard({required this.item, this.onTap});
 
   final AttentionItem item;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final color = _severityColor(item.severity);
+    final color = severityColor(item.severity);
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     return Card(
       clipBehavior: Clip.antiAlias,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(width: 4, color: color),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      spacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Tag(
-                          _severityText[item.severity] ?? item.severity,
-                          color: color,
-                        ),
-                        Text(
-                          _kindText[item.kind] ?? item.kind,
-                          style: TextStyle(color: muted, fontSize: 13),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      item.title,
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(item.detail, style: TextStyle(color: muted)),
-                  ],
+      child: InkWell(
+        onTap: onTap,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(width: 4, color: color),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Wrap(
+                        spacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Tag(
+                            severityText[item.severity] ?? item.severity,
+                            color: color,
+                          ),
+                          Text(
+                            _kindText[item.kind] ?? item.kind,
+                            style: TextStyle(color: muted, fontSize: 13),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        item.title,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(item.detail, style: TextStyle(color: muted)),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

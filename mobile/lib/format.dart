@@ -41,3 +41,12 @@ String ukDate(String isoDate) {
   final parts = isoDate.substring(0, 10).split('-');
   return '${parts[2]}/${parts[1]}/${parts[0]}';
 }
+
+String _two(int n) => n.toString().padLeft(2, '0');
+
+/// "2026-10-09T12:00:00+00:00" becomes "09/10/2026, 13:00" in the phone's own time (UK time for a
+/// phone set to the UK).
+String ukDateTime(String iso) {
+  final t = DateTime.parse(iso).toLocal();
+  return '${_two(t.day)}/${_two(t.month)}/${t.year}, ${_two(t.hour)}:${_two(t.minute)}';
+}

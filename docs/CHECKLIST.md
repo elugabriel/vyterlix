@@ -441,16 +441,22 @@ Step 1 (done, server side): **a phone signs in with `client: "mobile"` and gets 
 
 **The app**
 
+**Rule for the app (client decision, 2026-10-10): the core functionality of the system is in the app, with the same wording, the same roles and the same look as the website.** Every core web screen gets an app screen; the list below says which exist. Screens are added in this order: Actions and recommendations, then Key figures, Health, Forecast and What changed, then Ask Vyterlix, then Data (upload and quick entry), then Reports, What we know, and Settings, Team and Billing.
+
+Step 3 (done): a bar along the bottom (**Today, Alerts, Inbox**) inside each business, with the unread number on Inbox. **Alerts**: how many are open and how serious, filter by open, being dealt with or closed (with counts), each alert with its severity, how often it was seen and when; open one to read it in full, see what has happened to it (newest first) and, for an owner or a manager, **take it on** ("I'm on it") or **close it** with an optional note; a viewer is told only owners and managers can act; a refusal from the server (for example outside a manager's area) is shown. Tapping an alert that needs attention on Today opens the Alerts tab. **Inbox**: what the person has been told, unread in bold with a coloured dot, tap to mark read, "Mark all as read". 85 tests now, and the optional live test also reads alerts and the inbox from the real server.
+
 Step 2 (done): the Flutter project is in `mobile/` (see its README to run it). It has **log in** (with a show/hide password, forgot password in a sheet, clear messages for a wrong password, no connection and an app that is too old), the **list of businesses** (the one open last time opens by itself; "switch business" goes back), and the **Today** screen (a gradient card with the headline and health score, what needs attention with how serious, the key figures in pounds and per cent with good and bad news coloured, set-up progress, pull down to refresh, try again on a problem). The refresh token is kept in the iOS Keychain / Android Keystore through secure storage and replaced at every use; several screens needing a new token at once share one trip to the server; a sign-in that the server ends (signed out elsewhere, password changed) sends the person back to the log in screen from wherever they are. Same look as the website, dark mode follows the phone. **58 tests** run against a pretend server (`flutter test`), plus an optional test against the real server (`test/live_smoke_test.dart`) that passed against the local one: the app and the server agree on the sign-in, the businesses and the Today screen.
 
 - [~] Flutter project set up in the repo (`mobile/`): done, with lint (`flutter analyze`, clean) and tests; **CI (lint, tests, Android build, iOS build on a macOS runner) is not set up yet**
 - [~] Sign-in, sign-up, verify email, forgot/reset password, biometric unlock (Face ID / fingerprint) after first sign-in: sign-in and forgot password are done (the reset itself still happens on the website through the emailed link); sign-up, in-app verification and biometric unlock are not
 - [x] Business switcher (a person can belong to several businesses)
 - [x] Dashboard (read-only health + KPIs): the Today screen; the key figures on it only, not yet every figure with its history
-- [ ] Alerts and in-app notification list
+- [x] Alerts and in-app notification list (alerts: take on and close; inbox: read and mark all read; the alert's own explanation page is still on the website)
+- [ ] What changed (the figures that moved, why, and what to do), Key figures (every figure with its history), Health (score, areas, history) and Forecast (with ranges, accuracy and what to stock): same content as the website, drawn for a phone
 - [ ] Recommendations: view, approve / reject (Owner; Manager within remit; Viewer read-only)
 - [ ] Actions and follow-up: mark done, add outcome
-- [ ] AI consultation
+- [ ] AI consultation (Ask Vyterlix: the same grounded answers with their sources, earlier conversations, the AI controls)
+- [ ] Reports (write now, read, share the PDF or spreadsheet), What we know (memory), and Settings, Team and Billing (the owner's controls)
 - [ ] Data: upload a CSV/Excel file from the phone (share sheet / file picker), see checking results, import and undo; quick manual entry of a sale or expense
 - [ ] Push notifications (with Phase 14), with per-category preferences
 - [ ] Offline and poor-signal behaviour: last-known data shown with its age, clear "couldn't reach Vyterlix" states, no silent data loss
