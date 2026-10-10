@@ -82,6 +82,8 @@ cd backend
 .venv/Scripts/alembic upgrade head
 ```
 
+The phone app is in `mobile/` (Flutter); see `mobile/README.md` for how to run and test it.
+
 ## Running locally
 
 Use three terminals (two if you are not uploading files).

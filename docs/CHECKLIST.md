@@ -33,7 +33,7 @@ Sources: `VYTERLIX_IMPLEMENTATION_CHECKLIST.md` (build order),
 | 15 | Reporting | **Step 1 done (four reports, kept exactly as written, PDF and CSV downloads, weekly or monthly emailed delivery, the Reports screen)** |
 | 16 | Subscription / billing | **Step 1 done (plans and what they include as data, a 14-day trial, gating of four features, sandbox, Stripe and Paystack behind one interface with signed and never-twice messages, upgrade, downgrade, cancel, invoices, the Plan and billing screen); real Stripe and Paystack untried until accounts exist; prices are placeholders** |
 | 17 | Admin portal | **Done (platform staff made from the command line, businesses, people, roles, trials, the audit trail across businesses, the plans screen, feature switches, support cases and notes, system events and the health page; everything recorded)** apart from "see as a business" and two-step sign-in for staff |
-| 18 | Mobile apps (iOS + Android, Flutter) | **Confirmed in scope** — server-side prerequisites started (phone sign-in, devices, app-version check, push addresses); the app itself and email links that open it are not started |
+| 18 | Mobile apps (iOS + Android, Flutter) | **Confirmed in scope** — server-side prerequisites done (phone sign-in, devices, app-version check, push addresses); the app has log in, businesses and the Today screen; alerts, actions, the assistant, data upload, push and offline are still to do |
 | L1 | Security & privacy hardening | Not started |
 | L2 | Automated QA & testing | Ongoing |
 | L3 | Production infrastructure | Not started |
@@ -441,10 +441,12 @@ Step 1 (done, server side): **a phone signs in with `client: "mobile"` and gets 
 
 **The app**
 
-- [ ] Flutter project set up in the repo (`mobile/`): Dart tooling installed, lint + tests in CI, Android build in CI, iOS build on a macOS runner
-- [ ] Sign-in, sign-up, verify email, forgot/reset password, biometric unlock (Face ID / fingerprint) after first sign-in
-- [ ] Business switcher (a person can belong to several businesses)
-- [ ] Dashboard (read-only health + KPIs)
+Step 2 (done): the Flutter project is in `mobile/` (see its README to run it). It has **log in** (with a show/hide password, forgot password in a sheet, clear messages for a wrong password, no connection and an app that is too old), the **list of businesses** (the one open last time opens by itself; "switch business" goes back), and the **Today** screen (a gradient card with the headline and health score, what needs attention with how serious, the key figures in pounds and per cent with good and bad news coloured, set-up progress, pull down to refresh, try again on a problem). The refresh token is kept in the iOS Keychain / Android Keystore through secure storage and replaced at every use; several screens needing a new token at once share one trip to the server; a sign-in that the server ends (signed out elsewhere, password changed) sends the person back to the log in screen from wherever they are. Same look as the website, dark mode follows the phone. **58 tests** run against a pretend server (`flutter test`), plus an optional test against the real server (`test/live_smoke_test.dart`) that passed against the local one: the app and the server agree on the sign-in, the businesses and the Today screen.
+
+- [~] Flutter project set up in the repo (`mobile/`): done, with lint (`flutter analyze`, clean) and tests; **CI (lint, tests, Android build, iOS build on a macOS runner) is not set up yet**
+- [~] Sign-in, sign-up, verify email, forgot/reset password, biometric unlock (Face ID / fingerprint) after first sign-in: sign-in and forgot password are done (the reset itself still happens on the website through the emailed link); sign-up, in-app verification and biometric unlock are not
+- [x] Business switcher (a person can belong to several businesses)
+- [x] Dashboard (read-only health + KPIs): the Today screen; the key figures on it only, not yet every figure with its history
 - [ ] Alerts and in-app notification list
 - [ ] Recommendations: view, approve / reject (Owner; Manager within remit; Viewer read-only)
 - [ ] Actions and follow-up: mark done, add outcome
@@ -453,7 +455,7 @@ Step 1 (done, server side): **a phone signs in with `client: "mobile"` and gets 
 - [ ] Push notifications (with Phase 14), with per-category preferences
 - [ ] Offline and poor-signal behaviour: last-known data shown with its age, clear "couldn't reach Vyterlix" states, no silent data loss
 - [ ] Secure by default: nothing sensitive in logs or screenshots-in-switcher, certificate pinning decision, jailbreak/root decision, app data cleared on sign-out
-- [ ] Accessibility (text size, screen readers, contrast) and dark mode
+- [~] Accessibility (text size, screen readers, contrast) and dark mode: dark mode follows the phone and the controls are labelled; not yet checked with a screen reader or at large text sizes
 - [ ] Mobile testing: real iOS and Android devices, small and large screens, slow network, interrupted uploads
 - [ ] Store release work is tracked under L5 (accounts, signing, listings, privacy labels, TestFlight / internal testing)
 
@@ -607,6 +609,8 @@ Step 1 (done, server side): **a phone signs in with `client: "mobile"` and gets 
 | **Staff cannot yet "see as" a business** (no impersonation) and cannot see its figures, only its accounts and plan | Whether support needs to look at a business's screens; if so, a consent-based, time-limited, fully audited way | Not planned; ask the client / L1 |
 | **Staff sign in with a password only**; there is no second step yet for the accounts that can lock people out and suspend businesses | Two-step sign-in for staff at least | L1 |
 | **Push notifications cannot be sent yet**: phones can register, but sending needs a Firebase project (Android) and an Apple push key (iOS) | The Apple Developer and Google accounts, then the sending side in the notification service | Phase 18 step 2 |
+| **The mobile app has only been run as tests and compiled for Windows**, not on an Android emulator, a real phone or an iPhone (Android licences are not yet accepted on this PC; iOS needs a Mac) | A look on real devices | Phase 18 later steps / L6 |
+| **The app's name and identifiers (`com.vyterlix.vyterlix_mobile`) are placeholders** | The Apple and Google developer accounts and the final names | L5 |
 | **Links in emails open the web page, not the app**: opening the app from them needs the app's identifiers (bundle id and package name) and signing details published on the website | The app identifiers and store accounts | Phase 18 step 2 |
 | **The devices list has no screen yet** (the website's Settings and the app) | A Sessions section in Settings | Phase 18 step 2 |
 | **Stripe and Paystack have never been run for real**: they were written from the providers' documents and tried only against pretend servers and test-signed messages | Stripe and Paystack accounts, price ids for each plan (`provider-price`), webhook addresses set up, and a real test-mode payment end to end | L6 |
