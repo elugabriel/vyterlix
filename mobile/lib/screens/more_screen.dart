@@ -4,6 +4,7 @@ import '../models.dart';
 import 'ask_screen.dart';
 import 'changes_screen.dart';
 import 'data_screen.dart';
+import 'billing_screen.dart';
 import 'forecast_screen.dart';
 import 'health_screen.dart';
 import 'key_figures_screen.dart';
@@ -67,6 +68,12 @@ class MoreScreen extends StatelessWidget {
         'What changed',
         'The figures that moved by more than normal, and why.',
         (_) => ChangesScreen(business: business),
+      ),
+      (
+        Icons.credit_card_outlined,
+        'Plan and billing',
+        'Your plan, what you use, and what you have been charged.',
+        (_) => BillingScreen(business: business),
       ),
       (
         Icons.settings_outlined,
