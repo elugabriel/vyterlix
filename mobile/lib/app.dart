@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'api/api_client.dart';
 import 'auth/auth_controller.dart';
 import 'auth/session_store.dart';
+import 'cache.dart';
 import 'files.dart';
 import 'lock.dart';
 import 'screens/businesses_screen.dart';
@@ -11,6 +12,7 @@ import 'screens/login_screen.dart';
 import 'theme.dart';
 import 'widgets/common.dart';
 import 'widgets/lock_layer.dart';
+import 'widgets/offline_banner.dart';
 
 class VyterlixApp extends StatelessWidget {
   const VyterlixApp({
@@ -19,6 +21,7 @@ class VyterlixApp extends StatelessWidget {
     required this.api,
     required this.store,
     required this.lock,
+    required this.offline,
     this.files = const PhoneFileChooser(),
   });
 
@@ -26,6 +29,7 @@ class VyterlixApp extends StatelessWidget {
   final ApiClient api;
   final SessionStore store;
   final AppLock lock;
+  final OfflineState offline;
 
   /// How a spreadsheet is chosen on this phone (tests give it a made-up one).
   final FileChooser files;
@@ -38,6 +42,7 @@ class VyterlixApp extends StatelessWidget {
         Provider<ApiClient>.value(value: api),
         Provider<SessionStore>.value(value: store),
         ChangeNotifierProvider<AppLock>.value(value: lock),
+        ChangeNotifierProvider<OfflineState>.value(value: offline),
         Provider<FileChooser>.value(value: files),
       ],
       child: MaterialApp(
@@ -46,7 +51,7 @@ class VyterlixApp extends StatelessWidget {
         theme: buildTheme(Brightness.light),
         darkTheme: buildTheme(Brightness.dark),
         builder: (context, child) =>
-            LockLayer(child: child ?? const SizedBox()),
+            LockLayer(child: OfflineBanner(child: child ?? const SizedBox())),
         home: const _Gate(),
       ),
     );

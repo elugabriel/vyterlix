@@ -6,6 +6,7 @@ import 'api/api_client.dart';
 import 'app.dart';
 import 'auth/auth_controller.dart';
 import 'auth/session_store.dart';
+import 'cache.dart';
 import 'config.dart';
 import 'lock.dart';
 
@@ -23,14 +24,27 @@ String _deviceName() {
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   final store = SecureSessionStore();
-  final api = ApiClient(baseUrl: AppConfig.apiBaseUrl);
+  final offline = OfflineState();
+  final api = ApiClient(
+    baseUrl: AppConfig.apiBaseUrl,
+    cache: FileResponseCache(),
+    offline: offline,
+  );
   final auth = AuthController(
     api: api,
     store: store,
     deviceName: _deviceName(),
   );
   final lock = AppLock(phone: const SystemPhoneLock(), store: store);
-  runApp(VyterlixApp(auth: auth, api: api, store: store, lock: lock));
+  runApp(
+    VyterlixApp(
+      auth: auth,
+      api: api,
+      store: store,
+      lock: lock,
+      offline: offline,
+    ),
+  );
   lock.load();
   auth.start();
 }

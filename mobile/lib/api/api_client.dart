@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../cache.dart';
+
 /// Something the server (or the connection) said no to, in words fit to show.
 class ApiException implements Exception {
   const ApiException(this.status, this.code, this.message, {this.details});
@@ -29,8 +31,19 @@ class ApiException implements Exception {
 /// Talks to the Vyterlix server. It keeps the short-lived access token in memory, and when the
 /// server says that token has run out it asks [refresher] for a new one and tries once more.
 class ApiClient {
-  ApiClient({required this.baseUrl, http.Client? client})
-    : _http = client ?? http.Client();
+  ApiClient({
+    required this.baseUrl,
+    http.Client? client,
+    this.cache,
+    this.offline,
+  }) : _http = client ?? http.Client();
+
+  /// Where the last good answer to each read is kept, so there is something to show with no signal.
+  final ResponseCache? cache;
+  final OfflineState? offline;
+
+  /// Never kept on the phone: sign-in, the list of devices, and the admin portal.
+  static const _notSaved = ['/auth', '/me/sessions', '/admin', '/app-config'];
 
   final String baseUrl;
   final http.Client _http;
@@ -48,8 +61,27 @@ class ApiClient {
     );
   }
 
-  Future<dynamic> get(String path, {Map<String, String>? query}) =>
-      _send('GET', path, query: query);
+  /// Read something. With no connection, the last good answer is returned instead (and [offline]
+  /// is told, so the screen can say so); if nothing was saved the error is thrown as usual.
+  Future<dynamic> get(String path, {Map<String, String>? query}) async {
+    final saved = cache;
+    if (saved == null || _notSaved.any(path.startsWith)) {
+      return _send('GET', path, query: query);
+    }
+    final key = _uri(path, query).toString();
+    try {
+      final data = await _send('GET', path, query: query);
+      offline?.backOnline();
+      await saved.write(key, jsonEncode(data), DateTime.now());
+      return data;
+    } on ApiException catch (error) {
+      if (!error.isUnreachable) rethrow;
+      final old = await saved.read(key);
+      if (old == null) rethrow;
+      offline?.showSaved(old.savedAt);
+      return jsonDecode(old.body);
+    }
+  }
 
   Future<dynamic> post(String path, {Object? body, bool auth = true}) =>
       _send('POST', path, body: body, auth: auth);

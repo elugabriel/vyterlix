@@ -78,7 +78,13 @@ class AuthController extends ChangeNotifier {
       final ok = await refresh();
       _set(ok ? AuthStatus.signedIn : AuthStatus.signedOut);
     } on ApiException {
-      _set(AuthStatus.unreachable);
+      // No signal. If the phone has saved figures, open on those; the sign-in is renewed the first
+      // time a request reaches the server.
+      _set(
+        await api.cache?.hasAny() == true
+            ? AuthStatus.signedIn
+            : AuthStatus.unreachable,
+      );
     }
   }
 
@@ -143,6 +149,8 @@ class AuthController extends ChangeNotifier {
     api.accessToken = null;
     user = null;
     await store.clearSignIn();
+    await api.cache?.clear();
+    api.offline?.backOnline();
     if (status != AuthStatus.signedOut) _set(AuthStatus.signedOut);
   }
 

@@ -8,6 +8,7 @@ import 'package:vyterlix_mobile/api/api_client.dart';
 import 'package:vyterlix_mobile/app.dart';
 import 'package:vyterlix_mobile/auth/auth_controller.dart';
 import 'package:vyterlix_mobile/auth/session_store.dart';
+import 'package:vyterlix_mobile/cache.dart';
 import 'package:vyterlix_mobile/files.dart';
 import 'package:vyterlix_mobile/lock.dart';
 
@@ -1203,9 +1204,14 @@ Map<String, dynamic> jsonBodyOf(http.Request request) =>
     jsonDecode(request.body) as Map<String, dynamic>;
 
 class Harness {
-  Harness(this.server, {SessionStore? store})
+  Harness(this.server, {SessionStore? store, ResponseCache? cache})
     : store = store ?? MemorySessionStore() {
-    api = ApiClient(baseUrl: baseUrl, client: server.client);
+    api = ApiClient(
+      baseUrl: baseUrl,
+      client: server.client,
+      cache: cache,
+      offline: offline,
+    );
     auth = AuthController(
       api: api,
       store: this.store,
@@ -1216,6 +1222,7 @@ class Harness {
 
   final FakeServer server;
   final SessionStore store;
+  final offline = OfflineState();
   late final ApiClient api;
   late final AuthController auth;
   late AppLock lock;
@@ -1230,9 +1237,10 @@ Future<Harness> pumpApp(
   bool start = true,
   FileChooser? files,
   PhoneLock? phone,
+  ResponseCache? cache,
   Duration lockAfter = const Duration(seconds: 30),
 }) async {
-  final harness = Harness(server, store: store);
+  final harness = Harness(server, store: store, cache: cache);
   final lock = AppLock(
     phone: phone ?? FakePhoneLock(supported: false),
     store: harness.store,
@@ -1246,6 +1254,7 @@ Future<Harness> pumpApp(
       api: harness.api,
       store: harness.store,
       lock: lock,
+      offline: harness.offline,
       files: files ?? const PhoneFileChooser(),
     ),
   );

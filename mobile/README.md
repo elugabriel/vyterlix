@@ -71,3 +71,7 @@ listed in `docs/CHECKLIST.md` under Phase 18.
 ## Phone lock (fingerprint, face or PIN)
 
 The person icon menu offers "Open with fingerprint, face or PIN" on phones that can check. It is off by default; turning it on asks the phone to check the person once, then the app starts locked and locks again after 30 seconds out of sight. Logging out turns it off. Platform changes made for `local_auth`: Android `MainActivity` is a `FlutterFragmentActivity`, the themes use AppCompat and `USE_BIOMETRIC` is requested; iOS has `NSFaceIDUsageDescription`. Only the Windows build has been compiled so far, so check an Android and an iPhone build before release.
+
+## With no signal
+
+Every read the app makes is kept in a private folder on the phone (`lib/cache.dart`). With no connection the last saved answer is shown under an amber "No connection. Showing what was saved on ..." strip, and the app can open on the saved businesses. Nothing that changes data is saved or replayed: typing in a sale, importing, undoing and so on need a connection and say so. Sign-in, the device list and the admin portal are never saved, and everything is wiped on log out. Pull down on a screen to try again.
