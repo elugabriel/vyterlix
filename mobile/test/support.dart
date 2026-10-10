@@ -218,6 +218,180 @@ Map<String, dynamic> notificationJson(
   'created_at': '2026-10-09T13:05:00',
 };
 
+Map<String, dynamic> actionSummaryJson(
+  String id, {
+  String status = 'in_progress',
+  String label = 'In progress',
+  int daysLate = 0,
+  bool dueSoon = false,
+  Map<String, dynamic>? owner = const {'id': 'u1', 'name': 'Jo Baker'},
+  String? target = '2026-10-31',
+  int done = 1,
+  int total = 3,
+}) => {
+  'id': id,
+  'title': 'Action $id title',
+  'category': 'sales',
+  'kpi_name': 'Sales',
+  'status': status,
+  'status_label': label,
+  'owner': owner,
+  'start_date': '2026-10-01',
+  'target_date': target,
+  'days_late': daysLate,
+  'due_soon': dueSoon,
+  'progress': {
+    'done': done,
+    'total': total,
+    'percent': total == 0 ? 0 : (done * 100 ~/ total),
+  },
+  'last_activity_at': '2026-10-09T13:05:00',
+};
+
+Map<String, dynamic> actionDetailJson(
+  String id, {
+  String status = 'in_progress',
+  String label = 'In progress',
+  List<String> next = const ['partially_completed', 'completed', 'cancelled'],
+  int daysLate = 0,
+  List<Map<String, dynamic>>? steps,
+  Map<String, dynamic>? followUp,
+  Map<String, dynamic>? outcome,
+  List<Map<String, dynamic>>? updates,
+}) {
+  final stepList =
+      steps ??
+      [
+        {'text': 'Ring the supplier', 'done': true},
+        {'text': 'Change the order', 'done': false},
+        {'text': 'Tell the team', 'done': false},
+      ];
+  final done = stepList.where((s) => s['done'] == true).length;
+  return {
+    'id': id,
+    'title': 'Action $id title',
+    'description': 'Action $id description',
+    'category': 'sales',
+    'status': status,
+    'status_label': label,
+    'next_statuses': next,
+    'owner': {'id': 'u1', 'name': 'Jo Baker'},
+    'created_by': {'id': 'u1', 'name': 'Jo Baker'},
+    'approved_by': null,
+    'start_date': '2026-10-01',
+    'target_date': '2026-10-31',
+    'completed_at': null,
+    'days_late': daysLate,
+    'due_soon': false,
+    'steps': stepList,
+    'progress': {
+      'done': done,
+      'total': stepList.length,
+      'percent': stepList.isEmpty ? 0 : (done * 100 ~/ stepList.length),
+    },
+    'decision': {
+      'title': 'Action $id title',
+      'original_title': null,
+      'modified': false,
+      'description': 'Action $id description',
+      'target': 'Sourdough',
+      'library_code': 'x',
+      'kpi_code': 'sales',
+      'kpi_name': 'Sales',
+      'unit': 'gbp',
+      'baseline_period': '2026-09-01',
+      'baseline_value': '8717.1',
+      'expected_impact_value': '450',
+      'expected_impact_unit': 'gbp',
+      'recommendation_score': 80,
+      'accepted_by': {'id': 'u1', 'name': 'Jo Baker'},
+      'accepted_at': '2026-10-01T09:00:00',
+      'event_id': 'ev1',
+    },
+    'updates':
+        updates ??
+        [
+          {
+            'id': 'up1',
+            'kind': 'created',
+            'from_status': null,
+            'to_status': 'accepted',
+            'note': null,
+            'details': {},
+            'user': {'id': 'u1', 'name': 'Jo Baker'},
+            'created_at': '2026-10-01T09:00:00',
+          },
+          {
+            'id': 'up2',
+            'kind': 'overdue',
+            'from_status': 'accepted',
+            'to_status': 'overdue',
+            'note': 'Past its date',
+            'details': {},
+            'user': null,
+            'created_at': '2026-10-08T07:00:00',
+          },
+        ],
+    'evidence': [],
+    'follow_up': followUp,
+    'outcome': outcome,
+    'last_activity_at': '2026-10-09T13:05:00',
+  };
+}
+
+Map<String, dynamic> optionJson(
+  String id,
+  int rank, {
+  bool recommended = false,
+  String title = 'Option',
+}) => {
+  'id': id,
+  'rank': rank,
+  'is_recommended': recommended,
+  'title': '$title $id',
+  'description': 'Description of $id',
+  'target': recommended ? 'Sourdough' : null,
+  'intervention': {
+    'code': 'c$id',
+    'name': 'Intervention $id',
+    'category': 'sales',
+    'summary': 's',
+    'steps': ['First step of $id', 'Second step of $id'],
+    'effort': 'low',
+    'cost_level': 'none',
+    'typical_days_to_effect': 14,
+    'impact_share': '0.3',
+    'impact_basis': 'b',
+  },
+  'impact_value': '450',
+  'impact_unit': 'gbp',
+  'total_score': recommended ? 82 : 61,
+  'scores': [],
+  'effort': recommended ? 'low' : 'high',
+  'cost_level': recommended ? 'none' : 'medium',
+  'days_to_effect': recommended ? 14 : 30,
+};
+
+Map<String, dynamic> recommendationJson({
+  String status = 'open',
+  bool options = true,
+}) => {
+  'id': 'rec1',
+  'event': {},
+  'status': status,
+  'headline': 'Sales fell 11.9% in September',
+  'rationale': 'The best fit is to re-price the weakest line.',
+  'rules_version': '1',
+  'generated_at': '2026-10-09T10:00:00',
+  'options': options
+      ? [
+          optionJson('o1', 1, recommended: true, title: 'Re-price'),
+          optionJson('o2', 2, title: 'Promote'),
+        ]
+      : [],
+  'evidence': [],
+};
+
 /// A server that has a signed-in person, two businesses and a dashboard.
 FakeServer happyServer() {
   final server = FakeServer()
@@ -307,7 +481,230 @@ FakeServer happyServer() {
       'POST /organizations/b1/notifications/n2/read',
       (_) => http.Response('', 204),
     )
-    ..json('GET /organizations/b2/notifications', {'unread': 0, 'items': []});
+    ..json('GET /organizations/b2/notifications', {'unread': 0, 'items': []})
+    ..on('GET /organizations/b1/actions', (request) {
+      final q = request.url.queryParameters;
+      if (q['status'] == 'pending') {
+        return jsonResponse([
+          actionSummaryJson(
+            'a2',
+            status: 'pending',
+            label: 'Waiting for approval',
+            owner: null,
+            total: 0,
+            done: 0,
+          ),
+        ]);
+      }
+      if (q['status'] == 'completed') {
+        return jsonResponse([
+          actionSummaryJson('a3', status: 'completed', label: 'Done', done: 3),
+        ]);
+      }
+      if (q['mine'] == 'true') return jsonResponse([actionSummaryJson('a1')]);
+      return jsonResponse([
+        actionSummaryJson('a1'),
+        actionSummaryJson(
+          'a4',
+          status: 'overdue',
+          label: 'Overdue',
+          daysLate: 5,
+          target: '2026-10-04',
+          done: 0,
+        ),
+        actionSummaryJson(
+          'a5',
+          status: 'accepted',
+          label: 'Accepted',
+          dueSoon: true,
+          total: 0,
+          done: 0,
+        ),
+      ]);
+    })
+    ..json('GET /organizations/b1/actions/summary', {
+      'pending': 1,
+      'accepted': 1,
+      'in_progress': 1,
+      'partially_completed': 0,
+      'completed': 1,
+      'cancelled': 0, 'overdue': 1, 'open': 3, 'due_soon': 1, 'mine_open': 1, //
+    })
+    ..json('GET /organizations/b1/actions/a1', actionDetailJson('a1'))
+    ..json(
+      'PATCH /organizations/b1/actions/a1',
+      actionDetailJson(
+        'a1',
+        steps: [
+          {'text': 'Ring the supplier', 'done': true},
+          {'text': 'Change the order', 'done': true},
+          {'text': 'Tell the team', 'done': false},
+        ],
+      ),
+    )
+    ..json(
+      'POST /organizations/b1/actions/a1/status',
+      actionDetailJson(
+        'a1',
+        status: 'completed',
+        label: 'Done',
+        next: [],
+        followUp: {
+          'due_date': '2026-11-14',
+          'measure_month': '2026-10-01',
+          'status': 'scheduled',
+          'is_due': false,
+          'notified': false,
+        },
+      ),
+    )
+    ..json(
+      'POST /organizations/b1/actions/a1/notes',
+      actionDetailJson(
+        'a1',
+        updates: [
+          {
+            'id': 'up1',
+            'kind': 'note',
+            'from_status': null,
+            'to_status': null,
+            'note': 'Spoke to the baker',
+            'details': {},
+            'user': {'id': 'u1', 'name': 'Jo Baker'},
+            'created_at': '2026-10-09T16:00:00',
+          },
+        ],
+      ),
+    )
+    ..json(
+      'GET /organizations/b1/actions/a2',
+      actionDetailJson(
+        'a2',
+        status: 'pending',
+        label: 'Waiting for approval',
+        next: ['accepted', 'cancelled'],
+        steps: [],
+      ),
+    )
+    ..json(
+      'POST /organizations/b1/actions/a2/approve',
+      actionDetailJson(
+        'a2',
+        status: 'accepted',
+        label: 'Accepted',
+        next: ['in_progress', 'partially_completed', 'completed', 'cancelled'],
+        steps: [],
+      ),
+    )
+    ..json(
+      'POST /organizations/b1/actions/a2/reject',
+      actionDetailJson(
+        'a2',
+        status: 'cancelled',
+        label: 'Cancelled',
+        next: [],
+        steps: [],
+      ),
+    )
+    ..json(
+      'GET /organizations/b1/actions/a3',
+      actionDetailJson(
+        'a3',
+        status: 'completed',
+        label: 'Done',
+        next: [],
+        outcome: {
+          'outcome': 'successful',
+          'label': 'It worked',
+          'reason': 'Sales rose by more than hoped.',
+          'kpi_name': 'Sales',
+          'unit': 'gbp',
+          'baseline_period': '2026-09-01',
+          'baseline_value': '8717.1',
+          'measured_period': '2026-10-01',
+          'measured_value': '9400',
+          'expected_change': '450',
+          'actual_change': '682.9',
+          'seasonal_change': null,
+          'adjusted_change': null,
+          'achieved_pct': 152,
+          'data_quality': 95,
+          'measured_at': '2026-11-15T07:00:00',
+          'measured_by': null,
+          'alternative': null,
+        },
+      ),
+    )
+    ..json(
+      'GET /organizations/b1/actions/a5',
+      actionDetailJson(
+        'a5',
+        status: 'accepted',
+        label: 'Accepted',
+        next: ['in_progress', 'partially_completed', 'completed', 'cancelled'],
+        steps: [],
+        followUp: null,
+      ),
+    )
+    ..json('GET /organizations/b2/actions', [
+      actionSummaryJson('a9', status: 'accepted', label: 'Accepted'),
+    ])
+    ..json('GET /organizations/b2/actions/summary', {
+      'pending': 0,
+      'accepted': 1,
+      'in_progress': 0,
+      'partially_completed': 0,
+      'completed': 0,
+      'cancelled': 0,
+      'overdue': 0,
+      'open': 1,
+      'due_soon': 0,
+      'mine_open': 0,
+    })
+    ..json(
+      'GET /organizations/b2/actions/a9',
+      actionDetailJson(
+        'a9',
+        status: 'accepted',
+        label: 'Accepted',
+        next: ['in_progress'],
+      ),
+    )
+    ..json('GET /organizations/b1/recommendations', [
+      {
+        'id': 'rec1',
+        'event_id': 'ev1',
+        'kpi_name': 'Sales',
+        'period_start': '2026-09-01',
+        'status': 'open',
+        'headline': 'Sales fell 11.9% in September',
+        'recommended': 'Re-price o1',
+        'score': 82,
+        'generated_at': '2026-10-09T10:00:00',
+      },
+    ])
+    ..json(
+      'GET /organizations/b1/changes/ev1/recommendation',
+      recommendationJson(),
+    )
+    ..json(
+      'POST /organizations/b1/changes/ev1/recommendation/accept',
+      actionDetailJson(
+        'a1',
+        status: 'accepted',
+        label: 'Accepted',
+        next: ['in_progress', 'completed', 'cancelled'],
+      ),
+    )
+    ..on(
+      'POST /organizations/b1/changes/ev1/recommendation/dismiss',
+      (_) => http.Response('', 204),
+    )
+    ..json('GET /organizations/b2/recommendations', [])
+    ..json(
+      'GET /organizations/b2/changes/ev1/recommendation',
+      recommendationJson(),
+    );
   return server;
 }
 

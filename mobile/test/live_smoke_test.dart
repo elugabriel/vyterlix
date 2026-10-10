@@ -14,6 +14,7 @@ import 'package:vyterlix_mobile/api/api_client.dart';
 import 'package:vyterlix_mobile/auth/auth_controller.dart';
 import 'package:vyterlix_mobile/auth/session_store.dart';
 import 'package:vyterlix_mobile/models.dart';
+import 'package:vyterlix_mobile/models_actions.dart';
 
 const _base = String.fromEnvironment('LIVE_API_BASE_URL');
 const _token = String.fromEnvironment('LIVE_REFRESH_TOKEN');
@@ -76,6 +77,39 @@ void main() {
           as Map<String, dynamic>,
     );
     expect(inbox.unread, greaterThanOrEqualTo(0));
+
+    final counts2 = ActionCounts.fromJson(
+      await api.get('$base/actions/summary') as Map<String, dynamic>,
+    );
+    final actions = [
+      for (final item in await api.get(
+        '$base/actions',
+        query: {'open_only': 'true'},
+      ) as List)
+        ActionSummary.fromJson(item as Map<String, dynamic>),
+    ];
+    expect(counts2.open, greaterThanOrEqualTo(0));
+    if (actions.isNotEmpty) {
+      final detail = ActionDetail.fromJson(
+        await api.get('$base/actions/${actions.first.id}')
+            as Map<String, dynamic>,
+      );
+      expect(detail.title, isNotEmpty);
+    }
+    final ideas = [
+      for (final item in await api.get(
+        '$base/recommendations',
+        query: {'status': 'open'},
+      ) as List)
+        RecommendationSummary.fromJson(item as Map<String, dynamic>),
+    ];
+    if (ideas.isNotEmpty) {
+      final detail = RecommendationDetail.fromJson(
+        await api.get('$base/changes/${ideas.first.eventId}/recommendation')
+            as Map<String, dynamic>,
+      );
+      expect(detail.headline, isNotEmpty);
+    }
 
     await auth.logout();
     expect(auth.status, AuthStatus.signedOut);

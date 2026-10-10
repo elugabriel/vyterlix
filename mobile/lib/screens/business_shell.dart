@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../api/api_client.dart';
 import '../auth/auth_controller.dart';
 import '../models.dart';
+import 'actions_screen.dart';
 import 'alerts_screen.dart';
 import 'notifications_screen.dart';
 import 'today_screen.dart';
@@ -24,7 +25,12 @@ class _BusinessShellState extends State<BusinessShell> {
 
   /// What each tab has shown so far is kept, so going back and forth does not reload everything.
   late final List<Widget> _tabs = [
-    TodayScreen(business: widget.business, onOpenAlerts: () => _go(1)),
+    TodayScreen(
+      business: widget.business,
+      onOpenAlerts: () => _go(2),
+      onOpenActions: _openActions,
+    ),
+    ActionsScreen(key: _actionsKey, business: widget.business),
     AlertsScreen(business: widget.business),
     NotificationsScreen(
       business: widget.business,
@@ -56,7 +62,15 @@ class _BusinessShellState extends State<BusinessShell> {
     }
   }
 
+  final _actionsKey = GlobalKey<ActionsScreenState>();
+
   void _go(int index) => setState(() => _tab = index);
+
+  /// From Today: show the Actions tab, on the list that fits what was tapped.
+  void _openActions(String filter) {
+    _go(1);
+    _actionsKey.currentState?.showFilter(filter);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +116,11 @@ class _BusinessShellState extends State<BusinessShell> {
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home_rounded),
             label: 'Today',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.task_alt_outlined),
+            selectedIcon: Icon(Icons.task_alt_rounded),
+            label: 'Actions',
           ),
           const NavigationDestination(
             icon: Icon(Icons.notifications_active_outlined),

@@ -6,7 +6,8 @@ website, with the same logins, roles and business separation.
 The rule for the app: the core functionality of the system is in it, with the website's wording, roles and
 look. What is in it so far: log in (with forgot password), a list of the person's businesses (the one open
 last time opens by itself), and inside a business a bar along the bottom with **Today** (what needs
-attention, the health score and the key figures), **Alerts** (see, take on and close them) and **Inbox**
+attention, the health score and the key figures), **Actions** (the work decided on, with its steps and
+results, and Vyterlix's ideas to take up or leave), **Alerts** (see, take on and close them) and **Inbox**
 (what you have been told). The refresh token is kept in the iOS Keychain / Android Keystore and swapped for a new one each
 time; the app signs the person out if the server ends the session from anywhere.
 
@@ -63,6 +64,6 @@ Google developer accounts exist; change them before anything is published.
 
 ## Not built yet
 
-Actions and recommendations, key figures, health, forecast and what changed, the AI assistant, data upload
+Key figures, health, forecast and what changed, the AI assistant, data upload
 and quick entry, reports, what we know, settings and billing, fingerprint / Face ID unlock, push
 notifications, working without a signal, and links in emails that open the app. They are listed in `docs/CHECKLIST.md` under Phase 18.

@@ -26,12 +26,20 @@ const _kindText = {
 
 /// The front screen: what needs attention first, then how the business is doing.
 class TodayScreen extends StatefulWidget {
-  const TodayScreen({super.key, required this.business, this.onOpenAlerts});
+  const TodayScreen({
+    super.key,
+    required this.business,
+    this.onOpenAlerts,
+    this.onOpenActions,
+  });
 
   final Business business;
 
   /// Called when the person taps an alert that needs attention: the shell shows the Alerts tab.
   final VoidCallback? onOpenAlerts;
+
+  /// Called with the list to show on the Actions tab (still to do, waiting for approval, ideas).
+  final ValueChanged<String>? onOpenActions;
 
   @override
   State<TodayScreen> createState() => _TodayScreenState();
@@ -63,6 +71,24 @@ class _TodayScreenState extends State<TodayScreen> {
     }
   }
 
+  VoidCallback? _tapFor(AttentionItem item) {
+    final actions = widget.onOpenActions;
+    switch (item.kind) {
+      case 'alert':
+        return widget.onOpenAlerts;
+      case 'approval':
+        return actions == null ? null : () => actions('pending');
+      case 'suggestion':
+        return actions == null ? null : () => actions('ideas');
+      case 'action_overdue':
+      case 'action_due_soon':
+      case 'follow_up':
+        return actions == null ? null : () => actions('open');
+      default:
+        return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) => _body();
 
@@ -91,10 +117,7 @@ class _TodayScreenState extends State<TodayScreen> {
               ),
             ),
           for (final item in dashboard.attention) ...[
-            _AttentionCard(
-              item: item,
-              onTap: item.kind == 'alert' ? widget.onOpenAlerts : null,
-            ),
+            _AttentionCard(item: item, onTap: _tapFor(item)),
             const SizedBox(height: 12),
           ],
           if (dashboard.moreAttention > 0)
