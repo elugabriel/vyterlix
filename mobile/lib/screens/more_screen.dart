@@ -7,6 +7,7 @@ import 'data_screen.dart';
 import 'forecast_screen.dart';
 import 'health_screen.dart';
 import 'key_figures_screen.dart';
+import 'memory_screen.dart';
 import 'reports_screen.dart';
 
 /// Everything else in the business: the figures and what they mean.
@@ -47,6 +48,12 @@ class MoreScreen extends StatelessWidget {
         'Your data',
         'How complete your data is, and bring in more from a file.',
         (_) => DataScreen(business: business),
+      ),
+      (
+        Icons.psychology_alt_outlined,
+        'What we know',
+        'What Vyterlix has learned about your business, and your limits on suggestions.',
+        (_) => MemoryScreen(business: business),
       ),
       (
         Icons.description_outlined,
