@@ -7,6 +7,7 @@ import '../models_data.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/severity.dart';
+import 'entry_screen.dart';
 import 'imports_screen.dart';
 import 'upload_screen.dart';
 
@@ -139,6 +140,15 @@ class _DataScreenState extends State<DataScreen> {
               onPressed: () => _go(UploadScreen(business: widget.business)),
               icon: const Icon(Icons.upload_file_rounded),
               label: const Text('Upload a file'),
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () => _go(EntryScreen(business: widget.business)),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+              ),
+              icon: const Icon(Icons.edit_note_rounded),
+              label: const Text('Type in a sale or expense'),
             ),
             const SizedBox(height: 10),
             OutlinedButton.icon(
