@@ -7,6 +7,7 @@ import 'data_screen.dart';
 import 'forecast_screen.dart';
 import 'health_screen.dart';
 import 'key_figures_screen.dart';
+import 'reports_screen.dart';
 
 /// Everything else in the business: the figures and what they mean.
 class MoreScreen extends StatelessWidget {
@@ -46,6 +47,12 @@ class MoreScreen extends StatelessWidget {
         'Your data',
         'How complete your data is, and bring in more from a file.',
         (_) => DataScreen(business: business),
+      ),
+      (
+        Icons.description_outlined,
+        'Reports',
+        'Your figures written up to read, kept exactly as written.',
+        (_) => ReportsScreen(business: business),
       ),
       (
         Icons.show_chart_rounded,
