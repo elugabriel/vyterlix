@@ -9,6 +9,7 @@ import 'health_screen.dart';
 import 'key_figures_screen.dart';
 import 'memory_screen.dart';
 import 'reports_screen.dart';
+import 'settings_screen.dart';
 
 /// Everything else in the business: the figures and what they mean.
 class MoreScreen extends StatelessWidget {
@@ -66,6 +67,12 @@ class MoreScreen extends StatelessWidget {
         'What changed',
         'The figures that moved by more than normal, and why.',
         (_) => ChangesScreen(business: business),
+      ),
+      (
+        Icons.settings_outlined,
+        'Settings',
+        'Your business settings, your notifications and your team.',
+        (_) => SettingsScreen(business: business),
       ),
     ];
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
