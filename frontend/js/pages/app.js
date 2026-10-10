@@ -23,8 +23,13 @@ function renderOrgs(orgs) {
       el(
         "li",
         {},
-        el("a", { href: `dashboard.html?org=${org.id}` }, org.name),
-        el("span", { class: "badge" }, org.role),
+        el(
+          "a",
+          { class: "org-card", href: `dashboard.html?org=${org.id}` },
+          el("span", { class: "avatar", "aria-hidden": "true" }, org.name.trim().charAt(0).toUpperCase()),
+          el("span", { class: "org-name" }, org.name),
+          el("span", { class: "badge" }, org.role),
+        ),
       ),
     ),
   );

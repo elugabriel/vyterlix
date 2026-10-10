@@ -27,7 +27,7 @@ const invoicesBox = el("div", { class: "stack" });
 async function start({ org }) {
   base = `/organizations/${org.id}/billing`;
   document.getElementById("org-name").textContent = org.name;
-  content.replaceChildren(current, el("h2", {}, "Plans"), plansBox, el("h2", {}, "What you have been charged"), invoicesBox);
+  content.replaceChildren(current, el("div", { class: "section-title" }, el("h2", {}, "Plans")), plansBox, el("div", { class: "section-title" }, el("h2", {}, "What you have been charged")), invoicesBox);
   readReturn(org.id);
   await refresh();
 }
@@ -70,15 +70,23 @@ function usage(f) {
 function showCurrent(billing) {
   const sub = billing.subscription;
   const kids = [
-    el("div", { class: "kpi stack" },
-      el("div", { class: "kpi-name" }, `${sub.plan_name} plan `, el("span", { class: "badge" }, sub.status_label)),
-      el("p", {}, sub.message),
-      sub.scheduled_plan_name ? el("p", { class: "muted" }, `Moving to the ${sub.scheduled_plan_name} plan when this period ends.`) : null,
-      sub.current_period_end ? el("p", { class: "muted" }, `Current period: ${ukDate(sub.current_period_start)} to ${ukDate(sub.current_period_end)}`) : null,
+    el("div", { class: "hero" },
+      el("div", { class: "stack" },
+        el("div", { style: "color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;font-size:.75rem;font-weight:650" }, "Your plan"),
+        el("h2", {}, `${sub.plan_name} `, el("span", { class: "badge" }, sub.status_label)),
+        el("p", {}, sub.message),
+        sub.scheduled_plan_name ? el("p", {}, `Moving to the ${sub.scheduled_plan_name} plan when this period ends.`) : null,
+        sub.current_period_end ? el("p", {}, `Current period: ${ukDate(sub.current_period_start)} to ${ukDate(sub.current_period_end)}`) : null,
+      ),
       canManage ? ownerButtons(sub) : null,
     ),
+    el("div", { class: "section-title" }, el("h2", {}, "What you use")),
     el("div", { class: "kpi-grid" },
-      ...billing.features.map((f) => el("div", { class: "kpi" }, el("div", { class: "kpi-name" }, f.label), el("div", {}, usage(f)))),
+      ...billing.features.map((f) => el("div", { class: "kpi stack" },
+        el("div", { class: "kpi-name" }, f.label),
+        el("div", {}, usage(f)),
+        f.enabled && f.limit != null && f.used != null ? el("progress", { value: Math.min(f.used, f.limit), max: Math.max(f.limit, 1), "aria-label": `${f.label} in use` }) : null,
+      )),
     ),
   ];
   if (sandboxToken && canManage) kids.unshift(sandboxPanel());
@@ -158,9 +166,9 @@ function planCard(plan, billing, chooser) {
   else if (price == null) action = el("p", { class: "muted" }, "Not sold this way");
   else if (plan.current && sub.interval === interval && !sub.scheduled_plan_name) action = el("span", { class: "muted" }, "Your plan");
   else action = chooseButton(plan, paying, chooser);
-  return el("div", { class: "kpi stack" },
+  return el("div", { class: `kpi stack${plan.current ? " current" : ""}` },
     el("div", { class: "kpi-name" }, plan.name, " ", plan.current ? el("span", { class: "badge" }, "Current") : null),
-    el("div", {}, price == null ? "Talk to us" : `${price} a ${interval}`),
+    el("div", { class: "price" }, price == null ? "Talk to us" : price, price == null ? null : el("span", { class: "muted per" }, ` a ${interval}`)),
     interval === "year" && plan.year_saving ? el("p", { class: "muted" }, `Saves ${plan.year_saving} a year`) : null,
     el("p", { class: "muted" }, plan.description),
     el("ul", {}, ...plan.features.map((f) => el("li", {}, `${f.label}: ${f.text}`))),

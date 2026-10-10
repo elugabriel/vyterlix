@@ -179,7 +179,7 @@ def test_the_navigation_bar_only_points_at_pages_that_exist():
 
 def test_the_navigation_bar_is_added_by_the_one_shared_opener():
     business = (FRONTEND / "js" / "business.js").read_text(encoding="utf-8")
-    assert "mountNav(orgId)" in business and 'from "./nav.js"' in business
+    assert "mountNav(orgId" in business and 'from "./nav.js"' in business
     for script in (FRONTEND / "js" / "pages").glob("*.js"):
         assert "mountNav" not in script.read_text(encoding="utf-8"), (
             script.name

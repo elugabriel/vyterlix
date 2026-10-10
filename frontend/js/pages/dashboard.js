@@ -25,7 +25,34 @@ function page(link) {
   return `${file}?org=${orgId}${anchor ? `#${anchor}` : ""}`;
 }
 
+function hero(d) {
+  const h = d.health;
+  const change = !h || h.previous_score === null ? "" : h.score === h.previous_score ? "No change on the month before" : `${h.score > h.previous_score ? "Up" : "Down"} from ${h.previous_score} the month before`;
+  return el(
+    "section",
+    { class: "hero" },
+    el("div", { class: "stack" },
+      el("div", { class: "muted", style: "color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;font-size:.75rem;font-weight:650" }, "Today"),
+      el("h2", {}, d.headline),
+      h && h.weakest ? el("p", {}, `The area pulling your health down most is ${h.weakest}.`) : null,
+    ),
+    h
+      ? el("div", { class: "hero-score" },
+          el("div", {}, el("div", { class: "number" }, String(h.score)), el("div", { class: "of" }, "out of 100")),
+          el("div", { class: "stack" },
+            el("span", { class: "badge" }, HEALTH_TEXT[h.status] ?? h.status),
+            el("div", { class: "of" }, `${change ? `${change} · ` : ""}${periodLabel(h.period, "month")}`),
+            el("a", { href: page("health.html") }, "See the whole picture"),
+          ),
+        )
+      : null,
+  );
+}
+
 function attention(d) {
+  if (!d.attention.length) {
+    return el("section", { class: "stack" }, el("div", { class: "section-title" }, el("h2", {}, "Needs your attention")), el("p", { class: "muted" }, "Nothing needs you right now."));
+  }
   const items = d.attention.map((i) =>
     el(
       "div",
@@ -38,23 +65,10 @@ function attention(d) {
   );
   return el(
     "section",
-    { class: "stack" },
-    el("p", { class: "today-line" }, d.headline),
-    items.length ? el("div", { class: "attention" }, ...items) : null,
-    d.more_attention ? el("p", { class: "muted" }, `${d.more_attention} more. `, el("a", { href: page("alerts.html") }, "See them all on the Alerts page")) : null,
-  );
-}
-
-function health(h) {
-  if (!h) return null;
-  const change = h.previous_score === null ? "" : h.score === h.previous_score ? " (no change)" : ` (${h.score > h.previous_score ? "up" : "down"} from ${h.previous_score})`;
-  return el(
-    "section",
-    { class: "stack" },
-    el("h2", {}, "How the business is doing"),
-    el("p", {}, el("strong", {}, `${h.score} out of 100`), ` · ${HEALTH_TEXT[h.status] ?? h.status}${change} · ${periodLabel(h.period, "month")}`),
-    h.weakest ? el("p", { class: "muted" }, `The area pulling it down most is ${h.weakest}.`) : null,
-    el("a", { href: page("health.html") }, "See the whole picture"),
+    {},
+    el("div", { class: "section-title" }, el("h2", {}, "Needs your attention")),
+    el("div", { class: "attention" }, ...items),
+    d.more_attention ? el("p", { class: "muted", style: "margin-top:12px" }, `${d.more_attention} more. `, el("a", { href: page("alerts.html") }, "See them all on the Alerts page")) : null,
   );
 }
 
@@ -63,7 +77,7 @@ function figures(list) {
   return el(
     "section",
     { class: "stack" },
-    el("h2", {}, "Your key figures"),
+    el("div", { class: "section-title" }, el("h2", {}, "Your key figures")),
     el(
       "div",
       { class: "figures" },
@@ -99,7 +113,7 @@ async function start({ org }) {
   const d = await guard(message, () => api.get(`/organizations/${org.id}/dashboard`));
   if (!d) return;
   content.replaceChildren();
-  put(content, setup(d.setup), attention(d), health(d.health), figures(d.figures));
+  put(content, hero(d), setup(d.setup), attention(d), figures(d.figures));
   if (!d.health && !d.figures.length) {
     put(content, el("p", { class: "muted" }, "There are no figures yet. Bring in your sales, costs and customers from "), el("a", { href: page("data.html") }, "Your data"), el("span", { class: "muted" }, " and they will appear here."));
   }

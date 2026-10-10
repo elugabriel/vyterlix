@@ -28,7 +28,7 @@ export async function openBusiness(message) {
   try {
     const org = await api.get(`/organizations/${orgId}`);
     document.title = `${org.name} · Vyterlix`;
-    mountNav(orgId);
+    mountNav(orgId, org.name);
     return { user, org };
   } catch (err) {
     if (!(err instanceof ApiError)) throw err;
