@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../theme.dart';
 
-/// The Vyterlix mark: a rounded square with a V, in the accent gradient.
+/// The Vyterlix logo (the tile with the V and the name), at any size.
 class BrandMark extends StatelessWidget {
   const BrandMark({super.key, this.size = 34});
 
@@ -13,27 +12,22 @@ class BrandMark extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      alignment: Alignment.center,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Palette.accent, Palette.accent2],
-        ),
-        borderRadius: BorderRadius.circular(size * 0.3),
+        borderRadius: BorderRadius.circular(size * 0.22),
         boxShadow: [
           BoxShadow(
-            color: Palette.accent.withValues(alpha: 0.35),
+            color: const Color(0xFF041040).withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
         ],
       ),
-      child: Text(
-        'V',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: size * 0.5,
-          fontWeight: FontWeight.w800,
-        ),
+      child: Image.asset(
+        'assets/logo.png',
+        width: size,
+        height: size,
+        semanticLabel: 'Vyterlix',
+        filterQuality: FilterQuality.medium,
       ),
     );
   }
