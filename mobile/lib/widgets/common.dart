@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 /// The Vyterlix logo (the tile with the V and the name), at any size.
 class BrandMark extends StatelessWidget {
   const BrandMark({super.key, this.size = 34});

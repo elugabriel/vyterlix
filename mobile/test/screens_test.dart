@@ -15,7 +15,7 @@ void main() {
   group('the log in screen', () {
     testWidgets('shows the form when nobody is signed in', (tester) async {
       await pumpApp(tester, happyServer());
-      expect(find.text('Welcome back'), findsOneWidget);
+      expect(find.text('Log in to Vyterlix'), findsOneWidget);
       expect(
         find.widgetWithText(TextFormField, 'Email address'),
         findsOneWidget,
@@ -73,7 +73,7 @@ void main() {
         await pumpApp(tester, server);
         await logIn(tester, password: 'wrong');
         expect(find.text('Incorrect email or password'), findsOneWidget);
-        expect(find.text('Welcome back'), findsOneWidget);
+        expect(find.text('Log in to Vyterlix'), findsOneWidget);
         server.json('POST /auth/login', tokens());
         await logIn(tester);
         expect(find.text('Incorrect email or password'), findsNothing);
@@ -294,7 +294,7 @@ void main() {
       expect(find.text('jo@example.co.uk'), findsOneWidget);
       await tester.tap(find.text('Log out'));
       await tester.pumpAndSettle();
-      expect(find.text('Welcome back'), findsOneWidget);
+      expect(find.text('Log in to Vyterlix'), findsOneWidget);
       expect(h.memory.refreshToken, isNull);
     });
   });
@@ -463,7 +463,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Log out'));
       await tester.pumpAndSettle();
-      expect(find.text('Welcome back'), findsOneWidget);
+      expect(find.text('Log in to Vyterlix'), findsOneWidget);
       expect(find.text('TODAY'), findsNothing);
       expect(h.memory.refreshToken, isNull);
     });
@@ -492,7 +492,7 @@ void main() {
         await tester.fling(find.byType(ListView), const Offset(0, 400), 1000);
         await tester.pumpAndSettle();
         expect(h.auth.status, AuthStatus.signedOut);
-        expect(find.text('Welcome back'), findsOneWidget);
+        expect(find.text('Log in to Vyterlix'), findsOneWidget);
       },
     );
   });

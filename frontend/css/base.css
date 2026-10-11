@@ -239,13 +239,13 @@ body.shell .topbar { justify-content: flex-end; }
     var(--bg);
 }
 .auth-card { width: 100%; max-width: 440px; padding: 36px; border-radius: 20px; box-shadow: var(--shadow-lg); }
-.auth-card h1 { margin-top: 0; font-size: 1.6rem; }
+.auth-card h1 { margin-top: 0; font-size: 1.6rem; text-align: center; margin-bottom: 18px; }
 .auth-card::before {
   content: "";
   display: block;
   width: 76px;
   height: 76px;
-  margin-bottom: 18px;
+  margin: 0 auto 18px;
   border-radius: 18px;
   background: url("../img/logo.png") center / cover no-repeat;
   box-shadow: 0 10px 22px -10px rgba(4, 16, 64, 0.6);

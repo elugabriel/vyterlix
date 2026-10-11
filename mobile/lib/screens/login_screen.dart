@@ -82,19 +82,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Form(
                       key: _form,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const BrandMark(size: 44),
+                          const Center(child: BrandMark(size: 76)),
                           const SizedBox(height: 20),
                           Text(
-                            'Welcome back',
+                            'Log in to Vyterlix',
+                            textAlign: TextAlign.center,
                             style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Log in to see how your business is doing.',
+                            'See how your business is doing.',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
