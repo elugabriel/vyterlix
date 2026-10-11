@@ -4,4 +4,7 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Test builds may talk to a development server over plain http on the local network.
+         Release builds never get this: they only talk to the real https address. -->
+    <application android:usesCleartextTraffic="true" />
 </manifest>
