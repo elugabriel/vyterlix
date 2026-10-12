@@ -13,6 +13,10 @@ start "Vyterlix API" cmd /k "cd /d backend && .venv\Scripts\python.exe -m uvicor
 start "Vyterlix website" cmd /k "backend\.venv\Scripts\python.exe frontend\serve.py"
 start "Vyterlix worker" cmd /k "cd /d backend && .venv\Scripts\python.exe -m app.cli.worker run"
 
+rem If an Android phone is plugged in by USB, let its app reach this computer through the cable.
+set "ADB=%LOCALAPPDATA%\Android\sdk\platform-tools\adb.exe"
+if exist "%ADB%" "%ADB%" reverse tcp:8000 tcp:8000 >nul 2>&1
+
 echo Waiting a few seconds for everything to start...
 timeout /t 8 /nobreak >nul
 start http://localhost:5500
