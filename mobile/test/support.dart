@@ -174,9 +174,10 @@ Map<String, dynamic> alertJson(
   String severity = 'high',
   String status = 'open',
   int occurrences = 3,
+  String ruleCode = 'data_stale',
 }) => {
   'id': id,
-  'rule_code': 'change_sales',
+  'rule_code': ruleCode,
   'category': 'sales',
   'kpi_category': null,
   'severity': severity,
@@ -195,9 +196,10 @@ Map<String, dynamic> alertJson(
 Map<String, dynamic> alertDetailJson(
   String id, {
   String status = 'open',
+  String ruleCode = 'data_stale',
   List<Map<String, dynamic>>? events,
 }) => {
-  ...alertJson(id, status: status),
+  ...alertJson(id, status: status, ruleCode: ruleCode),
   'events':
       events ??
       [

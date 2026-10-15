@@ -20,6 +20,7 @@ class Business {
 
 class AttentionItem {
   const AttentionItem({
+    this.id = '',
     required this.kind,
     required this.severity,
     required this.title,
@@ -29,6 +30,7 @@ class AttentionItem {
   });
 
   factory AttentionItem.fromJson(Map<String, dynamic> json) => AttentionItem(
+    id: '${json['id'] ?? ''}',
     kind: '${json['kind']}',
     severity: '${json['severity']}',
     title: '${json['title']}',
@@ -37,6 +39,8 @@ class AttentionItem {
     canAct: json['can_act'] == true,
   );
 
+  /// Like `alert:` followed by the alert's id, or `action:` and the action's id.
+  final String id;
   final String kind;
 
   /// info, low, medium, high or critical
@@ -179,6 +183,7 @@ class Dashboard {
 
 class AlertSummary {
   const AlertSummary({
+    this.ruleCode = '',
     required this.id,
     required this.title,
     required this.body,
@@ -193,6 +198,7 @@ class AlertSummary {
   });
 
   factory AlertSummary.fromJson(Map<String, dynamic> json) => AlertSummary(
+    ruleCode: '${json['rule_code'] ?? ''}',
     id: '${json['id']}',
     title: '${json['title']}',
     body: '${json['body']}',
@@ -205,6 +211,12 @@ class AlertSummary {
     acknowledgedBy: json['acknowledged_by'] as String?,
     resolvedAt: json['resolved_at'] as String?,
   );
+
+  /// Which kind of alert it is; "change_..." ones are about a figure that moved.
+  final String ruleCode;
+
+  /// Whether this is about a figure that changed, so it has a card to decide on.
+  bool get isChange => ruleCode.startsWith('change_');
 
   final String id;
   final String title;

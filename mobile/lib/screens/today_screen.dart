@@ -7,6 +7,7 @@ import '../models.dart';
 import '../theme.dart';
 import '../widgets/severity.dart';
 import '../widgets/common.dart';
+import 'alerts_screen.dart';
 import '../widgets/plain.dart';
 
 const _kindText = {
@@ -69,6 +70,20 @@ class _TodayScreenState extends State<TodayScreen> {
     final actions = widget.onOpenActions;
     switch (item.kind) {
       case 'alert':
+        // A figure that changed opens its card, with what it means and what to do about it.
+        final hash = item.link.indexOf('#');
+        if (item.link.startsWith('alerts.html#') && hash >= 0) {
+          final id = item.link.substring(hash + 1);
+          return () async {
+            final changed = await Navigator.of(context).push<bool>(
+              MaterialPageRoute(
+                builder: (_) =>
+                    AlertDetailScreen(business: widget.business, alertId: id),
+              ),
+            );
+            if (changed == true) await _load();
+          };
+        }
         return widget.onOpenAlerts;
       case 'approval':
         return actions == null ? null : () => actions('pending');

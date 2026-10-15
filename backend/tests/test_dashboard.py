@@ -121,7 +121,7 @@ def test_what_needs_attention_comes_first_most_serious_first(api, march):
     assert (first["kind"], first["severity"], first["can_act"]) == ("alert", "high", True)
     assert (
         first["id"].startswith("alert:")
-        and first["link"] == "changes.html"
+        and first["link"] == "alerts.html#" + first["id"].removeprefix("alert:")
         and first["title"]
         and first["detail"]
     )

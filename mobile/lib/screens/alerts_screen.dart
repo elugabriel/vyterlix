@@ -5,6 +5,7 @@ import '../api/api_client.dart';
 import '../format.dart';
 import '../models.dart';
 import '../theme.dart';
+import '../widgets/alert_card_view.dart';
 import '../widgets/common.dart';
 import '../widgets/severity.dart';
 
@@ -328,6 +329,24 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
     final alert = detail.alert;
     final color = severityColor(alert.severity);
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    if (alert.isChange) {
+      // A figure that changed gets the whole card: what it means, what to do, and the buttons to decide.
+      return ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          AlertCardView(
+            business: widget.business,
+            alertId: widget.alertId,
+            onChanged: () {
+              _changed = true;
+              _load();
+            },
+          ),
+          const SectionTitle('What has happened'),
+          ..._history(detail, muted),
+        ],
+      );
+    }
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
@@ -400,36 +419,40 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
             ),
           ),
         const SectionTitle('What has happened'),
-        for (final event in detail.events.reversed)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 6, right: 12),
-                  child: Icon(Icons.circle, size: 8, color: Palette.accent),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${_eventText[event.kind] ?? event.kind}${event.user == null ? '' : ' by ${event.user}'}',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        ukDateTime(event.createdAt),
-                        style: TextStyle(color: muted, fontSize: 12),
-                      ),
-                      if (event.note != null) Text(event.note!),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+        ..._history(detail, muted),
       ],
     );
   }
+
+  List<Widget> _history(AlertDetail detail, Color muted) => [
+    for (final event in detail.events.reversed)
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(top: 6, right: 12),
+              child: Icon(Icons.circle, size: 8, color: Palette.accent),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${_eventText[event.kind] ?? event.kind}${event.user == null ? '' : ' by ${event.user}'}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  Text(
+                    ukDateTime(event.createdAt),
+                    style: TextStyle(color: muted, fontSize: 12),
+                  ),
+                  if (event.note != null) Text(event.note!),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+  ];
 }

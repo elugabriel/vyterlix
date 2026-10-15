@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, Query, status
 
 from app.api.deps import DB, Meta, Tenant, require_permission
 from app.core.permissions import Perm
+from app.schemas.actions import AcceptIn, DismissIn
+from app.schemas.alert_card import AlertCardOut
 from app.schemas.alerts import (
     AlertCategory,
     AlertCountsOut,
@@ -18,8 +20,8 @@ from app.schemas.alerts import (
     RuleOut,
     Severity,
 )
+from app.services import alert_card, notifications
 from app.services import alerts as service
-from app.services import notifications
 from app.services.email import EmailSender, get_email_sender
 
 router = APIRouter(prefix="/organizations/{organization_id}/alerts", tags=["alerts"])
@@ -29,6 +31,7 @@ inbox_router = APIRouter(
 
 Viewer = Annotated[Tenant, Depends(require_permission(Perm.INSIGHTS_VIEW))]
 Worker = Annotated[Tenant, Depends(require_permission(Perm.ACTIONS_MANAGE))]
+Decider = Annotated[Tenant, Depends(require_permission(Perm.RECOMMENDATIONS_ACTION))]
 Owner = Annotated[Tenant, Depends(require_permission(Perm.ORG_MANAGE))]
 
 
@@ -71,6 +74,29 @@ def evaluate(tenant: Worker, db: DB, sender: Annotated[EmailSender, Depends(get_
 @router.get("/{alert_id}", response_model=AlertDetailOut)
 def one(alert_id: uuid.UUID, tenant: Viewer, db: DB):
     return service.get_alert(db, alert_id)
+
+
+@router.get("/{alert_id}/card", response_model=AlertCardOut)
+def card(alert_id: uuid.UUID, tenant: Viewer, db: DB):
+    """The alert with everything needed to decide: what happened in plain words, why it matters,
+    how urgent, a chart, and the suggested next step (worked out the first time someone who may
+    decide opens it)."""
+    return alert_card.card(db, tenant, alert_id)
+
+
+@router.post("/{alert_id}/accept", response_model=AlertCardOut)
+def accept(alert_id: uuid.UUID, tenant: Decider, db: DB, meta: Meta, body: AcceptIn | None = None):
+    """Accept the suggestion: it becomes an action (with an owner and dates, changed first if you
+    want) and the alert is marked as being dealt with. Send nothing to take it as suggested."""
+    return alert_card.accept(db, tenant, alert_id, body or AcceptIn(), meta)
+
+
+@router.post("/{alert_id}/dismiss", response_model=AlertCardOut)
+def dismiss(
+    alert_id: uuid.UUID, tenant: Decider, db: DB, meta: Meta, body: DismissIn | None = None
+):
+    """Decide not to act. The suggestion stays on record with the reason and the alert is closed."""
+    return alert_card.dismiss(db, tenant, alert_id, body or DismissIn(), meta)
 
 
 @router.post("/{alert_id}/acknowledge", response_model=AlertDetailOut)

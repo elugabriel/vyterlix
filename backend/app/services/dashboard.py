@@ -46,7 +46,9 @@ def _alert_items(db: Session) -> list[rules.Item]:
             a.severity,
             a.title,
             a.body,
-            a.link or "alerts.html",
+            # a figure that changed opens its card (what it means and what to do); the rest go
+            # straight to the page that deals with them
+            f"alerts.html#{a.id}" if a.rule_code.startswith("change_") else a.link or "alerts.html",
             a.kpi_category,
             f"alert:{a.id}",
             {"alert_id": str(a.id)},

@@ -82,7 +82,7 @@ export function missingText(value, requires = []) {
 }
 
 /** A small bar chart of a KPI over time (finished periods solid, the one in progress faded). */
-export function barChart(values, unit, label) {
+export function barChart(values, unit, label, { marked = null } = {}) {
   const shown = values.filter((v) => v.status === "ok");
   const width = 560;
   const height = 120;
@@ -103,7 +103,7 @@ export function barChart(values, unit, label) {
       y: top,
       width: barWidth,
       height: Math.max(1, Math.abs(zero - y)),
-      class: v.is_complete ? "bar" : "bar bar-partial",
+      class: `${v.is_complete ? "bar" : "bar bar-partial"}${marked && v.period_start === marked ? " bar-marked" : ""}`,
       rx: 2,
     });
     bar.append(svg("title", {}, `${v.period_start}: ${formatValue(v.value, unit)}`));

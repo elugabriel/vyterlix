@@ -650,3 +650,15 @@ progress { -webkit-appearance: none; appearance: none; height: 8px; border: 0; b
 progress::-webkit-progress-bar { background: var(--border); border-radius: 999px; }
 progress::-webkit-progress-value { background: var(--gradient); border-radius: 999px; }
 progress::-moz-progress-bar { background: var(--gradient); border-radius: 999px; }
+
+/* An alert and what to do about it (client feedback, section 5) */
+.alert-card { max-width: 760px; }
+.alert-card h2 { margin: 4px 0; }
+.alert-card-meta { display: flex; align-items: center; gap: 8px; }
+.suggestion { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; display: grid; gap: 6px; }
+.suggestion h3 { margin: 0; }
+.suggestion p { margin: 0; }
+.chart .bar-marked { fill: var(--warn); }
+.plain-says { font-weight: 600; }
+.plain-good.plain-says { color: var(--ok); }
+.plain-bad.plain-says { color: var(--bad); }

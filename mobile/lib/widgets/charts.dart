@@ -18,12 +18,16 @@ class BarChart extends StatelessWidget {
     required this.values,
     this.lastIsPartial = false,
     this.height = 140,
+    this.markedIndex = -1,
   });
 
   /// Oldest first; null where there is no figure.
   final List<double?> values;
   final bool lastIsPartial;
   final double height;
+
+  /// A bar to draw in orange, to point at the month something is about (-1 for none).
+  final int markedIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +40,7 @@ class BarChart extends StatelessWidget {
           lastIsPartial,
           Theme.of(context).colorScheme.primary,
           Theme.of(context).colorScheme.outlineVariant,
+          markedIndex,
         ),
       ),
     );
@@ -43,12 +48,19 @@ class BarChart extends StatelessWidget {
 }
 
 class _BarPainter extends CustomPainter {
-  _BarPainter(this.values, this.lastIsPartial, this.color, this.axis);
+  _BarPainter(
+    this.values,
+    this.lastIsPartial,
+    this.color,
+    this.axis,
+    this.markedIndex,
+  );
 
   final List<double?> values;
   final bool lastIsPartial;
   final Color color;
   final Color axis;
+  final int markedIndex;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -72,7 +84,10 @@ class _BarPainter extends CustomPainter {
       final partial = lastIsPartial && i == values.length - 1;
       canvas.drawRRect(
         RRect.fromRectAndRadius(rect, const Radius.circular(3)),
-        Paint()..color = color.withValues(alpha: partial ? 0.4 : 1),
+        Paint()
+          ..color = i == markedIndex
+              ? Palette.warn
+              : color.withValues(alpha: partial ? 0.4 : 1),
       );
     }
     canvas.drawLine(
@@ -86,7 +101,9 @@ class _BarPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BarPainter old) =>
-      old.values != values || old.lastIsPartial != lastIsPartial;
+      old.values != values ||
+      old.lastIsPartial != lastIsPartial ||
+      old.markedIndex != markedIndex;
 }
 
 /// What happened (a line), and what is expected next (a dashed line with a band around it).

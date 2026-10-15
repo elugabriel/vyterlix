@@ -3,6 +3,7 @@
 // their thresholds; security alerts cannot be switched off). Owners and managers can say they have
 // seen an alert or close it.
 
+import { mountCard } from "../alert-card.js";
 import { api } from "../auth.js";
 import { openBusiness } from "../business.js";
 import { guard, put, table } from "../data.js";
@@ -95,7 +96,16 @@ async function openFromHash() {
   const id = location.hash.slice(1);
   if (!/^[0-9a-f-]{36}$/i.test(id)) return detail.replaceChildren();
   const a = await guard(message, () => api.get(`${base}/${id}`));
-  if (a) show(a);
+  if (!a) return;
+  if (a.rule_code.startsWith("change_")) {
+    // A figure that changed gets the whole card: what it means, what to do, and the buttons to decide.
+    detail.replaceChildren();
+    const holder = el("div", {});
+    detail.append(holder, el("strong", {}, "What happened to it"), el("ul", {}, ...a.events.map((e) => el("li", {}, el("span", { class: "muted" }, `${ukDateTime(e.created_at)} · ${e.user ?? "Vyterlix"} · `), { raised: "Raised", repeated: "Seen again", acknowledged: "Seen", resolved: "Closed", reopened: "Reopened" }[e.kind], e.note ? `: ${e.note}` : ""))));
+    await mountCard(holder, { orgId, alertId: id, pageLink, onChange: () => { load(); loadCounts(); } });
+    return;
+  }
+  show(a);
 }
 
 function pageLink(link) {

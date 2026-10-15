@@ -59,11 +59,11 @@ She wants this to be the central experience, not separate pages to remember.
   - [~] Detection exists (changes, alerts, drivers). It is not yet the start of one connected flow.
 - [ ] **2. Explain:** what changed, why it matters and what evidence supports it.
   - [~] What changed and evidence exist on the What changed page; not shown with the alert.
-- [ ] **3. Recommend:** one or more realistic next steps, each with **High, Medium or Low priority and a brief reason**.
+- [~] **3. Recommend:** one or more realistic next steps, each with **High, Medium or Low priority and a brief reason** (shown on the alert card; the What changed page does not show the label yet).
   - [~] Options, ranking and "why this one" exist; the High/Medium/Low label with a reason is not shown.
 - [ ] **4. Decide and assign:** the owner can **accept, change, assign, postpone or dismiss**. Accepted actions become tasks immediately.
   - [x] Accept, change before accepting, assign, dates, steps.
-  - [~] Dismiss exists for a recommendation.
+  - [x] Dismiss, with the reason kept (website card).
   - [ ] **Postpone** ("remind me later" with a date).
   - [ ] Dismiss with a reason, remembered for the future.
 - [ ] **5. Follow up:** remind the responsible person, check progress, ask for an outcome when needed.
@@ -103,13 +103,13 @@ Her figures are illustrations, not real results.
 
 ## 5. Important alerts lead straight to useful actions (§5)
 
-- [ ] A High priority alert shows, immediately and on the same screen: **the reason, the suggested action, the responsible person and the deadline**.
-- [ ] Her example alert card works: "High priority: Fewer customers returned this month. Why: return visits fell from 38% to 26%. Suggested next step: contact customers who have not booked in 60 days. Assign to: customer service. Review in: 14 days."
-- [ ] The owner can choose **Accept, Edit, Assign or Dismiss** on the card.
-- [ ] **Accepting creates a linked action and follow-up.** (Today an alert only links to a screen that explains it.)
+- [x] A High priority alert shows, immediately and on the same screen: **the reason, the suggested action, the responsible person and the deadline** (the alert card, website: `frontend/js/alert-card.js`, `GET /alerts/{id}/card`). Phone app card still to do (item 2b).
+- [~] Her example alert card works (priority and reason, suggested step, assign to, due by, and "we will check from" are all on the card; the customer-return suggestion needs the missing recommendations): "High priority: Fewer customers returned this month. Why: return visits fell from 38% to 26%. Suggested next step: contact customers who have not booked in 60 days. Assign to: customer service. Review in: 14 days."
+- [~] The owner can choose **Accept, Edit, Assign or Dismiss** on the card (website done; **Postpone** and the phone app come in 2b).
+- [x] **Accepting creates a linked action and follow-up** (the alert is marked as being dealt with; a manager outside their area can only propose it).
 - [ ] Not every good change needs a task: good news is explained simply.
 - [ ] When there is a meaningful opportunity, recommend how to build on it.
-- [ ] **Priorities reflect likely business impact, urgency and strength of evidence, not just the size of a percentage change.**
+- [x] **Priorities reflect likely business impact, urgency and strength of evidence, not just the size of a percentage change** (`backend/app/plain/priority.py`: 40% impact, 30% urgency, 30% evidence; thin evidence caps it at Medium).
 - [x] Alerts are graded by seriousness and cover sales, customers and stock changes.
 
 ## 6. Adapt to the kind of business (§6)
