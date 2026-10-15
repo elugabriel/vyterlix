@@ -10,7 +10,7 @@ const message = document.getElementById("message");
 const STATUS_LABEL = { done: "Done", to_do: "To do", skipped: "Skipped" };
 const CATEGORY_LABEL = {
   sales: "Sales",
-  financial: "Money and cash flow",
+  financial: "Financial Health",
   customer: "Customers",
   inventory: "Stock",
   marketing: "Marketing",

@@ -1,5 +1,7 @@
 // Key figures, business health, forecasts and changes, as the server sends them.
 
+import 'models_plain.dart';
+
 double? _number(dynamic value) =>
     value == null ? null : double.tryParse('$value');
 
@@ -48,6 +50,7 @@ class Kpi {
     required this.requires,
     required this.latest,
     required this.current,
+    this.plain,
   });
 
   factory Kpi.fromJson(Map<String, dynamic> json) => Kpi(
@@ -64,7 +67,11 @@ class Kpi {
     current: json['current'] is Map<String, dynamic>
         ? KpiValue.fromJson(json['current'] as Map<String, dynamic>)
         : null,
+    plain: PlainFigure.from(json['plain']),
   );
+
+  /// What the latest figure means, in everyday words.
+  final PlainFigure? plain;
 
   final String code;
   final String name;
@@ -90,6 +97,7 @@ class KpiHistory {
     required this.requires,
     required this.formula,
     required this.values,
+    this.plain,
   });
 
   factory KpiHistory.fromJson(Map<String, dynamic> json) => KpiHistory(
@@ -103,7 +111,11 @@ class KpiHistory {
       for (final v in (json['values'] as List? ?? const []))
         KpiValue.fromJson(v as Map<String, dynamic>),
     ],
+    plain: PlainFigure.from(json['plain']),
   );
+
+  /// What the newest finished month means, in everyday words.
+  final PlainFigure? plain;
 
   final String name;
   final String description;

@@ -518,6 +518,16 @@ input[type="file"] { width: 100%; padding: 10px 0; }
 }
 .kpi:hover { box-shadow: var(--shadow); }
 .kpi-name { font-weight: 650; margin-bottom: 4px; }
+/* What a figure means in everyday words (client feedback, section 2) */
+.plain { border-left: 3px solid var(--border-strong); padding-left: 10px; margin: 6px 0 10px; }
+.plain p { margin: 0; }
+.plain-good { border-left-color: var(--ok); }
+.plain-bad { border-left-color: var(--bad); }
+.plain-watch { border-left-color: var(--warn); }
+.plain-says { font-weight: 600; line-height: 1.4; }
+.plain-why { margin-top: 3px; color: var(--muted); font-size: 0.9rem; }
+.plain-caution { margin-top: 3px; color: var(--warn); font-size: 0.85rem; }
+.figure .plain-says { font-size: 0.9rem; }
 .kpi-value { font-size: 1.8rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.03em; }
 .kpi details { margin-top: 12px; }
 .kpi summary { cursor: pointer; color: var(--muted); font-size: 0.875rem; }

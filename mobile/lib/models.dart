@@ -1,5 +1,7 @@
 // What the server sends, as plain Dart objects. Only what the screens use is read.
 
+import 'models_plain.dart';
+
 class Business {
   const Business({required this.id, required this.name, required this.role});
 
@@ -78,6 +80,7 @@ class FigureGlance {
     required this.value,
     required this.changePct,
     required this.direction,
+    this.plain,
   });
 
   factory FigureGlance.fromJson(Map<String, dynamic> json) => FigureGlance(
@@ -90,7 +93,11 @@ class FigureGlance {
         ? null
         : double.tryParse('${json['change_pct']}'),
     direction: '${json['direction']}',
+    plain: PlainFigure.from(json['plain']),
   );
+
+  /// What it means, in everyday words (null when there is no number).
+  final PlainFigure? plain;
 
   final String code;
   final String name;

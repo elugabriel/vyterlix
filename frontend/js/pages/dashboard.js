@@ -8,7 +8,7 @@ import { api } from "../auth.js";
 import { openBusiness } from "../business.js";
 import { guard, put } from "../data.js";
 import { el } from "../dom.js";
-import { formatValue, periodLabel } from "../kpi.js";
+import { formatValue, periodLabel, plainBlock } from "../kpi.js";
 
 const message = document.getElementById("message");
 const content = document.getElementById("content");
@@ -88,6 +88,7 @@ function figures(list) {
           "a",
           { class: "figure", href: page(`kpis.html#${f.code}`) },
           el("div", { class: "muted" }, f.name),
+          plainBlock(f.plain, { short: true }),
           el("div", { class: "big" }, f.value === null ? "–" : formatValue(f.value, f.unit)),
           pct === null || f.unit === "percent" ? el("div", { class: "muted" }, periodLabel(f.period, "month")) : el("div", { class: good === null ? "muted" : good ? "status-ok" : "status-bad" }, `${pct >= 0 ? "▲" : "▼"} ${Math.abs(pct).toFixed(1)}% on the month before`),
         );

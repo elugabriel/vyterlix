@@ -362,7 +362,7 @@ def test_a_key_figures_report_has_every_figure_by_month_with_the_latest_change(a
         and content["business"] == "Acme"
         and content["facts"][0] == "Covers October 2025 to March 2026."
     )
-    money = sections(run)["Money"]["table"]
+    money = sections(run)["Financial Health"]["table"]
     assert money["columns"] == [
         "Figure",
         "Oct 25",
@@ -398,7 +398,9 @@ def test_the_months_a_report_covers_can_be_changed_by_the_owner_only(api, march)
     res = api.put(url, json={"months": 2}, headers=march[2]["owner"])
     assert res.status_code == 200 and res.json()["months"] == 2
     run = write(api, march, "kpi")
-    assert run["period_start"] == "2026-02-01" and sections(run)["Money"]["table"]["columns"] == [
+    assert run["period_start"] == "2026-02-01" and sections(run)["Financial Health"]["table"][
+        "columns"
+    ] == [
         "Figure",
         "Feb 26",
         "Mar 26",
@@ -1229,7 +1231,12 @@ def fake_health(monkeypatch, months_scores):
 
     metrics = [NS(score=score, text=f"metric {score}") for score in (60, 10, 50, 20, 40, 30)]
     component = NS(
-        label="Money", score=55, status="fair", previous_score=50, weight=0.5, metrics=metrics
+        label="Financial Health",
+        score=55,
+        status="fair",
+        previous_score=50,
+        weight=0.5,
+        metrics=metrics,
     )
     latest = NS(
         overall_score=60,
@@ -1265,7 +1272,7 @@ def test_the_health_history_only_shows_the_months_the_report_covers(db, march, m
     ]
     assert [r[0] for r in one["How it has moved"]["table"]["rows"]] == ["March 2026"]
     area = two["The areas of the business"]["table"]["rows"][0]
-    assert area == ["Money", "55", "Fair", "+5", "50%"]
+    assert area == ["Financial Health", "55", "Fair", "+5", "50%"]
 
 
 def test_only_the_five_weakest_things_are_listed_as_holding_it_back(db, march, monkeypatch):

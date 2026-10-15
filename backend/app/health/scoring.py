@@ -14,7 +14,7 @@ MIN_COVERAGE = 40  # below this share of the weighted picture, no overall score 
 TREND_POINTS = 3  # a change smaller than this is "flat"
 
 CATEGORY_LABEL = {
-    "financial": "Money",
+    "financial": "Financial Health",
     "sales": "Sales",
     "customer": "Customers",
     "marketing": "Marketing",

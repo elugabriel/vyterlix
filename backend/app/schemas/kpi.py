@@ -23,6 +23,15 @@ class KpiValueOut(BaseModel):
     inputs: dict[str, str]
 
 
+class PlainOut(BaseModel):
+    """What a figure means, in everyday words (see app/plain/figures.py)."""
+
+    says: str  # what happened, one sentence
+    why: str  # why it matters
+    tone: Literal["good", "bad", "watch", "neutral", "unknown"]
+    caution: str | None = None  # set when the data behind it is incomplete
+
+
 class RunOut(BaseModel):
     id: uuid.UUID
     status: Literal["running", "succeeded", "failed"]
@@ -47,6 +56,7 @@ class KpiOut(BaseModel):
     requires: list[str]  # kinds of record it needs: sales, expenses, customer_sales, stock
     latest: KpiValueOut | None  # the most recent finished period
     current: KpiValueOut | None  # the period in progress, if it has one
+    plain: PlainOut | None = None  # what `latest` means, in everyday words
 
 
 class KpisOut(BaseModel):
@@ -66,6 +76,7 @@ class KpiHistoryOut(BaseModel):
     granularity: Granularity
     formula: str  # the stored formula, so the number can be explained
     values: list[KpiValueOut]  # oldest first
+    plain: PlainOut | None = None  # what the newest finished value means, in everyday words
 
 
 class BreakdownRowOut(BaseModel):

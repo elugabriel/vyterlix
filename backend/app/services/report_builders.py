@@ -23,7 +23,7 @@ from app.services import detection, health, kpi, outcomes
 from app.services.memory import fmt
 
 CATEGORY_LABEL = {
-    "financial": "Money", "sales": "Sales", "customer": "Customers", "inventory": "Stock",
+    "financial": "Financial Health", "sales": "Sales", "customer": "Customers", "inventory": "Stock",
     "marketing": "Marketing", "operational": "Operations",
 }  # fmt: skip
 STATUS_LABEL = {

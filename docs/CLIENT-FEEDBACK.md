@@ -34,23 +34,22 @@ data analyst. Make it personalised, practical and easy to understand.
   - [ ] What should I do first? (one clear first step)
   - [ ] What am I waiting for? (actions in progress, results being checked)
   - [ ] Did my previous actions help? (a summary of results)
-- [ ] Detailed numbers stay available under "See details" or "How was this calculated?".
+- [~] Detailed numbers stay available under "See details" or "How was this calculated?" (Key figures now says "See the details and how it's worked out"; other screens not yet).
 - [ ] No complicated charts, formulas or jargon needed to benefit from the product.
 - [ ] The explanation, recommendation and follow-up happen naturally in the product, not only in the AI chat
   or after searching several screens.
 
 ## 2. Explain the figures in everyday language (§2)
 
-- [ ] **Every key figure has a plain sentence:** what changed, whether it is good or bad, why it matters,
+- [x] **Every key figure has a plain sentence** (all 28, website and phone app, Today and Key figures; `backend/app/plain/figures.py`): what changed, whether it is good or bad, why it matters,
   with the number shown underneath. Her example: "Your products are selling faster than last month. That is
   usually positive because less money is sitting in unsold stock. Check that your popular products do not run out."
-- [~] Direction (good or bad) is stored for each figure (`up_good` / `down_good`); the sentence is not written yet.
-- [ ] **Customer churn example:** "More customers stopped coming back this month. This could reduce next
-  month's sales." plus the customer groups most affected and a suggested way to reconnect.
-- [ ] **Only name a specific cause when the data supports it** (a written rule for every explanation).
-- [ ] Rename the dashboard category **"Money" to "Financial Health"** (costs, profit, margins and cash flow where
+- [x] Good or bad is worked out from each figure's good direction, with "watch" for figures that are neither (items in stock, stock bought), and a loss is called a loss.
+- [~] **Customer churn example:** the sentence is done ("More customers stopped coming back than last month. This could reduce next month's sales."). Still to do: the customer groups most affected and a suggested way to reconnect (comes with the alert card, item 2).
+- [x] **Only name a specific cause when the data supports it:** the figure sentences never state a cause (a test checks every sentence); causes stay on the What changed page, with evidence.
+- [x] Rename the dashboard category **"Money" to "Financial Health"** (costs, profit, margins and cash flow where
   data exists). Keep **"Sales"** separate. (Website, phone app, alerts, notifications, settings.)
-- [ ] All other labels: simple words first, technical terms explained when needed (a jargon pass over every screen).
+- [~] All other labels: simple words first, technical terms explained when needed. Done for the figures; the alert and What changed wording is still technical (for example "248.9 points below your usual"), to be rewritten with the alert card (item 2).
 
 ## 3. The recommendation and follow-up loop (§3: her most important feedback)
 

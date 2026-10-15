@@ -12,7 +12,7 @@ import { ukDateTime } from "../format.js";
 
 const message = document.getElementById("message");
 const content = document.getElementById("content");
-const CATEGORY_TEXT = { sales: "Sales", financial: "Money", customer: "Customers", inventory: "Stock", marketing: "Marketing", forecast: "Forecasts", action: "Actions", data: "Your data", security: "Security" };
+const CATEGORY_TEXT = { sales: "Sales", financial: "Financial Health", customer: "Customers", inventory: "Stock", marketing: "Marketing", forecast: "Forecasts", action: "Actions", data: "Your data", security: "Security" };
 const SEVERITY = [["info", "For information"], ["low", "Low"], ["medium", "Medium"], ["high", "High"], ["critical", "Critical"]];
 const SEVERITY_TEXT = Object.fromEntries(SEVERITY);
 const SEVERITY_CLASS = { info: "health-not_enough_data", low: "health-not_enough_data", medium: "health-fair", high: "health-at_risk", critical: "health-at_risk" };

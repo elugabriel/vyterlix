@@ -258,7 +258,8 @@ def test_every_score_comes_with_the_evidence_behind_it(api, steady_shop):
     assert sales["explanation"] == "Sales scores 100 out of 100 (healthy)."
     overall = get(api, steady_shop).json()["explanation"]
     assert overall.startswith("Your business health is 76 out of 100 (fair).")
-    assert "Strongest area: Sales (100)." in overall and "Weakest: Money (60)." in overall
+    assert "Strongest area: Sales (100)." in overall
+    assert "Weakest: Financial Health (60)." in overall
     assert "Not yet counted: Marketing" in overall and "covers 90%" in overall
 
 

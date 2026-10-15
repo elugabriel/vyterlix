@@ -129,6 +129,12 @@ Map<String, dynamic> dashboard({
       'value': '8717.1',
       'change_pct': '9.1',
       'direction': 'up_good',
+      'plain': {
+        'says': 'You sold more than last month.',
+        'why': 'More sales is good news.',
+        'tone': 'good',
+        'caution': null,
+      },
     },
     {
       'code': 'costs',
@@ -138,6 +144,12 @@ Map<String, dynamic> dashboard({
       'value': '5439',
       'change_pct': '8.2',
       'direction': 'down_good',
+      'plain': {
+        'says': 'Your running costs are higher than last month.',
+        'why': 'Your profit may be squeezed.',
+        'tone': 'bad',
+        'caution': null,
+      },
     },
     {
       'code': 'margin',
@@ -423,8 +435,10 @@ Map<String, dynamic> kpiJson(
   Map<String, dynamic>? latest,
   Map<String, dynamic>? current,
   List<String> requires = const ['sales'],
+  Map<String, dynamic>? plain,
 }) => {
   'code': code,
+  'plain': plain,
   'name': name,
   'description': 'About $name',
   'category': category,
@@ -443,6 +457,12 @@ Map<String, dynamic> kpisJson() => {
       'sales',
       'Sales',
       'sales',
+      plain: {
+        'says': 'You sold more than last month.',
+        'why': 'More sales is good news, as long as your costs did not rise just as fast.',
+        'tone': 'good',
+        'caution': null,
+      },
       latest: kpiValueJson(),
       current: kpiValueJson(
         start: '2026-10-01',
@@ -455,6 +475,13 @@ Map<String, dynamic> kpisJson() => {
       'Running costs',
       'financial',
       direction: 'down_good',
+      plain: {
+        'says': 'Your running costs are higher than last month.',
+        'why':
+            'If your sales did not rise as much, your profit will be squeezed.',
+        'tone': 'bad',
+        'caution': 'Some of the data behind this figure is incomplete, so treat it with care.',
+      },
       latest: kpiValueJson(value: '5439.00', previous: '5000.00', pct: '8.8'),
       requires: ['expenses'],
     ),
@@ -497,6 +524,12 @@ Map<String, dynamic> kpiHistoryJson() => {
   'requires': ['sales'],
   'granularity': 'month',
   'formula': 'Sales: the money taken, net of VAT, after refunds.',
+  'plain': {
+    'says': 'You sold more than last month.',
+    'why': 'More sales is good news, as long as your costs did not rise just as fast.',
+    'tone': 'good',
+    'caution': null,
+  },
   'values': [
     kpiValueJson(
       start: '2026-07-01',
@@ -536,14 +569,14 @@ Map<String, dynamic> healthJson() => {
   'components': [
     {
       'category': 'financial',
-      'label': 'Money',
+      'label': 'Financial Health',
       'score': 82,
       'status': 'healthy',
       'previous_score': 80,
       'trend': 'up',
       'weight': 0.5,
       'contribution': 41.0,
-      'explanation': 'Money is in good shape.',
+      'explanation': 'Financial Health is in good shape.',
       'metrics': [
         {
           'kpi_code': 'margin',

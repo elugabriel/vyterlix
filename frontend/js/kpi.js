@@ -47,6 +47,18 @@ export function changeText(value, unit, granularity) {
   return { sign: Math.sign(pct), text: `${pct > 0 ? "up" : "down"} ${Math.abs(pct).toFixed(1)}% on ${before}` };
 }
 
+/** What a figure means, in everyday words: the sentence, why it matters, and a caution if the data is thin. */
+export function plainBlock(plain, { short = false } = {}) {
+  if (!plain) return null;
+  return el(
+    "div",
+    { class: `plain plain-${plain.tone}` },
+    el("p", { class: "plain-says" }, plain.says),
+    short ? null : el("p", { class: "plain-why" }, plain.why),
+    plain.caution ? el("p", { class: "plain-caution" }, plain.caution) : null,
+  );
+}
+
 /** CSS class for a change: green when it is the good direction, red when not, grey otherwise. */
 export function changeClass(sign, direction) {
   if (sign === 0 || direction === "neutral") return "muted";

@@ -19,7 +19,7 @@ const weekdays = [
 
 const categoryLabels = {
   'sales': 'Sales',
-  'financial': 'Money and cash flow',
+  'financial': 'Financial Health',
   'customer': 'Customers',
   'inventory': 'Stock',
   'marketing': 'Marketing',

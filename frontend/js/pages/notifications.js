@@ -13,7 +13,7 @@ const message = document.getElementById("message");
 const content = document.getElementById("content");
 const CATEGORY_TEXT = {
   sales: "Sales",
-  financial: "Money",
+  financial: "Financial Health",
   customer: "Customers",
   inventory: "Stock",
   marketing: "Marketing",

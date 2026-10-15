@@ -79,7 +79,7 @@ void main() {
         (h.overallScore, h.previousScore, h.trend, h.coveragePct),
         (69, 89, 'down', 80),
       );
-      expect(h.components.map((c) => c.label), ['Money', 'Sales']);
+      expect(h.components.map((c) => c.label), ['Financial Health', 'Sales']);
       expect(h.components.last.metrics.single.score, 30.0);
       expect(
         HealthPoint.fromJson(
@@ -274,12 +274,12 @@ void main() {
           ),
           findsOneWidget,
         );
-        for (final group in ['Money', 'Sales', 'Customers']) {
+        for (final group in ['Financial Health', 'Sales', 'Customers']) {
           expect(find.text(group), findsWidgets);
         }
         expect(find.text('Stock'), findsNothing); // nothing in that group
         expect(
-          tester.getTopLeft(find.text('Money')).dy,
+          tester.getTopLeft(find.text('Financial Health')).dy,
           lessThan(tester.getTopLeft(find.text('Sales').first).dy),
         );
         expect(find.text('£8,717.10'), findsOneWidget);
@@ -439,7 +439,7 @@ void main() {
       await openMore(tester, 'Business health');
       expect(find.byKey(const ValueKey('health-history')), findsOneWidget);
       expect(find.text('June 2026 to September 2026'), findsOneWidget);
-      expect(find.text('Money'), findsOneWidget);
+      expect(find.text('Financial Health'), findsOneWidget);
       expect(find.text('82'), findsOneWidget);
       expect(find.text('Healthy'), findsOneWidget);
       expect(find.text('At risk'), findsOneWidget);

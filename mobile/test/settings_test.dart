@@ -122,7 +122,7 @@ void main() {
     );
     expect(find.text('From 22:00'), findsOneWidget);
     expect(find.text('Until 07:00'), findsOneWidget);
-    expect(find.text('Money and cash flow'), findsNothing);
+    expect(find.text('Financial Health'), findsNothing);
     expect(find.text('Sales'), findsOneWidget);
     expect(find.text('Jo Baker'), findsOneWidget);
     expect(find.text('jo@example.co.uk · joined 01/03/2026'), findsOneWidget);

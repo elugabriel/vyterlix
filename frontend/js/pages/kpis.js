@@ -8,13 +8,13 @@ import { openBusiness } from "../business.js";
 import { guard, jobProgress, number, put, table, waitForJob } from "../data.js";
 import { el } from "../dom.js";
 import { gbp, ukDate, ukDateTime } from "../format.js";
-import { barChart, changeClass, changeText, formatValue, missingText, periodLabel } from "../kpi.js";
+import { barChart, changeClass, changeText, formatValue, missingText, periodLabel, plainBlock } from "../kpi.js";
 import { showMessage } from "../ui.js";
 
 const message = document.getElementById("message");
 const content = document.getElementById("content");
 const GRANULARITY = "month";
-const CATEGORY_TITLE = { financial: "Money", sales: "Sales", customer: "Customers", inventory: "Stock" };
+const CATEGORY_TITLE = { financial: "Financial Health", sales: "Sales", customer: "Customers", inventory: "Stock" };
 const CATEGORY_ORDER = ["financial", "sales", "customer", "inventory"];
 
 let orgId = null;
@@ -171,6 +171,7 @@ function kpiTile(kpi) {
   const change = changeText(latest, kpi.unit, GRANULARITY);
   put(
     tile,
+    plainBlock(kpi.plain),
     el("div", { class: latest.status === "ok" ? "kpi-value" : "kpi-value muted" }, formatValue(latest.value, kpi.unit)),
     el("div", { class: "muted" }, periodLabel(latest.period_start, GRANULARITY)),
     latest.status !== "ok" ? el("div", { class: "muted" }, missingText(latest, kpi.requires)) : null,
@@ -188,7 +189,7 @@ function kpiTile(kpi) {
 
 function detailsFor(kpi) {
   const holder = el("div", {});
-  const details = el("details", {}, el("summary", {}, "How it's worked out and over time"), holder);
+  const details = el("details", {}, el("summary", {}, "See the details and how it's worked out"), holder);
   let loaded = false;
   details.addEventListener("toggle", async () => {
     if (!details.open || loaded) return;

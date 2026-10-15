@@ -31,7 +31,8 @@ from app.kpi.measures import MEASURES, PRESENCE, compute_series, has_records
 from app.models.business import BusinessProfile
 from app.models.data import Expense, Sale, StockMovement
 from app.models.kpi import KpiCalculationRun, KpiDefinition, KpiValue
-from app.schemas.kpi import KpiHistoryOut, KpiOut, KpisOut, KpiValueOut, RunOut
+from app.plain.figures import explain_figure
+from app.schemas.kpi import KpiHistoryOut, KpiOut, KpisOut, KpiValueOut, PlainOut, RunOut
 from app.services.data_quality import build_report
 
 logger = logging.getLogger("vyterlix.kpi")
@@ -318,11 +319,33 @@ def list_kpis(db: Session, granularity: str = "month") -> KpisOut:
                 requires=list(d.requires),
                 latest=pick(d, latest_period),
                 current=pick(d, current_period),
+                plain=plain_for(d.code, d.unit, d.direction, pick(d, latest_period), granularity),
             )
             for d in definitions
         ],
         last_run=last_run(db),
     )
+
+
+def plain_for(
+    code: str, unit: str, direction: str, value: KpiValueOut | None, granularity: str
+) -> PlainOut | None:
+    """What a figure's value means in everyday words, or None when there is no number."""
+    if value is None or value.status != "ok":
+        return None
+    said = explain_figure(
+        code,
+        unit=unit,
+        direction=direction,
+        value=value.value,
+        change_pct=value.change_pct,
+        previous_value=value.previous_value,
+        data_quality=value.data_quality,
+        granularity=granularity,
+    )
+    if said is None:
+        return None
+    return PlainOut(says=said.says, why=said.why, tone=said.tone, caution=said.caution)
 
 
 def kpi_history(
@@ -337,6 +360,7 @@ def kpi_history(
         .order_by(KpiValue.period_start.desc())
         .limit(limit)
     ).all()
+    values = [_value_out(r, definition.unit) for r in reversed(rows)]
     return KpiHistoryOut(
         code=definition.code,
         name=definition.name,
@@ -347,5 +371,12 @@ def kpi_history(
         requires=list(definition.requires),
         granularity=granularity,
         formula=definition.expression,
-        values=[_value_out(r, definition.unit) for r in reversed(rows)],
+        values=values,
+        plain=plain_for(
+            definition.code,
+            definition.unit,
+            definition.direction,
+            next((v for v in reversed(values) if v.is_complete), None),
+            granularity,
+        ),
     )

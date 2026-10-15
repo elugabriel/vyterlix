@@ -8,9 +8,10 @@ import '../models_insights.dart';
 import '../theme.dart';
 import '../widgets/charts.dart';
 import '../widgets/common.dart';
+import '../widgets/plain.dart';
 
 const _categoryTitle = {
-  'financial': 'Money',
+  'financial': 'Financial Health',
   'sales': 'Sales',
   'customer': 'Customers',
   'inventory': 'Stock',
@@ -172,7 +173,11 @@ class _KpiCard extends StatelessWidget {
                 kpi.name,
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
-              const SizedBox(height: 4),
+              if (kpi.plain != null) ...[
+                const SizedBox(height: 6),
+                PlainBlock(plain: kpi.plain!, short: true),
+              ],
+              const SizedBox(height: 6),
               if (latest == null || latest.status != 'ok')
                 Text(
                   latest == null
@@ -278,6 +283,10 @@ class _KpiDetailScreenState extends State<KpiDetailScreen> {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
+        if (history.plain != null) ...[
+          PlainBlock(plain: history.plain!),
+          const SizedBox(height: 16),
+        ],
         Text(history.description, style: TextStyle(color: muted)),
         const SizedBox(height: 16),
         if (latest != null) ...[

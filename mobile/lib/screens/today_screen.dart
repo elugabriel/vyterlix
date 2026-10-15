@@ -7,6 +7,7 @@ import '../models.dart';
 import '../theme.dart';
 import '../widgets/severity.dart';
 import '../widgets/common.dart';
+import '../widgets/plain.dart';
 
 const _kindText = {
   'approval': 'Waiting for you',
@@ -368,7 +369,11 @@ class _FigureCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(figure.name, style: TextStyle(color: muted, fontSize: 13)),
-            const SizedBox(height: 4),
+            if (figure.plain != null) ...[
+              const SizedBox(height: 6),
+              PlainBlock(plain: figure.plain!, short: true),
+            ],
+            const SizedBox(height: 6),
             Text(
               formatValue(figure.value, figure.unit),
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),

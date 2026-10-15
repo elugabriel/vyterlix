@@ -183,6 +183,7 @@ def _figures(db: Session, tenant, role: str, remit: list[str] | None) -> list[Fi
                 value=k.latest.value,
                 change_pct=k.latest.change_pct,
                 direction=k.direction,
+                plain=k.plain,
             )
         )
     return out

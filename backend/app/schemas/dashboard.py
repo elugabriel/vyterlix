@@ -3,6 +3,7 @@ from typing import Literal
 from pydantic import BaseModel
 
 from app.schemas.alerts import Severity
+from app.schemas.kpi import PlainOut
 
 ItemKind = Literal[
     "approval", "action_overdue", "alert", "follow_up", "action_due_soon", "suggestion"
@@ -37,6 +38,7 @@ class FigureGlance(BaseModel):
     value: str | None
     change_pct: str | None
     direction: Literal["up_good", "down_good", "neutral"]
+    plain: PlainOut | None = None  # what it means, in everyday words
 
 
 class SetupGlance(BaseModel):
