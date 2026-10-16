@@ -15,12 +15,18 @@ from sqlalchemy.orm import Session
 from app.alerts.rules import RANK
 from app.core.uk import today_uk
 from app.dashboard import rules
+from app.models.actions import BusinessAction, BusinessIntervention
 from app.models.alerts import Notification
+from app.models.outcomes import FollowUpSchedule, InterventionOutcome
+from app.outcomes.rules import OUTCOME_LABELS
 from app.schemas.dashboard import (
     AttentionItem,
     DashboardOut,
     FigureGlance,
+    GlanceItem,
     HealthGlance,
+    ResultItem,
+    ResultsGlance,
     SetupGlance,
 )
 from app.services import actions as actions_service
@@ -204,6 +210,146 @@ def _setup(db: Session) -> SetupGlance | None:
     )
 
 
+GOING_WELL_FIGURES = 3
+GOING_WELL_RESULTS = 2
+GOING_WELL_DAYS = 60  # a result is still good news this long after it was measured
+WAITING_SHOWN = 6
+RESULTS_SHOWN = 3
+STILL_TO_DO = ("accepted", "in_progress", "partially_completed")
+
+
+def _going_well(db: Session, role: str, remit, figures: list[FigureGlance], today: date):
+    """What is going well, from results already worked out: health up, figures in your favour, and
+    actions that worked. Said in the same plain words as everywhere else."""
+    items: list[GlanceItem] = []
+    h = health.latest_health(db)
+    if h is not None and h.overall_score is not None and h.previous_score is not None:
+        if h.overall_score > h.previous_score:
+            items.append(
+                GlanceItem(
+                    id="health", title="Your business health went up",
+                    detail=f"From {h.previous_score} to {h.overall_score} out of 100.",
+                    link="health.html", tone="good", category=None,
+                )
+            )  # fmt: skip
+    good = [f for f in figures if f.plain is not None and f.plain.tone == "good"]
+    for f in good[:GOING_WELL_FIGURES]:
+        items.append(
+            GlanceItem(
+                id=f"figure:{f.code}", title=f.name, detail=f.plain.says,
+                link=f"kpis.html#{f.code}", tone="good", category=None,
+            )
+        )  # fmt: skip
+    since = today.toordinal() - GOING_WELL_DAYS
+    rows = db.execute(
+        select(InterventionOutcome, BusinessIntervention, BusinessAction)
+        .join(BusinessIntervention, BusinessIntervention.id == InterventionOutcome.intervention_id)
+        .join(BusinessAction, BusinessAction.intervention_id == BusinessIntervention.id)
+        .where(InterventionOutcome.outcome == "successful")
+        .order_by(InterventionOutcome.measured_at.desc())
+    ).all()
+    wins = [
+        (o, i, a)
+        for o, i, a in rows
+        if rules.visible(role, remit, i.category) and o.measured_at.date().toordinal() >= since
+    ]
+    for o, i, a in wins[:GOING_WELL_RESULTS]:
+        items.append(
+            GlanceItem(
+                id=f"result:{a.id}", title=f'It worked: "{a.title}"', detail=o.reason,
+                link=f"actions.html#{a.id}", tone="good", category=i.category,
+            )
+        )  # fmt: skip
+    return items
+
+
+def _waiting_for(db: Session, tenant, role: str, remit, today: date) -> list[GlanceItem]:
+    """Work that is under way, work waiting for an owner's approval (for a manager), and results
+    that are not due to be checked yet."""
+    items: list[tuple[date, GlanceItem]] = []
+    for a in actions_service.list_actions(db, tenant, open_only=True, today=today):
+        if not rules.visible(role, remit, a.category):
+            continue
+        who = a.owner.name if a.owner else "Nobody yet"
+        due = f"due {a.target_date:%d/%m/%Y}" if a.target_date else "no date set"
+        if a.status in STILL_TO_DO:
+            items.append(
+                (
+                    a.target_date or date.max,
+                    GlanceItem(
+                        id=f"action:{a.id}", title=a.title, detail=f"{who}, {due}.",
+                        link=f"actions.html#{a.id}", tone="watch" if a.due_soon else "neutral",
+                        category=a.category,
+                    ),
+                )
+            )  # fmt: skip
+        elif a.status == "pending" and role == "manager":
+            items.append(
+                (
+                    date.max,
+                    GlanceItem(
+                        id=f"approval:{a.id}", title=a.title,
+                        detail="Waiting for the owner to approve it.",
+                        link=f"actions.html#{a.id}", tone="neutral", category=a.category,
+                    ),
+                )
+            )  # fmt: skip
+    plans = db.execute(
+        select(FollowUpSchedule, BusinessAction)
+        .join(BusinessAction, BusinessAction.id == FollowUpSchedule.action_id)
+        .where(FollowUpSchedule.status == "scheduled", FollowUpSchedule.due_date > today)
+        .order_by(FollowUpSchedule.due_date)
+    ).all()
+    for p, a in plans:
+        if rules.visible(role, remit, a.category):
+            items.append(
+                (
+                    p.due_date,
+                    GlanceItem(
+                        id=f"result:{a.id}", title=f'Result of "{a.title}"',
+                        detail=f"We will check how it went from {p.due_date:%d/%m/%Y}.",
+                        link=f"actions.html#{a.id}", tone="neutral", category=a.category,
+                    ),
+                )
+            )  # fmt: skip
+    items.sort(key=lambda pair: pair[0])
+    return [item for _, item in items[:WAITING_SHOWN]]
+
+
+def _results(db: Session, role: str, remit) -> ResultsGlance:
+    """Did my previous actions help?"""
+    rows = [
+        (o, i, a)
+        for o, i, a in db.execute(
+            select(InterventionOutcome, BusinessIntervention, BusinessAction)
+            .join(
+                BusinessIntervention, BusinessIntervention.id == InterventionOutcome.intervention_id
+            )
+            .join(BusinessAction, BusinessAction.intervention_id == BusinessIntervention.id)
+            .order_by(InterventionOutcome.measured_at.desc())
+        ).all()
+        if rules.visible(role, remit, i.category)
+    ]
+    by = {k: sum(1 for o, _, _ in rows if o.outcome == k) for k in OUTCOME_LABELS}
+    return ResultsGlance(
+        measured=len(rows),
+        successful=by["successful"],
+        partially_successful=by["partially_successful"],
+        unsuccessful=by["unsuccessful"],
+        inconclusive=by["inconclusive"],
+        sentence=rules.results_sentence(
+            len(rows), by["successful"], by["partially_successful"], by["unsuccessful"], by["inconclusive"]
+        ),
+        latest=[
+            ResultItem(
+                title=a.title, outcome=o.outcome, outcome_label=OUTCOME_LABELS[o.outcome],
+                reason=o.reason, link=f"actions.html#{a.id}",
+            )
+            for o, _, a in rows[:RESULTS_SHOWN]
+        ],
+    )  # fmt: skip
+
+
 def read(db: Session, tenant, *, today: date | None = None) -> DashboardOut:
     today = today or today_uk()
     role, remit = tenant.role, _remit(tenant)
@@ -230,9 +376,25 @@ def read(db: Session, tenant, *, today: date | None = None) -> DashboardOut:
         )
     )
     counts = actions_service.counts(db, tenant, today)
+    figures = _figures(db, tenant, role, remit)
+    attention = [
+        AttentionItem(
+            id=i.id,
+            kind=i.kind,
+            severity=i.severity,
+            title=i.title,
+            detail=i.detail,
+            link=i.link,
+            category=i.category,
+            can_act=rules.can_act(role, remit, i.category),
+        )
+        for i in shown
+    ]
     return DashboardOut(
         role=role, headline=rules.greeting_line(len(mine), serious),
-        attention=[AttentionItem(id=i.id, kind=i.kind, severity=i.severity, title=i.title, detail=i.detail, link=i.link, category=i.category, can_act=rules.can_act(role, remit, i.category)) for i in shown],
-        more_attention=more, health=_health(db), figures=_figures(db, tenant, role, remit), setup=_setup(db) if role == "owner" else None,
+        going_well=_going_well(db, role, remit, figures, today),
+        attention=attention, do_first=attention[0] if attention else None,
+        waiting_for=_waiting_for(db, tenant, role, remit, today), results=_results(db, role, remit),
+        more_attention=more, health=_health(db), figures=figures, setup=_setup(db) if role == "owner" else None,
         unread_notifications=unread or 0, open_actions=counts.open, can_act=role in ("owner", "manager"),
     )  # fmt: skip

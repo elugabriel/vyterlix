@@ -522,7 +522,7 @@ void main() {
       );
       await tester.tap(find.text('Fakeham Bakery'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Item 0 title'));
+      await tester.tap(find.text('Item 0 title').first);
       await tester.pumpAndSettle();
       expect(find.text('Sales fell sharply in March 2026.'), findsOneWidget);
       expect(find.text('Accept'), findsOneWidget);

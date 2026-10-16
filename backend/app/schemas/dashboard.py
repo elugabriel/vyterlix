@@ -41,6 +41,37 @@ class FigureGlance(BaseModel):
     plain: PlainOut | None = None  # what it means, in everyday words
 
 
+class GlanceItem(BaseModel):
+    """One line under "what is going well" or "what am I waiting for"."""
+
+    id: str
+    title: str
+    detail: str
+    link: str
+    tone: Literal["good", "bad", "watch", "neutral"]
+    category: str | None
+
+
+class ResultItem(BaseModel):
+    title: str  # the action
+    outcome: Literal["successful", "partially_successful", "unsuccessful", "inconclusive"]
+    outcome_label: str  # "It worked"...
+    reason: str
+    link: str
+
+
+class ResultsGlance(BaseModel):
+    """Did my previous actions help?"""
+
+    measured: int
+    successful: int
+    partially_successful: int
+    unsuccessful: int
+    inconclusive: int
+    sentence: str  # the answer in one line
+    latest: list[ResultItem]  # the most recent few, newest first
+
+
 class SetupGlance(BaseModel):
     done: int
     total: int
@@ -51,8 +82,12 @@ class SetupGlance(BaseModel):
 class DashboardOut(BaseModel):
     role: Literal["owner", "manager", "viewer"]
     headline: str  # the sentence that opens the screen
-    attention: list[AttentionItem]  # most serious first
+    going_well: list[GlanceItem]  # what is going well
+    attention: list[AttentionItem]  # what needs attention today, most serious first
     more_attention: int  # how many more there are than shown
+    do_first: AttentionItem | None  # what to do first: the most serious of them
+    waiting_for: list[GlanceItem]  # work in progress and results still to be checked
+    results: ResultsGlance  # did my previous actions help?
     health: HealthGlance | None
     figures: list[FigureGlance]
     setup: SetupGlance | None  # only until the business is set up

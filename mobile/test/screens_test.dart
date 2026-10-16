@@ -301,6 +301,10 @@ void main() {
 
   group('the Today screen', () {
     Future<Harness> openToday(WidgetTester tester, FakeServer server) async {
+      // tall enough to show what needs attention (Today now answers five questions first)
+      tester.view.physicalSize = const Size(800, 1500);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       final h = await pumpApp(
         tester,
         server,
@@ -336,15 +340,21 @@ void main() {
       'lists what needs attention, most serious first, with how serious',
       (tester) async {
         await openToday(tester, happyServer());
-        expect(find.text('Needs your attention'), findsOneWidget);
-        expect(find.text('Item 0 title'), findsOneWidget);
+        expect(find.text('What needs my attention today?'), findsOneWidget);
+        expect(
+          find.text('Item 0 title'),
+          findsNWidgets(2),
+        ); // and again as what to do first
         expect(find.text('Item 1 detail'), findsOneWidget);
-        expect(find.text('High'), findsOneWidget);
+        expect(
+          find.text('High'),
+          findsNWidgets(2),
+        ); // the list, and what to do first
         expect(find.text('Medium'), findsOneWidget);
-        expect(find.text('Alert'), findsOneWidget);
+        expect(find.text('Alert'), findsNWidgets(2));
         expect(find.text('Late'), findsOneWidget);
         expect(
-          tester.getTopLeft(find.text('Item 0 title')).dy,
+          tester.getTopLeft(find.text('Item 0 title').first).dy,
           lessThan(tester.getTopLeft(find.text('Item 1 title')).dy),
         );
         await tester.scrollUntilVisible(

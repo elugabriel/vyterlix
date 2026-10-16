@@ -124,8 +124,11 @@ void main() {
     testWidgets(
       'tapping an alert that needs attention on Today goes to the Alerts tab',
       (tester) async {
+        tester.view.physicalSize = const Size(800, 4000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
         await openBusiness(tester, happyServer());
-        await tester.tap(find.text('Item 0 title'));
+        await tester.tap(find.text('Item 0 title').first);
         await tester.pumpAndSettle();
         expect(find.text('2 open, 1 of them serious.'), findsOneWidget);
       },

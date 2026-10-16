@@ -662,3 +662,13 @@ progress::-moz-progress-bar { background: var(--gradient); border-radius: 999px;
 .plain-says { font-weight: 600; }
 .plain-good.plain-says { color: var(--ok); }
 .plain-bad.plain-says { color: var(--bad); }
+
+/* Today answers five questions */
+.glance-list { display: grid; gap: 10px; }
+.glance-item { display: grid; gap: 2px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
+.glance-item:hover { border-color: var(--accent); }
+.glance-good { border-left-color: var(--ok); }
+.glance-bad { border-left-color: var(--bad); }
+.glance-watch { border-left-color: var(--warn); }
+.first-card { display: grid; gap: 6px; padding: 18px 20px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius); }
+.first-card p { margin: 0; }

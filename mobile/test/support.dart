@@ -109,6 +109,54 @@ Map<String, dynamic> dashboard({
         'can_act': true,
       },
   ],
+  'going_well': [
+    {
+      'id': 'figure:sales',
+      'title': 'Sales',
+      'detail': 'You sold more than last month.',
+      'link': 'kpis.html#sales',
+      'tone': 'good',
+    },
+  ],
+  'do_first': attention == 0
+      ? null
+      : {
+          'id': 'alert:a0',
+          'kind': 'alert',
+          'severity': 'high',
+          'title': 'Item 0 title',
+          'detail': 'Item 0 detail',
+          'link': 'alerts.html',
+          'category': null,
+          'can_act': true,
+        },
+  'waiting_for': [
+    {
+      'id': 'action:a1',
+      'title': 'Ring the regulars',
+      'detail': 'Sam Lee, due 29/10/2026.',
+      'link': 'actions.html#a1',
+      'tone': 'neutral',
+    },
+  ],
+  'results': {
+    'measured': 2,
+    'successful': 1,
+    'partially_successful': 1,
+    'unsuccessful': 0,
+    'inconclusive': 0,
+    'sentence':
+        'Of the 2 actions we have checked, 1 worked and 1 partly worked.',
+    'latest': [
+      {
+        'title': 'Offer a bundle',
+        'outcome': 'successful',
+        'outcome_label': 'It worked',
+        'reason': 'It won back £90.00, against the £100.00 we expected (90%).',
+        'link': 'actions.html#a2',
+      },
+    ],
+  },
   'more_attention': 3,
   'health': health
       ? {

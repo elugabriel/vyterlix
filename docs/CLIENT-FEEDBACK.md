@@ -28,12 +28,12 @@ data analyst. Make it personalised, practical and easy to understand.
 ## 1. The main purpose (§1)
 
 - [ ] Vyterlix feels like a business analyst and practical adviser, not a set of charts and formulas.
-- [~] **The first screen (Today) answers five questions:**
-  - [~] What is going well? (health and figure changes show; no "going well" list yet)
-  - [~] What needs my attention today? (attention items exist)
-  - [ ] What should I do first? (one clear first step)
-  - [ ] What am I waiting for? (actions in progress, results being checked)
-  - [ ] Did my previous actions help? (a summary of results)
+- [x] **The first screen (Today) answers five questions** (website and phone app; `GET /dashboard` now carries `going_well`, `do_first`, `waiting_for` and `results`):
+  - [x] What is going well? (health up, figures in your favour, actions that worked in the last 60 days)
+  - [x] What needs my attention today?
+  - [x] What should I do first? (the most serious thing, with a button to open it)
+  - [x] What am I waiting for? (work under way, work a manager put forward, results still to be checked)
+  - [x] Did my previous actions help? (one plain line, and the latest results)
 - [~] Detailed numbers stay available under "See details" or "How was this calculated?" (Key figures now says "See the details and how it's worked out"; other screens not yet).
 - [ ] No complicated charts, formulas or jargon needed to benefit from the product.
 - [ ] The explanation, recommendation and follow-up happen naturally in the product, not only in the AI chat

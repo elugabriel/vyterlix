@@ -70,3 +70,27 @@ def greeting_line(count: int, serious: int) -> str:
     if serious:
         return f"{count} {things} your attention today, {serious} of them serious."
     return f"{count} {things} your attention today."
+
+
+def results_sentence(measured: int, successful: int, partly: int, failed: int, unclear: int) -> str:
+    """Did the actions help? Said in one plain line."""
+    if measured == 0:
+        return "No action has been checked yet. Finish one and we will tell you whether it helped."
+    if measured == 1:
+        one = (
+            "worked" if successful else "partly worked" if partly
+            else "did not work" if failed else "is one we cannot tell about yet"
+        )  # fmt: skip
+        return f"The one action we have checked {one}."
+    parts = [
+        text
+        for count, text in (
+            (successful, f"{successful} worked"),
+            (partly, f"{partly} partly worked"),
+            (failed, f"{failed} did not work"),
+            (unclear, f"for {unclear} we cannot tell"),
+        )
+        if count
+    ]
+    told = parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
+    return f"Of the {measured} actions we have checked, {told}."

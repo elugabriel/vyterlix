@@ -62,7 +62,8 @@ void main() {
       tester,
     ) async {
       await openBusiness(tester, happyServer());
-      expect(find.text('You sold more than last month.'), findsOneWidget);
+      // (also once under "What is going well?")
+      expect(find.text('You sold more than last month.'), findsNWidgets(2));
       expect(
         find.text('Your running costs are higher than last month.'),
         findsOneWidget,
@@ -70,7 +71,7 @@ void main() {
       // only the short sentence here; the reason is kept for the key figures page
       expect(find.text('More sales is good news.'), findsNothing);
       expect(
-        tester.getTopLeft(find.text('You sold more than last month.')).dy,
+        tester.getTopLeft(find.text('You sold more than last month.').last).dy,
         lessThan(tester.getTopLeft(find.text('£8,717.10')).dy),
       );
     });

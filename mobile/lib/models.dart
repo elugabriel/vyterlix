@@ -135,8 +135,89 @@ class SetupGlance {
   final int total;
 }
 
+/// One line under "What is going well?" or "What am I waiting for?".
+class GlanceItem {
+  const GlanceItem({
+    required this.id,
+    required this.title,
+    required this.detail,
+    required this.link,
+    required this.tone,
+  });
+
+  factory GlanceItem.fromJson(Map<String, dynamic> json) => GlanceItem(
+    id: '${json['id']}',
+    title: '${json['title']}',
+    detail: '${json['detail']}',
+    link: '${json['link']}',
+    tone: '${json['tone']}',
+  );
+
+  final String id;
+  final String title;
+  final String detail;
+
+  /// The page it opens on the website, such as `actions.html#<id>`.
+  final String link;
+
+  /// good, bad, watch or neutral
+  final String tone;
+}
+
+class ResultItem {
+  const ResultItem({
+    required this.title,
+    required this.outcome,
+    required this.outcomeLabel,
+    required this.reason,
+    required this.link,
+  });
+
+  factory ResultItem.fromJson(Map<String, dynamic> json) => ResultItem(
+    title: '${json['title']}',
+    outcome: '${json['outcome']}',
+    outcomeLabel: '${json['outcome_label']}',
+    reason: '${json['reason']}',
+    link: '${json['link']}',
+  );
+
+  final String title;
+
+  /// successful, partially_successful, unsuccessful or inconclusive
+  final String outcome;
+  final String outcomeLabel;
+  final String reason;
+  final String link;
+}
+
+/// "Did my actions help?"
+class ResultsGlance {
+  const ResultsGlance({
+    required this.measured,
+    required this.sentence,
+    required this.latest,
+  });
+
+  factory ResultsGlance.fromJson(Map<String, dynamic> json) => ResultsGlance(
+    measured: (json['measured'] as num?)?.toInt() ?? 0,
+    sentence: '${json['sentence']}',
+    latest: [
+      for (final i in (json['latest'] as List? ?? const []))
+        ResultItem.fromJson(i as Map<String, dynamic>),
+    ],
+  );
+
+  final int measured;
+  final String sentence;
+  final List<ResultItem> latest;
+}
+
 class Dashboard {
   const Dashboard({
+    this.goingWell = const [],
+    this.doFirst,
+    this.waitingFor = const [],
+    this.results,
     required this.role,
     required this.headline,
     required this.attention,
@@ -149,6 +230,20 @@ class Dashboard {
   });
 
   factory Dashboard.fromJson(Map<String, dynamic> json) => Dashboard(
+    goingWell: [
+      for (final i in (json['going_well'] as List? ?? const []))
+        GlanceItem.fromJson(i as Map<String, dynamic>),
+    ],
+    doFirst: json['do_first'] is Map<String, dynamic>
+        ? AttentionItem.fromJson(json['do_first'] as Map<String, dynamic>)
+        : null,
+    waitingFor: [
+      for (final i in (json['waiting_for'] as List? ?? const []))
+        GlanceItem.fromJson(i as Map<String, dynamic>),
+    ],
+    results: json['results'] is Map<String, dynamic>
+        ? ResultsGlance.fromJson(json['results'] as Map<String, dynamic>)
+        : null,
     role: '${json['role']}',
     headline: '${json['headline']}',
     attention: [
@@ -169,6 +264,12 @@ class Dashboard {
     unreadNotifications: (json['unread_notifications'] as int?) ?? 0,
     canAct: json['can_act'] == true,
   );
+
+  /// What is going well, what to do first, what I am waiting for, and did my actions help.
+  final List<GlanceItem> goingWell;
+  final AttentionItem? doFirst;
+  final List<GlanceItem> waitingFor;
+  final ResultsGlance? results;
 
   final String role;
   final String headline;

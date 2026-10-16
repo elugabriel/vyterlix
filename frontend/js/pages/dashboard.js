@@ -1,6 +1,7 @@
-// Today: the front screen. It opens with what needs attention, most serious first, each with a
-// button that takes you to where it is dealt with; only after that does it show how the business
-// is doing. Owners are shown everything, a Manager what is in their own area, and a Viewer is told
+// Today: the front screen. It answers five questions in plain words: what is going well, what needs
+// my attention today, what should I do first, what am I waiting for, and did my earlier actions
+// help. Each thing needing attention has a button that takes you to where it is dealt with; the
+// figures follow. Owners are shown everything, a Manager what is in their own area, and a Viewer is told
 // what is going on but is given nothing to do. Everything here was worked out elsewhere; this page
 // only gathers it.
 
@@ -49,9 +50,59 @@ function hero(d) {
   );
 }
 
+function question(title, ...children) {
+  return el("section", { class: "stack" }, el("div", { class: "section-title" }, el("h2", {}, title)), ...children);
+}
+
+function glanceList(items, empty) {
+  if (!items.length) return el("p", { class: "muted" }, empty);
+  return el(
+    "div",
+    { class: "glance-list" },
+    ...items.map((i) => el("a", { class: `glance-item glance-${i.tone}`, href: page(i.link) }, el("strong", {}, i.title), el("span", { class: "muted" }, i.detail))),
+  );
+}
+
+function goingWell(d) {
+  return question("What is going well?", glanceList(d.going_well, "Nothing stands out yet. As soon as a figure moves in your favour, or an action works, it will show here."));
+}
+
+function doFirst(d) {
+  const f = d.do_first;
+  if (!f) return question("What should I do first?", el("p", { class: "muted" }, "Nothing. Keep doing what you are doing."));
+  return question(
+    "What should I do first?",
+    el(
+      "div",
+      { class: "first-card" },
+      el("div", {}, el("span", { class: `badge ${SEVERITY_CLASS[f.severity]}` }, SEVERITY_TEXT[f.severity]), " ", el("span", { class: "muted" }, KIND_TEXT[f.kind])),
+      el("p", {}, el("strong", {}, f.title)),
+      el("p", { class: "muted" }, f.detail),
+      el("a", { class: "button", href: page(f.link) }, f.can_act ? BUTTON[f.kind] : "Take a look"),
+    ),
+  );
+}
+
+function waitingFor(d) {
+  return question("What am I waiting for?", glanceList(d.waiting_for, "Nothing is in progress. When you accept a suggestion it will show here until it is done and checked."));
+}
+
+const OUTCOME_CLASS = { successful: "glance-good", partially_successful: "glance-watch", unsuccessful: "glance-bad", inconclusive: "glance-neutral" };
+
+function results(d) {
+  const r = d.results;
+  return question(
+    "Did my actions help?",
+    el("p", {}, r.sentence),
+    r.latest.length
+      ? el("div", { class: "glance-list" }, ...r.latest.map((i) => el("a", { class: `glance-item ${OUTCOME_CLASS[i.outcome]}`, href: page(i.link) }, el("strong", {}, `${i.outcome_label}: ${i.title}`), el("span", { class: "muted" }, i.reason))))
+      : null,
+  );
+}
+
 function attention(d) {
   if (!d.attention.length) {
-    return el("section", { class: "stack" }, el("div", { class: "section-title" }, el("h2", {}, "Needs your attention")), el("p", { class: "muted" }, "Nothing needs you right now."));
+    return el("section", { class: "stack" }, el("div", { class: "section-title" }, el("h2", {}, "What needs my attention today?")), el("p", { class: "muted" }, "Nothing needs you right now."));
   }
   const items = d.attention.map((i) =>
     el(
@@ -66,7 +117,7 @@ function attention(d) {
   return el(
     "section",
     {},
-    el("div", { class: "section-title" }, el("h2", {}, "Needs your attention")),
+    el("div", { class: "section-title" }, el("h2", {}, "What needs my attention today?")),
     el("div", { class: "attention" }, ...items),
     d.more_attention ? el("p", { class: "muted", style: "margin-top:12px" }, `${d.more_attention} more. `, el("a", { href: page("alerts.html") }, "See them all on the Alerts page")) : null,
   );
@@ -114,7 +165,7 @@ async function start({ org }) {
   const d = await guard(message, () => api.get(`/organizations/${org.id}/dashboard`));
   if (!d) return;
   content.replaceChildren();
-  put(content, hero(d), setup(d.setup), attention(d), figures(d.figures));
+  put(content, hero(d), setup(d.setup), goingWell(d), attention(d), doFirst(d), waitingFor(d), results(d), figures(d.figures));
   if (!d.health && !d.figures.length) {
     put(content, el("p", { class: "muted" }, "There are no figures yet. Bring in your sales, costs and customers from "), el("a", { href: page("data.html") }, "Your data"), el("span", { class: "muted" }, " and they will appear here."));
   }

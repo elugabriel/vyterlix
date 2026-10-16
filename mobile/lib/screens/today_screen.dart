@@ -7,7 +7,10 @@ import '../models.dart';
 import '../theme.dart';
 import '../widgets/severity.dart';
 import '../widgets/common.dart';
+import 'action_detail_screen.dart';
 import 'alerts_screen.dart';
+import 'health_screen.dart';
+import 'key_figures_screen.dart';
 import '../widgets/plain.dart';
 
 const _kindText = {
@@ -98,6 +101,30 @@ class _TodayScreenState extends State<TodayScreen> {
     }
   }
 
+  /// Open what a line points at, as far as the phone has a screen for it.
+  VoidCallback? _open(String link) {
+    final hash = link.indexOf('#');
+    final page = hash < 0 ? link : link.substring(0, hash);
+    final id = hash < 0 ? '' : link.substring(hash + 1);
+    Widget? screen;
+    if (page == 'actions.html' && id.isNotEmpty) {
+      screen = ActionDetailScreen(business: widget.business, actionId: id);
+    } else if (page == 'alerts.html' && id.isNotEmpty) {
+      screen = AlertDetailScreen(business: widget.business, alertId: id);
+    } else if (page == 'kpis.html') {
+      screen = KeyFiguresScreen(business: widget.business);
+    } else if (page == 'health.html') {
+      screen = HealthScreen(business: widget.business);
+    }
+    if (screen == null) return null;
+    final target = screen;
+    return () async {
+      await Navigator.of(context)
+          .push(MaterialPageRoute<void>(builder: (_) => target));
+      if (mounted) await _load();
+    };
+  }
+
   @override
   Widget build(BuildContext context) => _body();
 
@@ -117,7 +144,13 @@ class _TodayScreenState extends State<TodayScreen> {
             const SizedBox(height: 16),
             _SetupCard(setup: dashboard.setup!),
           ],
-          const SectionTitle('Needs your attention'),
+          const SectionTitle('What is going well?'),
+          _GlanceList(
+            items: dashboard.goingWell,
+            empty: 'Nothing stands out yet. As soon as a figure moves in your favour, or an action works, it will show here.',
+            onOpen: _open,
+          ),
+          const SectionTitle('What needs my attention today?'),
           if (dashboard.attention.isEmpty)
             Text(
               'Nothing needs you right now.',
@@ -136,6 +169,49 @@ class _TodayScreenState extends State<TodayScreen> {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
+          const SectionTitle('What should I do first?'),
+          if (dashboard.doFirst == null)
+            Text(
+              'Nothing. Keep doing what you are doing.',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            )
+          else
+            _AttentionCard(
+              item: dashboard.doFirst!,
+              onTap: _tapFor(dashboard.doFirst!),
+            ),
+          const SectionTitle('What am I waiting for?'),
+          _GlanceList(
+            items: dashboard.waitingFor,
+            empty: 'Nothing is in progress. When you accept a suggestion it will show here until it is done and checked.',
+            onOpen: _open,
+          ),
+          if (dashboard.results != null) ...[
+            const SectionTitle('Did my actions help?'),
+            Text(dashboard.results!.sentence),
+            const SizedBox(height: 8),
+            _GlanceList(
+              items: [
+                for (final r in dashboard.results!.latest)
+                  GlanceItem(
+                    id: r.title,
+                    title: '${r.outcomeLabel}: ${r.title}',
+                    detail: r.reason,
+                    link: r.link,
+                    tone: switch (r.outcome) {
+                      'successful' => 'good',
+                      'partially_successful' => 'watch',
+                      'unsuccessful' => 'bad',
+                      _ => 'neutral',
+                    },
+                  ),
+              ],
+              empty: '',
+              onOpen: _open,
+            ),
+          ],
           if (dashboard.figures.isNotEmpty) ...[
             const SectionTitle('Your key figures'),
             _Figures(figures: dashboard.figures),
@@ -412,6 +488,75 @@ class _FigureCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A short list under one of the questions: a coloured bar by how it is going, the line, and why.
+class _GlanceList extends StatelessWidget {
+  const _GlanceList({
+    required this.items,
+    required this.empty,
+    required this.onOpen,
+  });
+
+  final List<GlanceItem> items;
+  final String empty;
+  final VoidCallback? Function(String link) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    if (items.isEmpty) {
+      return empty.isEmpty
+          ? const SizedBox.shrink()
+          : Text(empty, style: TextStyle(color: muted));
+    }
+    return Column(
+      children: [
+        for (final item in items)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Card(
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onOpen(item.link),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        width: 4,
+                        color: plainColor(context, item.tone),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.title,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                item.detail,
+                                style: TextStyle(color: muted, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
