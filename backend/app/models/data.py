@@ -42,6 +42,8 @@ UK_VAT_RATES = ("0", "5", "20")  # %, as NUMERIC text; NULL = exempt / outside t
 SALE_KINDS = ("sale", "refund")
 EXPENSE_KINDS = ("expense", "credit")
 STOCK_MOVEMENT_KINDS = ("opening", "delivery", "sale", "return", "adjustment", "write_off")
+# What became of an appointment: still to come, went ahead, was cancelled, or they did not turn up.
+BOOKING_STATUSES = ("booked", "completed", "cancelled", "no_show")
 
 Money = Numeric(18, 4)
 Quantity = Numeric(18, 4)
@@ -276,4 +278,31 @@ class StockMovement(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Data
     quantity: Mapped[Decimal] = mapped_column(Quantity)
     unit_cost: Mapped[Decimal | None] = mapped_column(Money)
     sale_line_id: Mapped[uuid.UUID | None] = mapped_column()
+    notes: Mapped[str | None] = mapped_column(String(300))
+
+
+class Booking(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOriginMixin, Base):
+    """An appointment or job for a business that sells a service (client feedback 15/10/2026,
+    section 6). The money from it is recorded as a sale as usual; this records what happened to the
+    appointment itself, which is what no-shows, cancellations and rebooking are worked out from."""
+
+    __tablename__ = "bookings"
+    __table_args__ = (
+        *_origin_rules("bookings"),
+        _tenant_fk("customer_id", "customers"),
+        CheckConstraint(_one_of("status", BOOKING_STATUSES), name="status_valid"),
+        CheckConstraint(
+            "cancelled_on IS NULL OR (status = 'cancelled' AND cancelled_on <= booked_for)",
+            name="cancelled_on_fits",
+        ),
+        Index("ix_bookings_org_date", "organization_id", "booked_for"),
+        Index("ix_bookings_org_customer", "organization_id", "customer_id"),
+    )
+
+    booked_for: Mapped[date] = mapped_column(Date)  # the day of the appointment
+    service: Mapped[str] = mapped_column(String(200))
+    status: Mapped[str] = mapped_column(String(12), server_default="booked")
+    customer_id: Mapped[uuid.UUID | None] = mapped_column()
+    staff: Mapped[str | None] = mapped_column(String(100))  # who was to do it
+    cancelled_on: Mapped[date | None] = mapped_column(Date)  # the day they cancelled
     notes: Mapped[str | None] = mapped_column(String(300))

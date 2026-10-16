@@ -12,6 +12,10 @@ from app.core.permissions import Perm
 from app.core.uk import today_uk
 from app.models.data import DATA_SOURCES, STOCK_MOVEMENT_KINDS
 from app.schemas.trading import (
+    BookingCreate,
+    BookingOut,
+    BookingPatch,
+    BookingsPage,
     CustomerCreate,
     CustomerOut,
     CustomerPatch,
@@ -57,6 +61,7 @@ customers_router = _router("customers")
 suppliers_router = _router("suppliers")
 products_router = _router("products")
 stock_router = _router("stock-movements")
+bookings_router = _router("bookings")
 
 
 # --- sales -------------------------------------------------------------------------------------
@@ -320,4 +325,51 @@ def list_stock_movements(
 @stock_router.delete("/{movement_id}", status_code=NoContent)
 def delete_stock_movement(movement_id: uuid.UUID, tenant: DataManager, db: DB, meta: Meta):
     svc.delete_stock_movement(db, tenant, movement_id, meta)
+    return Response(status_code=NoContent)
+
+
+# --- bookings ----------------------------------------------------------------------------------
+
+
+@bookings_router.post("", status_code=status.HTTP_201_CREATED, response_model=BookingOut)
+def create_booking(body: BookingCreate, tenant: DataManager, db: DB, meta: Meta):
+    return svc.create_booking(db, tenant, body, meta)
+
+
+@bookings_router.get("", response_model=BookingsPage)
+def list_bookings(
+    tenant: DataManager,
+    db: DB,
+    date_from: date | None = None,
+    date_to: date | None = None,
+    booking_status: Annotated[
+        Literal["booked", "completed", "cancelled", "no_show"] | None, Query(alias="status")
+    ] = None,
+    customer_id: uuid.UUID | None = None,
+    q: Search = None,
+    limit: Limit = 50,
+    offset: Offset = 0,
+):
+    """Latest day first. `q` searches the service."""
+    return svc.list_bookings(
+        db, date_from=date_from, date_to=date_to, status=booking_status,
+        customer_id=customer_id, q=q, limit=limit, offset=offset,
+    )  # fmt: skip
+
+
+@bookings_router.get("/{booking_id}", response_model=BookingOut)
+def get_booking(booking_id: uuid.UUID, tenant: DataManager, db: DB):
+    return svc.get_booking(db, booking_id)
+
+
+@bookings_router.patch("/{booking_id}", response_model=BookingOut)
+def update_booking(
+    booking_id: uuid.UUID, body: BookingPatch, tenant: DataManager, db: DB, meta: Meta
+):
+    return svc.update_booking(db, tenant, booking_id, body, meta)
+
+
+@bookings_router.delete("/{booking_id}", status_code=NoContent)
+def delete_booking(booking_id: uuid.UUID, tenant: DataManager, db: DB, meta: Meta):
+    svc.delete_booking(db, tenant, booking_id, meta)
     return Response(status_code=NoContent)

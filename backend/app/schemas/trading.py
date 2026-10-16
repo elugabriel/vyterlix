@@ -21,7 +21,7 @@ from pydantic import (
 )
 
 from app.core.uk import today_uk
-from app.models.data import SALE_KINDS, STOCK_MOVEMENT_KINDS
+from app.models.data import BOOKING_STATUSES, SALE_KINDS, STOCK_MOVEMENT_KINDS
 from app.services.value_parsers import (
     EARLIEST_DATE,
     CellError,
@@ -465,3 +465,70 @@ class ProductsPage(Page):
 
 class StockPage(Page):
     items: list[StockMovementOut]
+
+
+# --- bookings ---------------------------------------------------------------------------------
+
+BookingStatus = Literal[BOOKING_STATUSES]
+Service = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
+Staff = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
+BookingNote = Annotated[str, StringConstraints(strip_whitespace=True, max_length=300)]
+
+
+def check_cancellation(status: str, cancelled_on: date | None, booked_for: date | None) -> None:
+    if cancelled_on is None:
+        return
+    if status != "cancelled":
+        raise ValueError("Only a cancelled booking has a day it was cancelled")
+    if booked_for is not None and cancelled_on > booked_for:
+        raise ValueError("A booking cannot be cancelled after its day")
+
+
+class BookingCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    booked_for: date
+    service: Service
+    status: BookingStatus = "booked"
+    customer_id: uuid.UUID | None = None
+    staff: Staff | None = None
+    cancelled_on: date | None = None
+    notes: BookingNote | None = None
+
+    @model_validator(mode="after")
+    def _cancellation(self) -> "BookingCreate":
+        check_cancellation(self.status, self.cancelled_on, self.booked_for)
+        return self
+
+
+class BookingPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    booked_for: date | None = None
+    service: Service | None = None
+    status: BookingStatus | None = None
+    customer_id: uuid.UUID | None = None
+    staff: Staff | None = None
+    cancelled_on: date | None = None
+    notes: BookingNote | None = None
+
+
+class BookingOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    booked_for: date
+    service: str
+    status: str
+    customer_id: uuid.UUID | None
+    staff: str | None
+    cancelled_on: date | None
+    notes: str | None
+    source: str
+    import_id: uuid.UUID | None
+    created_at: datetime
+
+
+class BookingsPage(BaseModel):
+    total: int
+    items: list[BookingOut]

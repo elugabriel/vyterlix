@@ -26,8 +26,21 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import AppError, ConflictError, NotFoundError
 from app.models.business import BusinessListItem
-from app.models.data import Customer, Expense, Product, Sale, SaleLine, StockMovement, Supplier
+from app.models.data import (
+    Booking,
+    Customer,
+    Expense,
+    Product,
+    Sale,
+    SaleLine,
+    StockMovement,
+    Supplier,
+)
 from app.schemas.trading import (
+    BookingCreate,
+    BookingOut,
+    BookingPatch,
+    BookingsPage,
     CustomerCreate,
     CustomerOut,
     CustomerPatch,
@@ -54,6 +67,7 @@ from app.schemas.trading import (
     SupplierOut,
     SupplierPatch,
     SuppliersPage,
+    check_cancellation,
 )
 from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
@@ -787,3 +801,73 @@ def stock_level(db: Session, product_id: uuid.UUID, as_of: date) -> StockLevelOu
         )
     )
     return StockLevelOut(product_id=product_id, as_of=as_of, quantity=quantity)
+
+
+# --- bookings ------------------------------------------------
+
+
+@_atomic
+def create_booking(db: Session, tenant, body: BookingCreate, meta: RequestMeta) -> BookingOut:
+    _must_exist(db, Customer, body.customer_id, "customer_id", "customer")
+    booking = Booking(**body.model_dump(), source="manual")
+    db.add(booking)
+    db.flush()
+    _audit(db, tenant, meta, AuditAction.RECORD_CREATED, "bookings", booking.id)
+    return BookingOut.model_validate(booking)
+
+
+def get_booking(db: Session, booking_id: uuid.UUID) -> BookingOut:
+    return BookingOut.model_validate(_get(db, Booking, booking_id, "Booking"))
+
+
+@_atomic
+def update_booking(
+    db: Session, tenant, booking_id: uuid.UUID, body: BookingPatch, meta: RequestMeta
+) -> BookingOut:
+    booking = _get(db, Booking, booking_id, "Booking")
+    if "customer_id" in body.model_fields_set:
+        _must_exist(db, Customer, body.customer_id, "customer_id", "customer")
+    _apply(booking, body, nullable={"customer_id", "staff", "cancelled_on", "notes"})
+    if booking.status != "cancelled":
+        booking.cancelled_on = None  # no longer cancelled, so there is no day to keep
+    try:
+        check_cancellation(booking.status, booking.cancelled_on, booking.booked_for)
+    except ValueError as exc:
+        raise _invalid("cancelled_on", "cancellation_does_not_fit", str(exc)) from exc
+    db.flush()
+    _audit(
+        db, tenant, meta, AuditAction.RECORD_UPDATED, "bookings", booking.id,
+        fields=sorted(body.model_fields_set),
+    )  # fmt: skip
+    db.refresh(booking)
+    return BookingOut.model_validate(booking)
+
+
+def delete_booking(db: Session, tenant, booking_id: uuid.UUID, meta: RequestMeta) -> None:
+    _delete(db, tenant, meta, Booking, booking_id, "bookings", "booking", archivable=False)
+
+
+def list_bookings(
+    db: Session,
+    *,
+    date_from: date | None,
+    date_to: date | None,
+    status: str | None,
+    customer_id: uuid.UUID | None,
+    q: str | None,
+    limit: int,
+    offset: int,
+) -> BookingsPage:
+    query = select(Booking)
+    if date_from:
+        query = query.where(Booking.booked_for >= date_from)
+    if date_to:
+        query = query.where(Booking.booked_for <= date_to)
+    if status:
+        query = query.where(Booking.status == status)
+    if customer_id:
+        query = query.where(Booking.customer_id == customer_id)
+    if q:
+        query = query.where(Booking.service.ilike(f"%{_like(q)}%", escape="\\"))
+    total, rows = _page(db, query, (Booking.booked_for.desc(), Booking.id), limit, offset)
+    return BookingsPage(total=total, items=[BookingOut.model_validate(r) for r in rows])

@@ -29,7 +29,7 @@ from app.kpi import periods
 from app.kpi.expression import Compiled, ExpressionError, compile_expression, evaluate
 from app.kpi.measures import MEASURES, PRESENCE, compute_series, has_records
 from app.models.business import BusinessProfile
-from app.models.data import Expense, Sale, StockMovement
+from app.models.data import Booking, Expense, Sale, StockMovement
 from app.models.kpi import KpiCalculationRun, KpiDefinition, KpiValue
 from app.plain.figures import explain_figure
 from app.schemas.kpi import KpiHistoryOut, KpiOut, KpisOut, KpiValueOut, PlainOut, RunOut
@@ -77,9 +77,9 @@ def active_definitions(db: Session) -> list[KpiDefinition]:
 
 
 def _data_bounds(db: Session) -> tuple[date, date] | None:
-    """The first and last date the business has any sales, expenses or stock movements on."""
+    """The first and last date the business has any sales, expenses, stock or bookings on."""
     lows, highs = [], []
-    for column in (Sale.sold_on, Expense.spent_on, StockMovement.moved_on):
+    for column in (Sale.sold_on, Expense.spent_on, StockMovement.moved_on, Booking.booked_for):
         low, high = db.execute(select(func.min(column), func.max(column))).one()
         if low is not None:
             lows.append(low)
@@ -286,9 +286,13 @@ def _sells(db: Session) -> str | None:
 
 def list_kpis(db: Session, granularity: str = "month") -> KpisOut:
     definitions = active_definitions(db)
-    if _sells(db) == "services":
+    sells = _sells(db)
+    if sells == "services":
         # No stock to count: do not show a Stock group of figures that can never be worked out
         definitions = [d for d in definitions if d.category != "inventory"]
+    if sells == "products" or (sells is None and not has_records(db, "bookings")):
+        # Appointment figures are for a business that takes bookings
+        definitions = [d for d in definitions if "bookings" not in d.requires]
     latest_period = db.scalar(
         select(func.max(KpiValue.period_start)).where(
             KpiValue.granularity == granularity, KpiValue.is_complete.is_(True)

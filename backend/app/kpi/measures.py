@@ -33,7 +33,7 @@ from sqlalchemy.orm import Session
 
 from app.kpi import periods
 from app.models.business import BusinessListItem
-from app.models.data import Expense, Product, Sale, SaleLine, StockMovement
+from app.models.data import Booking, Expense, Product, Sale, SaleLine, StockMovement
 
 ZERO = Decimal("0")
 # The kinds of record a measure reads, and how to tell whether the business has any at all (so a
@@ -43,6 +43,7 @@ PRESENCE = {
     "expenses": select(Expense.id),
     "customer_sales": select(Sale.id).where(Sale.customer_id.is_not(None)),
     "stock": select(StockMovement.id),
+    "bookings": select(Booking.id),
 }
 
 Series = dict[date, Decimal]
@@ -244,6 +245,73 @@ def _identified_sales(db: Session, granularity: str, start: date, end: date) -> 
     return _decimals(db.execute(query))
 
 
+# --- bookings -----------------------------------------------------------------------------------
+# An appointment is "finished" once it has been kept, cancelled or missed. One still to come
+# (status "booked") is in none of the rates. A late cancellation is one made the day before or on
+# the day. Rebooking: of the customers who kept an appointment in the period, those who have another
+# appointment (kept, or still to come) on a later day than their last one in the period.
+
+LATE_CANCEL_DAYS = 1
+
+
+def _bookings(*conditions, distinct=None) -> Compute:
+    def compute(db: Session, granularity: str, start: date, end: date) -> Series:
+        bucket = _bucket(Booking.booked_for, granularity)
+        count = func.count() if distinct is None else func.count(func.distinct(distinct))
+        query = (
+            select(bucket, count)
+            .where(Booking.booked_for >= start, Booking.booked_for <= end, *conditions)
+            .group_by(bucket)
+        )
+        return _decimals(db.execute(query))
+
+    return compute
+
+
+def _kept_customers(db: Session, granularity: str, start: date, end: date) -> Series:
+    return _bookings(Booking.status == "completed", Booking.customer_id.is_not(None),
+                     distinct=Booking.customer_id)(db, granularity, start, end)  # fmt: skip
+
+
+def _rebooked_customers(db: Session, granularity: str, start: date, end: date) -> Series:
+    """Customers who kept an appointment in the period and have another one after their last."""
+    bucket = _bucket(Booking.booked_for, granularity)
+    last = (
+        select(
+            Booking.customer_id.label("customer_id"),
+            bucket.label("period"),
+            func.max(Booking.booked_for).label("last_day"),
+        )
+        .where(
+            Booking.booked_for >= start,
+            Booking.booked_for <= end,
+            Booking.status == "completed",
+            Booking.customer_id.is_not(None),
+        )
+        .group_by(Booking.customer_id, bucket)
+        .subquery()
+    )
+    later = (
+        select(Booking.id)
+        .where(
+            Booking.customer_id == last.c.customer_id,
+            Booking.booked_for > last.c.last_day,
+            Booking.status.in_(("completed", "booked")),
+        )
+        .exists()
+    )
+    query = select(last.c.period, func.count()).where(later).group_by(last.c.period)
+    return _decimals(db.execute(query))
+
+
+def _late_cancellations(db: Session, granularity: str, start: date, end: date) -> Series:
+    return _bookings(
+        Booking.status == "cancelled",
+        Booking.cancelled_on.is_not(None),
+        Booking.cancelled_on >= Booking.booked_for - LATE_CANCEL_DAYS,
+    )(db, granularity, start, end)
+
+
 # --- stock --------------------------------------------------------------------------------------
 
 
@@ -377,6 +445,35 @@ MEASURES: dict[str, Measure] = {
         Measure("products_tracked", "Products with stock records", "stock", _products_tracked),
         Measure("products_out_of_stock", "Products out of stock", "stock", _products_out_of_stock),
         Measure("period_days", "Days in the period", "sales", _period_days),
+        Measure(
+            "bookings_kept",
+            "Appointments kept",
+            "bookings",
+            _bookings(Booking.status == "completed"),
+        ),
+        Measure(
+            "bookings_cancelled",
+            "Appointments cancelled",
+            "bookings",
+            _bookings(Booking.status == "cancelled"),
+        ),
+        Measure(
+            "bookings_missed",
+            "Appointments missed (no-shows)",
+            "bookings",
+            _bookings(Booking.status == "no_show"),
+        ),
+        Measure(
+            "bookings_finished",
+            "Appointments kept, cancelled or missed",
+            "bookings",
+            _bookings(Booking.status != "booked"),
+        ),
+        Measure("late_cancellations", "Late cancellations", "bookings", _late_cancellations),
+        Measure("customers_kept", "Customers who kept an appointment", "bookings", _kept_customers),
+        Measure(
+            "customers_rebooked", "Customers who booked again", "bookings", _rebooked_customers
+        ),
     )
 }
 

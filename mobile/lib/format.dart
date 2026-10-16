@@ -91,6 +91,7 @@ const _needs = {
   'expenses': 'expenses',
   'customer_sales': 'sales that say which customer bought',
   'stock': 'stock records',
+  'bookings': 'appointments',
 };
 
 /// Why a figure shows no number, in plain words.

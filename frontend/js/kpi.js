@@ -70,6 +70,7 @@ const NEEDS = {
   expenses: "expenses",
   customer_sales: "sales that say which customer bought",
   stock: "stock records",
+  bookings: "appointments",
 };
 
 /** Why a KPI shows no number, in plain words. `requires` is what the KPI needs (from the API). */

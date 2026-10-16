@@ -117,13 +117,13 @@ Her figures are illustrations, not real results.
 - [x] **Onboarding asks whether the business sells products, provides services, or both.** ("What do you sell?" in business details.)
 - [~] Key figures and forecasts adapt to that choice (services: no stock figures). Recommendations adapt in item 6 and 7.
 - [ ] Retail and wholesale: best sellers, slow stock, reorders, margins, repeat buyers, suppliers. (Largely exists.)
-- [ ] Salon, barber and beauty: popular services, repeat bookings, no-shows, cancellations, staff availability, quiet periods.
+- [~] Salon, barber and beauty: repeat bookings, no-shows and cancellations now have figures. Popular services, staff availability and quiet periods still to do.
 - [ ] Consultancy and agency: leads, proposals, client renewals, project profitability, unpaid invoices, staff capacity.
 - [ ] Cleaning, repair and home services: bookings, repeat contracts, travel or service costs, cancellations, customer satisfaction.
 - [ ] Mixed businesses: show product and service insights where relevant, without forcing one set of measures on everything.
 - [x] **No empty "Stock to watch" section** for a business that sells only a service (website and phone). "Customers to follow up" is shown instead. ("Bookings to watch" waits for booking data, item 7.)
 - [ ] When there is not enough data for a recommendation, **say what is missing**. (Data quality exists; not tied to each recommendation.)
-- [ ] New data types needed for service businesses: bookings or appointments, services, staff, cancellations, no-shows, and their import and typing-in. (Very large; see section 0.)
+- [~] New data types for service businesses. **Appointments can now be typed in** (website: Type in data, Appointment tab; service, day, what happened, customer, who, day cancelled). Figures from them: appointments kept, cancelled, missed, late cancellations, customers who booked again. Still to do: file import of appointments, a list of services and staff, and the phone app (which has no data entry yet).
 
 ## 7. StableScore AI as a reference, and going further (§7)
 

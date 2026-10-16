@@ -1,4 +1,4 @@
-// Type in data by hand: sales, expenses, customers, suppliers, products and stock.
+// Type in data by hand: sales, expenses, customers, suppliers, products, stock and appointments.
 // Vyterlix works without any file or connection; everything here can also be imported.
 
 import { ApiError } from "../api.js";
@@ -20,6 +20,13 @@ const TABS = [
   ["supplier", "Supplier"],
   ["product", "Product"],
   ["stock", "Stock"],
+  ["booking", "Appointment"],
+];
+const BOOKING_STATUSES = [
+  ["booked", "Still to come"],
+  ["completed", "Went ahead"],
+  ["cancelled", "Cancelled"],
+  ["no_show", "Did not turn up"],
 ];
 const VAT_CHOICES = [
   ["20", "20% VAT (standard)"],
@@ -39,10 +46,13 @@ const STOCK_KINDS = [
 let orgId = null;
 let tab = "sale";
 let choices = null;
+let sells = null;
 
 
 async function start({ org }) {
   orgId = org.id;
+  sells = org.sells ?? null;
+  if (sells === "products" && tab === "booking") tab = "sale";
   document.getElementById("org-name").textContent = org.name;
   document.getElementById("nav").replaceChildren(dataNav(orgId, "entry"));
   if (!requireDataManager(org, message)) return;
@@ -82,7 +92,7 @@ async function render() {
   const tabs = el(
     "div",
     { class: "tabs", role: "tablist" },
-    ...TABS.map(([key, label]) => {
+    ...visibleTabs().map(([key, label]) => {
       const button = el("button", { type: "button", role: "tab", "aria-selected": key === tab ? "true" : "false" }, label);
       button.addEventListener("click", async () => {
         tab = key;
@@ -91,14 +101,14 @@ async function render() {
       return button;
     }),
   );
-  const builder = { sale, expense, customer, supplier, product, stock }[tab];
+  const builder = { sale, expense, customer, supplier, product, stock, booking }[tab];
   const { form, recent } = builder();
   const box = el("div", { class: "message", role: "alert", hidden: true });
   const listBox = el("div", {});
   const label = TABS.find(([key]) => key === tab)[1];
   content.replaceChildren(
     tabs,
-    el("section", { class: "card" }, el("h2", { style: "margin-top:0" }, `Add a ${label.toLowerCase()}`), box, form.node),
+    el("section", { class: "card" }, el("h2", { style: "margin-top:0" }, `Add ${tab === "booking" ? "an" : "a"} ${label.toLowerCase()}`), box, form.node),
     el("section", { class: "card" }, el("h2", { style: "margin-top:0" }, recent.title), listBox),
   );
   bindForm(form.node, box, async (values) => {
@@ -110,6 +120,9 @@ async function render() {
   });
   await showRecent(recent, listBox);
 }
+
+// Appointments are for a business that sells a service; one that sells only products does not see them.
+const visibleTabs = () => TABS.filter(([key]) => key !== "booking" || sells !== "products");
 
 // --- shared pieces -----------------------------------------------------------------------------------
 
@@ -452,6 +465,54 @@ function stock() {
     },
   };
 }
+
+// --- appointments ---------------------------------------------------------------------------------------------------------
+
+function booking() {
+  const status = select("status", BOOKING_STATUSES, { selected: "completed" });
+  const cancelled = input("cancelled_on", { type: "date" });
+  const cancelledField = field("Day they cancelled", cancelled, "Leave blank if you do not know. A cancellation the day before or on the day counts as late.");
+  cancelledField.hidden = true;
+  status.addEventListener("change", () => (cancelledField.hidden = status.value !== "cancelled"));
+  const node = el(
+    "form",
+    { novalidate: true },
+    el("div", { class: "row" }, field("Service", input("service", { maxlength: 200, required: true }), "For example: haircut, boiler service, consultation."), dateField("booked_for", "Day of the appointment")),
+    el("div", { class: "row" }, field("What happened?", status), cancelledField),
+    el("div", { class: "row" }, field("Customer (optional)", select("customer_id", choices.customers, { placeholder: "Not recorded" }), "Choose one to see who books again."), field("Who was doing it? (optional)", input("staff", { maxlength: 100 }))),
+    el("div", { class: "row" }, field("Notes (optional)", input("notes", { maxlength: 300 }))),
+    choices.customers.length ? null : el("p", { class: "hint" }, "To see who books again, add your customers first (the Customer tab)."),
+    el("button", { type: "submit" }, "Save appointment"),
+  );
+  return {
+    form: {
+      node,
+      submit: (v) =>
+        api.post(path("bookings"), {
+          booked_for: v.booked_for,
+          service: v.service,
+          status: v.status,
+          customer_id: orNull(v.customer_id),
+          staff: orNull(v.staff),
+          cancelled_on: v.status === "cancelled" ? orNull(v.cancelled_on) : null,
+          notes: orNull(v.notes),
+        }),
+    },
+    recent: {
+      path: "bookings",
+      title: "Latest appointments (newest first)",
+      headers: ["Day", "Service", "What happened", "Customer", ""],
+      cells: (b) => [
+        ukDate(b.booked_for),
+        b.service,
+        BOOKING_STATUSES.find(([k]) => k === b.status)?.[1] ?? b.status,
+        b.customer_id ? (customerName(b.customer_id) ?? "Unknown customer") : "Not recorded",
+      ],
+    },
+  };
+}
+
+const customerName = (id) => choices.customers.find(([cid]) => cid === id)?.[1];
 
 // Start last, so every const above has been set up before the page first runs.
 const opened = await openBusiness(message);

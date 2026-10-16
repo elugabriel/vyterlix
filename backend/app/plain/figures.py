@@ -114,6 +114,56 @@ WORDS: dict[str, Words] = {
             "This could reduce next month's sales. It is worth reconnecting with the customers who did not come back.",
         ),
     ),
+    "appointments_kept": Words(
+        Say(
+            "More appointments went ahead than {before}.",
+            "More appointments kept usually means more money coming in.",
+        ),
+        Say(
+            "Fewer appointments went ahead than {before}.",
+            "Fewer appointments can mean less money coming in, unless you charged more for each.",
+        ),
+    ),
+    "cancellation_rate_pct": Words(
+        Say(
+            "A bigger share of appointments were cancelled than {before}.",
+            "Cancelled slots are time you cannot sell again. A reminder the day before can help.",
+        ),
+        Say(
+            "A smaller share of appointments were cancelled than {before}.",
+            "That is a good sign: more of your booked time is being used.",
+        ),
+    ),
+    "no_show_rate_pct": Words(
+        Say(
+            "A bigger share of customers did not turn up than {before}.",
+            "A missed appointment is time you cannot get back. A reminder a day or two before often helps.",
+        ),
+        Say(
+            "A smaller share of customers did not turn up than {before}.",
+            "That is a good sign: more of your booked time is being used.",
+        ),
+    ),
+    "late_cancellations": Words(
+        Say(
+            "More appointments were cancelled at the last minute than {before}.",
+            "Late cancellations are hard to fill. A clear cancellation policy and a reminder can help.",
+        ),
+        Say(
+            "Fewer appointments were cancelled at the last minute than {before}.",
+            "That is a good sign: fewer gaps in your day.",
+        ),
+    ),
+    "rebooking_rate_pct": Words(
+        Say(
+            "More customers have another appointment booked than {before}.",
+            "That is a good sign that people want to come back.",
+        ),
+        Say(
+            "Fewer customers have another appointment booked than {before}.",
+            "Offering the next appointment before they leave can help. Recent months can look low as people have not booked yet.",
+        ),
+    ),
     "customer_churn_pct": Words(
         Say(
             "More customers stopped coming back than {before}.",
