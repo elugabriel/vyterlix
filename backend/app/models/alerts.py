@@ -11,12 +11,13 @@
 """
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
     ForeignKey,
     ForeignKeyConstraint,
@@ -36,7 +37,15 @@ from app.models.identity import _one_of
 
 SEVERITIES = ("info", "low", "medium", "high", "critical")
 ALERT_STATUSES = ("open", "acknowledged", "resolved")
-EVENT_KINDS = ("raised", "repeated", "acknowledged", "resolved", "reopened")
+EVENT_KINDS = (
+    "raised",
+    "repeated",
+    "acknowledged",
+    "resolved",
+    "reopened",
+    "postponed",
+    "brought_back",
+)
 EMAIL_STATUSES = ("none", "pending", "sent", "failed")
 
 
@@ -97,6 +106,8 @@ class Alert(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base):
     )
     acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Put off until this day: it stays open but is left out of what needs attention until then
+    snoozed_until: Mapped[date | None] = mapped_column(Date)
 
 
 class AlertEvent(UUIDPrimaryKeyMixin, TenantScopedMixin, Base):

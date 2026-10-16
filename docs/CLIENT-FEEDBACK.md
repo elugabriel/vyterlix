@@ -64,7 +64,7 @@ She wants this to be the central experience, not separate pages to remember.
 - [ ] **4. Decide and assign:** the owner can **accept, change, assign, postpone or dismiss**. Accepted actions become tasks immediately.
   - [x] Accept, change before accepting, assign, dates, steps.
   - [x] Dismiss, with the reason kept (website card).
-  - [ ] **Postpone** ("remind me later" with a date).
+  - [x] **Postpone** ("remind me later": 3 days, 1 week, 2 weeks or a chosen day, up to 90 days; the alert leaves what needs attention and comes back by itself; website and phone app).
   - [ ] Dismiss with a reason, remembered for the future.
 - [ ] **5. Follow up:** remind the responsible person, check progress, ask for an outcome when needed.
   - [~] Overdue marking and the timed follow-up round exist.
@@ -103,9 +103,9 @@ Her figures are illustrations, not real results.
 
 ## 5. Important alerts lead straight to useful actions (§5)
 
-- [x] A High priority alert shows, immediately and on the same screen: **the reason, the suggested action, the responsible person and the deadline** (the alert card, website: `frontend/js/alert-card.js`, `GET /alerts/{id}/card`). Phone app card still to do (item 2b).
+- [x] A High priority alert shows, immediately and on the same screen: **the reason, the suggested action, the responsible person and the deadline** (the alert card, website: `frontend/js/alert-card.js`, `GET /alerts/{id}/card`). The phone app has the same card.
 - [~] Her example alert card works (priority and reason, suggested step, assign to, due by, and "we will check from" are all on the card; the customer-return suggestion needs the missing recommendations): "High priority: Fewer customers returned this month. Why: return visits fell from 38% to 26%. Suggested next step: contact customers who have not booked in 60 days. Assign to: customer service. Review in: 14 days."
-- [~] The owner can choose **Accept, Edit, Assign or Dismiss** on the card (website done; **Postpone** and the phone app come in 2b).
+- [x] The owner can choose **Accept, Edit, Assign, Postpone or Dismiss** on the card (website and phone app).
 - [x] **Accepting creates a linked action and follow-up** (the alert is marked as being dealt with; a manager outside their area can only propose it).
 - [ ] Not every good change needs a task: good news is explained simply.
 - [ ] When there is a meaningful opportunity, recommend how to build on it.

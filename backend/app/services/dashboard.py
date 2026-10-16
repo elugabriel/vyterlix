@@ -55,6 +55,7 @@ def _alert_items(db: Session) -> list[rules.Item]:
         )  # fmt: skip
         for a in alerts_service.list_alerts(db, status="open", limit=200)
         if RANK[a.severity] >= RANK["medium"]  # the smaller ones are on the Alerts page
+        and a.postponed_until is None  # one put off comes back by itself on its day
     ]
 
 

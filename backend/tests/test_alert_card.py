@@ -392,3 +392,181 @@ def test_an_alert_that_is_not_about_a_change_has_a_next_step_and_nothing_to_acce
 def test_an_alert_that_does_not_exist_is_not_found(api, march):
     res = api.get(f"{ORGS}/{march[0]}/alerts/{uuid.uuid4()}/card", headers=march[2]["owner"])
     assert res.status_code == 404
+
+
+# --- putting it off ---------------------------------------------------------------------------------
+
+
+def postpone(api, business, alert, body, who="owner"):
+    return api.post(
+        f"{ORGS}/{business[0]}/alerts/{alert['id']}/postpone", json=body, headers=business[2][who]
+    )
+
+
+def summary_of(api, business, who="owner"):
+    return api.get(f"{ORGS}/{business[0]}/alerts/summary", headers=business[2][who]).json()
+
+
+def attention_ids(api, business):
+    return {
+        i["id"]
+        for i in api.get(f"{ORGS}/{business[0]}/dashboard", headers=business[2]["owner"]).json()[
+            "attention"
+        ]
+    }
+
+
+def test_postponing_for_some_days_puts_it_off_until_that_day(api, march, sales_alert):
+    res = postpone(api, march, sales_alert, {"days": 3})
+    assert res.status_code == 200, res.text
+    body = res.json()
+    due = (today_uk() + timedelta(days=3)).isoformat()
+    assert body["state"] == "postponed" and body["postponed_until"] == due
+    assert body["alert"]["status"] == "open" and body["alert"]["postponed_until"] == due
+    assert (
+        body["suggestion"] is not None and body["can_decide"] is True
+    )  # it can still be decided on
+    events = api.get(
+        f"{ORGS}/{march[0]}/alerts/{sales_alert['id']}", headers=march[2]["owner"]
+    ).json()["events"]
+    assert (
+        events[-1]["kind"] == "postponed"
+        and events[-1]["note"] == f"Put off until {today_uk() + timedelta(days=3):%d/%m/%Y}."
+    )
+
+
+def test_a_postponed_alert_is_out_of_the_way_but_counted_on_its_own(api, march, sales_alert):
+    before = summary_of(api, march)
+    assert attention_ids(api, march) >= {f"alert:{sales_alert['id']}"}
+    postpone(api, march, sales_alert, {"days": 7})
+    after = summary_of(api, march)
+    assert after["open"] == before["open"] - 1 and after["postponed"] == before["postponed"] + 1
+    assert f"alert:{sales_alert['id']}" not in attention_ids(api, march)
+    assert after["high_or_critical_open"] == before["high_or_critical_open"] - 1
+    listed = next(a for a in alerts_of(api, march) if a["id"] == sales_alert["id"])
+    assert (
+        listed["status"] == "open"
+        and listed["postponed_until"] == (today_uk() + timedelta(days=7)).isoformat()
+    )
+
+
+def test_it_can_be_put_off_until_a_chosen_day(api, march, sales_alert):
+    day = (today_uk() + timedelta(days=20)).isoformat()
+    body = postpone(api, march, sales_alert, {"until": day}).json()
+    assert body["postponed_until"] == day
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        {},
+        {"days": 3, "until": "2099-01-01"},
+        {"days": 0},
+        {"days": 91},
+        {"days": -2},
+        {"until": "2000-01-01"},
+        {"until": "not a date"},
+    ],
+)
+def test_a_bad_postponement_is_refused(api, march, sales_alert, body):
+    assert postpone(api, march, sales_alert, body).status_code == 422
+    assert card_of(api, march, sales_alert).json()["state"] == "open"
+
+
+def test_today_and_too_far_ahead_are_out_of_range(api, march, sales_alert):
+    assert postpone(api, march, sales_alert, {"until": today_uk().isoformat()}).status_code == 422
+    assert (
+        postpone(
+            api, march, sales_alert, {"until": (today_uk() + timedelta(days=91)).isoformat()}
+        ).status_code
+        == 422
+    )
+    assert (
+        postpone(
+            api, march, sales_alert, {"until": (today_uk() + timedelta(days=90)).isoformat()}
+        ).status_code
+        == 200
+    )
+
+
+def test_it_comes_back_by_itself_on_its_day(api, db, march, sales_alert):
+    from datetime import timedelta as td
+
+    from app.models.alerts import Alert
+    from tests.test_health import scoped
+
+    postpone(api, march, sales_alert, {"days": 3})
+    with scoped(db, march):
+        db.get(Alert, uuid.UUID(sales_alert["id"])).snoozed_until = today_uk() - td(days=1)
+        db.flush()
+    body = card_of(api, march, sales_alert).json()
+    assert body["state"] == "open" and body["postponed_until"] is None
+    assert f"alert:{sales_alert['id']}" in attention_ids(api, march)
+    assert summary_of(api, march)["postponed"] == 0
+
+
+def test_it_can_be_brought_back_now(api, march, sales_alert):
+    postpone(api, march, sales_alert, {"days": 14})
+    res = api.post(
+        f"{ORGS}/{march[0]}/alerts/{sales_alert['id']}/bring-back", headers=march[2]["owner"]
+    )
+    assert res.status_code == 200, res.text
+    assert res.json()["state"] == "open" and res.json()["postponed_until"] is None
+    assert f"alert:{sales_alert['id']}" in attention_ids(api, march)
+    events = api.get(
+        f"{ORGS}/{march[0]}/alerts/{sales_alert['id']}", headers=march[2]["owner"]
+    ).json()["events"]
+    assert [e["kind"] for e in events][-2:] == ["postponed", "brought_back"]
+    again = api.post(
+        f"{ORGS}/{march[0]}/alerts/{sales_alert['id']}/bring-back", headers=march[2]["owner"]
+    )
+    assert again.status_code == 409  # it is not put off any more
+
+
+def test_a_postponed_suggestion_can_still_be_accepted(api, march, sales_alert):
+    postpone(api, march, sales_alert, {"days": 3})
+    body = accept_card(api, march, sales_alert).json()
+    assert body["state"] == "accepted" and body["postponed_until"] is None
+
+
+def test_only_an_open_alert_can_be_put_off(api, march, sales_alert):
+    accept_card(api, march, sales_alert)  # now seen
+    assert postpone(api, march, sales_alert, {"days": 3}).status_code == 409
+
+
+def test_someone_who_may_only_look_cannot_put_it_off(api, march, sales_alert):
+    assert postpone(api, march, sales_alert, {"days": 3}, who="viewer").status_code == 403
+    assert (
+        api.post(
+            f"{ORGS}/{march[0]}/alerts/{sales_alert['id']}/bring-back", headers=march[2]["viewer"]
+        ).status_code
+        == 403
+    )
+
+
+def test_an_alert_that_is_not_about_a_change_can_be_put_off_too(api, march):
+    evaluate(api, march)
+    other = next(a for a in alerts_of(api, march) if not a["rule_code"].startswith("change_"))
+    body = postpone(api, march, other, {"days": 5}).json()
+    assert (
+        body["state"] == "other"
+        and body["postponed_until"] == (today_uk() + timedelta(days=5)).isoformat()
+    )
+
+
+def test_the_database_allows_the_new_event_kinds(db):
+    from sqlalchemy import text
+
+    kinds = db.execute(
+        text(
+            "select pg_get_constraintdef(oid) from pg_constraint where conname = 'ck_alert_events_kind_valid'"
+        )
+    ).scalar()
+    assert "postponed" in kinds and "brought_back" in kinds
+
+
+def test_someone_who_may_only_look_is_told_when_an_alert_comes_back(api, march, sales_alert):
+    postpone(api, march, sales_alert, {"days": 3})
+    body = card_of(api, march, sales_alert, who="viewer").json()
+    assert body["state"] == "postponed" and body["can_decide"] is False
+    assert body["postponed_until"] == (today_uk() + timedelta(days=3)).isoformat()

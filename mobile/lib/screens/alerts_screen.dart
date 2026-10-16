@@ -184,7 +184,9 @@ class _AlertCard extends StatelessWidget {
                             color: color,
                           ),
                           Text(
-                            _statusText[alert.status] ?? alert.status,
+                            alert.postponedUntil != null
+                                ? 'Put off until ${ukDate(alert.postponedUntil!)}'
+                                : _statusText[alert.status] ?? alert.status,
                             style: TextStyle(color: muted, fontSize: 13),
                           ),
                         ],

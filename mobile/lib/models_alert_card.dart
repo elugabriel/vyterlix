@@ -138,6 +138,7 @@ class AlertCard {
     required this.suggestion,
     required this.action,
     required this.dismissedReason,
+    required this.postponedUntil,
     required this.nextStepText,
     required this.canDecide,
   });
@@ -162,6 +163,7 @@ class AlertCard {
         ? CardAction.fromJson(json['action'] as Map<String, dynamic>)
         : null,
     dismissedReason: json['dismissed_reason'] as String?,
+    postponedUntil: json['postponed_until'] as String?,
     nextStepText: json['next_step'] is Map<String, dynamic>
         ? '${(json['next_step'] as Map<String, dynamic>)['text']}'
         : null,
@@ -184,6 +186,9 @@ class AlertCard {
   final CardSuggestion? suggestion;
   final CardAction? action;
   final String? dismissedReason;
+
+  /// The day it comes back, while it is put off ("2026-10-29").
+  final String? postponedUntil;
   final String? nextStepText;
   final bool canDecide;
 

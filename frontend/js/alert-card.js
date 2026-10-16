@@ -64,10 +64,18 @@ function draw(holder, card, ctx) {
     el("p", { class: "muted", title: "How urgent this is, from its likely effect, how soon it matters and how strong the evidence is" }, card.priority.reason),
     chartFor(card),
     card.evidence.length ? el("div", {}, el("strong", {}, "What we found"), el("ul", {}, ...card.evidence.map((e) => el("li", {}, e)))) : null,
+    ...(card.postponed_until && card.state !== "postponed" ? putOffBlock(card, decide) : []),
     ...stateBlocks(card, ctx, decide),
     card.event_id ? el("p", {}, el("a", { href: `changes.html?org=${ctx.orgId}#${card.event_id}` }, "See why it happened and the full explanation")) : null,
   );
   holder.replaceChildren(body);
+}
+
+function putOffBlock(card, decide) {
+  return [
+    el("p", {}, el("strong", {}, `Put off until ${ukDate(card.postponed_until)}. `), "It comes back by itself on that day."),
+    el("div", { class: "actions" }, el("button", { type: "button", class: "secondary", onclick: () => decide("bring-back", {}) }, "Bring it back now")),
+  ];
 }
 
 function chartFor(card) {
@@ -80,6 +88,12 @@ function stateBlocks(card, ctx, decide) {
   switch (card.state) {
     case "open":
       return [suggestion(card.suggestion), card.can_decide ? decisions(card, ctx, decide) : el("p", { class: "muted" }, "Only an owner or manager can accept or dismiss this.")];
+    case "postponed":
+      return [
+        ...putOffBlock(card, decide),
+        suggestion(card.suggestion),
+        card.can_decide ? decisions(card, ctx, decide) : null,
+      ];
     case "proposed":
       return [suggestion(card.suggestion), actionBlock(card.action, "Put forward for approval. It waits for the owner to approve it.", ctx)];
     case "accepted":
@@ -160,6 +174,14 @@ function decisions(card, ctx, decide) {
     return [field("Who should do it?", who), field("Due by", due), el("div", { class: "actions" }, go)];
   };
 
+  const postpone = () => {
+    const day = input("until", { type: "date" });
+    const later = (days, label) => el("button", { type: "button", class: "secondary", onclick: () => decide("postpone", { days }) }, label);
+    const pick = el("button", { type: "button", class: "secondary" }, "Put it off until that day");
+    pick.addEventListener("click", () => day.value && decide("postpone", { until: day.value }));
+    return [el("p", { class: "muted" }, "It leaves your list and comes back by itself."), el("div", { class: "actions" }, later(3, "3 days"), later(7, "1 week"), later(14, "2 weeks")), field("Or choose a day", day), el("div", { class: "actions" }, pick)];
+  };
+
   const dismiss = () => {
     const reason = input("reason", { maxlength: 500, placeholder: "Why not? (optional, kept for next time)" });
     const go = el("button", { type: "button", class: "secondary" }, "Dismiss it");
@@ -177,6 +199,7 @@ function decisions(card, ctx, decide) {
       accept,
       el("button", { type: "button", class: "secondary", onclick: () => open(edit) }, "Edit"),
       el("button", { type: "button", class: "secondary", onclick: () => open(assign) }, "Assign"),
+      el("button", { type: "button", class: "secondary", onclick: () => open(postpone) }, "Postpone"),
       el("button", { type: "button", class: "secondary", onclick: () => open(dismiss) }, "Dismiss"),
     ),
     panel,

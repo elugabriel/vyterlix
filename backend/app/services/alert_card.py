@@ -145,6 +145,7 @@ def card(db: Session, tenant, alert_id: uuid.UUID) -> AlertCardOut:
             suggestion=None,
             action=None,
             dismissed_reason=None,
+            postponed_until=detail.postponed_until,
             next_step=NextStepOut(text=NEXT_STEPS.get(alert.rule_code, "Open it to see what to do."), link=alert.link),
             can_decide=False,
         )  # fmt: skip
@@ -205,6 +206,8 @@ def card(db: Session, tenant, alert_id: uuid.UUID) -> AlertCardOut:
         else:
             state = "no_suggestion"
 
+    if state == "open" and detail.postponed_until is not None:
+        state = "postponed"
     priority = prioritise(alert_severity=alert.severity, effect=event.effect, scores=scores)
     return AlertCardOut(
         alert=detail,
@@ -222,8 +225,9 @@ def card(db: Session, tenant, alert_id: uuid.UUID) -> AlertCardOut:
         suggestion=suggestion,
         action=action,
         dismissed_reason=dismissed_reason,
+        postponed_until=detail.postponed_until,
         next_step=None,
-        can_decide=can_decide and state == "open",
+        can_decide=can_decide and state in ("open", "postponed"),
     )  # fmt: skip
 
 
@@ -274,4 +278,15 @@ def dismiss(
     if alert.status != "resolved":
         reason = f"Not acting on it: {body.reason}" if body.reason else "Decided not to act on it."
         alert_service.resolve(db, tenant, alert_id, reason, meta)
+    return card(db, tenant, alert_id)
+
+
+def postpone(db: Session, tenant, alert_id: uuid.UUID, body, meta: RequestMeta) -> AlertCardOut:
+    """Put the alert off until a day: it leaves what needs attention and comes back by itself."""
+    alert_service.postpone(db, tenant, alert_id, body, meta)
+    return card(db, tenant, alert_id)
+
+
+def bring_back(db: Session, tenant, alert_id: uuid.UUID, meta: RequestMeta) -> AlertCardOut:
+    alert_service.bring_back(db, tenant, alert_id, meta)
     return card(db, tenant, alert_id)

@@ -240,6 +240,43 @@ class _AlertCardViewState extends State<AlertCardView> {
   String _iso(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
+  Future<void> _postpone() async {
+    final choice = await showDialog<Object>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Put it off for how long?'),
+        children: [
+          for (final (days, label) in const [
+            (3, '3 days'),
+            (7, '1 week'),
+            (14, '2 weeks'),
+          ])
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(context, days),
+              child: Text(label),
+            ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, 'pick'),
+            child: const Text('Choose a day...'),
+          ),
+        ],
+      ),
+    );
+    if (choice == null || !mounted) return;
+    if (choice is int) {
+      await _decide('postpone', {'days': choice});
+      return;
+    }
+    final today = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: today.add(const Duration(days: 7)),
+      firstDate: today.add(const Duration(days: 1)),
+      lastDate: today.add(const Duration(days: 90)),
+    );
+    if (picked != null) await _decide('postpone', {'until': _iso(picked)});
+  }
+
   Future<void> _dismiss() async {
     final reason = TextEditingController();
     final ok = await showDialog<bool>(
@@ -339,6 +376,8 @@ class _AlertCardViewState extends State<AlertCardView> {
               ),
             ),
         ],
+        if (card.postponedUntil != null && card.state != 'postponed')
+          ..._putOff(card),
         ..._state(card, muted),
         if (_problem != null)
           Padding(
@@ -351,6 +390,18 @@ class _AlertCardViewState extends State<AlertCardView> {
       ],
     );
   }
+
+  List<Widget> _putOff(AlertCard card) => [
+    const SectionTitle('Put off'),
+    Text(
+      'Put off until ${ukDate(card.postponedUntil!)}. It comes back by itself on that day.',
+    ),
+    const SizedBox(height: 8),
+    OutlinedButton(
+      onPressed: _busy ? null : () => _decide('bring-back', null),
+      child: const Text('Bring it back now'),
+    ),
+  ];
 
   List<Widget> _state(AlertCard card, Color muted) {
     switch (card.state) {
@@ -367,6 +418,13 @@ class _AlertCardViewState extends State<AlertCardView> {
                 style: TextStyle(color: muted),
               ),
             ),
+        ];
+      case 'postponed':
+        return [
+          ..._putOff(card),
+          if (card.suggestion != null) _suggestion(card.suggestion!, muted),
+          if (card.canDecide && card.suggestion != null)
+            _decisions(card.suggestion!, muted),
         ];
       case 'proposed':
         return [
@@ -515,6 +573,17 @@ class _AlertCardViewState extends State<AlertCardView> {
                 child: OutlinedButton(
                   onPressed: _busy ? null : () => _assign(s),
                   child: const Text('Assign'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _busy ? null : _postpone,
+                  child: const Text('Postpone'),
                 ),
               ),
               const SizedBox(width: 8),

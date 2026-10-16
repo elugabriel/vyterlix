@@ -9,7 +9,7 @@ import { openBusiness } from "../business.js";
 import { guard, put, table } from "../data.js";
 import { el } from "../dom.js";
 import { checkbox, field, input, select } from "../forms.js";
-import { ukDateTime } from "../format.js";
+import { ukDate, ukDateTime } from "../format.js";
 
 const message = document.getElementById("message");
 const content = document.getElementById("content");
@@ -62,7 +62,7 @@ async function start({ org }) {
 
 async function loadCounts() {
   const c = await guard(message, () => api.get(`${base}/summary`));
-  if (c) counts.textContent = `${c.open} open · ${c.acknowledged} seen · ${c.resolved} closed · ${c.high_or_critical_open} serious ones not yet closed`;
+  if (c) counts.textContent = `${c.open} open${c.postponed ? ` · ${c.postponed} put off for later` : ""} · ${c.acknowledged} seen · ${c.resolved} closed · ${c.high_or_critical_open} serious ones not yet closed`;
 }
 
 async function load() {
@@ -76,7 +76,7 @@ async function load() {
         el("span", { class: `badge ${SEVERITY_CLASS[a.severity]}` }, SEVERITY_TEXT[a.severity]),
         el("a", { href: `#${a.id}` }, a.title),
         CATEGORY_TEXT[a.category] ?? a.category,
-        a.occurrences > 1 && a.status !== "resolved" ? `${STATUS_TEXT[a.status]} (seen on ${a.occurrences} days)` : STATUS_TEXT[a.status],
+        a.postponed_until ? `Put off until ${ukDate(a.postponed_until)}` : a.occurrences > 1 && a.status !== "resolved" ? `${STATUS_TEXT[a.status]} (seen on ${a.occurrences} days)` : STATUS_TEXT[a.status],
         ukDateTime(a.last_seen_at),
       ]),
       { empty: "No alerts. When something needs your attention it will appear here." },
@@ -101,7 +101,7 @@ async function openFromHash() {
     // A figure that changed gets the whole card: what it means, what to do, and the buttons to decide.
     detail.replaceChildren();
     const holder = el("div", {});
-    detail.append(holder, el("strong", {}, "What happened to it"), el("ul", {}, ...a.events.map((e) => el("li", {}, el("span", { class: "muted" }, `${ukDateTime(e.created_at)} · ${e.user ?? "Vyterlix"} · `), { raised: "Raised", repeated: "Seen again", acknowledged: "Seen", resolved: "Closed", reopened: "Reopened" }[e.kind], e.note ? `: ${e.note}` : ""))));
+    detail.append(holder, el("strong", {}, "What happened to it"), el("ul", {}, ...a.events.map((e) => el("li", {}, el("span", { class: "muted" }, `${ukDateTime(e.created_at)} · ${e.user ?? "Vyterlix"} · `), { raised: "Raised", repeated: "Seen again", acknowledged: "Seen", resolved: "Closed", reopened: "Reopened", postponed: "Put off", brought_back: "Brought back" }[e.kind], e.note ? `: ${e.note}` : ""))));
     await mountCard(holder, { orgId, alertId: id, pageLink, onChange: () => { load(); loadCounts(); } });
     return;
   }
@@ -124,6 +124,17 @@ async function act(id, verb, note) {
   }
 }
 
+async function putOff(id, days) {
+  const done = await guard(message, () => api.post(`${base}/${id}/postpone`, { days }));
+  if (done) {
+    message.hidden = true;
+    const fresh = await guard(message, () => api.get(`${base}/${id}`));
+    if (fresh) show(fresh);
+    load();
+    loadCounts();
+  }
+}
+
 function show(a) {
   const note = input("note", { maxlength: 500, placeholder: "A note (optional)" });
   detail.replaceChildren();
@@ -137,8 +148,11 @@ function show(a) {
     canAct && a.status !== "resolved"
       ? el("div", { class: "actions" }, a.status === "open" ? el("button", { type: "button", onclick: () => act(a.id, "acknowledge", note.value) }, "I have seen this") : null, el("button", { type: "button", class: "secondary", onclick: () => act(a.id, "resolve", note.value) }, "Close it"))
       : null,
+    canAct && a.status === "open"
+      ? el("div", { class: "actions" }, el("span", { class: "muted" }, a.postponed_until ? `Put off until ${ukDate(a.postponed_until)}.` : "Not now?"), ...[[3, "3 days"], [7, "1 week"], [14, "2 weeks"]].map(([n, label]) => el("button", { type: "button", class: "secondary", onclick: () => putOff(a.id, n) }, `Put it off ${label}`)))
+      : null,
     el("strong", {}, "What happened to it"),
-    el("ul", {}, ...a.events.map((e) => el("li", {}, el("span", { class: "muted" }, `${ukDateTime(e.created_at)} · ${e.user ?? "Vyterlix"} · `), { raised: "Raised", repeated: "Seen again", acknowledged: "Seen", resolved: "Closed", reopened: "Reopened" }[e.kind], e.note ? `: ${e.note}` : ""))),
+    el("ul", {}, ...a.events.map((e) => el("li", {}, el("span", { class: "muted" }, `${ukDateTime(e.created_at)} · ${e.user ?? "Vyterlix"} · `), { raised: "Raised", repeated: "Seen again", acknowledged: "Seen", resolved: "Closed", reopened: "Reopened", postponed: "Put off", brought_back: "Brought back" }[e.kind], e.note ? `: ${e.note}` : ""))),
   );
 }
 

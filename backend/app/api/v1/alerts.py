@@ -16,6 +16,7 @@ from app.schemas.alerts import (
     AlertStatus,
     EvaluateOut,
     InboxOut,
+    PostponeIn,
     RuleIn,
     RuleOut,
     Severity,
@@ -97,6 +98,19 @@ def dismiss(
 ):
     """Decide not to act. The suggestion stays on record with the reason and the alert is closed."""
     return alert_card.dismiss(db, tenant, alert_id, body or DismissIn(), meta)
+
+
+@router.post("/{alert_id}/postpone", response_model=AlertCardOut)
+def postpone(alert_id: uuid.UUID, body: PostponeIn, tenant: Worker, db: DB, meta: Meta):
+    """Put an open alert off for some days, or until a day. It stays open but leaves what needs
+    attention, and comes back by itself on that day."""
+    return alert_card.postpone(db, tenant, alert_id, body, meta)
+
+
+@router.post("/{alert_id}/bring-back", response_model=AlertCardOut)
+def bring_back(alert_id: uuid.UUID, tenant: Worker, db: DB, meta: Meta):
+    """Bring a postponed alert back now."""
+    return alert_card.bring_back(db, tenant, alert_id, meta)
 
 
 @router.post("/{alert_id}/acknowledge", response_model=AlertDetailOut)

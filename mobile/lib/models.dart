@@ -184,6 +184,7 @@ class Dashboard {
 class AlertSummary {
   const AlertSummary({
     this.ruleCode = '',
+    this.postponedUntil,
     required this.id,
     required this.title,
     required this.body,
@@ -199,6 +200,7 @@ class AlertSummary {
 
   factory AlertSummary.fromJson(Map<String, dynamic> json) => AlertSummary(
     ruleCode: '${json['rule_code'] ?? ''}',
+    postponedUntil: json['postponed_until'] as String?,
     id: '${json['id']}',
     title: '${json['title']}',
     body: '${json['body']}',
@@ -214,6 +216,9 @@ class AlertSummary {
 
   /// Which kind of alert it is; "change_..." ones are about a figure that moved.
   final String ruleCode;
+
+  /// The day it comes back, while it is put off for later (null otherwise).
+  final String? postponedUntil;
 
   /// Whether this is about a figure that changed, so it has a card to decide on.
   bool get isChange => ruleCode.startsWith('change_');

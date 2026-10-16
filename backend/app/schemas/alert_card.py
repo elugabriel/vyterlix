@@ -66,6 +66,7 @@ class NextStepOut(BaseModel):
 
 CardState = Literal[
     "open",  # a suggestion is waiting for a decision
+    "postponed",  # put off until a day; it comes back by itself
     "proposed",  # someone put it forward and it waits for approval
     "accepted",  # it became an action
     "dismissed",  # the owner decided not to act
@@ -94,5 +95,6 @@ class AlertCardOut(BaseModel):
     suggestion: CardSuggestionOut | None
     action: CardActionOut | None
     dismissed_reason: str | None
+    postponed_until: date | None  # the day it comes back, while it is put off
     next_step: NextStepOut | None
     can_decide: bool  # this person may accept or dismiss

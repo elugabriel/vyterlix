@@ -12,7 +12,7 @@ left entirely to the notification service.
 import logging
 import uuid
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 from sqlalchemy import func, select
@@ -481,12 +481,21 @@ def _names(db: Session, ids: set) -> dict:
     )
 
 
+def _postponed(a: Alert) -> date | None:
+    """The day it comes back, while it is still put off."""
+    return (
+        a.snoozed_until
+        if a.status == "open" and a.snoozed_until and a.snoozed_until > today_uk()
+        else None
+    )
+
+
 def _out(a: Alert, names: dict) -> dict:
     return dict(
         id=a.id, rule_code=a.rule_code, category=a.category, kpi_category=a.kpi_category, severity=a.severity,
         title=a.title, body=a.body, link=a.link, status=a.status, occurrences=a.occurrences, first_seen_at=a.first_seen_at,
         last_seen_at=a.last_seen_at, acknowledged_by=names.get(a.acknowledged_by_user_id), acknowledged_at=a.acknowledged_at,
-        resolved_at=a.resolved_at,
+        resolved_at=a.resolved_at, postponed_until=_postponed(a),
     )  # fmt: skip
 
 
@@ -515,18 +524,28 @@ def list_alerts(
 
 
 def counts(db: Session) -> AlertCountsOut:
+    today = today_uk()
     by = dict(db.execute(select(Alert.status, func.count()).group_by(Alert.status)).all())
+    later = Alert.snoozed_until.is_not(None) & (Alert.snoozed_until > today)
+    postponed = (
+        db.scalar(select(func.count()).select_from(Alert).where(Alert.status == "open", later)) or 0
+    )
     serious = db.scalar(
         select(func.count())
         .select_from(Alert)
-        .where(Alert.status != "resolved", Alert.severity.in_(("high", "critical")))
+        .where(
+            Alert.status != "resolved",
+            Alert.severity.in_(("high", "critical")),
+            ~(later & (Alert.status == "open")),
+        )
     )
     return AlertCountsOut(
-        open=by.get("open", 0),
+        open=by.get("open", 0) - postponed,
+        postponed=postponed,
         acknowledged=by.get("acknowledged", 0),
         resolved=by.get("resolved", 0),
         high_or_critical_open=serious or 0,
-    )
+    )  # fmt: skip
 
 
 def _get(db: Session, alert_id: uuid.UUID) -> Alert:
@@ -590,5 +609,43 @@ def resolve(
     now = utcnow()
     alert.status, alert.resolved_at = "resolved", now
     _event(db, alert, "resolved", tenant.user.id, note, now)
+    db.commit()
+    return get_alert(db, alert.id)
+
+
+# --- putting an alert off ------------------------------------------------------------------------------
+
+MAX_POSTPONE_DAYS = 90
+
+
+def postpone(db: Session, tenant, alert_id: uuid.UUID, body, meta: RequestMeta) -> AlertDetailOut:
+    """Put an open alert off until a day. It stays open but is left out of what needs attention,
+    and comes back by itself on that day."""
+    alert = _get(db, alert_id)
+    _require(tenant, alert)
+    if alert.status != "open":
+        raise ConflictError("Only an alert that is still open can be put off.", code="not_open")
+    today = today_uk()
+    until = body.until if body.until is not None else today + timedelta(days=body.days)
+    if until <= today or until > today + timedelta(days=MAX_POSTPONE_DAYS):
+        raise AppError(
+            f"Choose a day after today and within {MAX_POSTPONE_DAYS} days.",
+            code="date_out_of_range",
+            status_code=422,
+        )
+    alert.snoozed_until = until
+    _event(db, alert, "postponed", tenant.user.id, f"Put off until {until:%d/%m/%Y}.", utcnow())
+    db.commit()
+    return get_alert(db, alert.id)
+
+
+def bring_back(db: Session, tenant, alert_id: uuid.UUID, meta: RequestMeta) -> AlertDetailOut:
+    """Bring a postponed alert back now, instead of waiting for its day."""
+    alert = _get(db, alert_id)
+    _require(tenant, alert)
+    if alert.status != "open" or _postponed(alert) is None:
+        raise ConflictError("That alert is not put off.", code="not_postponed")
+    alert.snoozed_until = None
+    _event(db, alert, "brought_back", tenant.user.id, "Brought back.", utcnow())
     db.commit()
     return get_alert(db, alert.id)

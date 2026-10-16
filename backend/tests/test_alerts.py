@@ -1032,6 +1032,7 @@ def test_the_summary_counts_by_state(api, march, raised):
     url = f"{ORGS}/{march[0]}/alerts/summary"
     assert api.get(url, headers=march[2]["viewer"]).json() == {
         "open": 7,
+        "postponed": 0,
         "acknowledged": 0,
         "resolved": 0,
         "high_or_critical_open": 6,
@@ -1041,6 +1042,7 @@ def test_the_summary_counts_by_state(api, march, raised):
     api.post(f"{ORGS}/{march[0]}/alerts/{first[1]['id']}/resolve", headers=march[2]["owner"])
     assert api.get(url, headers=march[2]["owner"]).json() == {
         "open": 5,
+        "postponed": 0,
         "acknowledged": 1,
         "resolved": 1,
         "high_or_critical_open": 5,

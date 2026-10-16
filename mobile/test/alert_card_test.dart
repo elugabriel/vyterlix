@@ -14,6 +14,7 @@ Map<String, dynamic> cardJson({
   bool withSuggestion = true,
   Map<String, dynamic>? action,
   String level = 'high',
+  String? postponedUntil,
 }) => {
   'alert': alertJson('ac1', ruleCode: 'change_sales'),
   'state': state,
@@ -59,6 +60,7 @@ Map<String, dynamic> cardJson({
       : null,
   'action': action,
   'dismissed_reason': null,
+  'postponed_until': postponedUntil,
   'next_step': null,
   'can_decide': canDecide,
 };
@@ -92,6 +94,11 @@ FakeServer cardServer([Map<String, dynamic>? card]) => happyServer()
     {'user_id': 'u2', 'full_name': 'Sam Lee', 'status': 'active'},
   ])
   ..json('POST /organizations/b1/alerts/ac1/accept', acceptedCard())
+  ..json(
+    'POST /organizations/b1/alerts/ac1/postpone',
+    cardJson(state: 'postponed', postponedUntil: '2026-10-22'),
+  )
+  ..json('POST /organizations/b1/alerts/ac1/bring-back', cardJson())
   ..json('POST /organizations/b1/alerts/ac1/dismiss', {
     ...cardJson(state: 'dismissed', canDecide: false, withSuggestion: false),
     'dismissed_reason': 'Not acting on it: our quiet week',
@@ -195,7 +202,7 @@ void main() {
           findsOneWidget,
         );
         expect(find.text('Accept'), findsOneWidget);
-        for (final b in ['Edit', 'Assign', 'Dismiss']) {
+        for (final b in ['Edit', 'Assign', 'Postpone', 'Dismiss']) {
           expect(find.text(b), findsOneWidget);
         }
         expect(
@@ -519,6 +526,159 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Sales fell sharply in March 2026.'), findsOneWidget);
       expect(find.text('Accept'), findsOneWidget);
+    });
+  });
+
+  group('putting it off', () {
+    Future<void> openIt(WidgetTester tester, FakeServer server) async {
+      await openCard(tester, server);
+      await tester.tap(find.text('Alert ac1 title'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+      'a number of days is sent and the card says when it comes back',
+      (tester) async {
+        final server = cardServer();
+        await openIt(tester, server);
+        await tester.tap(find.text('Postpone'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('1 week'));
+        await tester.pumpAndSettle();
+        expect(
+          server.bodyOf(
+            server.to('POST /organizations/b1/alerts/ac1/postpone').single,
+          ),
+          {'days': 7},
+        );
+        expect(
+          find.text(
+            'Put off until 22/10/2026. It comes back by itself on that day.',
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Bring it back now'), findsOneWidget);
+        expect(
+          find.text('Accept'),
+          findsOneWidget,
+        ); // it can still be decided on
+      },
+    );
+
+    testWidgets('each of the three lengths is offered', (tester) async {
+      await openIt(tester, cardServer());
+      await tester.tap(find.text('Postpone'));
+      await tester.pumpAndSettle();
+      for (final label in ['3 days', '1 week', '2 weeks', 'Choose a day...']) {
+        expect(find.text(label), findsOneWidget);
+      }
+    });
+
+    testWidgets('a chosen day is sent as a date', (tester) async {
+      final server = cardServer();
+      await openIt(tester, server);
+      await tester.tap(find.text('Postpone'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Choose a day...'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      final body = server.bodyOf(
+        server.to('POST /organizations/b1/alerts/ac1/postpone').single,
+      );
+      expect(body.keys, ['until']);
+      expect(body['until'], matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')));
+    });
+
+    testWidgets('backing out sends nothing', (tester) async {
+      final server = cardServer();
+      await openIt(tester, server);
+      await tester.tap(find.text('Postpone'));
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(5, 5)); // outside the dialog
+      await tester.pumpAndSettle();
+      expect(server.to('POST /organizations/b1/alerts/ac1/postpone'), isEmpty);
+    });
+
+    testWidgets('it can be brought back now', (tester) async {
+      final server = cardServer(
+        cardJson(state: 'postponed', postponedUntil: '2026-10-22'),
+      );
+      await openIt(tester, server);
+      expect(
+        find.text(
+          'Put off until 22/10/2026. It comes back by itself on that day.',
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Bring it back now'));
+      await tester.pumpAndSettle();
+      expect(
+        server.to('POST /organizations/b1/alerts/ac1/bring-back'),
+        hasLength(1),
+      );
+      expect(find.text('Bring it back now'), findsNothing);
+      expect(find.text('Accept'), findsOneWidget);
+    });
+
+    testWidgets('a refusal is shown', (tester) async {
+      final server = cardServer()
+        ..on(
+          'POST /organizations/b1/alerts/ac1/postpone',
+          (_) => errorResponse(
+            422,
+            'date_out_of_range',
+            'Choose a day after today and within 90 days.',
+          ),
+        );
+      await openIt(tester, server);
+      await tester.tap(find.text('Postpone'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('3 days'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Choose a day after today and within 90 days.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the list says when a put-off alert comes back', (
+      tester,
+    ) async {
+      final server = cardServer()
+        ..json('GET /organizations/b1/alerts', [
+          {
+            ...alertJson('ac1', ruleCode: 'change_sales'),
+            'postponed_until': '2026-10-22',
+          },
+        ]);
+      await openCard(tester, server);
+      expect(find.text('Put off until 22/10/2026'), findsOneWidget);
+    });
+
+    testWidgets('a put-off alert says so even with no suggestion', (
+      tester,
+    ) async {
+      final server = cardServer(
+        cardJson(
+          state: 'no_suggestion',
+          canDecide: false,
+          withSuggestion: false,
+          postponedUntil: '2026-10-22',
+        ),
+      );
+      await openIt(tester, server);
+      expect(
+        find.text(
+          'Put off until 22/10/2026. It comes back by itself on that day.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Bring it back now'), findsOneWidget);
+      expect(
+        find.textContaining('We cannot say what to do about this yet.'),
+        findsOneWidget,
+      );
     });
   });
 }

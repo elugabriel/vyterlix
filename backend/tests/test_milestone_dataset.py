@@ -111,7 +111,12 @@ def bring_in(api, db, storage, org_id, auth, dataset):
     return results
 
 
-def test_a_whole_year_arrives_with_exactly_the_expected_totals(api, db, storage, business):
+def test_a_whole_year_arrives_with_exactly_the_expected_totals(
+    api, db, storage, business, monkeypatch
+):
+    # The invented year ends on 30 September 2026. The data-quality screen reads "today", and it
+    # rightly says the data is out of date a fortnight later, so pin it to just after the year ends.
+    monkeypatch.setattr("app.services.data_quality.today_uk", lambda: date(2026, 10, 2))
     org_id, auth = business
     dataset = milestone.build()
     expected = dataset.expected

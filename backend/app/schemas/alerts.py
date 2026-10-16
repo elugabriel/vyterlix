@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 Severity = Literal["info", "low", "medium", "high", "critical"]
 AlertStatus = Literal["open", "acknowledged", "resolved"]
@@ -35,10 +35,13 @@ class AlertOut(BaseModel):
     acknowledged_by: str | None
     acknowledged_at: datetime | None
     resolved_at: datetime | None
+    postponed_until: date | None = None  # put off until this day (still open, out of the way)
 
 
 class AlertEventOut(BaseModel):
-    kind: Literal["raised", "repeated", "acknowledged", "resolved", "reopened"]
+    kind: Literal[
+        "raised", "repeated", "acknowledged", "resolved", "reopened", "postponed", "brought_back"
+    ]
     user: str | None  # nobody when the system did it
     note: str | None
     created_at: datetime
@@ -55,7 +58,8 @@ class AlertNoteIn(BaseModel):
 
 
 class AlertCountsOut(BaseModel):
-    open: int
+    open: int  # waiting for someone: not counting the ones put off for later
+    postponed: int = 0
     acknowledged: int
     resolved: int
     high_or_critical_open: int
@@ -105,3 +109,18 @@ class NotificationOut(BaseModel):
 class InboxOut(BaseModel):
     unread: int
     items: list[NotificationOut]  # newest first
+
+
+class PostponeIn(BaseModel):
+    """Put an alert off: for a number of days, or until a day. Exactly one of the two."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    days: int | None = Field(default=None, ge=1, le=90)
+    until: date | None = None
+
+    @model_validator(mode="after")
+    def _one_of(self) -> "PostponeIn":
+        if (self.days is None) == (self.until is None):
+            raise ValueError("Give either days or until (exactly one)")
+        return self
