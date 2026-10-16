@@ -396,11 +396,35 @@ void main() {
         );
         await tester.tap(find.text('Mark as done'));
         await tester.pumpAndSettle();
+        expect(find.text('Tell us what happened'), findsOneWidget);
+        await tester.enterText(
+          find.widgetWithText(TextField, 'What did you do? (optional)'),
+          ' Rang 12 regulars ',
+        );
+        await tester.enterText(
+          find.widgetWithText(
+            TextField,
+            'How many customers or items did it reach? (optional)',
+          ),
+          '12',
+        );
+        await tester.tap(
+          find.descendant(
+            of: find.byType(AlertDialog),
+            matching: find.text('Mark as done'),
+          ),
+        );
+        await tester.pumpAndSettle();
         expect(
           server.bodyOf(
             server.to('POST /organizations/b1/actions/a1/status').single,
           ),
-          {'status': 'completed', 'note': 'All finished'},
+          {
+            'status': 'completed',
+            'note': 'All finished',
+            'what_was_done': 'Rang 12 regulars',
+            'reached': 12,
+          },
         );
         expect(find.text('Done'), findsWidgets);
         expect(find.text('Mark as done'), findsNothing); // it is finished now
@@ -586,8 +610,77 @@ void main() {
       await scrollTo(tester, find.text('Mark as done'));
       await tester.tap(find.text('Mark as done'));
       await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Mark as done'),
+        ),
+      );
+      await tester.pumpAndSettle();
       expect(find.text('This action is outside your area.'), findsOneWidget);
       expect(find.text('Mark as done'), findsOneWidget);
+    });
+
+    testWidgets('finishing without saying anything sends just the move', (
+      tester,
+    ) async {
+      final server = await openAction(tester);
+      await scrollTo(tester, find.text('Mark as done'));
+      await tester.tap(find.text('Mark as done'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Mark as done'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        server.bodyOf(
+          server.to('POST /organizations/b1/actions/a1/status').single,
+        ),
+        {'status': 'completed'},
+      );
+    });
+
+    testWidgets('backing out of the question sends nothing', (tester) async {
+      final server = await openAction(tester);
+      await scrollTo(tester, find.text('Mark as done'));
+      await tester.tap(find.text('Mark as done'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(server.to('POST /organizations/b1/actions/a1/status'), isEmpty);
+    });
+
+    testWidgets('part done asks how far you got', (tester) async {
+      final server = await openAction(tester);
+      await scrollTo(tester, find.text('Partly done'));
+      await tester.tap(find.text('Partly done'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tell us how far you got'), findsOneWidget);
+      await tester.tap(find.text('Save as partly done'));
+      await tester.pumpAndSettle();
+      expect(
+        server.bodyOf(
+          server.to('POST /organizations/b1/actions/a1/status').single,
+        ),
+        {'status': 'partially_completed'},
+      );
+    });
+
+    testWidgets('other moves do not ask', (tester) async {
+      final server = await openAction(tester);
+      await scrollTo(tester, find.text('Cancel it'));
+      await tester.tap(find.text('Cancel it'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(
+        server.bodyOf(
+          server.to('POST /organizations/b1/actions/a1/status').single,
+        ),
+        {'status': 'cancelled'},
+      );
     });
 
     testWidgets('a problem loading it can be tried again', (tester) async {

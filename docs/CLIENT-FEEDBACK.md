@@ -68,12 +68,12 @@ She wants this to be the central experience, not separate pages to remember.
   - [ ] Dismiss with a reason, remembered for the future.
 - [ ] **5. Follow up:** remind the responsible person, check progress, ask for an outcome when needed.
   - [~] Overdue marking and the timed follow-up round exist.
-  - [ ] Reminders to the assignee before and on the due date.
-  - [ ] On completion, ask "what was done?" (and structured questions such as "how many customers were contacted?").
+  - [x] Reminders to the assignee 2 days before and on the due date, once each (`backend/app/services/reminders.py`); late work stays with the overdue alert.
+  - [x] On completion (or part completion), ask "what did you do?" and "how many did it reach?" (website and phone app); a check-in two weeks after finishing asks how it is going.
 - [ ] **6. Measure and learn:** compare results before and after, say whether the action appears to have helped, and use the history to improve future suggestions.
   - [x] Expected against actual with the season taken out; four outcomes; track record feeds later suggestions.
   - [ ] Say plainly when the outcome **cannot yet be measured**, never claim success. (The "cannot tell" outcome exists; check every screen and email uses her wording.)
-  - [ ] Judge by profit as well as sales where a discount was involved (see example B).
+  - [x] Judge by profit as well as sales where a discount or spend was involved: a sales win with profit down more than 5% is only a partial success, and a missing profit figure is said out loud (`backend/app/outcomes/rules.py`, `profit_check`).
 - [ ] **Five stages in the product:** Understand, Explain, Predict, Recommend, Follow Up. Learning happens continuously after follow-up, not as a sixth numbered stage. (Menu and page grouping.)
 - [ ] **Her worked flow works end to end:** an alert "Customer return rate fell" opens a recommendation on the same
   screen, accepting it creates a task with a due date and assignee, a few days later Vyterlix reminds them, on

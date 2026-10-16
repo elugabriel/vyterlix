@@ -469,9 +469,11 @@ def set_status(
     action.status = body.status
     if body.status == "completed":
         action.completed_at = utcnow()
+    done = {k: v for k, v in (("reached", body.reached),) if v is not None}
     _record(
-        db, tenant, action, "status", from_status=current, to_status=body.status, note=body.note
-    )
+        db, tenant, action, "status", from_status=current, to_status=body.status,
+        note=body.what_was_done or body.note, details=done or None,
+    )  # fmt: skip
     _audit(
         db, tenant, meta, AuditAction.ACTION_STATUS_CHANGED, action.id,
         from_status=current, to_status=body.status,

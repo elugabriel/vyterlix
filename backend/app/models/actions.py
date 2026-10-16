@@ -192,3 +192,31 @@ class ActionEvidence(UUIDPrimaryKeyMixin, TenantScopedMixin, Base):
     content_type: Mapped[str | None] = mapped_column(String(100))
     size_bytes: Mapped[int | None] = mapped_column(BigInteger)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+REMINDER_KINDS = ("due_soon", "due_today", "check_in")
+
+
+class ActionReminder(UUIDPrimaryKeyMixin, TenantScopedMixin, Base):
+    """A nudge that has been sent about an action, so it is never sent twice.
+
+    `for_date` is what the nudge was about: the target date for "due soon" and "due today" (so
+    moving the date earns a new reminder), and the day it was finished for the check-in.
+    """
+
+    __tablename__ = "action_reminders"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["organization_id", "action_id"],
+            ["actions.organization_id", "actions.id"],
+            ondelete="CASCADE",
+        ),
+        CheckConstraint(_one_of("kind", REMINDER_KINDS), name="kind_valid"),
+        UniqueConstraint("action_id", "kind", "for_date", name="uq_action_reminders_once"),
+    )
+
+    action_id: Mapped[uuid.UUID] = mapped_column()
+    kind: Mapped[str] = mapped_column(String(15))
+    for_date: Mapped[date] = mapped_column(Date)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

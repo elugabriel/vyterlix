@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 from app.schemas.outcomes import FollowUpOut, OutcomeOut
 
@@ -67,6 +67,18 @@ class StatusIn(BaseModel):
 
     status: Literal["accepted", "in_progress", "partially_completed", "completed", "cancelled"]
     note: ShortText | None = None
+    # When it is finished (or part finished): what was actually done, and how many customers or
+    # items it reached, kept with the action so the result can be judged fairly later.
+    what_was_done: ShortText | None = None
+    reached: int | None = Field(default=None, ge=0, le=10_000_000)
+
+    @model_validator(mode="after")
+    def _only_when_done(self) -> "StatusIn":
+        if self.status not in ("completed", "partially_completed") and (
+            self.what_was_done is not None or self.reached is not None
+        ):
+            raise ValueError("what_was_done and reached can only be given when it is done")
+        return self
 
 
 class NoteIn(BaseModel):

@@ -259,8 +259,17 @@ function pendingControls(a) {
 
 function controls(a) {
   const note = input("note", { maxlength: 500, placeholder: "A note about the move (optional)" });
+  const ask = el("div", { class: "stack" });
+  // Finishing (or part finishing) asks what was done and how far it reached, so the result can be judged fairly later.
+  const askWhatWasDone = (s) => {
+    const what = input("what_was_done", { maxlength: 500, placeholder: "What did you do? (optional)" });
+    const reached = input("reached", { type: "number", min: "0", step: "1", placeholder: "How many customers or items did it reach? (optional)" });
+    const go = el("button", { type: "button" }, s === "completed" ? "Mark as done" : "Save as partly done");
+    go.addEventListener("click", () => send(() => api.post(`${base}/${a.id}/status`, { status: s, note: orNull(note.value), what_was_done: orNull(what.value), reached: reached.value === "" ? null : Number(reached.value) })));
+    ask.replaceChildren(el("strong", {}, s === "completed" ? "Nearly there. Tell us what happened:" : "Tell us how far you got:"), what, reached, el("div", { class: "actions" }, go));
+  };
   const moves = a.next_statuses.map((s) =>
-    el("button", { type: "button", class: s === "cancelled" ? "secondary" : "", onclick: () => send(() => api.post(`${base}/${a.id}/status`, { status: s, note: orNull(note.value) })) }, MOVE_TEXT[s] ?? s),
+    el("button", { type: "button", class: s === "cancelled" ? "secondary" : "", onclick: () => (s === "completed" || s === "partially_completed" ? askWhatWasDone(s) : send(() => api.post(`${base}/${a.id}/status`, { status: s, note: orNull(note.value) }))) }, MOVE_TEXT[s] ?? s),
   );
   const owner = select("owner", people, { selected: a.owner?.id ?? "", placeholder: "Nobody yet" });
   const start = input("start_date", { type: "date", value: a.start_date ?? "" });
@@ -273,6 +282,7 @@ function controls(a) {
     "div",
     { class: "stack" },
     el("div", { class: "actions" }, ...moves),
+    ask,
     note,
     el("div", { class: "stack" }, field("Who", owner), field("Start", start), field("Finish by", target), el("div", { class: "actions" }, save)),
     el("div", { class: "actions" }, text, addNote),

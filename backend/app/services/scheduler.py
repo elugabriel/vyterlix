@@ -31,6 +31,7 @@ from app.services import (
     billing,
     notifications,
     outcomes,
+    reminders,
     reports,
     system_events,
 )
@@ -40,9 +41,11 @@ logger = logging.getLogger("vyterlix.scheduler")
 
 
 def _businesses_with_work(db: Session, today: date, now: datetime | None = None) -> set:
+    # Every finished action still waiting to be measured: it is followed up when it is due, and
+    # asked about two weeks after it was finished.
     due = db.scalars(
         select(FollowUpSchedule.organization_id)
-        .where(FollowUpSchedule.status == "scheduled", FollowUpSchedule.due_date <= today)
+        .where(FollowUpSchedule.status == "scheduled")
         .execution_options(**ACROSS_TENANTS)
     ).all()
     open_work = db.scalars(
@@ -93,6 +96,7 @@ def tick(db: Session, *, today: date | None = None, now: datetime | None = None)
         "measured": 0,
         "reports": 0,
         "renewed": 0,
+        "reminded": 0,
     }
     for organization_id in sorted(_businesses_with_work(db, today, now), key=str):
         owner = _owner(db, organization_id)
@@ -104,6 +108,7 @@ def tick(db: Session, *, today: date | None = None, now: datetime | None = None)
                 totals["renewed"] += billing.roll_sandbox(db, organization_id, now or utcnow())
                 totals["overdue"] += actions.refresh_overdue(db, tenant, today=today)
                 result = outcomes.sweep(db, tenant, today=today)
+                totals["reminded"] += sum(reminders.sweep(db, tenant, today=today).values())
                 alerts.evaluate(db, tenant, today=today, now=now)
                 notifications.send_due_emails(db, now=now)
                 totals["reports"] += reports.run_due(db, organization_id, now=now)

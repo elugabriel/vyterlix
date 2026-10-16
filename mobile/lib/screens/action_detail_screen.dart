@@ -120,12 +120,29 @@ class _ActionDetailScreenState extends State<ActionDetailScreen> {
     return _send((api) => api.patch(_path, body: {'steps': steps}));
   }
 
-  Future<void> _move(String status) {
+  Future<void> _move(String status) async {
     final note = _note.text.trim();
-    return _send(
+    String? what;
+    int? reached;
+    if (status == 'completed' || status == 'partially_completed') {
+      // Finishing asks what was done and how far it reached, so the result can be judged fairly later.
+      final answer = await showDialog<(String, int?)>(
+        context: context,
+        builder: (_) => _WhatWasDoneDialog(finished: status == 'completed'),
+      );
+      if (answer == null) return;
+      what = answer.$1.isEmpty ? null : answer.$1;
+      reached = answer.$2;
+    }
+    await _send(
       (api) => api.post(
         '$_path/status',
-        body: {'status': status, if (note.isNotEmpty) 'note': note},
+        body: {
+          'status': status,
+          if (note.isNotEmpty) 'note': note,
+          'what_was_done': ?what,
+          'reached': ?reached,
+        },
       ),
       clearNote: true,
     );
@@ -502,6 +519,74 @@ class _ReasonDialogState extends State<_ReasonDialog> {
           onPressed: () => Navigator.of(context).pop(_reason.text.trim()),
           style: FilledButton.styleFrom(minimumSize: const Size(120, 44)),
           child: const Text('Turn it down'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Asked when an action is finished or part finished: what was done, and how many it reached.
+class _WhatWasDoneDialog extends StatefulWidget {
+  const _WhatWasDoneDialog({required this.finished});
+
+  final bool finished;
+
+  @override
+  State<_WhatWasDoneDialog> createState() => _WhatWasDoneDialogState();
+}
+
+class _WhatWasDoneDialogState extends State<_WhatWasDoneDialog> {
+  final _what = TextEditingController();
+  final _reached = TextEditingController();
+
+  @override
+  void dispose() {
+    _what.dispose();
+    _reached.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        widget.finished ? 'Tell us what happened' : 'Tell us how far you got',
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _what,
+              maxLines: 3,
+              maxLength: 500,
+              decoration: const InputDecoration(
+                labelText: 'What did you do? (optional)',
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _reached,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText:
+                    'How many customers or items did it reach? (optional)',
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, (
+            _what.text.trim(),
+            int.tryParse(_reached.text.trim()),
+          )),
+          child: Text(widget.finished ? 'Mark as done' : 'Save as partly done'),
         ),
       ],
     );

@@ -255,6 +255,7 @@ def measure(
         data_quality=now_value.data_quality,
         show=lambda v: show(v, kpi.unit),
     )
+    verdict = _check_profit(db, kpi, intervention, plan, verdict)
     return _store(
         db,
         tenant,
@@ -269,6 +270,25 @@ def measure(
         seasonal,
         by_system,
         sender,
+    )
+
+
+def _check_profit(db: Session, kpi, intervention, plan, verdict):
+    """Sales up is not the same as better off: look at profit too when the action gives something
+    away or spends money (see outcomes/rules.py)."""
+    checked = rules.PROFIT_CHECKED.get(intervention.library_code)
+    if checked is None or kpi.code not in rules.SALES_FIGURES:
+        return verdict
+    code, words = checked
+    profit = db.scalars(select(KpiDefinition).where(KpiDefinition.code == code)).first()
+    before = after = None
+    if profit is not None:
+        then = _value(db, profit.id, intervention.baseline_period)
+        now = _value(db, profit.id, plan.measure_month)
+        before = None if then is None or then.value is None else Decimal(then.value)
+        after = None if now is None or now.value is None else Decimal(now.value)
+    return rules.profit_check(
+        verdict, words=words, before=before, after=after, show=lambda v: show(v, "gbp")
     )
 
 

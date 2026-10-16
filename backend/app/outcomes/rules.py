@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """Did an action work? The rules for choosing the month to look at and judging the result.
 
 Pure rules, no database (services/outcomes.py applies them).
@@ -134,3 +135,61 @@ def judge(
             f"{expected_text}."
         )
     return Verdict(outcome, reason, achieved, adjusted)
+
+
+# --- sales are not the whole story -----------------------------------------------------------------
+# A promotion, a price cut or an offer can lift sales and still cost the business money. So when the
+# figure an action was meant to move is a sales figure, and the action is one that gives something
+# away or spends money, the result is also checked against profit (client feedback 15/10/2026,
+# examples B and D: "do not judge the campaign by sales alone").
+
+PROFIT_CHECKED = {
+    "promote_product": ("gross_profit", "profit on what you sold"),
+    "weekday_special": ("gross_profit", "profit on what you sold"),
+    "bundle_offer": ("gross_profit", "profit on what you sold"),
+    "price_review": ("gross_profit", "profit on what you sold"),
+    "channel_push": ("gross_profit", "profit on what you sold"),
+    "local_marketing": ("net_profit", "profit"),
+}
+SALES_FIGURES = frozenset(
+    {"revenue", "gross_sales", "sales_count", "units_sold", "average_order_value"}
+)
+PROFIT_FELL_BY = Decimal(5)  # per cent: a smaller dip than this is just normal wobble
+
+
+def profit_check(
+    verdict: Verdict,
+    *,
+    words: str,
+    before: Decimal | None,
+    after: Decimal | None,
+    show: Callable[[Decimal], str],
+) -> Verdict:
+    """Hold a "successful" result back if profit fell, and say so when profit could not be checked.
+
+    `before` and `after` are the profit figure in the month the action was accepted and in the month
+    it was measured. Anything other than a success is left as it was.
+    """
+    if verdict.outcome != "successful":
+        return verdict
+    if before is None or after is None:
+        return Verdict(
+            verdict.outcome,
+            f"{verdict.reason} We could not check what it did to your {words}, so we cannot be sure it paid off.",
+            verdict.achieved_pct,
+            verdict.adjusted,
+        )
+    fell = after < before - abs(before) * PROFIT_FELL_BY / 100
+    if fell:
+        return Verdict(
+            "partially_successful",
+            f"{verdict.reason} But your {words} fell from {show(before)} to {show(after)}, so we cannot call it a success.",
+            verdict.achieved_pct,
+            verdict.adjusted,
+        )
+    return Verdict(
+        verdict.outcome,
+        f"{verdict.reason} Your {words} held up too ({show(before)} to {show(after)}).",
+        verdict.achieved_pct,
+        verdict.adjusted,
+    )
