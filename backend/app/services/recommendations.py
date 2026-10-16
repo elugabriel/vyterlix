@@ -39,7 +39,7 @@ from app.schemas.recommendations import (
     ScoreLineOut,
 )
 from app.services import diagnosis as diagnosis_service
-from app.services import memory, track_record
+from app.services import finding_tags, memory, track_record
 from app.services.detection import get_event
 from app.services.goals import list_goals
 
@@ -176,14 +176,16 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
     diagnosis = _ensure_diagnosis(db, tenant, event_id)
     month = f"{event.period_start:%B %Y}"
     drivers = (diagnosis.basis or {}).get("drivers")
-    findings = _findings(drivers)
+    findings = finding_tags.tag(db, _findings(drivers))
     unit = kpi.unit if not drivers else drivers["unit"]
     scored: list[rules.Scored] = []
     record: dict[str, track_record.Record] = {}
     remembered: list[diagnosis_evidence.Item] = []  # what memory added to this recommendation
     used: list[dict] = []
 
-    if event.effect != "bad":
+    effect = "bad" if event.effect == "bad" else "good"
+    library = _library(db)
+    if effect == "good" and not rules.generate(library, findings, kpi.code, effect):
         status = "no_action_needed"
         headline = f"{kpi.name} in {month} is good news: nothing needs fixing."
         rationale = (
@@ -191,11 +193,12 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
             "have been doing, and read the explanation to see what is helping."
         )
     else:
+        # A change in the owner's favour can still call for something: protect what is working.
         goals = _goals(db)
         tried = _tried(db, event.id)
         recalled = memory.recall(db, kpi.code)
         candidates, left_out = [], []
-        for c in rules.generate(_library(db), findings, kpi.code):
+        for c in rules.generate(library, findings, kpi.code, effect):
             if (c.action.code, c.target) in tried:
                 continue
             why = memory_rules.broken_limit(
@@ -223,7 +226,14 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
                 for c in candidates
             ]
         )[: rules.MAX_OPTIONS]
-        if not scored:
+        if not scored and effect == "good":
+            status = "no_action_needed"
+            headline = f"{kpi.name} in {month} is good news: nothing needs fixing."
+            rationale = (
+                "This change is in your favour, so there is nothing to put right. Keep doing what "
+                "you have been doing, and read the explanation to see what is helping."
+            )
+        elif not scored:
             status = "insufficient_evidence"
             headline = f"We can't recommend an action for {kpi.name} in {month} yet."
             rationale = (
@@ -271,14 +281,14 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
     )
     db.add(recommendation)
     db.flush()
-    library = {i.code: i for i in db.scalars(select(Intervention))}
+    stored = {i.code: i for i in db.scalars(select(Intervention))}
     for item in scored:
         candidate = item.candidate
         db.add(
             RecommendationOption(
                 organization_id=tenant.organization_id,
                 recommendation_id=recommendation.id,
-                intervention_id=library[candidate.action.code].id,
+                intervention_id=stored[candidate.action.code].id,
                 rank=item.rank,
                 is_recommended=item.rank == 1,
                 title=rules.title_for(candidate),

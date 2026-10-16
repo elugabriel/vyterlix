@@ -496,7 +496,7 @@ def test_when_every_answer_breaks_a_limit_the_recommendation_says_that(api, marc
         i["code"]
         for i in api.get(f"{ORGS}/{march[0]}/interventions", headers=march[2]["owner"]).json()
     ]
-    assert len(all_codes) == 10
+    assert len(all_codes) == 13
     put_limits(api, march, {"excluded_actions": all_codes})
     again = recommend(api, march, event).json()
     assert again["status"] == "insufficient_evidence" and again["options"] == []

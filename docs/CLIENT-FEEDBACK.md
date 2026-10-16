@@ -88,9 +88,9 @@ Her figures are illustrations, not real results.
   Recommend reviewing complaints or missed appointments and contacting customers who have not returned in 6 to 8 weeks.
   Follow-up: 14 days ask how many were contacted, 30 days check how many returned, record whether it helped.
   - Exists: "Win back the customers who stopped coming". Missing: the 14 and 30 day questions and the linked card.
-- [ ] **B. Best-selling product.** Opportunity, but it could run out. Recommend: check stock, a targeted offer to previous buyers, **avoid unnecessary discounting** if demand is strong. Assign stock review to the owner and the campaign to sales.
+- [x] **B. Best-selling product.** Opportunity, but it could run out. Recommend: check stock, a targeted offer to previous buyers, **avoid unnecessary discounting** if demand is strong. Assign stock review to the owner and the campaign to sales.
   Follow-up after 2 weeks: stock, offer uptake and profit; **do not judge by sales alone** if discounts cut profit.
-- [ ] **C. Slow-moving stock.** Selling slowly for three months with high stock. Recommend: reduce or pause the next reorder, review the price, or a limited promotion, **showing which option suits the margins and demand**. Action: stock-review task with a deadline before the next supplier order.
+- [x] **C. Slow-moving stock.** Selling slowly for three months with high stock. Recommend: reduce or pause the next reorder, review the price, or a limited promotion, **showing which option suits the margins and demand**. Action: stock-review task with a deadline before the next supplier order.
   Follow-up: remaining stock, sales and margin; **if a promotion did not help, do not repeat it automatically**.
 - [~] **D. Quiet appointment times** (Tuesday afternoons). Recommend a small Tuesday-only offer or booking reminders; a two-week trial. Follow-up: compare Tuesday bookings **and earnings** before and after; if bookings rose but profit fell, suggest a different approach.
   - Exists: "Run a special on the day that has gone quiet" (from sales). Needs booking data for service businesses.
@@ -98,8 +98,8 @@ Her figures are illustrations, not real results.
 - [ ] **F. Rising cancellations.** Recommend reminders 24 to 48 hours before, or a clear cancellation policy. Follow-up: compare late cancellations over four weeks **and check customers are still satisfied**. (Needs booking data.)
 - [~] **G. Costs rising faster than sales.** Recommend reviewing the largest cost increases first; **do not recommend cutting costs blindly** without checking the effect on service quality. Create a review task for the owner or finance lead. Follow-up: did costs fall, and were sales or customer experience affected.
   - Exists: "Go through the cost that grew" and "Get quotes and renegotiate with the supplier". Missing: the quality-of-service check.
-- [ ] **H. Valuable customer at risk** (orders less often, lower spend). Recommend the account manager contacts them. High-priority contact task due within three days. Follow-up: record whether contact happened, the feedback and later orders; **avoid claiming the customer was saved** until the outcome is visible.
-- [ ] Add the missing recommendations to the library: protect-and-restock the best seller, slow-stock review, valuable customer at risk, rebooking prompt, cancellation reminder.
+- [x] **H. Valuable customer at risk** (orders less often, lower spend). Recommend the account manager contacts them. High-priority contact task due within three days. Follow-up: record whether contact happened, the feedback and later orders; **avoid claiming the customer was saved** until the outcome is visible.
+- [~] Missing recommendations added to the library: protect the best seller, slow-stock review, valuable customer at risk (all three done and tested). Still to come, with booking data (item 7): rebooking prompt and cancellation reminder.
 
 ## 5. Important alerts lead straight to useful actions (§5)
 

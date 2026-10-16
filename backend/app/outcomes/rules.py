@@ -150,6 +150,8 @@ PROFIT_CHECKED = {
     "price_review": ("gross_profit", "profit on what you sold"),
     "channel_push": ("gross_profit", "profit on what you sold"),
     "local_marketing": ("net_profit", "profit"),
+    "protect_best_seller": ("gross_profit", "profit on what you sold"),
+    "slow_stock_review": ("gross_profit", "profit on what you sold"),
 }
 SALES_FIGURES = frozenset(
     {"revenue", "gross_sales", "sales_count", "units_sold", "average_order_value"}

@@ -73,6 +73,7 @@ class Finding:
     amount: Decimal
     share_pct: Decimal | None
     text: str
+    tags: frozenset[str] = frozenset()  # small facts about the part (see services/finding_tags)
 
 
 @dataclass
@@ -143,18 +144,25 @@ def part_of(finding: Finding) -> tuple[str | None, str | None]:
     return dimension, target
 
 
-def matches(action: Action, finding: Finding, kpi_code: str) -> bool:
+def matches(action: Action, finding: Finding, kpi_code: str, effect: str = "bad") -> bool:
+    """An action answers a kind of finding. It may also need a tag on it (a product with lots of
+    stock), and is for a change that hurts (the default) or one in the owner's favour."""
     if kpi_code not in action.kpis:
         return False
     dimension, _ = part_of(finding)
     return any(
-        spec.get("kind") == finding.kind and spec.get("dimension") in (None, dimension)
+        spec.get("kind") == finding.kind
+        and spec.get("dimension") in (None, dimension)
+        and spec.get("tag") in (None, *finding.tags)
+        and spec.get("effect", "bad") == effect
         for spec in action.addresses
     )
 
 
-def generate(library: list[Action], findings: list[Finding], kpi_code: str) -> list[Candidate]:
-    """Every action the hurting findings call up; one per action and target."""
+def generate(
+    library: list[Action], findings: list[Finding], kpi_code: str, effect: str = "bad"
+) -> list[Candidate]:
+    """Every action the findings that drive the change call up; one per action and target."""
     seen: set[tuple[str, str | None]] = set()
     found = []
     for finding in findings:
@@ -165,7 +173,7 @@ def generate(library: list[Action], findings: list[Finding], kpi_code: str) -> l
             continue
         for action in library:
             key = (action.code, target)
-            if key in seen or not matches(action, finding, kpi_code):
+            if key in seen or not matches(action, finding, kpi_code, effect):
                 continue
             seen.add(key)
             found.append(Candidate(action, finding, target, abs(finding.amount)))

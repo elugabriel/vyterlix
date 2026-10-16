@@ -567,7 +567,7 @@ def test_the_library_lists_what_can_be_suggested(api, march):
     res = api.get(f"{ORGS}/{march[0]}/interventions", headers=march[2]["viewer"])
     assert res.status_code == 200
     library = res.json()
-    assert len(library) == 10 and [i["name"] for i in library] == sorted(i["name"] for i in library)
+    assert len(library) == 13 and [i["name"] for i in library] == sorted(i["name"] for i in library)
     bundle = next(i for i in library if i["code"] == "bundle_offer")
     assert (
         bundle["effort"] == "low"

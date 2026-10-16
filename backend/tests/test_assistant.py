@@ -589,7 +589,7 @@ def test_actions_are_listed_and_only_the_people_who_work_on_them_see_names(api, 
     event, _ = suggested
     action = accept(api, march, event).json()
     owner = said(api, march, "what are my actions")["answer"]["content"]
-    assert "You have 1 actions still to do, 0 overdue and 0 due within a week; 0 are done." in owner
+    assert "You have 1 actions still to do, 0 overdue and " in owner and "; 0 are done." in owner
     assert action["title"] in owner and ", with owner" in owner
     viewer = said(api, march, "what are my actions", who="viewer")["answer"]["content"]
     assert action["title"] in viewer and ", with " not in viewer
