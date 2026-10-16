@@ -39,8 +39,8 @@ def list_mine(user: VerifiedUser, db: DB):
 
 
 @router.get("/{organization_id}", response_model=OrganizationOut)
-def read(tenant: CurrentTenant):
-    return organization_out(tenant.organization, tenant.role)
+def read(tenant: CurrentTenant, db: DB):
+    return organization_out(tenant.organization, tenant.role, db)
 
 
 @router.patch("/{organization_id}", response_model=OrganizationOut)
@@ -51,7 +51,7 @@ def rename(
     meta: Meta,
 ):
     org = rename_organization(db, tenant.organization, tenant.user, body.name, meta)
-    return organization_out(org, tenant.role)
+    return organization_out(org, tenant.role, db)
 
 
 @router.get("/{organization_id}/members", response_model=list[MemberOut])

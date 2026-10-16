@@ -88,6 +88,24 @@ class BreakdownRowOut(BaseModel):
     gross_profit: str | None  # revenue minus cost of goods; by product only
 
 
+class CustomerToFollowUpOut(BaseModel):
+    customer_id: uuid.UUID
+    name: str
+    last_bought_on: date
+    days_since: int  # up to the latest sale the business has recorded
+    orders: int
+    total_spent: str  # before VAT, after refunds
+
+
+class FollowUpOut(BaseModel):
+    """Customers who used to buy and have gone quiet, the best ones first."""
+
+    as_of: date | None  # the latest sale recorded: "quiet" is counted back from it
+    quiet_days: int
+    total: int  # how many customers have gone quiet (only the best few are listed)
+    customers: list[CustomerToFollowUpOut]
+
+
 class BreakdownOut(BaseModel):
     dimension: Literal["channel", "product"]
     period_from: date

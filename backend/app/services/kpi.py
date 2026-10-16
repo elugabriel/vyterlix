@@ -280,8 +280,15 @@ def last_run(db: Session) -> RunOut | None:
     return _run_out(run) if run else None
 
 
+def _sells(db: Session) -> str | None:
+    return db.scalar(select(BusinessProfile.sells))
+
+
 def list_kpis(db: Session, granularity: str = "month") -> KpisOut:
     definitions = active_definitions(db)
+    if _sells(db) == "services":
+        # No stock to count: do not show a Stock group of figures that can never be worked out
+        definitions = [d for d in definitions if d.category != "inventory"]
     latest_period = db.scalar(
         select(func.max(KpiValue.period_start)).where(
             KpiValue.granularity == granularity, KpiValue.is_complete.is_(True)

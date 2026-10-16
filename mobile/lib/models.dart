@@ -3,12 +3,18 @@
 import 'models_plain.dart';
 
 class Business {
-  const Business({required this.id, required this.name, required this.role});
+  const Business({
+    required this.id,
+    required this.name,
+    required this.role,
+    this.sells,
+  });
 
   factory Business.fromJson(Map<String, dynamic> json) => Business(
     id: '${json['id']}',
     name: '${json['name']}',
     role: '${json['role']}',
+    sells: json['sells'] as String?,
   );
 
   final String id;
@@ -16,6 +22,61 @@ class Business {
 
   /// owner, manager or viewer
   final String role;
+
+  /// products, services or both; null until the owner says
+  final String? sells;
+
+  /// A business that sells only a service has no stock to show.
+  bool get hasStock => sells != 'services';
+
+  /// Customers to follow up are for anyone who sells a service, or has not said.
+  bool get showFollowUp => sells != 'products';
+}
+
+class CustomerToFollowUp {
+  const CustomerToFollowUp({
+    required this.name,
+    required this.lastBoughtOn,
+    required this.daysSince,
+    required this.orders,
+    required this.totalSpent,
+  });
+
+  factory CustomerToFollowUp.fromJson(Map<String, dynamic> json) =>
+      CustomerToFollowUp(
+        name: '${json['name']}',
+        lastBoughtOn: '${json['last_bought_on']}',
+        daysSince: (json['days_since'] as num).toInt(),
+        orders: (json['orders'] as num).toInt(),
+        totalSpent: '${json['total_spent']}',
+      );
+
+  final String name;
+  final String lastBoughtOn;
+  final int daysSince;
+  final int orders;
+  final String totalSpent;
+}
+
+class QuietCustomers {
+  const QuietCustomers({
+    required this.quietDays,
+    required this.total,
+    required this.customers,
+  });
+
+  factory QuietCustomers.fromJson(Map<String, dynamic> json) => QuietCustomers(
+    quietDays: (json['quiet_days'] as num).toInt(),
+    total: (json['total'] as num).toInt(),
+    customers: [
+      for (final c in (json['customers'] as List? ?? const []))
+        CustomerToFollowUp.fromJson(c as Map<String, dynamic>),
+    ],
+  );
+
+  final int quietDays;
+  final int total;
+  final List<CustomerToFollowUp> customers;
 }
 
 class AttentionItem {

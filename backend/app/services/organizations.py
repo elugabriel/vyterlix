@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import AppError, NotFoundError
 from app.db.tenant import ACROSS_TENANTS
+from app.models.business import BusinessProfile
 from app.models.identity import Organization, OrganizationUser, Role, User
 from app.schemas.organizations import MemberOut, OrganizationOut, Remit
 from app.services.audit import AuditAction, record_audit
@@ -33,9 +34,27 @@ def _membership_query(user_id: uuid.UUID):
     )
 
 
-def _out(org: Organization, role: str) -> OrganizationOut:
+def _sells(db: Session, organization_ids: list[uuid.UUID]) -> dict[uuid.UUID, str | None]:
+    """What each business says it sells. Spans businesses on purpose: it is only asked for the ones
+    the caller has already been found to belong to."""
+    if not organization_ids:
+        return {}
+    rows = db.execute(
+        select(BusinessProfile.organization_id, BusinessProfile.sells)
+        .where(BusinessProfile.organization_id.in_(organization_ids))
+        .execution_options(**ACROSS_TENANTS)
+    ).all()
+    return {organization_id: sells for organization_id, sells in rows}
+
+
+def _out(org: Organization, role: str, sells: str | None = None) -> OrganizationOut:
     return OrganizationOut(
-        id=org.id, name=org.name, status=org.status, role=role, created_at=org.created_at
+        id=org.id,
+        name=org.name,
+        status=org.status,
+        role=role,
+        created_at=org.created_at,
+        sells=sells,
     )
 
 
@@ -65,8 +84,9 @@ def create_organization(db: Session, user: User, name: str, meta: RequestMeta) -
 
 
 def list_organizations(db: Session, user: User) -> list[OrganizationOut]:
-    rows = db.execute(_membership_query(user.id).order_by(Organization.name, Organization.id))
-    return [_out(org, role) for org, role in rows]
+    rows = db.execute(_membership_query(user.id).order_by(Organization.name, Organization.id)).all()
+    sells = _sells(db, [org.id for org, _ in rows])
+    return [_out(org, role, sells.get(org.id)) for org, role in rows]
 
 
 @dataclass(frozen=True)
@@ -100,8 +120,9 @@ def resolve_membership(db: Session, user: User, organization_id: uuid.UUID) -> M
     return Membership(org, role_code, permissions, remit)
 
 
-def organization_out(org: Organization, role: str) -> OrganizationOut:
-    return _out(org, role)
+def organization_out(org: Organization, role: str, db: Session | None = None) -> OrganizationOut:
+    sells = _sells(db, [org.id]).get(org.id) if db is not None else None
+    return _out(org, role, sells)
 
 
 def list_members(db: Session) -> list[MemberOut]:

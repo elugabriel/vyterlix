@@ -12,11 +12,12 @@ from pydantic import (
 )
 
 from app.core.uk import is_valid_day_of_month, normalise_postcode, normalise_vat_number, today_uk
-from app.models.business import BUSINESS_MODELS, BUSINESS_SIZES, UK_REGIONS
+from app.models.business import BUSINESS_MODELS, BUSINESS_SIZES, SELLS, UK_REGIONS
 
 Region = Literal[UK_REGIONS]  # type: ignore[valid-type]
 BusinessSize = Literal[BUSINESS_SIZES]  # type: ignore[valid-type]
 BusinessModel = Literal[BUSINESS_MODELS]  # type: ignore[valid-type]
+Sells = Literal[SELLS]  # type: ignore[valid-type]
 
 Postcode = Annotated[str, AfterValidator(normalise_postcode)]
 VatNumber = Annotated[str, AfterValidator(normalise_vat_number)]
@@ -57,6 +58,7 @@ class _ProfileFields(BaseModel):
     postcode: Postcode | None = None
     business_size: BusinessSize | None = None
     business_model: BusinessModel | None = None
+    sells: Sells | None = None  # products, services or both
     team_size: int | None = Field(default=None, ge=0, le=1_000_000)
     founded_year: int | None = Field(default=None, ge=1800)
     vat_registered: bool | None = None
@@ -110,6 +112,7 @@ class BusinessProfileOut(BaseModel):
     postcode: str | None
     business_size: str | None
     business_model: str | None
+    sells: str | None  # products, services or both; empty until they say
     team_size: int | None
     founded_year: int | None
     years_operating: int | None  # worked out from founded_year, so it never goes stale

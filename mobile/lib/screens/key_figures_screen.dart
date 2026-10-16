@@ -38,6 +38,7 @@ class KeyFiguresScreen extends StatefulWidget {
 
 class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
   List<Kpi>? _kpis;
+  QuietCustomers? _followUp;
   String? _workedOut;
   String? _error;
 
@@ -67,6 +68,16 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
       });
     } on ApiException catch (error) {
       if (mounted) setState(() => _error = error.message);
+      return;
+    }
+    if (!widget.business.showFollowUp) return;
+    try {
+      final data =
+          await context.read<ApiClient>().get('$_base/customers/follow-up')
+              as Map<String, dynamic>;
+      if (mounted) setState(() => _followUp = QuietCustomers.fromJson(data));
+    } on ApiException {
+      // the list is a bonus: the figures matter more
     }
   }
 
@@ -135,10 +146,37 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
                 },
               ),
             ],
+          if (_followUp != null && _followUp!.customers.isNotEmpty)
+            ..._followUpView(_followUp!, muted),
         ],
       ),
     );
   }
+
+  List<Widget> _followUpView(QuietCustomers f, Color muted) => [
+    const SectionTitle('Customers to follow up'),
+    Text(
+      '${f.total} ${f.total == 1 ? 'customer has' : 'customers have'} not bought for ${f.quietDays} days or more. These spent the most with you, so they are worth a friendly message.',
+      style: TextStyle(color: muted),
+    ),
+    const SizedBox(height: 8),
+    for (final c in f.customers)
+      Card(
+        child: ListTile(
+          title: Text(
+            c.name,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          subtitle: Text(
+            'Last bought ${ukDate(c.lastBoughtOn)}, ${c.daysSince} days ago. ${c.orders} ${c.orders == 1 ? 'order' : 'orders'}.',
+          ),
+          trailing: Text(
+            formatValue(c.totalSpent, 'gbp'),
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+      ),
+  ];
 }
 
 class _KpiCard extends StatelessWidget {

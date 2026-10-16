@@ -106,6 +106,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
   }
 
   Future<void> _loadStock() async {
+    if (!widget.business.hasStock) return; // a service has nothing to stock
     try {
       final data = await context.read<ApiClient>().get(
         '$_base/stock-requirements',

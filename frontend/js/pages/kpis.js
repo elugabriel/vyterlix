@@ -20,10 +20,12 @@ const CATEGORY_ORDER = ["financial", "sales", "customer", "inventory"];
 let orgId = null;
 let base = "";
 let isOwner = false;
+let sells = null; // products, services, both, or null if they have not said
 
 async function start({ org }) {
   orgId = org.id;
   isOwner = org.role === "owner";
+  sells = org.sells ?? null;
   base = `/organizations/${orgId}/kpis`;
   document.getElementById("org-name").textContent = org.name;
   document.getElementById("back").href = `business.html?org=${orgId}`;
@@ -48,13 +50,16 @@ async function load() {
 // --- where sales come from, and which stock to watch (read straight from the records) ---------------------
 
 async function loadBreakdowns(slots) {
-  const [channels, products, movers] = await Promise.all([
+  const noStock = sells === "services";
+  const [channels, products, movers, followUp] = await Promise.all([
     guard(message, () => api.get(`${base}/breakdown/channel`)),
     guard(message, () => api.get(`${base}/breakdown/product`)),
-    guard(message, () => api.get(`${base}/stock/movers`)),
+    noStock ? null : guard(message, () => api.get(`${base}/stock/movers`)),
+    sells === "products" ? null : guard(message, () => api.get(`${base}/customers/follow-up`)),
   ]);
   if (channels && channels.rows.length) slots.append(breakdownCard("Where your sales come from", "Sales", channels, false));
   if (products && products.rows.length) slots.append(breakdownCard("Your best sellers", "Items sold", products, true));
+  if (followUp && followUp.customers.length) slots.append(followUpCard(followUp));
   if (movers && (movers.fast.length || movers.slow.length || movers.dead.length)) slots.append(moversCard(movers));
 }
 
@@ -75,6 +80,19 @@ function breakdownCard(title, countHeading, data, withProfit) {
         ...(withProfit ? [r.gross_profit === null ? "–" : gbp(r.gross_profit)] : []),
       ]),
       { empty: "No sales in this period." },
+    ),
+  );
+}
+
+function followUpCard(data) {
+  return el(
+    "section",
+    { class: "card" },
+    el("h2", { style: "margin-top:0" }, "Customers to follow up"),
+    el("p", { class: "muted" }, `${data.total} ${data.total === 1 ? "customer has" : "customers have"} not bought for ${data.quiet_days} days or more. These spent the most with you, so they are worth a friendly message.`),
+    table(
+      ["Customer", "Last bought", "Quiet for", "Orders", "Spent"],
+      data.customers.map((c) => [c.name, ukDate(c.last_bought_on), `${number(c.days_since)} days`, number(c.orders), gbp(c.total_spent)]),
     ),
   );
 }

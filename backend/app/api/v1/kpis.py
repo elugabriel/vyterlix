@@ -6,11 +6,18 @@ from fastapi import APIRouter, Depends, Query, status
 from app.api.deps import DB, Meta, Tenant, require_permission
 from app.core.permissions import Perm
 from app.schemas.jobs import JobOut
-from app.schemas.kpi import BreakdownOut, Granularity, KpiHistoryOut, KpisOut, MoversOut
+from app.schemas.kpi import (
+    BreakdownOut,
+    FollowUpOut,
+    Granularity,
+    KpiHistoryOut,
+    KpisOut,
+    MoversOut,
+)
 from app.services import job_handlers  # noqa: F401  (registers the handlers)
 from app.services.jobs import enqueue
 from app.services.kpi import kpi_history, list_kpis
-from app.services.kpi_breakdown import breakdown, movers
+from app.services.kpi_breakdown import breakdown, customers_to_follow_up, movers
 
 router = APIRouter(prefix="/organizations/{organization_id}/kpis", tags=["kpis"])
 
@@ -53,6 +60,17 @@ def sales_breakdown(
     """Where sales come from, by sales channel or by product, for a date range (default: the last
     12 finished months). The biggest come first; the rest are rolled into "Everything else"."""
     return breakdown(db, dimension, date_from, date_to, limit)
+
+
+@router.get("/customers/follow-up", response_model=FollowUpOut)
+def customers_to_follow_up_list(
+    tenant: Viewer,
+    db: DB,
+    quiet_days: Annotated[int, Query(ge=14, le=365)] = 60,
+    limit: Annotated[int, Query(ge=1, le=25)] = 10,
+):
+    """Customers who used to buy and have gone quiet, the ones who spent most first."""
+    return customers_to_follow_up(db, quiet_days=quiet_days, limit=limit)
 
 
 @router.get("/stock/movers", response_model=MoversOut)

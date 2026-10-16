@@ -50,6 +50,9 @@ UK_REGIONS = (
 # UK Companies Act size bands, by headcount: micro <10, small <50, medium <250.
 BUSINESS_SIZES = ("micro", "small", "medium", "large")
 BUSINESS_MODELS = ("b2c", "b2b", "b2b_and_b2c", "marketplace", "subscription")
+# What the business sells: things (stock), a service (time and skill), or both. Not asked of
+# older businesses, so it can be empty, and then nothing is hidden.
+SELLS = ("products", "services", "both")
 GOAL_TYPES = (
     "increase_revenue",
     "improve_margin",
@@ -112,6 +115,7 @@ class BusinessProfile(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Ba
         CheckConstraint(_one_of("region", UK_REGIONS), name="region_valid"),
         CheckConstraint(_one_of("business_size", BUSINESS_SIZES), name="business_size_valid"),
         CheckConstraint(_one_of("business_model", BUSINESS_MODELS), name="business_model_valid"),
+        CheckConstraint(_one_of("sells", SELLS), name="sells_valid"),
         CheckConstraint("team_size >= 0", name="team_size_non_negative"),
         CheckConstraint("founded_year BETWEEN 1800 AND 2100", name="founded_year_range"),
     )
@@ -131,6 +135,7 @@ class BusinessProfile(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Ba
     postcode: Mapped[str | None] = mapped_column(String(8))
     business_size: Mapped[str | None] = mapped_column(String(10))
     business_model: Mapped[str | None] = mapped_column(String(20))
+    sells: Mapped[str | None] = mapped_column(String(10))
     team_size: Mapped[int | None] = mapped_column(Integer)
     # Year founded rather than "years operating", which would go stale every year.
     founded_year: Mapped[int | None] = mapped_column(SmallInteger)

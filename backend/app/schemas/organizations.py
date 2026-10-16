@@ -55,6 +55,7 @@ class OrganizationOut(BaseModel):
     status: str
     role: str  # the caller's role in this organisation: owner / manager / viewer
     created_at: datetime
+    sells: str | None = None  # products, services or both (None until they say)
 
 
 class MemberOut(BaseModel):

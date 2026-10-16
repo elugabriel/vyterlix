@@ -22,6 +22,11 @@ const MODELS = [
   ["marketplace", "A marketplace"],
   ["subscription", "Subscriptions"],
 ];
+const SELLS = [
+  ["products", "Products: things you make, buy or stock"],
+  ["services", "A service: your time and skill"],
+  ["both", "Both products and a service"],
+];
 const GOAL_TYPES = [
   ["increase_revenue", "Increase revenue"],
   ["improve_margin", "Improve profit margin"],
@@ -97,6 +102,7 @@ async function businessDetails({ panel, orgId, done }) {
     ),
     field("UK SIC code (optional)", input("sic_code", { value: p.sic_code ?? "", inputmode: "numeric", maxlength: 5 }), "5 digits, from Companies House, e.g. 47110"),
     field("Size", select("business_size", SIZES, { selected: p.business_size, placeholder: "Not sure" })),
+    field("What do you sell?", select("sells", SELLS, { selected: p.sells, placeholder: "Not sure" }), "We use this to show what suits you. A business with no stock will not be shown stock figures."),
     field("How you sell", select("business_model", MODELS, { selected: p.business_model, placeholder: "Not sure" })),
     el(
       "div",
@@ -117,6 +123,7 @@ async function businessDetails({ panel, orgId, done }) {
       sic_code: orNull(v.sic_code),
       business_size: orNull(v.business_size),
       business_model: orNull(v.business_model),
+      sells: orNull(v.sells),
       team_size: intOrNull(v.team_size),
       founded_year: intOrNull(v.founded_year),
       vat_registered: form.elements.vat_registered.checked || null,

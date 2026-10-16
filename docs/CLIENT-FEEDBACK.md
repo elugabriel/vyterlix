@@ -114,14 +114,14 @@ Her figures are illustrations, not real results.
 
 ## 6. Adapt to the kind of business (§6)
 
-- [ ] **Onboarding asks whether the business sells products, provides services, or both.**
-- [ ] Wording, key figures and recommendations adapt to that choice **and to the data actually available**.
+- [x] **Onboarding asks whether the business sells products, provides services, or both.** ("What do you sell?" in business details.)
+- [~] Key figures and forecasts adapt to that choice (services: no stock figures). Recommendations adapt in item 6 and 7.
 - [ ] Retail and wholesale: best sellers, slow stock, reorders, margins, repeat buyers, suppliers. (Largely exists.)
 - [ ] Salon, barber and beauty: popular services, repeat bookings, no-shows, cancellations, staff availability, quiet periods.
 - [ ] Consultancy and agency: leads, proposals, client renewals, project profitability, unpaid invoices, staff capacity.
 - [ ] Cleaning, repair and home services: bookings, repeat contracts, travel or service costs, cancellations, customer satisfaction.
 - [ ] Mixed businesses: show product and service insights where relevant, without forcing one set of measures on everything.
-- [ ] **No empty "Stock to watch" section** for a business without stock. Offer instead "Bookings to watch", "Customers to follow up" or "Services needing attention".
+- [x] **No empty "Stock to watch" section** for a business that sells only a service (website and phone). "Customers to follow up" is shown instead. ("Bookings to watch" waits for booking data, item 7.)
 - [ ] When there is not enough data for a recommendation, **say what is missing**. (Data quality exists; not tied to each recommendation.)
 - [ ] New data types needed for service businesses: bookings or appointments, services, staff, cancellations, no-shows, and their import and typing-in. (Very large; see section 0.)
 
@@ -138,7 +138,7 @@ Her figures are illustrations, not real results.
 - [ ] Is an important alert's recommendation linked directly to an action? **Not yet.** Being built (section 5).
 - [ ] When the owner accepts, is the task created and tracked with owner, deadline and reminders? **Created and tracked with owner, dates and overdue marking now; reminders being added.**
 - [ ] After completion, how is the outcome checked and used? **Compared with what was expected, with the season removed; feeds later suggestions. Profit-aware checks being added.**
-- [ ] Does the business type chosen at onboarding change wording, figures and recommendations? **Not yet.** Planned (section 6).
+- [~] Does the business type chosen at onboarding change wording, figures and recommendations? **Figures and sections now; recommendations next.**
 - [ ] Can the main dashboard explain findings in plain language without the AI assistant? **Partly.** The plain-language layer is planned (section 2).
 - [ ] Which parts are working now and which are planned before final handover? Send the working and planned list.
 - [ ] Reply to the client in plain English covering the six answers and the plan (a Word file).

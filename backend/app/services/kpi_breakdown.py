@@ -18,8 +18,15 @@ from app.core.uk import today_uk
 from app.kpi import periods
 from app.kpi.measures import _hash_joins
 from app.models.business import BusinessListItem
-from app.models.data import Product, Sale, SaleLine, StockMovement
-from app.schemas.kpi import BreakdownOut, BreakdownRowOut, MoverOut, MoversOut
+from app.models.data import Customer, Product, Sale, SaleLine, StockMovement
+from app.schemas.kpi import (
+    BreakdownOut,
+    BreakdownRowOut,
+    CustomerToFollowUpOut,
+    FollowUpOut,
+    MoverOut,
+    MoversOut,
+)
 
 ZERO = Decimal("0")
 HUNDRED = Decimal("100")
@@ -245,3 +252,55 @@ def movers(db: Session, as_of: date | None = None, days: int = 90, limit: int = 
         key=lambda r: (-Decimal(r.stock_value or 0), r.name),
     )[:limit]
     return MoversOut(as_of=as_of, days=days, fast=fast, slow=slow, dead=dead)
+
+
+QUIET_DAYS = 60  # how long without buying before a customer is worth getting in touch with
+
+
+def customers_to_follow_up(
+    db: Session, *, quiet_days: int = QUIET_DAYS, limit: int = 10
+) -> FollowUpOut:
+    """Customers who used to buy and have gone quiet, the ones who spent most first.
+
+    "Quiet" is counted back from the latest sale the business has recorded, not from today, so a
+    business that has not brought its latest sales in is not told that everyone has gone quiet.
+    Customers whose sales are not linked to a customer cannot be listed, and are not guessed at.
+    """
+    as_of = db.scalar(select(func.max(Sale.sold_on)))
+    if as_of is None:
+        return FollowUpOut(as_of=None, quiet_days=quiet_days, total=0, customers=[])
+    bought = (
+        select(
+            Sale.customer_id.label("customer_id"),
+            func.max(Sale.sold_on).label("last_bought_on"),
+            func.count().filter(Sale.kind == "sale").label("orders"),
+            func.sum(Sale.net_amount).label("spent"),
+        )
+        .where(Sale.customer_id.is_not(None))
+        .group_by(Sale.customer_id)
+        .subquery()
+    )
+    cutoff = as_of - timedelta(days=quiet_days)
+    quiet = (
+        select(bought, Customer.name)
+        .join(Customer, Customer.id == bought.c.customer_id)
+        .where(bought.c.last_bought_on <= cutoff, bought.c.orders > 0, Customer.is_active.is_(True))
+    )
+    total = db.scalar(select(func.count()).select_from(quiet.subquery())) or 0
+    rows = db.execute(quiet.order_by(bought.c.spent.desc(), Customer.name).limit(limit)).all()
+    return FollowUpOut(
+        as_of=as_of,
+        quiet_days=quiet_days,
+        total=total,
+        customers=[
+            CustomerToFollowUpOut(
+                customer_id=r.customer_id,
+                name=r.name or "A customer with no name",
+                last_bought_on=r.last_bought_on,
+                days_since=(as_of - r.last_bought_on).days,
+                orders=r.orders,
+                total_spent=_pounds(r.spent),
+            )
+            for r in rows
+        ],
+    )

@@ -17,6 +17,7 @@ const content = document.getElementById("content");
 const STATUS = { order_now: ["Order now", "health-at_risk"], watch: ["Watch", "health-fair"], ok: ["Well stocked", "health-healthy"] };
 
 let orgId = null;
+let sells = null;
 let base = "";
 let canMake = false;
 let horizon = "3";
@@ -25,6 +26,7 @@ let figures = [];
 
 async function start({ org }) {
   orgId = org.id;
+  sells = org.sells ?? null;
   canMake = org.role === "owner" || org.role === "manager";
   base = `/organizations/${orgId}/forecasts`;
   document.getElementById("org-name").textContent = org.name;
@@ -52,20 +54,21 @@ function figureChooser() {
 }
 
 async function load() {
+  const noStock = sells === "services"; // nothing to stock: leave the whole section out
   const [forecast, accuracy, stock] = await Promise.all([
     guard(message, () => api.get(`${base}/${kpi}`)),
     guard(message, () => api.get(`${base}/${kpi}/accuracy`)),
-    guard(message, () => api.get(`${base}/stock-requirements`)),
+    noStock ? null : guard(message, () => api.get(`${base}/stock-requirements`)),
   ]);
-  if (forecast === undefined || !accuracy || !stock) return;
+  if (forecast === undefined || !accuracy || (!noStock && !stock)) return;
   const chooser = figureChooser();
-  if (forecast === null) return void content.replaceChildren(chooser, emptyCard(), stockCard(stock));
+  if (forecast === null) return void content.replaceChildren(chooser, emptyCard(), ...(noStock ? [] : [stockCard(stock)]));
   content.replaceChildren(
     chooser,
     forecast.status === "ok" ? mainCard(forecast) : tooEarlyCard(forecast),
     ...(forecast.status === "ok" ? [methodCard(forecast)] : []),
     accuracyCard(accuracy),
-    stockCard(stock),
+    ...(noStock ? [] : [stockCard(stock)]),
   );
 }
 
