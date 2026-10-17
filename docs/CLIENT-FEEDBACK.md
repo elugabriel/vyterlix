@@ -94,12 +94,12 @@ Her figures are illustrations, not real results.
   Follow-up: remaining stock, sales and margin; **if a promotion did not help, do not repeat it automatically**.
 - [~] **D. Quiet appointment times** (Tuesday afternoons). Recommend a small Tuesday-only offer or booking reminders; a two-week trial. Follow-up: compare Tuesday bookings **and earnings** before and after; if bookings rose but profit fell, suggest a different approach.
   - Exists: "Run a special on the day that has gone quiet" (from sales). Needs booking data for service businesses.
-- [ ] **E. Popular service, weak rebooking.** Recommend offering the next appointment at checkout or a reminder at the normal repeat interval. Follow-up after one month; record whether reminders or staff prompts worked better. (Needs booking data.)
-- [ ] **F. Rising cancellations.** Recommend reminders 24 to 48 hours before, or a clear cancellation policy. Follow-up: compare late cancellations over four weeks **and check customers are still satisfied**. (Needs booking data.)
+- [~] **E. Popular service, weak rebooking.** (Recommendation done: "Offer the next appointment before they leave", for a fall in customers who booked again. "Popular service" breakdown still to do.) Recommend offering the next appointment at checkout or a reminder at the normal repeat interval. Follow-up after one month; record whether reminders or staff prompts worked better. (Needs booking data.)
+- [x] **F. Rising cancellations.** Recommend reminders 24 to 48 hours before, or a clear cancellation policy. Follow-up: compare late cancellations over four weeks **and check customers are still satisfied**. (Needs booking data.)
 - [~] **G. Costs rising faster than sales.** Recommend reviewing the largest cost increases first; **do not recommend cutting costs blindly** without checking the effect on service quality. Create a review task for the owner or finance lead. Follow-up: did costs fall, and were sales or customer experience affected.
   - Exists: "Go through the cost that grew" and "Get quotes and renegotiate with the supplier". Missing: the quality-of-service check.
 - [x] **H. Valuable customer at risk** (orders less often, lower spend). Recommend the account manager contacts them. High-priority contact task due within three days. Follow-up: record whether contact happened, the feedback and later orders; **avoid claiming the customer was saved** until the outcome is visible.
-- [~] Missing recommendations added to the library: protect the best seller, slow-stock review, valuable customer at risk (all three done and tested). Still to come, with booking data (item 7): rebooking prompt and cancellation reminder.
+- [~] Missing recommendations added to the library: protect the best seller, slow-stock review, valuable customer at risk (all three done and tested). Rebooking prompt, appointment reminders and a cancellation policy are also done (they act on the appointment figures themselves, since those cannot be split into causes).
 
 ## 5. Important alerts lead straight to useful actions (§5)
 

@@ -21,6 +21,7 @@ from app.health.scoring import format_value
 RULES_VERSION = "recommend-1"
 MIN_SHARE = Decimal("25")  # a finding must account for this share of the change to be acted on
 MAX_OPTIONS = 5
+FIGURE_ONLY_SHARE = Decimal("50")  # a figure that cannot be broken down: we know it moved, not why
 FULL_MARKS_IMPACT = Decimal("0.5")  # winning back half the change earns full marks for impact
 NO_DIAGNOSIS_CONFIDENCE = 40
 NO_GOALS_FIT = 50  # a business with no goals set is neither helped nor hurt by goal fit

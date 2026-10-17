@@ -567,7 +567,7 @@ def test_the_library_lists_what_can_be_suggested(api, march):
     res = api.get(f"{ORGS}/{march[0]}/interventions", headers=march[2]["viewer"])
     assert res.status_code == 200
     library = res.json()
-    assert len(library) == 13 and [i["name"] for i in library] == sorted(i["name"] for i in library)
+    assert len(library) == 16 and [i["name"] for i in library] == sorted(i["name"] for i in library)
     bundle = next(i for i in library if i["code"] == "bundle_offer")
     assert (
         bundle["effort"] == "low"
@@ -580,6 +580,8 @@ def test_the_library_lists_what_can_be_suggested(api, march):
 
 def test_every_action_in_the_library_answers_something_and_helps_a_figure_we_can_explain(db):
     explainable = {"revenue", "sales_count", "units_sold", "gross_profit", "operating_expenses"}
+    explainable |= {"cancellation_rate_pct", "no_show_rate_pct", "late_cancellations"}
+    explainable |= {"rebooking_rate_pct", "appointments_kept"}  # answered from the figure itself
     for item in db.scalars(select(Intervention)):
         assert item.addresses, item.code
         assert set(item.kpis) <= explainable, item.code

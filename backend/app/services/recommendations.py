@@ -154,6 +154,20 @@ def _findings(drivers: dict | None) -> list[rules.Finding]:
     ]
 
 
+def _figure_finding(event: DetectionEvent) -> rules.Finding:
+    """For a figure we cannot break down (appointments cancelled, say) the only thing known is that
+    the figure itself moved, so that is the finding. It carries a middling share so that what it
+    leads to is not presented as sure: we do not know why it moved."""
+    return rules.Finding(
+        kind="figure_moved",
+        lens="figure",
+        label="The figure itself",
+        amount=Decimal(event.value) - Decimal(event.reference_value),
+        share_pct=rules.FIGURE_ONLY_SHARE,
+        text=event.summary,
+    )
+
+
 def _goals(db: Session) -> list[rules.Goal]:
     return [
         rules.Goal(g.kpi_code, g.goal_type, g.title, g.priority) for g in list_goals(db, "active")
@@ -177,6 +191,8 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
     month = f"{event.period_start:%B %Y}"
     drivers = (diagnosis.basis or {}).get("drivers")
     findings = finding_tags.tag(db, _findings(drivers))
+    if drivers is None:
+        findings = [_figure_finding(event)]
     unit = kpi.unit if not drivers else drivers["unit"]
     scored: list[rules.Scored] = []
     record: dict[str, track_record.Record] = {}
@@ -211,7 +227,7 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
                 candidates.append(c)
         record = track_record.load(db)
         remembered, used = _remembered(recalled, record, candidates, left_out, kpi.name)
-        change = Decimal(drivers["total_change"]) if drivers else Decimal(0)
+        change = Decimal(drivers["total_change"]) if drivers else findings[0].amount
         scored = rules.rank(
             [
                 rules.evaluate(
