@@ -65,7 +65,7 @@ const path = (rest) => `/organizations/${orgId}/${rest}`;
 async function loadChoices() {
   const pick = (page) => page.items.map((i) => [i.id, i.name ?? i.email]);
   const listed = (items) => items.filter((i) => i.is_active).map((i) => [i.id, i.name]);
-  const [customers, suppliers, products, channels, categories, ctypes, offerings] = await Promise.all([
+  const [customers, suppliers, products, channels, categories, ctypes, offerings, used] = await Promise.all([
     api.get(path("customers?limit=100")),
     api.get(path("suppliers?limit=100")),
     api.get(path("products?limit=100")),
@@ -73,6 +73,7 @@ async function loadChoices() {
     api.get(path("lists/cost_category")),
     api.get(path("lists/customer_type")),
     api.get(path("lists/offering")),
+    sells === "products" ? { services: [], staff: [] } : api.get(path("bookings/choices")),
   ]);
   return {
     customers: pick(customers),
@@ -82,6 +83,8 @@ async function loadChoices() {
     categories: listed(categories),
     ctypes: listed(ctypes),
     offerings: listed(offerings),
+    usedServices: used.services,
+    usedStaff: used.staff,
     productNames: Object.fromEntries(pick(products)),
   };
 }
@@ -477,9 +480,9 @@ function booking() {
   const node = el(
     "form",
     { novalidate: true },
-    el("div", { class: "row" }, field("Service", input("service", { maxlength: 200, required: true }), "For example: haircut, boiler service, consultation."), dateField("booked_for", "Day of the appointment")),
+    el("div", { class: "row" }, field("Service", picker("service", choices.usedServices, { maxlength: 200, required: true }), "Pick one you have used, or type a new one. For example: haircut, boiler service, consultation."), dateField("booked_for", "Day of the appointment")),
     el("div", { class: "row" }, field("What happened?", status), cancelledField),
-    el("div", { class: "row" }, field("Customer (optional)", select("customer_id", choices.customers, { placeholder: "Not recorded" }), "Choose one to see who books again."), field("Who was doing it? (optional)", input("staff", { maxlength: 100 }))),
+    el("div", { class: "row" }, field("Customer (optional)", select("customer_id", choices.customers, { placeholder: "Not recorded" }), "Choose one to see who books again."), field("Who was doing it? (optional)", picker("staff", choices.usedStaff, { maxlength: 100 }))),
     el("div", { class: "row" }, field("Notes (optional)", input("notes", { maxlength: 300 }))),
     choices.customers.length ? null : el("p", { class: "hint" }, "To see who books again, add your customers first (the Customer tab)."),
     el("button", { type: "submit" }, "Save appointment"),
@@ -510,6 +513,13 @@ function booking() {
       ],
     },
   };
+}
+
+/** A text box that suggests what has been typed before (the most used first), and takes anything new. */
+function picker(name, used, attrs) {
+  const id = `list-${name}`;
+  const box = input(name, { ...attrs, list: id, autocomplete: "off" });
+  return el("div", {}, box, el("datalist", { id }, ...used.map((value) => el("option", { value }))));
 }
 
 const customerName = (id) => choices.customers.find(([cid]) => cid === id)?.[1];

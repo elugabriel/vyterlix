@@ -22,7 +22,9 @@ from app.actions import rules as action_rules
 from app.core.errors import ConflictError, NotFoundError
 from app.core.permissions import KpiCategory, Perm
 from app.core.uk import today_uk
+from app.kpi.measures import has_records
 from app.models.actions import BusinessAction, BusinessIntervention
+from app.models.kpi import KpiDefinition
 from app.plain.changes import explain_change
 from app.plain.priority import LABEL, prioritise
 from app.schemas.actions import AcceptIn, DismissIn
@@ -43,6 +45,47 @@ from app.services.auth import RequestMeta
 
 CHART_MONTHS = 12
 EVIDENCE_SHOWN = 3
+
+# What to add so a suggestion can be made, by kind of record a figure needs
+NEEDS_RECORDS = {
+    "sales": "Add your sales (Your data), so we can see what is behind the change.",
+    "expenses": "Add your costs (Your data), so we can see what is behind the change.",
+    "customer_sales": "Say which customer bought on each sale, so we can see who has stopped coming back.",
+    "stock": "Add your stock records (deliveries and what you started with), so we can see what is selling slowly.",
+    "bookings": "Add your appointments (Your data, then Type in data), so we can see what is behind the change.",
+}
+# What an admission of "not enough evidence" on the diagnosis means for the owner to do
+FROM_REASON = {
+    "no_product_detail": "Record which product was sold on each sale, so we can tell which products moved.",
+    "spread_widely": "The change is spread across many things, so no single one stands out. A few more months of figures will help us see a pattern.",
+    "not_explainable": "This figure cannot yet be split into causes, so we can only suggest things that act on the figure itself.",
+}
+
+
+def what_is_missing(db: Session, event, rec) -> list[str]:
+    """In plain words, what is stopping us suggesting something. Never empty: if nothing is missing
+    from the records, it says we do not have a suggestion for this kind of change yet."""
+    found: list[str] = []
+    definition = db.scalars(
+        select(KpiDefinition).where(KpiDefinition.code == event.kpi_code)
+    ).first()
+    for dataset in definition.requires if definition else []:
+        if not has_records(db, dataset) and dataset in NEEDS_RECORDS:
+            found.append(NEEDS_RECORDS[dataset])
+    if event.data_quality is not None and event.data_quality < 80:
+        found.append(
+            f"Some of the figures behind {event.period_start:%B %Y} are missing, so we are less sure what to do. See Your data for what to fill in."
+        )
+    for item in rec.evidence if rec is not None else []:
+        reason = (item.data or {}).get("reason")
+        if (
+            item.evidence_type == "insufficient"
+            and reason in FROM_REASON
+            and FROM_REASON[reason] not in found
+        ):
+            found.append(FROM_REASON[reason])
+    return found or ["We do not have a suggestion for this kind of change yet."]
+
 
 # Where to go for an alert that is not about a figure changing (rule code -> what to say).
 NEXT_STEPS = {
@@ -164,6 +207,8 @@ def card(db: Session, tenant, alert_id: uuid.UUID) -> AlertCardOut:
         change=event.change,
         change_unit=event.change_unit,
         explained_by_season=event.explained_by_season,
+        kind=event.kind,
+        data_quality=event.data_quality,
     )
 
     rec: RecommendationOut | None = None
@@ -227,6 +272,7 @@ def card(db: Session, tenant, alert_id: uuid.UUID) -> AlertCardOut:
         dismissed_reason=dismissed_reason,
         postponed_until=detail.postponed_until,
         next_step=None,
+        missing=what_is_missing(db, event, rec) if state == "no_suggestion" else [],
         can_decide=can_decide and state in ("open", "postponed"),
     )  # fmt: skip
 

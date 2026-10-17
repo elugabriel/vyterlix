@@ -87,6 +87,16 @@ void main() {
       expect(find.byType(BarChart), findsOneWidget);
     });
 
+    testWidgets('a bar shows how the checked actions turned out', (
+      tester,
+    ) async {
+      await openToday(tester);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('outcome-bar-words'))).data,
+        '1 worked · 1 partly worked',
+      );
+    });
+
     testWidgets('what is going well lists the good news with a green bar', (
       tester,
     ) async {

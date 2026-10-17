@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """Breaking the numbers down: where sales come from (by channel, by product) and which products
 move fast, slowly, or not at all.
 
@@ -18,14 +19,17 @@ from app.core.uk import today_uk
 from app.kpi import periods
 from app.kpi.measures import _hash_joins
 from app.models.business import BusinessListItem
-from app.models.data import Customer, Product, Sale, SaleLine, StockMovement
+from app.models.data import Booking, Customer, Product, Sale, SaleLine, StockMovement
 from app.schemas.kpi import (
+    BookingChoicesOut,
     BreakdownOut,
     BreakdownRowOut,
     CustomerToFollowUpOut,
     FollowUpOut,
     MoverOut,
     MoversOut,
+    ServiceRowOut,
+    ServicesOut,
 )
 
 ZERO = Decimal("0")
@@ -304,3 +308,112 @@ def customers_to_follow_up(
             for r in rows
         ],
     )
+
+
+# --- services (appointments) ----------------------------------------------------------------------
+
+SERVICE_WINDOW_DAYS = 90
+WEAK_REBOOKING_MIN_CUSTOMERS = 5  # fewer than this and a low rate is just chance
+WEAK_REBOOKING_BELOW = Decimal(
+    "0.5"
+)  # a service whose rate is under half the overall one is "weak"
+
+
+def _pct(part: int, whole: int) -> str | None:
+    return (
+        None if whole == 0 else str((Decimal(part) / Decimal(whole) * 100).quantize(Decimal("0.1")))
+    )
+
+
+def popular_services(db: Session, *, limit: int = 10) -> ServicesOut:
+    """The services booked over the last three months of appointments, most popular first.
+
+    The window ends at the latest appointment that has already happened (not at today), so a
+    business that has not entered the latest weeks is not told its services went quiet.
+    """
+    last = db.scalar(select(func.max(Booking.booked_for)).where(Booking.status != "booked"))
+    if last is None:
+        return ServicesOut(
+            period_from=None, period_to=None, kept=0, rebooked_pct=None, rows=[], notes=[]
+        )
+    first = last - timedelta(days=SERVICE_WINDOW_DAYS)
+    rows = db.execute(
+        select(Booking.service, Booking.status, Booking.customer_id, Booking.booked_for).where(
+            Booking.booked_for > first, Booking.booked_for <= last, Booking.status != "booked"
+        )
+    ).all()
+    counts: dict[str, dict[str, int]] = {}
+    last_kept: dict[str, dict] = {}  # service -> customer -> the day of their last one kept
+    for service, status, customer, day in rows:
+        c = counts.setdefault(service, {"completed": 0, "cancelled": 0, "no_show": 0})
+        c[status] += 1
+        if status == "completed" and customer is not None:
+            kept = last_kept.setdefault(service, {})
+            kept[customer] = max(day, kept.get(customer, day))
+    customers = {c for kept in last_kept.values() for c in kept}
+    later: dict = {}  # customer -> days of every appointment they kept or have booked
+    if customers:
+        for customer, day in db.execute(
+            select(Booking.customer_id, Booking.booked_for).where(
+                Booking.customer_id.in_(customers), Booking.status.in_(("completed", "booked"))
+            )
+        ):
+            later.setdefault(customer, []).append(day)
+
+    def booked_again(customer, since) -> bool:
+        return any(day > since for day in later.get(customer, []))
+
+    out, kept_total, rebooked_total, people_total = (
+        [],
+        sum(c["completed"] for c in counts.values()),
+        0,
+        0,
+    )
+    for service, c in counts.items():
+        people = last_kept.get(service, {})
+        again = sum(1 for cust, day in people.items() if booked_again(cust, day))
+        rebooked_total += again
+        people_total += len(people)
+        out.append(
+            ServiceRowOut(
+                service=service, kept=c["completed"], cancelled=c["cancelled"], missed=c["no_show"],
+                share_pct=_pct(c["completed"], kept_total), customers=len(people),
+                rebooked_pct=_pct(again, len(people)),
+            )
+        )  # fmt: skip
+    out.sort(key=lambda r: (-r.kept, r.service.lower()))
+    overall = _pct(rebooked_total, people_total)
+    notes: list[str] = []
+    if out and out[0].kept:
+        notes.append(
+            f"{out[0].service} is your most booked service: {out[0].kept} kept in the last three months."
+        )
+    if overall is not None:
+        for row in out:
+            if (
+                row.customers >= WEAK_REBOOKING_MIN_CUSTOMERS
+                and row.rebooked_pct is not None
+                and Decimal(row.rebooked_pct) < Decimal(overall) * WEAK_REBOOKING_BELOW
+            ):
+                notes.append(
+                    f"Few people who have {row.service} book again ({row.rebooked_pct}%, against {overall}% across all your services). Offering the next appointment before they leave can help."
+                )
+    return ServicesOut(
+        period_from=first + timedelta(days=1), period_to=last, kept=kept_total,
+        rebooked_pct=overall, rows=out[:limit], notes=notes,
+    )  # fmt: skip
+
+
+def booking_choices(db: Session) -> BookingChoicesOut:
+    """Services and staff already used (most used first), to pick from when typing in an appointment."""
+
+    def used(column) -> list[str]:
+        rows = db.execute(
+            select(column)
+            .where(column.is_not(None))
+            .group_by(column)
+            .order_by(func.count().desc(), column)
+        )
+        return [value for (value,) in rows]
+
+    return BookingChoicesOut(services=used(Booking.service), staff=used(Booking.staff))

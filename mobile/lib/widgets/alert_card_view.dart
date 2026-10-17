@@ -463,9 +463,21 @@ class _AlertCardViewState extends State<AlertCardView> {
         return [
           const SectionTitle('What to do'),
           Text(
-            'We cannot say what to do about this yet. Open the explanation on the website to see what we found.',
+            'We cannot say what to do about this yet.',
             style: TextStyle(color: muted),
           ),
+          if (card.missing.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            const Text(
+              'What would help us suggest something',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+            for (final m in card.missing)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text('•  $m'),
+              ),
+          ],
         ];
       case 'not_yet':
         return [

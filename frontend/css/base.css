@@ -670,5 +670,11 @@ progress::-moz-progress-bar { background: var(--gradient); border-radius: 999px;
 .glance-good { border-left-color: var(--ok); }
 .glance-bad { border-left-color: var(--bad); }
 .glance-watch { border-left-color: var(--warn); }
+.outcome-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--border); }
+.outcome-bar .glance-ok { background: var(--ok); }
+.outcome-bar .glance-warn { background: var(--warn); }
+.outcome-bar .glance-bad-bar { background: var(--bad); }
+.outcome-bar .glance-grey { background: var(--border-strong); }
+.outcome-bar-box p { margin: 4px 0 0; font-size: 12px; }
 .first-card { display: grid; gap: 6px; padding: 18px 20px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius); }
 .first-card p { margin: 0; }

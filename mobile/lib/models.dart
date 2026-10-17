@@ -257,10 +257,18 @@ class ResultsGlance {
     required this.measured,
     required this.sentence,
     required this.latest,
+    this.successful = 0,
+    this.partly = 0,
+    this.failed = 0,
+    this.unclear = 0,
   });
 
   factory ResultsGlance.fromJson(Map<String, dynamic> json) => ResultsGlance(
     measured: (json['measured'] as num?)?.toInt() ?? 0,
+    successful: (json['successful'] as num?)?.toInt() ?? 0,
+    partly: (json['partially_successful'] as num?)?.toInt() ?? 0,
+    failed: (json['unsuccessful'] as num?)?.toInt() ?? 0,
+    unclear: (json['inconclusive'] as num?)?.toInt() ?? 0,
     sentence: '${json['sentence']}',
     latest: [
       for (final i in (json['latest'] as List? ?? const []))
@@ -271,6 +279,12 @@ class ResultsGlance {
   final int measured;
   final String sentence;
   final List<ResultItem> latest;
+
+  /// How many actions worked, partly worked, did not work, or cannot be measured yet.
+  final int successful;
+  final int partly;
+  final int failed;
+  final int unclear;
 }
 
 class Dashboard {
@@ -516,4 +530,46 @@ class Inbox {
 
   final int unread;
   final List<AppNotification> items;
+}
+
+class ServiceRow {
+  const ServiceRow({
+    required this.service,
+    required this.kept,
+    required this.cancelled,
+    required this.missed,
+    required this.rebookedPct,
+  });
+
+  factory ServiceRow.fromJson(Map<String, dynamic> json) => ServiceRow(
+    service: '${json['service']}',
+    kept: (json['kept'] as num).toInt(),
+    cancelled: (json['cancelled'] as num).toInt(),
+    missed: (json['missed'] as num).toInt(),
+    rebookedPct: json['rebooked_pct'] == null
+        ? null
+        : '${json['rebooked_pct']}',
+  );
+
+  final String service;
+  final int kept;
+  final int cancelled;
+  final int missed;
+  final String? rebookedPct;
+}
+
+/// The services people book, most popular first, and plain notes about them.
+class ServicesBooked {
+  const ServicesBooked({required this.rows, required this.notes});
+
+  factory ServicesBooked.fromJson(Map<String, dynamic> json) => ServicesBooked(
+    rows: [
+      for (final r in (json['rows'] as List? ?? const []))
+        ServiceRow.fromJson(r as Map<String, dynamic>),
+    ],
+    notes: [for (final n in (json['notes'] as List? ?? const [])) '$n'],
+  );
+
+  final List<ServiceRow> rows;
+  final List<String> notes;
 }

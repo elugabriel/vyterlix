@@ -131,3 +131,31 @@ class MoversOut(BaseModel):
     fast: list[MoverOut]  # selling most
     slow: list[MoverOut]  # selling, but least
     dead: list[MoverOut]  # in stock but not sold in the window
+
+
+class ServiceRowOut(BaseModel):
+    service: str
+    kept: int  # appointments that went ahead
+    cancelled: int
+    missed: int  # did not turn up
+    share_pct: str | None  # of all appointments kept in the window
+    customers: int  # different customers who kept one
+    rebooked_pct: str | None  # of those, the share with another appointment after their last
+
+
+class ServicesOut(BaseModel):
+    """The services people book, most popular first, and where people do not come back."""
+
+    period_from: date | None
+    period_to: date | None
+    kept: int
+    rebooked_pct: str | None  # across every service: the yardstick for "weak"
+    rows: list[ServiceRowOut]
+    notes: list[str]  # plain sentences: the most popular, and any with weak rebooking
+
+
+class BookingChoicesOut(BaseModel):
+    """The services and staff already used, so they can be picked rather than retyped."""
+
+    services: list[str]
+    staff: list[str]

@@ -82,7 +82,7 @@ async function start({ user, org }) {
   effect.addEventListener("change", refresh);
   hideExpected.addEventListener("change", refresh);
   content.replaceChildren(
-    el("p", { class: "muted" }, "Each figure is compared with the month before, and with how it usually behaves over the last year. Small ups and downs are left out; only the bigger movements appear."),
+    el("p", { class: "muted" }, "Here are the figures that moved by more than usual, in plain words. Small ups and downs are left out; only the bigger movements appear."),
     filters,
     results,
   );
@@ -139,25 +139,26 @@ function monthCard(month, events) {
 
 function eventRow({ change, unusual }) {
   const event = change ?? unusual;
+  const words = event.plain;
   return el(
     "div",
     { class: "kpi" },
     el(
       "div",
       {},
-      el("strong", {}, `${ARROW[event.direction]} ${event.kpi_name}`),
+      el("strong", {}, `${ARROW[event.direction]} ${words ? words.headline : event.kpi_name}`),
       " ",
       el("span", { class: `badge ${EFFECT_CLASS[event.effect]}` }, EFFECT_TEXT[event.effect]),
       " ",
       el("span", { class: "muted" }, SEVERITY_TEXT[event.severity]),
-      unusual ? el("span", { class: "badge" }, "Unusual for you") : null,
+      unusual && change ? el("span", { class: "badge" }, "Also unusual for your business") : null,
     ),
-    el("p", {}, event.summary),
-    change && unusual ? el("p", {}, unusual.summary) : null,
+    el("p", { class: "plain-says" }, words ? words.happened : event.summary),
+    words ? el("p", { class: "muted" }, words.numbers) : null,
+    words ? el("p", {}, words.why) : null,
+    change && unusual && unusual.plain ? el("p", { class: "muted" }, `${unusual.plain.numbers} That is further from normal than it usually strays.`) : null,
     event.explained_by_season && !unusual ? el("p", { class: "muted" }, "Expected for the time of year, so probably nothing to worry about.") : null,
-    event.data_quality !== null && event.data_quality < 80
-      ? el("p", { class: "status-bad" }, `Some of the data behind this month is incomplete (${event.data_quality} out of 100), so treat it with care.`)
-      : null,
+    words && words.data_note ? el("p", { class: "status-bad" }, words.data_note) : null,
     diagnosisPanel(event),
     event.effect === "bad" ? recommendationPanel(event) : null,
     splittable[event.kpi_code] ? whereFrom(event) : null,

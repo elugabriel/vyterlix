@@ -7,6 +7,7 @@ import '../models_data.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/severity.dart';
+import 'appointment_screen.dart';
 import 'entry_screen.dart';
 import 'imports_screen.dart';
 import 'upload_screen.dart';
@@ -150,6 +151,18 @@ class _DataScreenState extends State<DataScreen> {
               icon: const Icon(Icons.edit_note_rounded),
               label: const Text('Type in a sale or expense'),
             ),
+            if (widget.business.showFollowUp) ...[
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: () =>
+                    _go(AppointmentScreen(business: widget.business)),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                ),
+                icon: const Icon(Icons.event_available_rounded),
+                label: const Text('Type in an appointment'),
+              ),
+            ],
             const SizedBox(height: 10),
             OutlinedButton.icon(
               onPressed: () => _go(ImportsScreen(business: widget.business)),

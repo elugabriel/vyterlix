@@ -220,6 +220,10 @@ class _TodayScreenState extends State<TodayScreen> {
           if (dashboard.results != null) ...[
             const SectionTitle('Did my actions help?'),
             Text(dashboard.results!.sentence),
+            if (dashboard.results!.measured > 0) ...[
+              const SizedBox(height: 8),
+              _OutcomeBar(results: dashboard.results!),
+            ],
             const SizedBox(height: 8),
             _GlanceList(
               items: [
@@ -597,6 +601,57 @@ class _GlanceList extends StatelessWidget {
               ),
             ),
           ),
+      ],
+    );
+  }
+}
+
+/// How the actions that have been checked turned out, as one bar: worked, partly, did not, cannot
+/// be measured yet. The words under it say the same, so colour is never the only clue.
+class _OutcomeBar extends StatelessWidget {
+  const _OutcomeBar({required this.results});
+
+  final ResultsGlance results;
+
+  @override
+  Widget build(BuildContext context) {
+    final parts = [
+      (results.successful, Palette.ok, 'worked'),
+      (results.partly, Palette.warn, 'partly worked'),
+      (results.failed, Palette.bad, 'did not work'),
+      (
+        results.unclear,
+        Theme.of(context).colorScheme.outlineVariant,
+        'cannot be measured yet',
+      ),
+    ].where((p) => p.$1 > 0).toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: SizedBox(
+            height: 12,
+            child: Row(
+              children: [
+                for (final (count, color, _) in parts)
+                  Expanded(
+                    flex: count,
+                    child: ColoredBox(color: color),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          parts.map((p) => '${p.$1} ${p.$3}').join(' · '),
+          key: const Key('outcome-bar-words'),
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
       ],
     );
   }

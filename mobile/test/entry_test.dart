@@ -17,6 +17,21 @@ FakeServer entryServer() => dataServer()
     'id': 's1',
     'gross_amount': '12.50',
   }, 201)
+  ..json('GET /organizations/b1/customers', {
+    'total': 1,
+    'items': [
+      {'id': 'cu1', 'name': 'Jo Baker', 'email': null},
+    ],
+  })
+  ..json('GET /organizations/b1/bookings/choices', {
+    'services': ['Cut', 'Colour'],
+    'staff': ['Ola'],
+  })
+  ..json('POST /organizations/b1/bookings', {
+    'id': 'bk1',
+    'service': 'Cut',
+    'status': 'completed',
+  }, 201)
   ..json('POST /organizations/b1/expenses', {
     'id': 'e1',
     'gross_amount': '240.00',
@@ -50,6 +65,64 @@ Future<void> open(
 }
 
 void main() {
+  testWidgets('an appointment is sent with who it was for and what happened', (
+    tester,
+  ) async {
+    final server = entryServer();
+    await open(tester, server);
+    await tester.tap(find.text('Type in an appointment'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Service'), ' Cut ');
+    await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Did not turn up').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButtonFormField<String?>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Jo Baker').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save appointment'));
+    await tester.pumpAndSettle();
+    final body = server.bodyOf(
+      server.to('POST /organizations/b1/bookings').single,
+    );
+    expect(body['service'], 'Cut');
+    expect(body['status'], 'no_show');
+    expect(body['customer_id'], 'cu1');
+    expect(body['cancelled_on'], isNull);
+    expect(find.text('Appointment saved.'), findsOneWidget);
+  });
+
+  testWidgets('an appointment needs a service', (tester) async {
+    final server = entryServer();
+    await open(tester, server);
+    await tester.tap(find.text('Type in an appointment'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save appointment'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Say which service it was'), findsOneWidget);
+    expect(server.to('POST /organizations/b1/bookings'), isEmpty);
+  });
+
+  testWidgets(
+    'a business that sells only products is not offered appointments',
+    (tester) async {
+      final server = entryServer()
+        ..json('GET /organizations', [
+          {
+            'id': 'b1',
+            'name': 'Fakeham Bakery',
+            'role': 'owner',
+            'sells': 'products',
+          },
+          {'id': 'b2', 'name': 'Second Shop', 'role': 'viewer'},
+        ]);
+      await open(tester, server);
+      expect(find.text('Type in a sale or expense'), findsOneWidget);
+      expect(find.text('Type in an appointment'), findsNothing);
+    },
+  );
+
   testWidgets('only the owner is offered typing in data', (tester) async {
     await open(tester, entryServer(), shop: 'Second Shop');
     expect(find.text('Type in a sale or expense'), findsNothing);

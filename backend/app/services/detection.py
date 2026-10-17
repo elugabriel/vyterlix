@@ -28,7 +28,8 @@ from app.kpi import periods
 from app.models.diagnostics import DetectionEvent
 from app.models.health import HealthRule
 from app.models.kpi import KpiDefinition, KpiValue
-from app.schemas.diagnostics import DetectionOut
+from app.plain.changes import explain_change
+from app.schemas.diagnostics import ChangeWordsOut, DetectionOut
 from app.services.health import GRANULARITY, confirmed_seasons, season_effect
 
 MATERIAL = "material_change"
@@ -228,8 +229,26 @@ def detect(db: Session, tenant) -> DetectionRun:
 # --- reading -------------------------------------------------------------------------------
 
 
+def _words(event: DetectionEvent, definition: KpiDefinition) -> ChangeWordsOut:
+    cents, tenths = Decimal("0.01"), Decimal("0.1")
+    words = explain_change(
+        kpi_code=definition.code, kpi_name=definition.name, unit=definition.unit,
+        direction=event.direction, severity=event.severity, effect=event.effect,
+        period_start=event.period_start, value=str(event.value.quantize(cents)),
+        reference_value=str(event.reference_value.quantize(cents)),
+        change=str(event.change.quantize(tenths)), change_unit=event.change_unit,
+        explained_by_season=event.explained_by_season, kind=event.kind,
+        data_quality=event.data_quality,
+    )  # fmt: skip
+    return ChangeWordsOut(
+        headline=words.headline, happened=words.happened, numbers=words.numbers, why=words.why,
+        tone=words.tone, season=words.season, data_note=words.data_note,
+    )  # fmt: skip
+
+
 def _out(event: DetectionEvent, definition: KpiDefinition) -> DetectionOut:
     return DetectionOut(
+        plain=_words(event, definition),
         id=event.id,
         kpi_code=definition.code,
         kpi_name=definition.name,

@@ -140,6 +140,7 @@ class AlertCard {
     required this.dismissedReason,
     required this.postponedUntil,
     required this.nextStepText,
+    this.missing = const [],
     required this.canDecide,
   });
 
@@ -167,6 +168,7 @@ class AlertCard {
     nextStepText: json['next_step'] is Map<String, dynamic>
         ? '${(json['next_step'] as Map<String, dynamic>)['text']}'
         : null,
+    missing: [for (final m in (json['missing'] as List? ?? const [])) '$m'],
     canDecide: json['can_decide'] == true,
   );
 
@@ -190,6 +192,9 @@ class AlertCard {
   /// The day it comes back, while it is put off ("2026-10-29").
   final String? postponedUntil;
   final String? nextStepText;
+
+  /// What would let us suggest something, when we cannot yet.
+  final List<String> missing;
   final bool canDecide;
 
   PlainFigure get plain => PlainFigure(

@@ -659,6 +659,31 @@ void main() {
       },
     );
 
+    testWidgets('says each change in everyday words when the server does', (
+      tester,
+    ) async {
+      final server = happyServer()
+        ..json('GET /organizations/b1/changes', [
+          {
+            ...changeJson('ch1'),
+            'plain': {
+              'headline': 'Sales fell sharply in September 2026.',
+              'happened': 'You sold less than last month.',
+              'numbers': 'Sales was £8,000.00, compared with £9,000.00 last month (down 11.1%).',
+              'why': 'Check whether this is a quiet spell before reacting.',
+              'tone': 'bad',
+              'season': null,
+              'data_note': null,
+            },
+          },
+        ]);
+      await openBusiness(tester, server);
+      await openMore(tester, 'What changed');
+      expect(find.text('You sold less than last month.'), findsOneWidget);
+      expect(find.textContaining('compared with £9,000.00'), findsOneWidget);
+      expect(find.text('Change ch1 summary'), findsNothing);
+    });
+
     testWidgets('can be narrowed to bad news or good news', (tester) async {
       final server = happyServer();
       await openBusiness(tester, server);

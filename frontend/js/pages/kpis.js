@@ -51,14 +51,16 @@ async function load() {
 
 async function loadBreakdowns(slots) {
   const noStock = sells === "services";
-  const [channels, products, movers, followUp] = await Promise.all([
+  const [channels, products, movers, followUp, serviceList] = await Promise.all([
     guard(message, () => api.get(`${base}/breakdown/channel`)),
     guard(message, () => api.get(`${base}/breakdown/product`)),
     noStock ? null : guard(message, () => api.get(`${base}/stock/movers`)),
     sells === "products" ? null : guard(message, () => api.get(`${base}/customers/follow-up`)),
+    sells === "products" ? null : guard(message, () => api.get(`${base}/services`)),
   ]);
   if (channels && channels.rows.length) slots.append(breakdownCard("Where your sales come from", "Sales", channels, false));
   if (products && products.rows.length) slots.append(breakdownCard("Your best sellers", "Items sold", products, true));
+  if (serviceList && serviceList.rows.length) slots.append(servicesCard(serviceList));
   if (followUp && followUp.customers.length) slots.append(followUpCard(followUp));
   if (movers && (movers.fast.length || movers.slow.length || movers.dead.length)) slots.append(moversCard(movers));
 }
@@ -81,6 +83,20 @@ function breakdownCard(title, countHeading, data, withProfit) {
       ]),
       { empty: "No sales in this period." },
     ),
+  );
+}
+
+function servicesCard(data) {
+  return el(
+    "section",
+    { class: "card" },
+    el("h2", { style: "margin-top:0" }, "Your services"),
+    ...data.notes.map((n) => el("p", {}, n)),
+    table(
+      ["Service", "Kept", "Cancelled", "Did not turn up", "Booked again"],
+      data.rows.map((r) => [r.service, number(r.kept), number(r.cancelled), number(r.missed), r.rebooked_pct === null ? "Not known" : `${r.rebooked_pct}%`]),
+    ),
+    el("p", { class: "muted" }, `The last three months of appointments, up to ${ukDate(data.period_to)}. "Booked again" is the share of customers who have another appointment after their last one.`),
   );
 }
 

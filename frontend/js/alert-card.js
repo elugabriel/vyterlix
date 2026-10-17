@@ -103,7 +103,12 @@ function stateBlocks(card, ctx, decide) {
     case "good_news":
       return [el("p", {}, el("strong", {}, "Good news. "), "This change is in your favour, so there is nothing to put right.")];
     case "no_suggestion":
-      return [el("p", { class: "muted" }, "We cannot say what to do about this yet. Open the explanation to see what we found.")];
+      return [
+        el("p", { class: "muted" }, "We cannot say what to do about this yet."),
+        card.missing && card.missing.length
+          ? el("div", {}, el("strong", {}, "What would help us suggest something"), el("ul", {}, ...card.missing.map((m) => el("li", {}, m))))
+          : null,
+      ];
     case "not_yet":
       return [el("p", { class: "muted" }, "A suggestion has not been made yet. An owner or manager can open this alert to get one.")];
     default:

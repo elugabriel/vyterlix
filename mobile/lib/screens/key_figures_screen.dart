@@ -39,6 +39,7 @@ class KeyFiguresScreen extends StatefulWidget {
 class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
   List<Kpi>? _kpis;
   QuietCustomers? _followUp;
+  ServicesBooked? _services;
   String? _workedOut;
   String? _error;
 
@@ -78,6 +79,15 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
       if (mounted) setState(() => _followUp = QuietCustomers.fromJson(data));
     } on ApiException {
       // the list is a bonus: the figures matter more
+    }
+    if (!mounted) return;
+    try {
+      final data = await context.read<ApiClient>().get(
+        '$_base/services',
+      ) as Map<String, dynamic>;
+      if (mounted) setState(() => _services = ServicesBooked.fromJson(data));
+    } on ApiException {
+      // a bonus too
     }
   }
 
@@ -146,12 +156,37 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
                 },
               ),
             ],
+          if (_services != null && _services!.rows.isNotEmpty)
+            ..._servicesView(_services!, muted),
           if (_followUp != null && _followUp!.customers.isNotEmpty)
             ..._followUpView(_followUp!, muted),
         ],
       ),
     );
   }
+
+  List<Widget> _servicesView(ServicesBooked s, Color muted) => [
+    const SectionTitle('Your services'),
+    for (final note in s.notes)
+      Padding(padding: const EdgeInsets.only(bottom: 4), child: Text(note)),
+    const SizedBox(height: 4),
+    for (final r in s.rows)
+      Card(
+        child: ListTile(
+          title: Text(
+            r.service,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          subtitle: Text(
+            '${r.kept} kept · ${r.cancelled} cancelled · ${r.missed} did not turn up',
+          ),
+          trailing: Text(
+            r.rebookedPct == null ? '' : '${r.rebookedPct}% book again',
+            style: TextStyle(color: muted, fontSize: 12),
+          ),
+        ),
+      ),
+  ];
 
   List<Widget> _followUpView(QuietCustomers f, Color muted) => [
     const SectionTitle('Customers to follow up'),

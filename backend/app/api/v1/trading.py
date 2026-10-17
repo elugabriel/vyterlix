@@ -11,6 +11,7 @@ from app.api.deps import DB, Meta, Tenant, require_permission
 from app.core.permissions import Perm
 from app.core.uk import today_uk
 from app.models.data import DATA_SOURCES, STOCK_MOVEMENT_KINDS
+from app.schemas.kpi import BookingChoicesOut
 from app.schemas.trading import (
     BookingCreate,
     BookingOut,
@@ -42,6 +43,7 @@ from app.schemas.trading import (
     SuppliersPage,
 )
 from app.services import trading as svc
+from app.services.kpi_breakdown import booking_choices as booking_choices_service
 
 DataManager = Annotated[Tenant, Depends(require_permission(Perm.DATA_MANAGE))]
 Limit = Annotated[int, Query(ge=1, le=100)]
@@ -355,6 +357,12 @@ def list_bookings(
         db, date_from=date_from, date_to=date_to, status=booking_status,
         customer_id=customer_id, q=q, limit=limit, offset=offset,
     )  # fmt: skip
+
+
+@bookings_router.get("/choices", response_model=BookingChoicesOut)
+def booking_choices(tenant: DataManager, db: DB):
+    """The services and staff already used, most used first, to pick from when typing one in."""
+    return booking_choices_service(db)
 
 
 @bookings_router.get("/{booking_id}", response_model=BookingOut)

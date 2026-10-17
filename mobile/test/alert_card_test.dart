@@ -422,14 +422,21 @@ void main() {
       expect(find.text('Accept'), findsNothing);
     });
 
-    testWidgets('no suggestion yet says so', (tester) async {
-      await show(
-        tester,
-        cardJson(
+    testWidgets('no suggestion yet says so, and what would help', (
+      tester,
+    ) async {
+      await show(tester, {
+        ...cardJson(
           state: 'no_suggestion',
           canDecide: false,
           withSuggestion: false,
         ),
+        'missing': ['Say which customer bought on each sale.'],
+      });
+      expect(find.text('What would help us suggest something'), findsOneWidget);
+      expect(
+        find.textContaining('Say which customer bought on each sale.'),
+        findsOneWidget,
       );
       expect(
         find.textContaining('We cannot say what to do about this yet.'),

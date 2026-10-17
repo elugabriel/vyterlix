@@ -89,11 +89,29 @@ function waitingFor(d) {
 
 const OUTCOME_CLASS = { successful: "glance-good", partially_successful: "glance-watch", unsuccessful: "glance-bad", inconclusive: "glance-neutral" };
 
+/** How the checked actions turned out, as one bar with the same words under it. */
+function outcomeBar(r) {
+  const parts = [
+    [r.successful, "glance-ok", "worked"],
+    [r.partially_successful, "glance-warn", "partly worked"],
+    [r.unsuccessful, "glance-bad-bar", "did not work"],
+    [r.inconclusive, "glance-grey", "cannot be measured yet"],
+  ].filter(([n]) => n > 0);
+  if (!parts.length) return null;
+  return el(
+    "div",
+    { class: "outcome-bar-box" },
+    el("div", { class: "outcome-bar", role: "img", "aria-label": parts.map(([n, , w]) => `${n} ${w}`).join(", ") }, ...parts.map(([n, c]) => el("span", { class: c, style: `flex:${n}` }))),
+    el("p", { class: "muted" }, parts.map(([n, , w]) => `${n} ${w}`).join(" · ")),
+  );
+}
+
 function results(d) {
   const r = d.results;
   return question(
     "Did my actions help?",
     el("p", {}, r.sentence),
+    outcomeBar(r),
     r.latest.length
       ? el("div", { class: "glance-list" }, ...r.latest.map((i) => el("a", { class: `glance-item ${OUTCOME_CLASS[i.outcome]}`, href: page(i.link) }, el("strong", {}, `${i.outcome_label}: ${i.title}`), el("span", { class: "muted" }, i.reason))))
       : null,

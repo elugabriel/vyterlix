@@ -27,6 +27,7 @@ class ChangeWords:
     season: (
         str | None
     )  # set when the change is about what the owner's busy and quiet times lead them to expect
+    data_note: str | None = None  # set when the figures behind the month are incomplete
 
 
 def _show(value: Decimal, unit: str) -> str:
@@ -53,6 +54,8 @@ def explain_change(
     change: str,
     change_unit: str,  # "percent" or "points"
     explained_by_season: bool,
+    kind: str = "material_change",  # or "anomaly": unusual for this business, not just moved
+    data_quality: int | None = None,
 ) -> ChangeWords:
     month = f"{period_start:%B %Y}"
     size = "sharply" if severity == "major" else "noticeably"
@@ -79,6 +82,10 @@ def explain_change(
     now, before, amount = Decimal(value), Decimal(reference_value), abs(Decimal(change))
     how_much = f"{amount:.1f} points" if change_unit == "points" else f"{amount:.1f}%"
     numbers = f"{kpi_name} was {_show(now, unit)}, compared with {_show(before, unit)} last month ({'up' if direction == 'up' else 'down'} {how_much})."
+    if kind == "anomaly":
+        # the reference is what is normal for the business, not last month
+        headline = f"{kpi_name} was unusually {'high' if direction == 'up' else 'low'} in {month}."
+        numbers = f"{kpi_name} was {_show(now, unit)}. It is normally around {_show(before, unit)}."
 
     if plain is None:  # a figure the wording table does not know: say only what is certain
         happened, why, tone = (
@@ -88,9 +95,16 @@ def explain_change(
         )
     else:
         happened, why, tone = plain.says, plain.why, plain.tone
+    if kind == "anomaly":
+        happened = f"{kpi_name} was {'higher' if direction == 'up' else 'lower'} than it normally is for your business."
     season = (
         "This is about what your busy and quiet times lead you to expect."
         if explained_by_season
         else None
     )
-    return ChangeWords(headline, happened, numbers, why, tone, season)
+    data_note = (
+        "Some of the figures behind this month are missing, so treat this with care."
+        if data_quality is not None and data_quality < 80
+        else None
+    )
+    return ChangeWords(headline, happened, numbers, why, tone, season, data_note)

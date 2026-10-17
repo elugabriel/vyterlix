@@ -97,4 +97,5 @@ class AlertCardOut(BaseModel):
     dismissed_reason: str | None
     postponed_until: date | None  # the day it comes back, while it is put off
     next_step: NextStepOut | None
+    missing: list[str] = []  # what would let us suggest something, when we cannot yet
     can_decide: bool  # this person may accept or dismiss

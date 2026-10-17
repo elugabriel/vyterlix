@@ -15,10 +15,11 @@ data analyst. Make it personalised, practical and easy to understand.
 
 ## 0. To confirm with the client
 
-- [?] **Charts and graphs over words.** Raised verbally; the written feedback says words on top of
+- [x] **Charts and graphs over words.** DECIDED (owner, 17/10/2026): charts alongside the plain words, which is what is built.
+  (earlier note:) Raised verbally; the written feedback says words on top of
   charts ("beyond the dashboards, charts and figures…"). Agree the rule: a chart first, one plain
   sentence under it. Ask which screens most need charts (suggested: alerts and Today).
-- [?] **Business types to support first** (suggest retail plus one service type, such as salon or barber).
+- [x] **Business types to support first.** DECIDED (owner, 17/10/2026): all small and medium businesses, so every type needs measures, not just retail. (earlier note:) (suggest retail plus one service type, such as salon or barber).
 - [?] **Is service-business data (bookings, appointments) in the original scope?** It changes the data
   model; check the contract and milestones.
 - [?] **Her question list (§8)**: send her honest answers (see section 8 below) and what is planned.
@@ -49,7 +50,7 @@ data analyst. Make it personalised, practical and easy to understand.
 - [x] **Only name a specific cause when the data supports it:** the figure sentences never state a cause (a test checks every sentence); causes stay on the What changed page, with evidence.
 - [x] Rename the dashboard category **"Money" to "Financial Health"** (costs, profit, margins and cash flow where
   data exists). Keep **"Sales"** separate. (Website, phone app, alerts, notifications, settings.)
-- [~] All other labels: simple words first, technical terms explained when needed. Done for the figures; the alert and What changed wording is still technical (for example "248.9 points below your usual"), to be rewritten with the alert card (item 2).
+- [x] All other labels: simple words first, technical terms explained when needed. The What changed page now uses the same plain words as the alert card (headline, what happened, the figures, why it matters), and the technical wording ("324 points below your usual", "75 out of 100") is gone, website and phone. (earlier note:) Done for the figures; the alert and What changed wording is still technical (for example "248.9 points below your usual"), to be rewritten with the alert card (item 2).
 
 ## 3. The recommendation and follow-up loop (§3: her most important feedback)
 
@@ -94,7 +95,7 @@ Her figures are illustrations, not real results.
   Follow-up: remaining stock, sales and margin; **if a promotion did not help, do not repeat it automatically**.
 - [~] **D. Quiet appointment times** (Tuesday afternoons). Recommend a small Tuesday-only offer or booking reminders; a two-week trial. Follow-up: compare Tuesday bookings **and earnings** before and after; if bookings rose but profit fell, suggest a different approach.
   - Exists: "Run a special on the day that has gone quiet" (from sales). Needs booking data for service businesses.
-- [~] **E. Popular service, weak rebooking.** (Recommendation done: "Offer the next appointment before they leave", for a fall in customers who booked again. "Popular service" breakdown still to do.) Recommend offering the next appointment at checkout or a reminder at the normal repeat interval. Follow-up after one month; record whether reminders or staff prompts worked better. (Needs booking data.)
+- [x] **E. Popular service, weak rebooking.** (Done: "Your services" lists what people book, most popular first, with cancelled, missed and booked-again, and says so when few people for one service book again; the recommendation "Offer the next appointment before they leave" is there for the overall fall.) Recommend offering the next appointment at checkout or a reminder at the normal repeat interval. Follow-up after one month; record whether reminders or staff prompts worked better. (Needs booking data.)
 - [x] **F. Rising cancellations.** Recommend reminders 24 to 48 hours before, or a clear cancellation policy. Follow-up: compare late cancellations over four weeks **and check customers are still satisfied**. (Needs booking data.)
 - [~] **G. Costs rising faster than sales.** Recommend reviewing the largest cost increases first; **do not recommend cutting costs blindly** without checking the effect on service quality. Create a review task for the owner or finance lead. Follow-up: did costs fall, and were sales or customer experience affected.
   - Exists: "Go through the cost that grew" and "Get quotes and renegotiate with the supplier". Missing: the quality-of-service check.
@@ -117,13 +118,13 @@ Her figures are illustrations, not real results.
 - [x] **Onboarding asks whether the business sells products, provides services, or both.** ("What do you sell?" in business details.)
 - [~] Key figures and forecasts adapt to that choice (services: no stock figures). Recommendations adapt in item 6 and 7.
 - [ ] Retail and wholesale: best sellers, slow stock, reorders, margins, repeat buyers, suppliers. (Largely exists.)
-- [~] Salon, barber and beauty: repeat bookings, no-shows and cancellations now have figures. Popular services, staff availability and quiet periods still to do.
+- [~] Salon, barber and beauty: repeat bookings, no-shows and cancellations now have figures. Popular services are done ("Your services"), and services and staff are offered as you type them in (website and phone). Staff availability and quiet periods still to do.
 - [ ] Consultancy and agency: leads, proposals, client renewals, project profitability, unpaid invoices, staff capacity.
 - [ ] Cleaning, repair and home services: bookings, repeat contracts, travel or service costs, cancellations, customer satisfaction.
 - [ ] Mixed businesses: show product and service insights where relevant, without forcing one set of measures on everything.
 - [x] **No empty "Stock to watch" section** for a business that sells only a service (website and phone). "Customers to follow up" is shown instead. ("Bookings to watch" waits for booking data, item 7.)
-- [ ] When there is not enough data for a recommendation, **say what is missing**. (Data quality exists; not tied to each recommendation.)
-- [~] New data types for service businesses. **Appointments can now be typed in** (website: Type in data, Appointment tab; service, day, what happened, customer, who, day cancelled). Figures from them: appointments kept, cancelled, missed, late cancellations, customers who booked again. Still to do: file import of appointments, a list of services and staff, and the phone app (which has no data entry yet).
+- [x] When there is not enough data for a recommendation, **say what is missing**: the alert card lists what would help (add appointments, say which customer bought, add stock records, fill gaps in the data, record the product on each sale), website and phone.
+- [~] New data types for service businesses. **Appointments can now be typed in** (website: Type in data, Appointment tab; service, day, what happened, customer, who, day cancelled). Figures from them: appointments kept, cancelled, missed, late cancellations, customers who booked again. Also done: a services and staff pick-list, and typing in an appointment on the phone. Still to do: file import of appointments.
 
 ## 7. StableScore AI as a reference, and going further (§7)
 
@@ -161,7 +162,7 @@ Her figures are illustrations, not real results.
 - [x] Action results show a **before and after chart** (website and phone).
 - [x] Forecasts show the likely range as a band on a line graph (website and phone).
 - [x] Today shows a simple picture of the trend (how the first key figure has moved, with the latest finished month marked).
-- [ ] Today also shows how actions are doing as a picture (today it is one plain sentence and the latest results).
+- [x] Today also shows how actions are doing as a picture: one bar of worked / partly worked / did not work / cannot be measured yet, with the same words under it (website and phone).
 - [~] One reusable "chart plus one plain sentence" component, used everywhere (the same bar chart is used on the card, Today and results, each with its own sentence).
 
 ---

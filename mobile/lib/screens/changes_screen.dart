@@ -210,9 +210,17 @@ class _ChangeCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        change.summary,
+                        change.plain?.happened ?? change.summary,
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
+                      if (change.plain != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            change.plain!.numbers,
+                            style: TextStyle(color: muted, fontSize: 12),
+                          ),
+                        ),
                       if (change.explainedBySeason)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
@@ -361,10 +369,28 @@ class _ChangeDetailScreenState extends State<ChangeDetailScreen> {
         ),
         const SizedBox(height: 12),
         Text(
-          change.summary,
+          change.plain?.headline ?? change.summary,
           style: Theme.of(context).textTheme.titleMedium
               ?.copyWith(fontWeight: FontWeight.w700),
         ),
+        if (change.plain != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            change.plain!.happened,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 4),
+          Text(change.plain!.numbers, style: TextStyle(color: muted)),
+          const SizedBox(height: 4),
+          Text(change.plain!.why),
+          if (change.plain!.dataNote != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              change.plain!.dataNote!,
+              style: const TextStyle(color: Palette.bad),
+            ),
+          ],
+        ],
         if (change.explainedBySeason) ...[
           const SizedBox(height: 8),
           Text(

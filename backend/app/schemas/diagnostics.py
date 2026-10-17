@@ -5,6 +5,18 @@ from typing import Literal
 from pydantic import BaseModel
 
 
+class ChangeWordsOut(BaseModel):
+    """The change in everyday words (the same words as on the alert card)."""
+
+    headline: str
+    happened: str
+    numbers: str
+    why: str
+    tone: Literal["good", "bad", "watch", "neutral", "unknown"]
+    season: str | None
+    data_note: str | None
+
+
 class DetectionOut(BaseModel):
     """Something worth a look in a business's figures, with the numbers behind it."""
 
@@ -26,6 +38,7 @@ class DetectionOut(BaseModel):
     explained_by_season: bool  # about what the owner's busy and quiet seasons lead you to expect
     data_quality: int | None
     summary: str  # a plain sentence on what moved and by how much
+    plain: ChangeWordsOut | None = None
     status: Literal["open", "dismissed", "diagnosed"]
     detected_at: datetime
 

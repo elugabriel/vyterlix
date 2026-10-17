@@ -413,6 +413,33 @@ class StockRequirements {
   final List<StockNeed> rows;
 }
 
+/// A change in everyday words: what happened, the figures, and why it matters.
+class ChangeWords {
+  const ChangeWords({
+    required this.headline,
+    required this.happened,
+    required this.numbers,
+    required this.why,
+    this.dataNote,
+  });
+
+  static ChangeWords? from(Object? json) => json is! Map<String, dynamic>
+      ? null
+      : ChangeWords(
+          headline: '${json['headline']}',
+          happened: '${json['happened']}',
+          numbers: '${json['numbers']}',
+          why: '${json['why']}',
+          dataNote: json['data_note'] as String?,
+        );
+
+  final String headline;
+  final String happened;
+  final String numbers;
+  final String why;
+  final String? dataNote;
+}
+
 class Change {
   const Change({
     required this.id,
@@ -425,6 +452,7 @@ class Change {
     required this.summary,
     required this.status,
     required this.explainedBySeason,
+    this.plain,
   });
 
   factory Change.fromJson(Map<String, dynamic> json) => Change(
@@ -438,6 +466,7 @@ class Change {
     summary: '${json['summary']}',
     status: '${json['status']}',
     explainedBySeason: json['explained_by_season'] == true,
+    plain: ChangeWords.from(json['plain']),
   );
 
   final String id;
@@ -458,6 +487,9 @@ class Change {
   /// open, dismissed or diagnosed
   final String status;
   final bool explainedBySeason;
+
+  /// The same change in everyday words (null from an older server).
+  final ChangeWords? plain;
 }
 
 class Evidence {
