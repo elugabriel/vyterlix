@@ -217,6 +217,28 @@ SALES = (
         "store",
         "location",
     ),
+    _f(
+        "due_on",
+        "Due date",
+        "For an invoice: the day it must be paid by (UK format).",
+        "date",
+        "due date",
+        "due",
+        "payment due",
+        "due on",
+        "pay by",
+    ),
+    _f(
+        "paid_on",
+        "Date paid",
+        "For an invoice: the day it was paid. Leave blank if it is still owed.",
+        "date",
+        "paid on",
+        "date paid",
+        "paid date",
+        "payment date",
+        "paid",
+    ),
     _f("notes", "Notes", "Anything else worth keeping.", "text", "notes", "note", "comment"),
 )
 
@@ -551,6 +573,97 @@ STOCK_MOVEMENTS = (
     ),
 )
 
+BOOKINGS = (
+    _f(
+        "booked_for",
+        "Day of the appointment",
+        "The day it was booked for (UK format).",
+        "date",
+        "date",
+        "day",
+        "appointment date",
+        "booking date",
+        "booked for",
+        "appointment",
+    ),
+    _f(
+        "service",
+        "Service",
+        "What it was for, for example haircut or boiler service.",
+        "text",
+        "service",
+        "treatment",
+        "job",
+        "job type",
+        "appointment type",
+        "description",
+    ),
+    _f(
+        "status",
+        "What happened",
+        "completed, cancelled, no_show or booked (still to come). If unmapped it is worked out "
+        "from the day: past appointments went ahead, future ones are still to come.",
+        "choice",
+        "status",
+        "outcome",
+        "result",
+        "attended",
+        "state",
+    ),
+    _f(
+        "customer_name",
+        "Customer name",
+        "Who it was for.",
+        "text",
+        "customer",
+        "customer name",
+        "client",
+        "client name",
+        "name",
+    ),
+    _f(
+        "customer_email",
+        "Customer email",
+        "Their email address (used to recognise them).",
+        "email",
+        "email",
+        "customer email",
+        "client email",
+    ),
+    _f(
+        "staff",
+        "Who did it",
+        "The person who did, or was to do, it.",
+        "text",
+        "staff",
+        "stylist",
+        "technician",
+        "employee",
+        "assigned to",
+    ),
+    _f(
+        "cancelled_on",
+        "Day cancelled",
+        "The day they cancelled, so late cancellations can be counted.",
+        "date",
+        "cancelled on",
+        "cancellation date",
+        "date cancelled",
+    ),
+    _f("notes", "Notes", "Anything else worth keeping.", "text", "notes", "note", "comment"),
+    _f(
+        "reference",
+        "Booking reference",
+        _REFERENCE_HELP,
+        "text",
+        "reference",
+        "ref",
+        "booking id",
+        "booking number",
+        "id",
+    ),
+)
+
 DATASET_FIELDS: dict[str, tuple[ImportField, ...]] = {
     "sales": SALES,
     "expenses": EXPENSES,
@@ -558,6 +671,7 @@ DATASET_FIELDS: dict[str, tuple[ImportField, ...]] = {
     "suppliers": SUPPLIERS,
     "products": PRODUCTS,
     "stock_movements": STOCK_MOVEMENTS,
+    "bookings": BOOKINGS,
 }
 
 # Fields that must be mapped, and groups where at least one of them must be.
@@ -568,6 +682,7 @@ REQUIRED: dict[str, tuple[str, ...]] = {
     "suppliers": ("name",),
     "products": ("name",),
     "stock_movements": ("moved_on", "quantity"),
+    "bookings": ("booked_for", "service"),
 }
 ONE_OF: dict[str, tuple[tuple[str, ...], ...]] = {
     "customers": (("name", "email"),),

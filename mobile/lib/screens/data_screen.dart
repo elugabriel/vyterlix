@@ -10,6 +10,7 @@ import '../widgets/severity.dart';
 import 'appointment_screen.dart';
 import 'entry_screen.dart';
 import 'imports_screen.dart';
+import 'lead_screen.dart';
 import 'upload_screen.dart';
 
 Color bandColor(String? band) {
@@ -161,6 +162,15 @@ class _DataScreenState extends State<DataScreen> {
                 ),
                 icon: const Icon(Icons.event_available_rounded),
                 label: const Text('Type in an appointment'),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: () => _go(LeadScreen(business: widget.business)),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                ),
+                icon: const Icon(Icons.handshake_outlined),
+                label: const Text('Type in a lead or proposal'),
               ),
             ],
             const SizedBox(height: 10),

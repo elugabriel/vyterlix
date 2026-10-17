@@ -21,6 +21,13 @@ const TABS = [
   ["product", "Product"],
   ["stock", "Stock"],
   ["booking", "Appointment"],
+  ["opportunity", "Lead or proposal"],
+];
+const STAGES = [
+  ["lead", "A lead (an enquiry)"],
+  ["proposal", "Proposal sent"],
+  ["won", "Won"],
+  ["lost", "Lost"],
 ];
 const BOOKING_STATUSES = [
   ["booked", "Still to come"],
@@ -52,7 +59,7 @@ let sells = null;
 async function start({ org }) {
   orgId = org.id;
   sells = org.sells ?? null;
-  if (sells === "products" && tab === "booking") tab = "sale";
+  if (sells === "products" && ["booking", "opportunity"].includes(tab)) tab = "sale";
   document.getElementById("org-name").textContent = org.name;
   document.getElementById("nav").replaceChildren(dataNav(orgId, "entry"));
   if (!requireDataManager(org, message)) return;
@@ -104,7 +111,7 @@ async function render() {
       return button;
     }),
   );
-  const builder = { sale, expense, customer, supplier, product, stock, booking }[tab];
+  const builder = { sale, expense, customer, supplier, product, stock, booking, opportunity }[tab];
   const { form, recent } = builder();
   const box = el("div", { class: "message", role: "alert", hidden: true });
   const listBox = el("div", {});
@@ -125,7 +132,7 @@ async function render() {
 }
 
 // Appointments are for a business that sells a service; one that sells only products does not see them.
-const visibleTabs = () => TABS.filter(([key]) => key !== "booking" || sells !== "products");
+const visibleTabs = () => TABS.filter(([key]) => !["booking", "opportunity"].includes(key) || sells !== "products");
 
 // --- shared pieces -----------------------------------------------------------------------------------
 
@@ -219,6 +226,12 @@ function sale() {
       field("Sales channel (optional)", select("sales_channel_id", choices.channels, { placeholder: "Not set" })),
     ),
     el("div", { class: "row" }, field("Reference (optional)", input("reference", { maxlength: 200 }), "e.g. an invoice or receipt number. Each can only be used once."), field("Notes (optional)", input("notes", { maxlength: 2000 }))),
+    el(
+      "div",
+      { class: "row" },
+      field("Invoice due by (optional)", input("due_on", { type: "date", value: "" }), "Only for an invoice you will be paid later for. It lets Vyterlix show what you are owed."),
+      field("Paid on (optional)", input("paid_on", { type: "date", value: "" }), "Leave blank if you are still waiting to be paid."),
+    ),
     lines.node,
     el("button", { type: "submit" }, "Save sale"),
   );
@@ -234,14 +247,16 @@ function sale() {
           sales_channel_id: optionalId(v.sales_channel_id),
           reference: orNull(v.reference),
           notes: orNull(v.notes),
+          due_on: orNull(v.due_on),
+          paid_on: orNull(v.paid_on),
           lines: lines.read(),
         }),
     },
     recent: {
       path: "sales",
       title: "Latest sales (newest first)",
-      headers: ["Date", "Reference", "Total", "Type", "Source", ""],
-      cells: (s) => [ukDate(s.sold_on), s.reference ?? "–", gbp(s.gross_amount), kindText[s.kind], SOURCE[s.source] ?? s.source],
+      headers: ["Date", "Reference", "Total", "Type", "Paid", "Source", ""],
+      cells: (s) => [ukDate(s.sold_on), s.reference ?? "–", gbp(s.gross_amount), kindText[s.kind], s.due_on ? (s.paid_on ? `Paid ${ukDate(s.paid_on)}` : `Owed, due ${ukDate(s.due_on)}`) : "–", SOURCE[s.source] ?? s.source],
     },
   };
 }
@@ -520,6 +535,51 @@ function picker(name, used, attrs) {
   const id = `list-${name}`;
   const box = input(name, { ...attrs, list: id, autocomplete: "off" });
   return el("div", {}, box, el("datalist", { id }, ...used.map((value) => el("option", { value }))));
+}
+
+function opportunity() {
+  const stage = select("stage", STAGES, { selected: "lead" });
+  const proposalField = field("Day the proposal was sent (optional)", input("proposal_on", { type: "date", value: "" }), "Leave blank for today.");
+  const closedField = field("Day it was won or lost (optional)", input("closed_on", { type: "date", value: "" }), "Leave blank for today.");
+  const sync = () => {
+    proposalField.hidden = !["proposal", "won", "lost"].includes(stage.value);
+    closedField.hidden = !["won", "lost"].includes(stage.value);
+  };
+  stage.addEventListener("change", sync);
+  sync();
+  const node = el(
+    "form",
+    { novalidate: true },
+    el("div", { class: "row" }, field("What is it?", input("name", { maxlength: 200, required: true }), "For example: website for Acme, or Acme's yearly contract."), field("Where is it up to?", stage)),
+    el("div", { class: "row" }, field("New work or a renewal?", select("kind", [["new", "New work"], ["renewal", "A client renewing"]], { selected: "new" })), field("Worth (£, before VAT, optional)", input("value", { type: "number", step: "0.01", min: "0" }))),
+    el("div", { class: "row" }, field("Day the lead came in", input("created_on", { type: "date", value: todayUk(), required: true })), field("Client (optional)", select("customer_id", choices.customers, { placeholder: "Not recorded" }))),
+    el("div", { class: "row" }, proposalField, closedField),
+    el("div", { class: "row" }, field("Notes (optional)", input("notes", { maxlength: 300 }))),
+    el("button", { type: "submit" }, "Save"),
+  );
+  return {
+    form: {
+      node,
+      submit: (v) =>
+        api.post(path("opportunities"), {
+          name: v.name,
+          stage: v.stage,
+          kind: v.kind,
+          value: orNull(v.value),
+          created_on: orNull(v.created_on),
+          proposal_on: ["proposal", "won", "lost"].includes(v.stage) ? orNull(v.proposal_on) : null,
+          closed_on: ["won", "lost"].includes(v.stage) ? orNull(v.closed_on) : null,
+          customer_id: orNull(v.customer_id),
+          notes: orNull(v.notes),
+        }),
+    },
+    recent: {
+      path: "opportunities",
+      title: "Latest leads and proposals (newest first)",
+      headers: ["Came in", "What", "Where it is up to", "Worth", ""],
+      cells: (o) => [ukDate(o.created_on), `${o.name}${o.kind === "renewal" ? " (renewal)" : ""}`, STAGES.find(([k]) => k === o.stage)?.[1] ?? o.stage, o.value === null ? "–" : gbp(o.value)],
+    },
+  };
 }
 
 const customerName = (id) => choices.customers.find(([cid]) => cid === id)?.[1];

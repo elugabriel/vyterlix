@@ -119,12 +119,12 @@ Her figures are illustrations, not real results.
 - [~] Key figures and forecasts adapt to that choice (services: no stock figures). Recommendations adapt in item 6 and 7.
 - [ ] Retail and wholesale: best sellers, slow stock, reorders, margins, repeat buyers, suppliers. (Largely exists.)
 - [~] Salon, barber and beauty: repeat bookings, no-shows and cancellations now have figures. Popular services are done ("Your services"), and services and staff are offered as you type them in (website and phone). Staff availability and quiet periods still to do.
-- [ ] Consultancy and agency: leads, proposals, client renewals, project profitability, unpaid invoices, staff capacity.
-- [ ] Cleaning, repair and home services: bookings, repeat contracts, travel or service costs, cancellations, customer satisfaction.
-- [ ] Mixed businesses: show product and service insights where relevant, without forcing one set of measures on everything.
+- [~] Consultancy and agency: **leads, proposals, wins and client renewals** (type in a lead or proposal on the website and the phone; figures: new leads, proposals sent, proposals won, work won, clients who renewed; suggestions: look back at lost proposals, ask for introductions, talk before renewal) and **unpaid invoices** (money owed, overdue, days to get paid; a sale can have a due day and a paid day, typed in or from a file) are done. **Project profitability and staff capacity** need time and project records that do not exist yet: not started.
+- [~] Cleaning, repair and home services: jobs are appointments (typed in or imported from a file), with kept, cancelled, missed and booked-again figures, popular services, money owed, and costs. **Customer satisfaction** (ratings) and **repeat contracts** as such are not started.
+- [x] Mixed businesses: product and service figures both show; each set only appears when the business has that kind of record (stock, appointments, invoices, leads).
 - [x] **No empty "Stock to watch" section** for a business that sells only a service (website and phone). "Customers to follow up" is shown instead. ("Bookings to watch" waits for booking data, item 7.)
 - [x] When there is not enough data for a recommendation, **say what is missing**: the alert card lists what would help (add appointments, say which customer bought, add stock records, fill gaps in the data, record the product on each sale), website and phone.
-- [~] New data types for service businesses. **Appointments can now be typed in** (website: Type in data, Appointment tab; service, day, what happened, customer, who, day cancelled). Figures from them: appointments kept, cancelled, missed, late cancellations, customers who booked again. Also done: a services and staff pick-list, and typing in an appointment on the phone. Still to do: file import of appointments.
+- [~] New data types for service businesses. **Appointments can now be typed in** (website: Type in data, Appointment tab; service, day, what happened, customer, who, day cancelled). Figures from them: appointments kept, cancelled, missed, late cancellations, customers who booked again. Also done: a services and staff pick-list, and typing in an appointment on the phone. Appointments can also be **imported from a file** (CSV or Excel), with the same checks and undo as sales.
 
 ## 7. StableScore AI as a reference, and going further (§7)
 

@@ -29,7 +29,7 @@ from app.kpi import periods
 from app.kpi.expression import Compiled, ExpressionError, compile_expression, evaluate
 from app.kpi.measures import MEASURES, PRESENCE, compute_series, has_records
 from app.models.business import BusinessProfile
-from app.models.data import Booking, Expense, Sale, StockMovement
+from app.models.data import Booking, Expense, Opportunity, Sale, StockMovement
 from app.models.kpi import KpiCalculationRun, KpiDefinition, KpiValue
 from app.plain.figures import explain_figure
 from app.schemas.kpi import KpiHistoryOut, KpiOut, KpisOut, KpiValueOut, PlainOut, RunOut
@@ -77,9 +77,15 @@ def active_definitions(db: Session) -> list[KpiDefinition]:
 
 
 def _data_bounds(db: Session) -> tuple[date, date] | None:
-    """The first and last date the business has any sales, expenses, stock or bookings on."""
+    """The first and last date the business has any sales, costs, stock, bookings or leads on."""
     lows, highs = [], []
-    for column in (Sale.sold_on, Expense.spent_on, StockMovement.moved_on, Booking.booked_for):
+    for column in (
+        Sale.sold_on,
+        Expense.spent_on,
+        StockMovement.moved_on,
+        Booking.booked_for,
+        Opportunity.created_on,
+    ):
         low, high = db.execute(select(func.min(column), func.max(column))).one()
         if low is not None:
             lows.append(low)
@@ -290,6 +296,12 @@ def list_kpis(db: Session, granularity: str = "month") -> KpisOut:
     if sells == "services":
         # No stock to count: do not show a Stock group of figures that can never be worked out
         definitions = [d for d in definitions if d.category != "inventory"]
+    if not has_records(db, "pipeline"):
+        # Leads and win rates are for a business that quotes for work
+        definitions = [d for d in definitions if "pipeline" not in d.requires]
+    if not has_records(db, "invoices"):
+        # Money owed is for a business that sends invoices (a shop takes the money at the till)
+        definitions = [d for d in definitions if "invoices" not in d.requires]
     if sells == "products" or (sells is None and not has_records(db, "bookings")):
         # Appointment figures are for a business that takes bookings
         definitions = [d for d in definitions if "bookings" not in d.requires]

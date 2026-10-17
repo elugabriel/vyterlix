@@ -16,7 +16,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
-from app.models.data import STOCK_MOVEMENT_KINDS
+from app.models.data import BOOKING_STATUSES, STOCK_MOVEMENT_KINDS
 from app.services import import_fields as fields
 from app.services import value_parsers as vp
 from app.services.money import VatError, vat_split
@@ -166,7 +166,13 @@ def _transaction(row: _Row, options: dict, today: date | None, *, dataset: str) 
             "sku": row.text("sku", 100),
             "channel": row.text("channel", 100),
             "notes": row.text("notes", 2000),
+            "due_on": row.read("due_on", lambda t: vp.parse_date(t, today=today, ahead_days=366)),
+            "paid_on": row.read("paid_on", lambda t: vp.parse_date(t, today=today)),
         }
+        if extras["due_on"] is not None and when is not None and extras["due_on"] < when:
+            row.error(
+                "due_on", "due_before_sale", "An invoice cannot be due before the day of the sale."
+            )
     else:
         positive, negative = "expense", "credit"
         extras = {
@@ -333,6 +339,66 @@ def _direction_ok(kind: str, quantity: Decimal) -> bool:
     }[kind]
 
 
+def _booking_status(text: str) -> str:
+    word = text.strip().lower().replace("-", "_").replace(" ", "_")
+    word = {
+        "done": "completed", "attended": "completed", "kept": "completed", "yes": "completed",
+        "went_ahead": "completed", "complete": "completed",
+        "canceled": "cancelled", "cancel": "cancelled",
+        "noshow": "no_show", "did_not_attend": "no_show", "dna": "no_show", "missed": "no_show",
+        "no": "no_show", "upcoming": "booked", "pending": "booked", "confirmed": "booked",
+    }.get(word, word)  # fmt: skip
+    if word not in BOOKING_STATUSES:
+        raise CellError(
+            "invalid_booking_status",
+            f"'{text.strip()}' isn't something that can happen to an appointment. Use one of: "
+            + ", ".join(BOOKING_STATUSES)
+            + ".",
+        )
+    return word
+
+
+def _booking(row: _Row, options: dict, today: date | None) -> None:
+    # an appointment can be booked up to a year ahead
+    day = row.read(
+        "booked_for", lambda t: vp.parse_date(t, today=today, ahead_days=366), required=True
+    )
+    service = row.text("service", 200, required=True)
+    status = row.read("status", _booking_status)
+    cancelled_on = row.read("cancelled_on", lambda t: vp.parse_date(t, today=today))
+    if status is None and not row.cell("status") and day is not None:
+        status = (
+            "cancelled"
+            if cancelled_on
+            else "completed"
+            if day <= (today or date.today())
+            else "booked"
+        )
+    if cancelled_on is not None and status != "cancelled":
+        row.error(
+            "cancelled_on", "not_cancelled", "A day cancelled is only for a cancelled appointment."
+        )
+    elif cancelled_on is not None and day is not None and cancelled_on > day:
+        row.error("cancelled_on", "cancelled_after", "It cannot be cancelled after its own day.")
+    email = row.read("customer_email", vp.parse_email)
+    reference = row.text("reference", 200)
+    row.out.values.update(
+        {
+            "booked_for": day,
+            "service": service,
+            "status": status,
+            "customer_name": row.text("customer_name", 200),
+            "customer_email": email,
+            "staff": row.text("staff", 100),
+            "cancelled_on": cancelled_on,
+            "notes": row.text("notes", 300),
+            "reference": reference,
+        }
+    )
+    row.out.reference = reference
+    row.out.key = ("ref", reference) if reference else None
+
+
 _PARSERS: dict[str, Callable[[_Row, dict, date | None], None]] = {
     "sales": lambda r, o, t: _transaction(r, o, t, dataset="sales"),
     "expenses": lambda r, o, t: _transaction(r, o, t, dataset="expenses"),
@@ -340,4 +406,5 @@ _PARSERS: dict[str, Callable[[_Row, dict, date | None], None]] = {
     "suppliers": _supplier,
     "products": _product,
     "stock_movements": _stock_movement,
+    "bookings": _booking,
 }

@@ -44,6 +44,9 @@ EXPENSE_KINDS = ("expense", "credit")
 STOCK_MOVEMENT_KINDS = ("opening", "delivery", "sale", "return", "adjustment", "write_off")
 # What became of an appointment: still to come, went ahead, was cancelled, or they did not turn up.
 BOOKING_STATUSES = ("booked", "completed", "cancelled", "no_show")
+# A piece of work you are trying to win: a lead, a proposal sent, then won or lost.
+OPPORTUNITY_STAGES = ("lead", "proposal", "won", "lost")
+OPPORTUNITY_KINDS = ("new", "renewal")
 
 Money = Numeric(18, 4)
 Quantity = Numeric(18, 4)
@@ -169,6 +172,7 @@ class Sale(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOriginMix
             name="sign_matches_kind",
         ),
         CheckConstraint("discount_amount >= 0", name="discount_not_negative"),
+        CheckConstraint("due_on IS NULL OR due_on >= sold_on", name="due_not_before_sale"),
         Index("ix_sales_org_date", "organization_id", "sold_on"),
         # Foreign-key lookups: without these, deleting a customer or channel scans every sale.
         Index("ix_sales_org_customer", "organization_id", "customer_id"),
@@ -184,6 +188,10 @@ class Sale(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOriginMix
     gross_amount: Mapped[Decimal] = mapped_column(Money)  # what the customer paid
     discount_amount: Mapped[Decimal] = mapped_column(Money, server_default=text("0"))
     currency: Mapped[str] = mapped_column(String(3), server_default="GBP")
+    # An invoice: when it must be paid by, and when it was. A sale with no due day is not an invoice
+    # (a shop takes the money at the till), so it is never "owed".
+    due_on: Mapped[date | None] = mapped_column(Date)
+    paid_on: Mapped[date | None] = mapped_column(Date)
     notes: Mapped[str | None] = mapped_column(Text)
 
 
@@ -305,4 +313,34 @@ class Booking(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigin
     customer_id: Mapped[uuid.UUID | None] = mapped_column()
     staff: Mapped[str | None] = mapped_column(String(100))  # who was to do it
     cancelled_on: Mapped[date | None] = mapped_column(Date)  # the day they cancelled
+    notes: Mapped[str | None] = mapped_column(String(300))
+
+
+class Opportunity(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOriginMixin, Base):
+    """A lead, proposal or renewal for a business that wins work (consultancy, agency, trades).
+    What is won turns into sales as usual; this records the road to it, which is what the number of
+    leads, the win rate and the renewal rate are worked out from."""
+
+    __tablename__ = "opportunities"
+    __table_args__ = (
+        *_origin_rules("opportunities"),
+        _tenant_fk("customer_id", "customers"),
+        CheckConstraint(_one_of("stage", OPPORTUNITY_STAGES), name="stage_valid"),
+        CheckConstraint(_one_of("kind", OPPORTUNITY_KINDS), name="kind_valid"),
+        CheckConstraint("value IS NULL OR value >= 0", name="value_not_negative"),
+        CheckConstraint(
+            "(stage IN ('won', 'lost')) = (closed_on IS NOT NULL)", name="closed_when_decided"
+        ),
+        Index("ix_opportunities_org_created", "organization_id", "created_on"),
+        Index("ix_opportunities_org_customer", "organization_id", "customer_id"),
+    )
+
+    name: Mapped[str] = mapped_column(String(200))  # what it is, e.g. "Website for Acme"
+    stage: Mapped[str] = mapped_column(String(10), server_default="lead")
+    kind: Mapped[str] = mapped_column(String(10), server_default="new")
+    customer_id: Mapped[uuid.UUID | None] = mapped_column()
+    value: Mapped[Decimal | None] = mapped_column(Money)  # what it is worth, before VAT
+    created_on: Mapped[date] = mapped_column(Date)  # the day the lead came in
+    proposal_on: Mapped[date | None] = mapped_column(Date)  # the day the proposal was sent
+    closed_on: Mapped[date | None] = mapped_column(Date)  # the day it was won or lost
     notes: Mapped[str | None] = mapped_column(String(300))

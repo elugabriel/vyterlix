@@ -440,6 +440,11 @@ void main() {
         '2 stock movements, 4 odd_table',
       );
       expect(datasetLabel('stock_movements'), 'Stock movements');
+      expect(datasetLabel('bookings'), 'Appointments');
+      expect(
+        describeCounts({'bookings': 3, 'customers': 2}),
+        '3 appointments, 2 customers',
+      );
       expect(datasetLabel('what'), 'what');
     });
   });

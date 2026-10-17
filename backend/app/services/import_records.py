@@ -23,7 +23,16 @@ from sqlalchemy import func, insert, select
 from sqlalchemy.orm import Session
 
 from app.models.business import BusinessListItem
-from app.models.data import Customer, Expense, Product, Sale, SaleLine, StockMovement, Supplier
+from app.models.data import (
+    Booking,
+    Customer,
+    Expense,
+    Product,
+    Sale,
+    SaleLine,
+    StockMovement,
+    Supplier,
+)
 from app.services.import_rows import RowOutcome
 
 MODELS = {
@@ -34,6 +43,7 @@ MODELS = {
     "customers": Customer,
     "suppliers": Supplier,
     "products": Product,
+    "bookings": Booking,
 }
 # Where each kind of file's own records go (the table a row points at).
 MAIN_TABLE = {
@@ -43,6 +53,7 @@ MAIN_TABLE = {
     "customers": "customers",
     "suppliers": "suppliers",
     "products": "products",
+    "bookings": "bookings",
 }
 # Insert order (parents before children) and the reverse for undo.
 INSERT_ORDER = (
@@ -53,6 +64,7 @@ INSERT_ORDER = (
     "customers",
     "suppliers",
     "products",
+    "bookings",
 )
 UNIT_PRICE_PLACES = Decimal("0.0001")
 
@@ -111,6 +123,8 @@ class Resolver:
             self._items("offering", [v.get("category") for v in values])
         elif dataset == "stock_movements":
             self._products([(v.get("sku"), v.get("product")) for v in values])
+        elif dataset == "bookings":
+            self._customers(values)
 
     # --- lookups used while building --------------------------------------------------------------
 
@@ -279,6 +293,8 @@ def _sale(r: Resolver, v: dict[str, Any], sale_id: uuid.UUID, tables: dict) -> N
             "gross_amount": v["gross_amount"],
             "discount_amount": v.get("discount") or Decimal(0),
             "notes": v.get("notes"),
+            "due_on": v.get("due_on"),
+            "paid_on": v.get("paid_on"),
             "source_ref": v.get("reference"),
             **r.common,
         }
@@ -374,6 +390,23 @@ def _stock_movement(r: Resolver, v: dict[str, Any], movement_id: uuid.UUID, tabl
     )
 
 
+def _booking(r: Resolver, v: dict[str, Any], booking_id: uuid.UUID, tables: dict) -> None:
+    tables["bookings"].append(
+        {
+            "id": booking_id,
+            "booked_for": v["booked_for"],
+            "service": v["service"],
+            "status": v["status"],
+            "customer_id": r.customer_id(v),
+            "staff": v.get("staff"),
+            "cancelled_on": v.get("cancelled_on"),
+            "notes": v.get("notes"),
+            "source_ref": v.get("reference"),
+            **r.common,
+        }
+    )
+
+
 _BUILDERS = {
     "sales": _sale,
     "expenses": _expense,
@@ -381,6 +414,7 @@ _BUILDERS = {
     "suppliers": _supplier,
     "products": _product,
     "stock_movements": _stock_movement,
+    "bookings": _booking,
 }
 
 

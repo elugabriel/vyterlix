@@ -38,7 +38,15 @@ from app.db.base import Base, TenantScopedMixin, TimestampMixin, UUIDPrimaryKeyM
 from app.models.identity import _one_of
 
 # What an import fills. Each maps to one trading table (see app/models/data.py).
-DATASETS = ("sales", "expenses", "customers", "suppliers", "products", "stock_movements")
+DATASETS = (
+    "sales",
+    "expenses",
+    "customers",
+    "suppliers",
+    "products",
+    "stock_movements",
+    "bookings",
+)
 FILE_SOURCES = ("csv", "excel")  # .csv and .xlsx uploads
 SOURCE_KINDS = ("csv", "excel", "xero", "shopify", "woocommerce", "google_analytics")
 FILE_SUFFIXES = {"csv": ".csv", "excel": ".xlsx"}

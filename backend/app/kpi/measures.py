@@ -33,7 +33,15 @@ from sqlalchemy.orm import Session
 
 from app.kpi import periods
 from app.models.business import BusinessListItem
-from app.models.data import Booking, Expense, Product, Sale, SaleLine, StockMovement
+from app.models.data import (
+    Booking,
+    Expense,
+    Opportunity,
+    Product,
+    Sale,
+    SaleLine,
+    StockMovement,
+)
 
 ZERO = Decimal("0")
 # The kinds of record a measure reads, and how to tell whether the business has any at all (so a
@@ -44,6 +52,8 @@ PRESENCE = {
     "customer_sales": select(Sale.id).where(Sale.customer_id.is_not(None)),
     "stock": select(StockMovement.id),
     "bookings": select(Booking.id),
+    "invoices": select(Sale.id).where(Sale.due_on.is_not(None)),
+    "pipeline": select(Opportunity.id),
 }
 
 Series = dict[date, Decimal]
@@ -312,6 +322,69 @@ def _late_cancellations(db: Session, granularity: str, start: date, end: date) -
     )(db, granularity, start, end)
 
 
+# --- leads, proposals and renewals --------------------------------------------------------------
+# A lead counts in the month it came in, a proposal in the month it was sent, and a win or a loss in
+# the month it was decided. The win rate is of the ones decided, so work still being chased does not
+# count against it.
+
+
+def _opportunities(day_column, *conditions, total=None) -> Compute:
+    def compute(db: Session, granularity: str, start: date, end: date) -> Series:
+        bucket = _bucket(day_column, granularity)
+        query = (
+            select(bucket, func.count() if total is None else func.sum(total))
+            .where(day_column >= start, day_column <= end, *conditions)
+            .group_by(bucket)
+        )
+        return _decimals(db.execute(query))
+
+    return compute
+
+
+# --- invoices -----------------------------------------------------------------------------------
+# An invoice is a sale with a due day. It is owed from the day of the sale until the day it is paid
+# (a sale with no paid day is still owed). Amounts are what the customer owes, including VAT.
+
+
+def _owed_at(db: Session, day: date, *, overdue: bool) -> Decimal:
+    query = select(func.sum(Sale.gross_amount)).where(
+        Sale.kind == "sale",
+        Sale.due_on.is_not(None),
+        Sale.sold_on <= day,
+        (Sale.paid_on.is_(None)) | (Sale.paid_on > day),
+    )
+    if overdue:
+        query = query.where(Sale.due_on < day)
+    return Decimal(db.scalar(query) or 0)
+
+
+def _owed(*, overdue: bool) -> Compute:
+    def compute(db: Session, granularity: str, start: date, end: date) -> Series:
+        first = periods.start_of(start, granularity)
+        return {
+            p: _owed_at(db, periods.end_of(p, granularity), overdue=overdue)
+            for p in periods.series(first, periods.start_of(end, granularity), granularity)
+        }
+
+    return compute
+
+
+def _days_to_pay(db: Session, granularity: str, start: date, end: date) -> Series:
+    """The average number of days invoices paid in the period took to be paid."""
+    bucket = _bucket(Sale.paid_on, granularity)
+    query = (
+        select(bucket, func.avg(Sale.paid_on - Sale.sold_on))
+        .where(
+            Sale.kind == "sale",
+            Sale.due_on.is_not(None),
+            Sale.paid_on >= start,
+            Sale.paid_on <= end,
+        )
+        .group_by(bucket)
+    )
+    return _decimals(db.execute(query))
+
+
 # --- stock --------------------------------------------------------------------------------------
 
 
@@ -445,6 +518,56 @@ MEASURES: dict[str, Measure] = {
         Measure("products_tracked", "Products with stock records", "stock", _products_tracked),
         Measure("products_out_of_stock", "Products out of stock", "stock", _products_out_of_stock),
         Measure("period_days", "Days in the period", "sales", _period_days),
+        Measure("leads_in", "New leads", "pipeline", _opportunities(Opportunity.created_on)),
+        Measure(
+            "proposals_sent",
+            "Proposals sent",
+            "pipeline",
+            _opportunities(Opportunity.proposal_on, Opportunity.proposal_on.is_not(None)),
+        ),
+        Measure(
+            "deals_won",
+            "Won",
+            "pipeline",
+            _opportunities(Opportunity.closed_on, Opportunity.stage == "won"),
+        ),
+        Measure(
+            "deals_decided",
+            "Won or lost",
+            "pipeline",
+            _opportunities(Opportunity.closed_on, Opportunity.stage.in_(("won", "lost"))),
+        ),
+        Measure(
+            "value_won",
+            "Value won",
+            "pipeline",
+            _opportunities(
+                Opportunity.closed_on,
+                Opportunity.stage == "won",
+                total=func.coalesce(Opportunity.value, 0),
+            ),
+        ),
+        Measure(
+            "renewals_won",
+            "Renewals won",
+            "pipeline",
+            _opportunities(
+                Opportunity.closed_on, Opportunity.stage == "won", Opportunity.kind == "renewal"
+            ),
+        ),
+        Measure(
+            "renewals_decided",
+            "Renewals won or lost",
+            "pipeline",
+            _opportunities(
+                Opportunity.closed_on,
+                Opportunity.stage.in_(("won", "lost")),
+                Opportunity.kind == "renewal",
+            ),
+        ),
+        Measure("invoices_outstanding", "Money owed at the end", "invoices", _owed(overdue=False)),
+        Measure("invoices_overdue", "Money overdue at the end", "invoices", _owed(overdue=True)),
+        Measure("average_days_to_pay", "Days invoices took to be paid", "invoices", _days_to_pay),
         Measure(
             "bookings_kept",
             "Appointments kept",

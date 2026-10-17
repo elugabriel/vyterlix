@@ -27,6 +27,11 @@ FakeServer entryServer() => dataServer()
     'services': ['Cut', 'Colour'],
     'staff': ['Ola'],
   })
+  ..json('POST /organizations/b1/opportunities', {
+    'id': 'op1',
+    'name': 'Website for Acme',
+    'stage': 'proposal',
+  }, 201)
   ..json('POST /organizations/b1/bookings', {
     'id': 'bk1',
     'service': 'Cut',
@@ -91,6 +96,58 @@ void main() {
     expect(body['customer_id'], 'cu1');
     expect(body['cancelled_on'], isNull);
     expect(find.text('Appointment saved.'), findsOneWidget);
+  });
+
+  testWidgets('a lead or proposal is sent with where it is up to', (
+    tester,
+  ) async {
+    final server = entryServer();
+    await open(tester, server);
+    await tester.tap(find.text('Type in a lead or proposal'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'What is it?'),
+      ' Website for Acme ',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Worth (£, before VAT, optional)'),
+      '4000',
+    );
+    await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Proposal sent').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    final body = server.bodyOf(
+      server.to('POST /organizations/b1/opportunities').single,
+    );
+    expect(body['name'], 'Website for Acme');
+    expect(body['stage'], 'proposal');
+    expect(body['kind'], 'renewal');
+    expect(body['value'], '4000');
+    expect(find.text('Saved.'), findsOneWidget);
+  });
+
+  testWidgets('a lead needs a name and a sensible worth', (tester) async {
+    final server = entryServer();
+    await open(tester, server);
+    await tester.tap(find.text('Type in a lead or proposal'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Say what it is'), findsOneWidget);
+    await tester.enterText(find.widgetWithText(TextField, 'What is it?'), 'A');
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Worth (£, before VAT, optional)'),
+      'lots',
+    );
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Type what it is worth'), findsOneWidget);
+    expect(server.to('POST /organizations/b1/opportunities'), isEmpty);
   });
 
   testWidgets('an appointment needs a service', (tester) async {
@@ -165,6 +222,28 @@ void main() {
           .text,
       '',
     );
+  });
+
+  testWidgets('a sale can be an invoice with a due day', (tester) async {
+    final server = entryServer();
+    await open(tester, server);
+    await tester.tap(find.text('Type in a sale or expense'));
+    await tester.pumpAndSettle();
+    expect(find.text('Paid on (leave if still owed)'), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('entry-due')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Invoice due by '), findsOneWidget);
+    expect(find.text('Paid on (leave if still owed)'), findsOneWidget);
+    await tester.enterText(find.widgetWithText(TextField, 'Amount (£)'), '120');
+    await tester.tap(find.text('Save sale'));
+    await tester.pumpAndSettle();
+    final body = server.bodyOf(
+      server.to('POST /organizations/b1/sales').single,
+    );
+    expect(body['due_on'], isNotNull);
+    expect(body['paid_on'], isNull);
   });
 
   testWidgets('a refund with a typed VAT amount and a channel', (tester) async {

@@ -32,6 +32,8 @@ class _EntryScreenState extends State<EntryScreen> {
   bool _isSale = true;
   bool _refund = false; // a refund (sale) or a credit note (expense)
   String _date = _today();
+  String? _dueOn; // an invoice: the day it must be paid by
+  String? _paidOn; // and the day it was paid
   final _amount = TextEditingController();
   final _vatAmount = TextEditingController();
   final _text =
@@ -85,6 +87,22 @@ class _EntryScreenState extends State<EntryScreen> {
     }
   }
 
+  Future<String?> _chooseOptionalDay(
+    String initial, {
+    required bool future,
+  }) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.parse(initial),
+      firstDate: DateTime(2000),
+      lastDate: future
+          ? DateTime.now().add(const Duration(days: 366))
+          : DateTime.now(),
+    );
+    if (picked == null) return null;
+    return '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+  }
+
   Future<void> _chooseDate() async {
     final current = DateTime.parse(_date);
     final picked = await showDatePicker(
@@ -122,6 +140,8 @@ class _EntryScreenState extends State<EntryScreen> {
       else
         'vat_rate': _vat,
       if (_isSale) ...{
+        'due_on': _dueOn,
+        'paid_on': _paidOn,
         'sales_channel_id': _pick,
         'reference': text.isEmpty ? null : text,
         'lines': <dynamic>[],
@@ -148,6 +168,8 @@ class _EntryScreenState extends State<EntryScreen> {
         _amount.clear();
         _vatAmount.clear();
         _text.clear();
+        _dueOn = null;
+        _paidOn = null;
       });
     } on ApiException catch (error) {
       if (mounted) setState(() => _error = error.message);
@@ -199,6 +221,42 @@ class _EntryScreenState extends State<EntryScreen> {
                       '${_isSale ? 'Date of sale' : 'Date'}: ${ukDate(_date)}',
                     ),
                   ),
+                  if (_isSale) ...[
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      key: const ValueKey('entry-due'),
+                      onPressed: () async {
+                        final day = await _chooseOptionalDay(
+                          _dueOn ?? _date,
+                          future: true,
+                        );
+                        if (day != null) setState(() => _dueOn = day);
+                      },
+                      icon: const Icon(Icons.event_note_rounded, size: 18),
+                      label: Text(
+                        _dueOn == null
+                            ? 'Invoice due by (optional)'
+                            : 'Invoice due by ${ukDate(_dueOn!)}',
+                      ),
+                    ),
+                    if (_dueOn != null)
+                      OutlinedButton.icon(
+                        key: const ValueKey('entry-paid'),
+                        onPressed: () async {
+                          final day = await _chooseOptionalDay(
+                            _paidOn ?? _date,
+                            future: false,
+                          );
+                          if (day != null) setState(() => _paidOn = day);
+                        },
+                        icon: const Icon(Icons.check_circle_outline, size: 18),
+                        label: Text(
+                          _paidOn == null
+                              ? 'Paid on (leave if still owed)'
+                              : 'Paid on ${ukDate(_paidOn!)}',
+                        ),
+                      ),
+                  ],
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(

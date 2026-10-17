@@ -25,6 +25,10 @@ from app.schemas.trading import (
     ExpenseOut,
     ExpensePatch,
     ExpensesPage,
+    OpportunitiesPage,
+    OpportunityCreate,
+    OpportunityOut,
+    OpportunityPatch,
     ProductCreate,
     ProductOut,
     ProductPatch,
@@ -64,6 +68,7 @@ suppliers_router = _router("suppliers")
 products_router = _router("products")
 stock_router = _router("stock-movements")
 bookings_router = _router("bookings")
+opportunities_router = _router("opportunities")
 
 
 # --- sales -------------------------------------------------------------------------------------
@@ -380,4 +385,47 @@ def update_booking(
 @bookings_router.delete("/{booking_id}", status_code=NoContent)
 def delete_booking(booking_id: uuid.UUID, tenant: DataManager, db: DB, meta: Meta):
     svc.delete_booking(db, tenant, booking_id, meta)
+    return Response(status_code=NoContent)
+
+
+# --- leads, proposals and renewals ---------------------------------------------------------------
+
+
+@opportunities_router.post("", status_code=status.HTTP_201_CREATED, response_model=OpportunityOut)
+def create_opportunity(body: OpportunityCreate, tenant: DataManager, db: DB, meta: Meta):
+    return svc.create_opportunity(db, tenant, body, meta)
+
+
+@opportunities_router.get("", response_model=OpportunitiesPage)
+def list_opportunities(
+    tenant: DataManager,
+    db: DB,
+    stage: Literal["lead", "proposal", "won", "lost"] | None = None,
+    kind: Literal["new", "renewal"] | None = None,
+    customer_id: uuid.UUID | None = None,
+    q: Search = None,
+    limit: Limit = 50,
+    offset: Offset = 0,
+):
+    """Newest lead first. `q` searches the name."""
+    return svc.list_opportunities(
+        db, stage=stage, kind=kind, customer_id=customer_id, q=q, limit=limit, offset=offset
+    )
+
+
+@opportunities_router.get("/{opportunity_id}", response_model=OpportunityOut)
+def get_opportunity(opportunity_id: uuid.UUID, tenant: DataManager, db: DB):
+    return svc.get_opportunity(db, opportunity_id)
+
+
+@opportunities_router.patch("/{opportunity_id}", response_model=OpportunityOut)
+def update_opportunity(
+    opportunity_id: uuid.UUID, body: OpportunityPatch, tenant: DataManager, db: DB, meta: Meta
+):
+    return svc.update_opportunity(db, tenant, opportunity_id, body, meta)
+
+
+@opportunities_router.delete("/{opportunity_id}", status_code=NoContent)
+def delete_opportunity(opportunity_id: uuid.UUID, tenant: DataManager, db: DB, meta: Meta):
+    svc.delete_opportunity(db, tenant, opportunity_id, meta)
     return Response(status_code=NoContent)

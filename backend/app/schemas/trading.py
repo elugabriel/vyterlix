@@ -21,7 +21,13 @@ from pydantic import (
 )
 
 from app.core.uk import today_uk
-from app.models.data import BOOKING_STATUSES, SALE_KINDS, STOCK_MOVEMENT_KINDS
+from app.models.data import (
+    BOOKING_STATUSES,
+    OPPORTUNITY_KINDS,
+    OPPORTUNITY_STAGES,
+    SALE_KINDS,
+    STOCK_MOVEMENT_KINDS,
+)
 from app.services.value_parsers import (
     EARLIEST_DATE,
     CellError,
@@ -81,6 +87,11 @@ def _trading_date(value: date) -> date:
 
 
 TradingDate = Annotated[date, AfterValidator(_trading_date)]
+
+
+def check_due(sold_on: date | None, due_on: date | None) -> None:
+    if due_on is not None and sold_on is not None and due_on < sold_on:
+        raise ValueError("An invoice cannot be due before the day of the sale")
 
 
 def _email(value: str) -> str:
@@ -145,7 +156,14 @@ class SaleCreate(VatFields):
     sales_channel_id: uuid.UUID | None = None
     reference: Reference | None = None  # e.g. an invoice number, unique per business
     notes: Notes | None = None
+    due_on: date | None = None  # an invoice: the day it must be paid by
+    paid_on: TradingDate | None = None  # and the day it was paid
     lines: list[SaleLineIn] = Field(default_factory=list, max_length=100)
+
+    @model_validator(mode="after")
+    def _due_after_sale(self) -> "SaleCreate":
+        check_due(self.sold_on, self.due_on)
+        return self
 
 
 class SalePatch(BaseModel):
@@ -165,6 +183,8 @@ class SalePatch(BaseModel):
     sales_channel_id: uuid.UUID | None = None
     reference: Reference | None = None
     notes: Notes | None = None
+    due_on: date | None = None
+    paid_on: TradingDate | None = None
     lines: list[SaleLineIn] | None = Field(default=None, max_length=100)
 
     @model_validator(mode="after")
@@ -200,6 +220,8 @@ class SaleOut(BaseModel):
     currency: str
     reference: str | None = Field(default=None, validation_alias="source_ref")
     notes: str | None
+    due_on: date | None = None
+    paid_on: date | None = None
     source: str
     import_id: uuid.UUID | None
     created_at: datetime
@@ -532,3 +554,63 @@ class BookingOut(BaseModel):
 class BookingsPage(BaseModel):
     total: int
     items: list[BookingOut]
+
+
+# --- leads, proposals and renewals ---------------------------------------------------------------
+
+OpportunityStage = Literal[OPPORTUNITY_STAGES]
+OpportunityKind = Literal[OPPORTUNITY_KINDS]
+OpportunityName = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)
+]
+
+
+class OpportunityCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: OpportunityName
+    stage: OpportunityStage = "lead"
+    kind: OpportunityKind = "new"
+    customer_id: uuid.UUID | None = None
+    value: Pounds | None = None
+    created_on: TradingDate | None = None  # the day the lead came in (today if not said)
+    proposal_on: TradingDate | None = None
+    closed_on: TradingDate | None = None  # the day it was won or lost (today if not said)
+    notes: BookingNote | None = None
+
+
+class OpportunityPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: OpportunityName | None = None
+    stage: OpportunityStage | None = None
+    kind: OpportunityKind | None = None
+    customer_id: uuid.UUID | None = None
+    value: Pounds | None = None
+    created_on: TradingDate | None = None
+    proposal_on: TradingDate | None = None
+    closed_on: TradingDate | None = None
+    notes: BookingNote | None = None
+
+
+class OpportunityOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    stage: str
+    kind: str
+    customer_id: uuid.UUID | None
+    value: Money2 | None
+    created_on: date
+    proposal_on: date | None
+    closed_on: date | None
+    notes: str | None
+    source: str
+    import_id: uuid.UUID | None
+    created_at: datetime
+
+
+class OpportunitiesPage(BaseModel):
+    total: int
+    items: list[OpportunityOut]

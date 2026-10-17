@@ -84,7 +84,7 @@ def _year(text: str) -> int:
     return year
 
 
-def parse_date(text: str, *, today: date | None = None) -> date:
+def parse_date(text: str, *, today: date | None = None, ahead_days: int = 1) -> date:
     text = text.strip()
     today = today or today_uk()
     if match := _ISO.match(text):
@@ -113,7 +113,7 @@ def parse_date(text: str, *, today: date | None = None) -> date:
         raise CellError("invalid_date", f"{_shown(text)} isn't a real date.") from None
     if parsed < EARLIEST_DATE:
         raise CellError("date_out_of_range", f"{_shown(text)} is before 1990, which looks wrong.")
-    if parsed > today + timedelta(days=1):
+    if parsed > today + timedelta(days=ahead_days):
         raise CellError("date_out_of_range", f"{_shown(text)} is in the future, which looks wrong.")
     return parsed
 

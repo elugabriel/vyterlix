@@ -25,11 +25,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError, ConflictError, NotFoundError
+from app.core.uk import today_uk
 from app.models.business import BusinessListItem
 from app.models.data import (
     Booking,
     Customer,
     Expense,
+    Opportunity,
     Product,
     Sale,
     SaleLine,
@@ -49,6 +51,10 @@ from app.schemas.trading import (
     ExpenseOut,
     ExpensePatch,
     ExpensesPage,
+    OpportunitiesPage,
+    OpportunityCreate,
+    OpportunityOut,
+    OpportunityPatch,
     ProductCreate,
     ProductOut,
     ProductPatch,
@@ -68,6 +74,7 @@ from app.schemas.trading import (
     SupplierPatch,
     SuppliersPage,
     check_cancellation,
+    check_due,
 )
 from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
@@ -285,6 +292,8 @@ def create_sale(db: Session, tenant, body: SaleCreate, meta: RequestMeta) -> Sal
         gross_amount=gross,
         discount_amount=body.discount,
         notes=body.notes,
+        due_on=body.due_on,
+        paid_on=body.paid_on,
         source="manual",
         source_ref=body.reference,
     )
@@ -332,11 +341,17 @@ def update_sale(
 
     for name in sent - {"amount", "amount_includes_vat", "vat_rate", "vat_amount", "lines"}:
         value = getattr(body, name)
-        if value is None and name not in {"customer_id", "sales_channel_id", "reference", "notes"}:
+        if value is None and name not in {
+            "customer_id", "sales_channel_id", "reference", "notes", "due_on", "paid_on",
+        }:  # fmt: skip
             raise _invalid(name, "cannot_be_blank", "That can't be left blank.")
         setattr(
             sale, {"discount": "discount_amount", "reference": "source_ref"}.get(name, name), value
         )
+    try:
+        check_due(sale.sold_on, sale.due_on)
+    except ValueError as exc:
+        raise _invalid("due_on", "due_before_sale", str(exc)) from exc
     if money:
         sale.net_amount, sale.vat_amount, sale.gross_amount = _amounts(
             body.amount,
@@ -871,3 +886,104 @@ def list_bookings(
         query = query.where(Booking.service.ilike(f"%{_like(q)}%", escape="\\"))
     total, rows = _page(db, query, (Booking.booked_for.desc(), Booking.id), limit, offset)
     return BookingsPage(total=total, items=[BookingOut.model_validate(r) for r in rows])
+
+
+# --- leads, proposals and renewals ------------------------------------------------
+
+
+def _settle_opportunity(opportunity: Opportunity) -> None:
+    """Won and lost have a day they were decided; lead and proposal do not. A proposal has a day it
+    was sent. Anything missing gets the sensible day, anything that does not fit is refused."""
+    today = today_uk()
+    if opportunity.stage in ("won", "lost"):
+        opportunity.closed_on = opportunity.closed_on or today
+    else:
+        opportunity.closed_on = None
+    if opportunity.stage == "proposal" and opportunity.proposal_on is None:
+        opportunity.proposal_on = today
+    if opportunity.stage == "lead":
+        opportunity.proposal_on = None
+    for field, later in (
+        ("proposal_on", opportunity.proposal_on),
+        ("closed_on", opportunity.closed_on),
+    ):
+        if later is not None and later < opportunity.created_on:
+            raise _invalid(
+                field, "before_the_lead", "That cannot be before the day the lead came in."
+            )
+    if (
+        opportunity.proposal_on is not None
+        and opportunity.closed_on is not None
+        and opportunity.closed_on < opportunity.proposal_on
+    ):
+        raise _invalid(
+            "closed_on", "before_the_proposal", "That cannot be before the proposal was sent."
+        )
+
+
+@_atomic
+def create_opportunity(
+    db: Session, tenant, body: OpportunityCreate, meta: RequestMeta
+) -> OpportunityOut:
+    _must_exist(db, Customer, body.customer_id, "customer_id", "customer")
+    data = body.model_dump()
+    data["created_on"] = data["created_on"] or today_uk()
+    opportunity = Opportunity(**data, source="manual")
+    _settle_opportunity(opportunity)
+    db.add(opportunity)
+    db.flush()
+    _audit(db, tenant, meta, AuditAction.RECORD_CREATED, "opportunities", opportunity.id)
+    return OpportunityOut.model_validate(opportunity)
+
+
+def get_opportunity(db: Session, opportunity_id: uuid.UUID) -> OpportunityOut:
+    return OpportunityOut.model_validate(_get(db, Opportunity, opportunity_id, "Opportunity"))
+
+
+@_atomic
+def update_opportunity(
+    db: Session, tenant, opportunity_id: uuid.UUID, body: OpportunityPatch, meta: RequestMeta
+) -> OpportunityOut:
+    opportunity = _get(db, Opportunity, opportunity_id, "Opportunity")
+    if "customer_id" in body.model_fields_set:
+        _must_exist(db, Customer, body.customer_id, "customer_id", "customer")
+    _apply(
+        opportunity, body, nullable={"customer_id", "value", "proposal_on", "closed_on", "notes"}
+    )
+    _settle_opportunity(opportunity)
+    db.flush()
+    _audit(
+        db, tenant, meta, AuditAction.RECORD_UPDATED, "opportunities", opportunity.id,
+        fields=sorted(body.model_fields_set),
+    )  # fmt: skip
+    db.refresh(opportunity)
+    return OpportunityOut.model_validate(opportunity)
+
+
+def delete_opportunity(db: Session, tenant, opportunity_id: uuid.UUID, meta: RequestMeta) -> None:
+    _delete(
+        db, tenant, meta, Opportunity, opportunity_id, "opportunities", "lead", archivable=False
+    )
+
+
+def list_opportunities(
+    db: Session,
+    *,
+    stage: str | None,
+    kind: str | None,
+    customer_id: uuid.UUID | None,
+    q: str | None,
+    limit: int,
+    offset: int,
+) -> OpportunitiesPage:
+    query = select(Opportunity)
+    if stage:
+        query = query.where(Opportunity.stage == stage)
+    if kind:
+        query = query.where(Opportunity.kind == kind)
+    if customer_id:
+        query = query.where(Opportunity.customer_id == customer_id)
+    if q:
+        query = query.where(Opportunity.name.ilike(f"%{_like(q)}%", escape="\\"))
+    total, rows = _page(db, query, (Opportunity.created_on.desc(), Opportunity.id), limit, offset)
+    return OpportunitiesPage(total=total, items=[OpportunityOut.model_validate(r) for r in rows])

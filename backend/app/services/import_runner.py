@@ -17,7 +17,16 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.errors import ConflictError
-from app.models.data import Customer, Expense, Product, Sale, SaleLine, StockMovement, Supplier
+from app.models.data import (
+    Booking,
+    Customer,
+    Expense,
+    Product,
+    Sale,
+    SaleLine,
+    StockMovement,
+    Supplier,
+)
 from app.models.imports import DataImport, DataImportRow, DataSource
 from app.schemas.import_results import ImportResultOut, RecordsOut, UndoResultOut
 from app.schemas.imports import ImportOut
@@ -29,7 +38,7 @@ from app.services.import_validation import existing_keys
 
 BATCH = 1000
 # Children before parents, so nothing is deleted while something still points at it.
-UNDO_ORDER = (StockMovement, Sale, Expense, Customer, Supplier, Product)
+UNDO_ORDER = (Booking, StockMovement, Sale, Expense, Customer, Supplier, Product)
 
 
 DATA_TABLES = (
@@ -40,6 +49,7 @@ DATA_TABLES = (
     "customers",
     "suppliers",
     "products",
+    "bookings",
 )
 
 

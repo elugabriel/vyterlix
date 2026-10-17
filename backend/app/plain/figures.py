@@ -114,6 +114,86 @@ WORDS: dict[str, Words] = {
             "This could reduce next month's sales. It is worth reconnecting with the customers who did not come back.",
         ),
     ),
+    "new_leads": Words(
+        Say(
+            "More enquiries came in than {before}.",
+            "More enquiries means more chances to win work.",
+        ),
+        Say(
+            "Fewer enquiries came in than {before}.",
+            "Fewer enquiries now can mean less work later. It is worth asking past clients who else they know.",
+        ),
+    ),
+    "proposals_sent": Words(
+        Say(
+            "You sent more proposals than {before}.",
+            "More proposals out means more chances to win work.",
+        ),
+        Say(
+            "You sent fewer proposals than {before}.",
+            "If enquiries are coming in, check that none are waiting for a reply.",
+        ),
+    ),
+    "win_rate_pct": Words(
+        Say(
+            "You won a bigger share of the proposals that were decided than {before}.",
+            "That is a good sign: more of your proposals are turning into work.",
+        ),
+        Say(
+            "You won a smaller share of the proposals that were decided than {before}.",
+            "It is worth asking a few clients you lost what made the difference.",
+        ),
+    ),
+    "work_won": Words(
+        Say(
+            "You won more work than {before}.",
+            "Work won now is income in the months ahead.",
+        ),
+        Say(
+            "You won less work than {before}.",
+            "Less work won now can mean a quieter few months ahead.",
+        ),
+    ),
+    "renewal_rate_pct": Words(
+        Say(
+            "More clients renewed than {before}.",
+            "That is a good sign: clients are staying.",
+        ),
+        Say(
+            "Fewer clients renewed than {before}.",
+            "A conversation before the renewal is due often saves the ones who were unsure.",
+        ),
+    ),
+    "money_owed": Words(
+        Say(
+            "You are owed more than {before}.",
+            "Money owed is money you have earned but not yet been paid. If it keeps growing, cash can get tight.",
+        ),
+        Say(
+            "You are owed less than {before}.",
+            "That is a good sign: customers are paying what they owe.",
+        ),
+    ),
+    "overdue_invoices": Words(
+        Say(
+            "More money is overdue than {before}.",
+            "Overdue invoices are the ones past their due day. A polite reminder often brings them in.",
+        ),
+        Say(
+            "Less money is overdue than {before}.",
+            "That is a good sign: fewer customers are late paying.",
+        ),
+    ),
+    "days_to_get_paid": Words(
+        Say(
+            "Invoices took longer to be paid than {before}.",
+            "The longer customers take, the longer your cash is tied up.",
+        ),
+        Say(
+            "Invoices were paid faster than {before}.",
+            "That is a good sign: your cash comes in sooner.",
+        ),
+    ),
     "appointments_kept": Words(
         Say(
             "More appointments went ahead than {before}.",
