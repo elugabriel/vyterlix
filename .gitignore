@@ -7,3 +7,6 @@ __pycache__/
 .env
 .DS_Store
 backend/.demo-logins.local.md
+
+# Documents written for the client, kept on this computer only
+docs/*.docx
