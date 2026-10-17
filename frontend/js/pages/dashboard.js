@@ -9,7 +9,7 @@ import { api } from "../auth.js";
 import { openBusiness } from "../business.js";
 import { guard, put } from "../data.js";
 import { el } from "../dom.js";
-import { formatValue, periodLabel, plainBlock } from "../kpi.js";
+import { barChart, formatValue, periodLabel, plainBlock } from "../kpi.js";
 
 const message = document.getElementById("message");
 const content = document.getElementById("content");
@@ -123,6 +123,25 @@ function attention(d) {
   );
 }
 
+/** The first key figure as a picture over the last months, with the month it is about marked. */
+function trend(figure, history) {
+  if (!figure || !history || history.values.filter((v) => v.status === "ok").length < 2) return null;
+  const shown = history.values.slice(-12);
+  const marked = shown.filter((v) => v.is_complete).at(-1)?.period_start ?? null;
+  return el(
+    "section",
+    { class: "stack" },
+    el("div", { class: "section-title" }, el("h2", {}, `How ${figure.name.toLowerCase()} has moved`)),
+    el(
+      "div",
+      { class: "card" },
+      barChart(shown, figure.unit, `${figure.name} over the last months`, { marked }),
+      figure.plain ? el("p", { class: "plain-says" }, figure.plain.says) : null,
+      el("p", { class: "muted" }, "Month by month. The orange bar is the latest finished month."),
+    ),
+  );
+}
+
 function figures(list) {
   if (!list.length) return null;
   return el(
@@ -165,7 +184,9 @@ async function start({ org }) {
   const d = await guard(message, () => api.get(`/organizations/${org.id}/dashboard`));
   if (!d) return;
   content.replaceChildren();
-  put(content, hero(d), setup(d.setup), goingWell(d), attention(d), doFirst(d), waitingFor(d), results(d), figures(d.figures));
+  const first = d.figures[0];
+  const history = first ? await guard(message, () => api.get(`/organizations/${org.id}/kpis/${first.code}?limit=12`)) : null;
+  put(content, hero(d), setup(d.setup), goingWell(d), attention(d), doFirst(d), waitingFor(d), results(d), trend(first, history), figures(d.figures));
   if (!d.health && !d.figures.length) {
     put(content, el("p", { class: "muted" }, "There are no figures yet. Bring in your sales, costs and customers from "), el("a", { href: page("data.html") }, "Your data"), el("span", { class: "muted" }, " and they will appear here."));
   }

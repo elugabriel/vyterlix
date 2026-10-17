@@ -10,7 +10,7 @@ import { el } from "../dom.js";
 import { field, input, orNull, select } from "../forms.js";
 import { ukDate, ukDateTime } from "../format.js";
 import { loadPeople, statusBadge } from "../actions.js";
-import { formatValue, periodLabel } from "../kpi.js";
+import { barChart, formatValue, periodLabel } from "../kpi.js";
 
 const message = document.getElementById("message");
 const content = document.getElementById("content");
@@ -188,6 +188,21 @@ function show(a) {
   );
 }
 
+/** The figure when the action was accepted and afterwards, as two bars with one plain sentence. */
+function beforeAfter(o) {
+  if (o.baseline_value === null || o.measured_value === null) return null;
+  const values = [
+    { period_start: o.baseline_period, value: o.baseline_value, is_complete: true, status: "ok" },
+    { period_start: o.measured_period, value: o.measured_value, is_complete: true, status: "ok" },
+  ];
+  return el(
+    "div",
+    {},
+    barChart(values, o.unit, `${o.kpi_name} before and after`, { marked: o.measured_period }),
+    el("p", { class: "muted" }, `Before and after: the left bar is ${o.kpi_name} when you accepted it, the orange bar is afterwards.`),
+  );
+}
+
 function resultPanel(a) {
   if (a.outcome) {
     const o = a.outcome;
@@ -197,6 +212,7 @@ function resultPanel(a) {
       { class: "stack" },
       el("h3", {}, "What came of it ", el("span", { class: `badge ${OUTCOME_CLASS[o.outcome]}` }, o.label)),
       el("p", {}, o.reason),
+      beforeAfter(o),
       table(
         ["", "Figure"],
         [

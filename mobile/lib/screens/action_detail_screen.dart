@@ -6,6 +6,7 @@ import '../format.dart';
 import '../models.dart';
 import '../models_actions.dart';
 import '../theme.dart';
+import '../widgets/charts.dart';
 import '../widgets/common.dart';
 import 'actions_screen.dart' show actionColor;
 
@@ -426,6 +427,13 @@ class _DecisionCard extends StatelessWidget {
   }
 }
 
+/// The figure when the action was accepted and afterwards, for a small before-and-after chart.
+List<double?>? _beforeAfter(Outcome result) {
+  final before = double.tryParse(result.baselineValue ?? '');
+  final after = double.tryParse(result.measuredValue ?? '');
+  return before == null || after == null ? null : [before, after];
+}
+
 class _ResultCard extends StatelessWidget {
   const _ResultCard({required this.followUp, required this.outcome});
 
@@ -458,6 +466,18 @@ class _ResultCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(result.reason),
+                  if (_beforeAfter(result) != null) ...[
+                    const SizedBox(height: 12),
+                    BarChart(
+                      values: _beforeAfter(result)!,
+                      markedIndex: 1,
+                      height: 90,
+                    ),
+                    Text(
+                      'Before and after: the left bar is ${result.kpiName} when you accepted it, the orange bar is afterwards.',
+                      style: TextStyle(color: muted, fontSize: 12),
+                    ),
+                  ],
                   if (result.baselineValue != null &&
                       result.measuredValue != null)
                     Padding(

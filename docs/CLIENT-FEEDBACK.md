@@ -127,41 +127,42 @@ Her figures are illustrations, not real results.
 
 ## 7. StableScore AI as a reference, and going further (§7)
 
-- [ ] Presentation: each card clearly shows a **recommended action, the reasons supporting it, and a next step** (as in their example cards: score out of 100, "Why this recommendation?" with three signals, "Next action" with an owner). Do not copy their design.
-- [ ] Go further: connect the recommendation to an **action the business can accept and assign**.
-- [ ] Track whether it was done.
-- [ ] Measure the result when possible.
-- [ ] Remember the outcome for future decisions. (Exists in the engine; make it visible: "last time this worked for you".)
+- [x] Presentation: each card clearly shows a **recommended action, the reasons supporting it, and a next step** (the alert card: priority and reason, "why this one", the evidence, the steps, who and by when, and "we will check from"). Our own design, not a copy.
+- [x] Go further: the recommendation becomes an **action the business can accept and assign** (one tap, or with changes).
+- [x] Track whether it was done (status, steps, overdue marking, reminders, what was done and how many it reached).
+- [x] Measure the result when possible (before and after, with the season taken out; profit-aware; "cannot be measured yet" when it cannot).
+- [~] Remember the outcome for future decisions: the engine uses it and the recommendation evidence says "Last time: ..." and what was said no to. The card shows up to three evidence lines, so it can be left off the card when there are others.
 
 ## 8. Her six questions: answers owed to her (§8)
 
-- [ ] Is an important alert's recommendation linked directly to an action? **Not yet.** Being built (section 5).
-- [ ] When the owner accepts, is the task created and tracked with owner, deadline and reminders? **Created and tracked with owner, dates and overdue marking now; reminders being added.**
-- [ ] After completion, how is the outcome checked and used? **Compared with what was expected, with the season removed; feeds later suggestions. Profit-aware checks being added.**
-- [~] Does the business type chosen at onboarding change wording, figures and recommendations? **Figures and sections now; recommendations next.**
-- [ ] Can the main dashboard explain findings in plain language without the AI assistant? **Partly.** The plain-language layer is planned (section 2).
-- [ ] Which parts are working now and which are planned before final handover? Send the working and planned list.
-- [ ] Reply to the client in plain English covering the six answers and the plan (a Word file).
+- [x] Is an important alert's recommendation linked directly to an action? **Yes.** The alert opens as a card with the suggestion on it, and accepting it makes the action (website and phone).
+- [x] When the owner accepts, is the task created and tracked with owner, deadline and reminders? **Yes.** Created with an owner and dates, reminded two days before and on the day, marked overdue, and a check-in two weeks after it is finished.
+- [x] After completion, how is the outcome checked and used? **Compared with what was expected, with the season removed and profit checked where it matters; said plainly when it cannot be measured yet; fed back into later suggestions.**
+- [x] Does the business type chosen at onboarding change wording, figures and recommendations? **Yes for figures and sections** (no stock for a service; customers to follow up; appointment figures) **and recommendations** (reminders, cancellation policy, rebooking). Wording by business type is still the same plain wording for all.
+- [x] Can the main dashboard explain findings in plain language without the AI assistant? **Yes.** Every figure has a plain sentence, and Today answers her five questions.
+- [x] Which parts are working now and which are planned before final handover? See the reply (docs/Vyterlix-response-to-feedback.docx, to be brought up to date) and the build list at the end of this file.
+- [ ] Reply to the client in plain English covering the six answers and the plan (a Word file). **The earlier version says several things are "being built" that are now done; it needs rewriting before it is sent.**
 
 ## 9. Her final thought (§9)
 
-- [ ] The most important part is easy to see and use: explain the business, recommend practical actions, follow up, measure the outcome, learn from it.
+- [~] The most important part is easy to see and use: explain the business, recommend practical actions, follow up, measure the outcome, learn from it. (Built; wants her to try it and say.)
 - [ ] She asked for our thoughts on how the current build supports this and what is still being worked on (the reply above).
-- [ ] Her stated non-priority: colours and the number of charts. (But see the charts point in section 0.)
+- [x] Her stated non-priority: colours and the number of charts. (The tea green theme is done; charts are in section 11.)
 
 ## 10. Presentation items from the covering message
 
-- [ ] More **personalised, practical and easy to understand** than other platforms offering similar services.
-- [ ] Beyond dashboards, charts and figures: explain, recommend, follow up.
-- [ ] The recommendation and follow-up process is the core feature that should make Vyterlix different.
+- [~] More **personalised, practical and easy to understand** than other platforms offering similar services (a matter for her to judge).
+- [x] Beyond dashboards, charts and figures: explain, recommend, follow up.
+- [x] The recommendation and follow-up process is the core feature: the five stages, the alert card and the worked flow.
 
 ## 11. Charts with the words (from the verbal point, to confirm in section 0)
 
-- [ ] Each alert and recommendation card has a **small chart** (trend with the change marked).
-- [ ] Action results show a **before and after chart**.
-- [ ] Forecasts show the likely range as a band on a line graph (website; the phone already has a line chart).
-- [ ] Today shows a simple picture of the trend and of how actions are doing.
-- [ ] One reusable "chart plus one plain sentence" component, used everywhere.
+- [x] Each alert and recommendation card has a **small chart** (trend with the change marked; website and phone).
+- [x] Action results show a **before and after chart** (website and phone).
+- [x] Forecasts show the likely range as a band on a line graph (website and phone).
+- [x] Today shows a simple picture of the trend (how the first key figure has moved, with the latest finished month marked).
+- [ ] Today also shows how actions are doing as a picture (today it is one plain sentence and the latest results).
+- [~] One reusable "chart plus one plain sentence" component, used everywhere (the same bar chart is used on the card, Today and results, each with its own sentence).
 
 ---
 

@@ -62,8 +62,8 @@ void main() {
       tester,
     ) async {
       await openBusiness(tester, happyServer());
-      // (also once under "What is going well?")
-      expect(find.text('You sold more than last month.'), findsNWidgets(2));
+      // (also under "What is going well?" and under the picture of how sales has moved)
+      expect(find.text('You sold more than last month.'), findsNWidgets(3));
       expect(
         find.text('Your running costs are higher than last month.'),
         findsOneWidget,

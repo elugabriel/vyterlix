@@ -360,6 +360,7 @@ void main() {
         expect(
           server
               .to('GET /organizations/b1/kpis/sales')
+              .where((r) => r.url.queryParameters['limit'] == '24')
               .single
               .url
               .queryParameters,

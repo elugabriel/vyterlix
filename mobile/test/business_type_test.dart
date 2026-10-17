@@ -32,12 +32,7 @@ Map<String, dynamic> followUp() => {
 FakeServer serverFor(String? sells) {
   final server = happyServer()
     ..json('GET /organizations', [
-      {
-        'id': 'b1',
-        'name': 'Fakeham Bakery',
-        'role': 'owner',
-        'sells': ?sells,
-      },
+      {'id': 'b1', 'name': 'Fakeham Bakery', 'role': 'owner', 'sells': ?sells},
       {'id': 'b2', 'name': 'Second Shop', 'role': 'viewer'},
     ])
     ..json('GET /organizations/b1/kpis/customers/follow-up', followUp());
@@ -61,24 +56,27 @@ void main() {
       expect(b.hasStock && b.showFollowUp, isTrue);
     });
 
-    test('a service has no stock and a product seller has no follow-up list', () {
-      const services = Business(
-        id: 'b',
-        name: 'N',
-        role: 'owner',
-        sells: 'services',
-      );
-      const products = Business(
-        id: 'b',
-        name: 'N',
-        role: 'owner',
-        sells: 'products',
-      );
-      expect(services.hasStock, isFalse);
-      expect(services.showFollowUp, isTrue);
-      expect(products.hasStock, isTrue);
-      expect(products.showFollowUp, isFalse);
-    });
+    test(
+      'a service has no stock and a product seller has no follow-up list',
+      () {
+        const services = Business(
+          id: 'b',
+          name: 'N',
+          role: 'owner',
+          sells: 'services',
+        );
+        const products = Business(
+          id: 'b',
+          name: 'N',
+          role: 'owner',
+          sells: 'products',
+        );
+        expect(services.hasStock, isFalse);
+        expect(services.showFollowUp, isTrue);
+        expect(products.hasStock, isTrue);
+        expect(products.showFollowUp, isFalse);
+      },
+    );
   });
 
   group('on the phone', () {
@@ -93,7 +91,10 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.text('Customers to follow up'), findsOneWidget);
-      expect(find.textContaining('3 customers have not bought'), findsOneWidget);
+      expect(
+        find.textContaining('3 customers have not bought'),
+        findsOneWidget,
+      );
       await tester.scrollUntilVisible(
         find.text('Ben Ola'),
         200,
@@ -116,7 +117,9 @@ void main() {
       );
     });
 
-    testWidgets('a service business is not shown what to stock', (tester) async {
+    testWidgets('a service business is not shown what to stock', (
+      tester,
+    ) async {
       final server = serverFor('services');
       await openBusiness(tester, server);
       await openMore(tester, 'Forecast');

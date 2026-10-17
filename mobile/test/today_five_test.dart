@@ -4,6 +4,8 @@ import 'package:vyterlix_mobile/auth/session_store.dart';
 import 'package:vyterlix_mobile/models.dart';
 import 'package:vyterlix_mobile/theme.dart';
 
+import 'package:vyterlix_mobile/widgets/charts.dart';
+
 import 'support.dart';
 
 Future<FakeServer> openToday(
@@ -75,6 +77,14 @@ void main() {
         );
         last = y;
       }
+    });
+
+    testWidgets('a picture shows how the first figure has moved', (
+      tester,
+    ) async {
+      await openToday(tester);
+      expect(find.text('How sales has moved'), findsOneWidget);
+      expect(find.byType(BarChart), findsOneWidget);
     });
 
     testWidgets('what is going well lists the good news with a green bar', (

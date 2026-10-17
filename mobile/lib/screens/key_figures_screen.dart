@@ -72,9 +72,9 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
     }
     if (!widget.business.showFollowUp) return;
     try {
-      final data =
-          await context.read<ApiClient>().get('$_base/customers/follow-up')
-              as Map<String, dynamic>;
+      final data = await context.read<ApiClient>().get(
+        '$_base/customers/follow-up',
+      ) as Map<String, dynamic>;
       if (mounted) setState(() => _followUp = QuietCustomers.fromJson(data));
     } on ApiException {
       // the list is a bonus: the figures matter more

@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vyterlix_mobile/auth/session_store.dart';
 import 'package:vyterlix_mobile/models_actions.dart';
 
+import 'package:vyterlix_mobile/widgets/charts.dart';
+
 import 'support.dart';
 
 Future<Harness> openBusiness(
@@ -560,6 +562,14 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('152% of what was expected.'), findsOneWidget);
+      expect(
+        find.byType(BarChart),
+        findsOneWidget,
+      ); // before and after, as a picture
+      expect(
+        find.textContaining('the left bar is Sales when you accepted it'),
+        findsOneWidget,
+      );
       expect(find.text('What do you want to do?'), findsNothing);
       expect(
         tester

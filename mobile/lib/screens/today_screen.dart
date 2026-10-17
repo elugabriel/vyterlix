@@ -5,6 +5,7 @@ import '../api/api_client.dart';
 import '../format.dart';
 import '../models.dart';
 import '../theme.dart';
+import '../widgets/charts.dart';
 import '../widgets/severity.dart';
 import '../widgets/common.dart';
 import 'action_detail_screen.dart';
@@ -45,6 +46,8 @@ class TodayScreen extends StatefulWidget {
 
 class _TodayScreenState extends State<TodayScreen> {
   Dashboard? _dashboard;
+  List<double?> _trend = const [];
+  int _trendMarked = -1; // the latest finished month
   String? _error;
 
   @override
@@ -59,13 +62,39 @@ class _TodayScreenState extends State<TodayScreen> {
       final data = await context.read<ApiClient>().get(
         '/organizations/${widget.business.id}/dashboard',
       );
-      if (mounted) {
-        setState(
-          () => _dashboard = Dashboard.fromJson(data as Map<String, dynamic>),
-        );
-      }
+      final dashboard = Dashboard.fromJson(data as Map<String, dynamic>);
+      if (mounted) setState(() => _dashboard = dashboard);
+      await _loadTrend(dashboard);
     } on ApiException catch (error) {
       if (mounted) setState(() => _error = error.message);
+    }
+  }
+
+  /// The first key figure over the last months, for the picture. It is a bonus: if it cannot be
+  /// had, the screen simply has no picture.
+  Future<void> _loadTrend(Dashboard dashboard) async {
+    if (dashboard.figures.isEmpty) return;
+    try {
+      final history = await context.read<ApiClient>().get(
+        '/organizations/${widget.business.id}/kpis/${dashboard.figures.first.code}',
+        query: {'limit': '12'},
+      ) as Map<String, dynamic>;
+      final rows = (history['values'] as List).cast<Map<String, dynamic>>();
+      final values = <double?>[
+        for (final v in rows)
+          v['status'] == 'ok' ? double.tryParse('${v['value']}') : null,
+      ];
+      final marked = rows.lastIndexWhere(
+        (v) => v['status'] == 'ok' && v['is_complete'] == true,
+      );
+      if (mounted) {
+        setState(() {
+          _trend = values;
+          _trendMarked = marked;
+        });
+      }
+    } on ApiException {
+      // no picture
     }
   }
 
@@ -211,6 +240,18 @@ class _TodayScreenState extends State<TodayScreen> {
               empty: '',
               onOpen: _open,
             ),
+          ],
+          if (_trend.whereType<double>().length >= 2 &&
+              dashboard.figures.isNotEmpty) ...[
+            SectionTitle(
+              'How ${dashboard.figures.first.name.toLowerCase()} has moved',
+            ),
+            BarChart(values: _trend, markedIndex: _trendMarked, height: 110),
+            if (dashboard.figures.first.plain != null)
+              Text(
+                dashboard.figures.first.plain!.says,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
           ],
           if (dashboard.figures.isNotEmpty) ...[
             const SectionTitle('Your key figures'),
