@@ -117,7 +117,7 @@ def lesson(
         return f'"{action}" helped {kpi_name} only in part: {reason}'
     if outcome == "unsuccessful":
         return f'"{action}" did not work for {kpi_name}: {reason}'
-    return f'We could not tell whether "{action}" worked for {kpi_name}: {reason}'
+    return f'We cannot yet measure whether "{action}" worked for {kpi_name}: {reason}'
 
 
 def average_achieved(values: list[int | None]) -> Decimal | None:

@@ -348,7 +348,7 @@ def outcomes_tool(db: Session, tenant, u: Understood) -> ToolResult:
     facts = []
     if checked:
         facts.append(
-            f"Of the things you tried that have been checked: {s.successful} worked, {s.partially_successful} partly worked, {s.unsuccessful} did not work and {s.inconclusive} could not be judged."
+            f"Of the things you tried that have been checked: {s.successful} worked, {s.partially_successful} partly worked, {s.unsuccessful} did not work and {s.inconclusive} cannot be measured yet."
         )
     if s.waiting:
         facts.append(f"{s.waiting} finished and are waiting to be checked.")

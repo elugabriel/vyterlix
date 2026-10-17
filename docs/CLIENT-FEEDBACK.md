@@ -55,29 +55,29 @@ data analyst. Make it personalised, practical and easy to understand.
 
 She wants this to be the central experience, not separate pages to remember.
 
-- [ ] **1. Detect:** a problem, risk or opportunity is spotted from the business data.
-  - [~] Detection exists (changes, alerts, drivers). It is not yet the start of one connected flow.
-- [ ] **2. Explain:** what changed, why it matters and what evidence supports it.
-  - [~] What changed and evidence exist on the What changed page; not shown with the alert.
-- [~] **3. Recommend:** one or more realistic next steps, each with **High, Medium or Low priority and a brief reason** (shown on the alert card; the What changed page does not show the label yet).
-  - [~] Options, ranking and "why this one" exist; the High/Medium/Low label with a reason is not shown.
-- [ ] **4. Decide and assign:** the owner can **accept, change, assign, postpone or dismiss**. Accepted actions become tasks immediately.
+- [x] **1. Detect:** a problem, risk or opportunity is spotted from the business data.
+  - [x] Detection (changes, alerts, drivers) now starts one connected flow: the alert opens as a card (website and phone).
+- [x] **2. Explain:** what changed, why it matters and what evidence supports it.
+  - [x] The alert card says what happened, the figures behind it, why it matters, the season note, a chart with the month marked, and up to three pieces of evidence. The What changed page keeps the full evidence.
+- [x] **3. Recommend:** one or more realistic next steps, each with **High, Medium or Low priority and a brief reason** (on the alert card, and now on the What changed page too).
+  - [x] Options, ranking and "why this one"; the priority label with its reason on both screens.
+  - [x] For figures that cannot be broken down (appointments, customers coming back) the suggestion comes from the figure's own move, and says it does not know why.
+- [x] **4. Decide and assign:** the owner can **accept, change, assign, postpone or dismiss**. Accepted actions become tasks immediately.
   - [x] Accept, change before accepting, assign, dates, steps.
   - [x] Dismiss, with the reason kept (website card).
   - [x] **Postpone** ("remind me later": 3 days, 1 week, 2 weeks or a chosen day, up to 90 days; the alert leaves what needs attention and comes back by itself; website and phone app).
-  - [ ] Dismiss with a reason, remembered for the future.
-- [ ] **5. Follow up:** remind the responsible person, check progress, ask for an outcome when needed.
-  - [~] Overdue marking and the timed follow-up round exist.
+  - [x] Dismiss with a reason, **remembered**: what was said no to is not suggested again for 120 days, and the next suggestion says "You said no to ... on dd/mm/yyyy".
+- [x] **5. Follow up:** remind the responsible person, check progress, ask for an outcome when needed.
+  - [x] Overdue marking and the timed follow-up round.
   - [x] Reminders to the assignee 2 days before and on the due date, once each (`backend/app/services/reminders.py`); late work stays with the overdue alert.
   - [x] On completion (or part completion), ask "what did you do?" and "how many did it reach?" (website and phone app); a check-in two weeks after finishing asks how it is going.
-- [ ] **6. Measure and learn:** compare results before and after, say whether the action appears to have helped, and use the history to improve future suggestions.
+- [x] **6. Measure and learn:** compare results before and after, say whether the action appears to have helped, and use the history to improve future suggestions.
   - [x] Expected against actual with the season taken out; four outcomes; track record feeds later suggestions.
-  - [ ] Say plainly when the outcome **cannot yet be measured**, never claim success. (The "cannot tell" outcome exists; check every screen and email uses her wording.)
-  - [x] Judge by profit as well as sales where a discount or spend was involved: a sales win with profit down more than 5% is only a partial success, and a missing profit figure is said out loud (`backend/app/outcomes/rules.py`, `profit_check`).
-- [ ] **Five stages in the product:** Understand, Explain, Predict, Recommend, Follow Up. Learning happens continuously after follow-up, not as a sixth numbered stage. (Menu and page grouping.)
-- [ ] **Her worked flow works end to end:** an alert "Customer return rate fell" opens a recommendation on the same
-  screen, accepting it creates a task with a due date and assignee, a few days later Vyterlix reminds them, on
-  completion it asks what was done, and later it compares the new return rate where possible.
+  - [x] Says plainly when the outcome **cannot yet be measured**, never claims success: the label is now "Cannot be measured yet" on every screen, report, answer and the phone.
+  - [x] Judge by profit as well as sales where a discount or spend was involved (`profit_check`).
+  - [x] Protecting something that is going well (the best seller) is judged by whether the good result held.
+- [x] **Five stages in the product:** Understand, Explain, Predict, Recommend, Follow Up. The website menu and the phone's More menu are grouped by them (Today, Key figures, Health and Reports; What changed and Ask Vyterlix; Forecast; Alerts; Actions and What we know). Learning happens continuously after follow-up, not as a sixth stage.
+- [x] **Her worked flow works end to end** (`backend/tests/test_worked_flow.py`): the alert "Customers who came back" fell from 38 to 26 and opens a recommendation on the same card ("Win back the customers who stopped coming"); accepting creates a task with an owner and due date; two days before it is due the person is reminded; on completion it asks what was done and how many were reached; later it compares the new figure and records the result in plain words.
 
 ## 4. Detailed examples (§4): each must work end to end
 
@@ -107,8 +107,8 @@ Her figures are illustrations, not real results.
 - [~] Her example alert card works (priority and reason, suggested step, assign to, due by, and "we will check from" are all on the card; the customer-return suggestion needs the missing recommendations): "High priority: Fewer customers returned this month. Why: return visits fell from 38% to 26%. Suggested next step: contact customers who have not booked in 60 days. Assign to: customer service. Review in: 14 days."
 - [x] The owner can choose **Accept, Edit, Assign, Postpone or Dismiss** on the card (website and phone app).
 - [x] **Accepting creates a linked action and follow-up** (the alert is marked as being dealt with; a manager outside their area can only propose it).
-- [ ] Not every good change needs a task: good news is explained simply.
-- [ ] When there is a meaningful opportunity, recommend how to build on it.
+- [x] Not every good change needs a task: good news is explained simply ("nothing needs fixing").
+- [x] When there is a meaningful opportunity, recommend how to build on it (a best seller that is driving a rise: keep it in stock, tell past buyers, do not discount).
 - [x] **Priorities reflect likely business impact, urgency and strength of evidence, not just the size of a percentage change** (`backend/app/plain/priority.py`: 40% impact, 30% urgency, 30% evidence; thin evidence caps it at Medium).
 - [x] Alerts are graded by seriousness and cover sales, customers and stock changes.
 

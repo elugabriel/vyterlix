@@ -102,7 +102,7 @@ async function loadResults() {
   if (!r.waiting && !checked) return;
   const parts = [];
   if (r.waiting) parts.push(`${r.waiting} finished and waiting to be checked${r.due ? ` (${r.due} ready now)` : ""}`);
-  if (checked) parts.push(`${r.successful} worked`, `${r.partially_successful} partly worked`, `${r.unsuccessful} did not work`, `${r.inconclusive} could not be judged`);
+  if (checked) parts.push(`${r.successful} worked`, `${r.partially_successful} partly worked`, `${r.unsuccessful} did not work`, `${r.inconclusive} cannot be measured yet`);
   put(
     results,
     el("p", { class: "muted" }, `Results: ${parts.join(" · ")}`),

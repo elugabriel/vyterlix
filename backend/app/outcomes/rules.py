@@ -33,7 +33,7 @@ OUTCOME_LABELS = {
     "successful": "It worked",
     "partially_successful": "It partly worked",
     "unsuccessful": "It did not work",
-    "inconclusive": "We cannot tell",
+    "inconclusive": "Cannot be measured yet",
 }
 
 

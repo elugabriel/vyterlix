@@ -20,7 +20,7 @@ const OUTCOME_CLASS = {
   unsuccessful: "health-at_risk",
   inconclusive: "health-not_enough_data",
 };
-const OUTCOME_TEXT = { successful: "It worked", partially_successful: "It partly worked", unsuccessful: "It did not work", inconclusive: "We cannot tell" };
+const OUTCOME_TEXT = { successful: "It worked", partially_successful: "It partly worked", unsuccessful: "It did not work", inconclusive: "Cannot be measured yet" };
 
 let base = "";
 let canRefresh = false;

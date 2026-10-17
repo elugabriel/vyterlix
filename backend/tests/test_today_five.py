@@ -31,7 +31,7 @@ from tests.test_outcomes import check, done, figures, finish, make_due, suggeste
         ((1, 1, 0, 0, 0), "The one action we have checked worked."),
         ((1, 0, 1, 0, 0), "The one action we have checked partly worked."),
         ((1, 0, 0, 1, 0), "The one action we have checked did not work."),
-        ((1, 0, 0, 0, 1), "The one action we have checked is one we cannot tell about yet."),
+        ((1, 0, 0, 0, 1), "The one action we have checked cannot be measured yet."),
         ((2, 2, 0, 0, 0), "Of the 2 actions we have checked, 2 worked."),
         (
             (4, 2, 1, 1, 0),
@@ -39,9 +39,9 @@ from tests.test_outcomes import check, done, figures, finish, make_due, suggeste
         ),
         (
             (5, 1, 1, 1, 2),
-            "Of the 5 actions we have checked, 1 worked, 1 partly worked, 1 did not work and for 2 we cannot tell.",
+            "Of the 5 actions we have checked, 1 worked, 1 partly worked, 1 did not work and 2 cannot be measured yet.",
         ),
-        ((3, 0, 0, 0, 3), "Of the 3 actions we have checked, for 3 we cannot tell."),
+        ((3, 0, 0, 0, 3), "Of the 3 actions we have checked, 3 cannot be measured yet."),
     ],
 )
 def test_the_answer_to_did_they_help_is_one_plain_line(counts, sentence):

@@ -9,6 +9,7 @@ Ranking is rules and arithmetic (app/recommend/rules.py), never a language model
 """
 
 import uuid
+from datetime import date
 from decimal import Decimal
 from types import SimpleNamespace
 
@@ -16,6 +17,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import NotFoundError
+from app.core.uk import today_uk
 from app.diagnostics import evidence as diagnosis_evidence
 from app.integrations.base import utcnow
 from app.memory import rules as memory_rules
@@ -29,7 +31,9 @@ from app.models.recommendations import (
     RecommendationEvidence,
     RecommendationOption,
 )
+from app.plain.priority import LABEL, prioritise
 from app.recommend import rules
+from app.schemas.alert_card import PriorityOut
 from app.schemas.diagnostics import EvidenceOut
 from app.schemas.recommendations import (
     InterventionOut,
@@ -88,6 +92,32 @@ def _tried(db: Session, event_id: uuid.UUID) -> set[tuple[str | None, str | None
         )
     ).all()
     return {(code, target) for code, target in rows}
+
+
+# How serious the change itself was, in the words priority uses for an alert
+EVENT_SEVERITY = {"major": "high", "notable": "medium"}
+DECLINED_FOR_DAYS = 120  # an action the owner said no to is not suggested again for this long
+
+
+def _declined(db: Session, kpi_id: uuid.UUID, today: date) -> dict[tuple[str, str | None], dict]:
+    """What the owner has said no to for this figure lately: (code, target) -> what they said."""
+    found: dict[tuple[str, str | None], dict] = {}
+    rows = db.scalars(
+        select(Recommendation)
+        .join(DetectionEvent, DetectionEvent.id == Recommendation.event_id)
+        .where(Recommendation.status == "dismissed", DetectionEvent.kpi_id == kpi_id)
+    )
+    for rec in rows:
+        basis = rec.basis or {}
+        option, when = basis.get("dismissed_option"), basis.get("dismissed_on")
+        if not option or not when:
+            continue
+        said = date.fromisoformat(when)
+        if (today - said).days <= DECLINED_FOR_DAYS:
+            found[(option["code"], option["target"])] = {
+                "title": option["title"], "on": said, "reason": basis.get("dismissed_reason"),
+            }  # fmt: skip
+    return found
 
 
 def _history(recalled, record: dict, code: str) -> int:
@@ -212,10 +242,15 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
         # A change in the owner's favour can still call for something: protect what is working.
         goals = _goals(db)
         tried = _tried(db, event.id)
+        declined = _declined(db, kpi.id, today_uk())
+        said_no: dict[tuple[str, str | None], dict] = {}
         recalled = memory.recall(db, kpi.code)
         candidates, left_out = [], []
         for c in rules.generate(library, findings, kpi.code, effect):
             if (c.action.code, c.target) in tried:
+                continue
+            if (c.action.code, c.target) in declined:
+                said_no[(c.action.code, c.target)] = declined[(c.action.code, c.target)]
                 continue
             why = memory_rules.broken_limit(
                 recalled.constraints, code=c.action.code, effort=c.action.effort,
@@ -227,6 +262,16 @@ def generate(db: Session, tenant, event_id: uuid.UUID) -> RecommendationOut:
                 candidates.append(c)
         record = track_record.load(db)
         remembered, used = _remembered(recalled, record, candidates, left_out, kpi.name)
+        for (code, _), said in sorted(said_no.items(), key=lambda kv: kv[1]["on"]):
+            why = f' You said: "{said["reason"]}".' if said["reason"] else ""
+            text = (
+                f'You said no to "{said["title"]}" on {said["on"]:%d/%m/%Y}, so it is not '
+                f"suggested again for now.{why}"
+            )
+            remembered.append(
+                diagnosis_evidence.Item("fact", text, {"reason": "you_said_no", "code": code})
+            )
+            used.append({"kind": "declined", "statement": text})
         change = Decimal(drivers["total_change"]) if drivers else findings[0].amount
         scored = rules.rank(
             [
@@ -463,9 +508,22 @@ def read(db: Session, event_id: uuid.UUID) -> RecommendationOut:
         .where(RecommendationEvidence.recommendation_id == recommendation.id)
         .order_by(RecommendationEvidence.sort_order)
     ).all()
+    event = get_event(db, event_id)
+    top = next((o for o in rows if o[0].is_recommended), None)
+    scores = (
+        None if top is None else {line["key"]: line["score"] for line in top[0].breakdown["lines"]}
+    )
+    priority = prioritise(
+        alert_severity=EVENT_SEVERITY.get(event.severity, "medium"),
+        effect=event.effect,
+        scores=scores,
+    )
     return RecommendationOut(
         id=recommendation.id,
-        event=get_event(db, event_id),
+        event=event,
+        priority=PriorityOut(
+            level=priority.level, label=LABEL[priority.level], reason=priority.reason
+        ),
         status=recommendation.status,
         headline=recommendation.headline,
         rationale=recommendation.rationale,

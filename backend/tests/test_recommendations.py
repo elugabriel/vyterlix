@@ -582,6 +582,7 @@ def test_every_action_in_the_library_answers_something_and_helps_a_figure_we_can
     explainable = {"revenue", "sales_count", "units_sold", "gross_profit", "operating_expenses"}
     explainable |= {"cancellation_rate_pct", "no_show_rate_pct", "late_cancellations"}
     explainable |= {"rebooking_rate_pct", "appointments_kept"}  # answered from the figure itself
+    explainable |= {"customer_retention_pct", "repeat_customer_rate_pct", "customer_churn_pct"}
     for item in db.scalars(select(Intervention)):
         assert item.addresses, item.code
         assert set(item.kpis) <= explainable, item.code

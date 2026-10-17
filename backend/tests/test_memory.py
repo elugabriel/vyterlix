@@ -142,7 +142,7 @@ def test_a_lesson_is_a_sentence_for_each_kind_of_result():
     )
     assert (
         rules.lesson(outcome="inconclusive", **args)
-        == 'We could not tell whether "Run a special" worked for Sales: R.'
+        == 'We cannot yet measure whether "Run a special" worked for Sales: R.'
     )
 
 
@@ -575,7 +575,7 @@ def test_inconclusive_results_are_kept_but_do_not_change_the_average(api, db, ma
     with scoped(db, march):
         pattern = db.scalars(select(InterventionPattern)).one()
     assert (pattern.inconclusive, pattern.successful, pattern.average_achieved_pct) == (1, 0, None)
-    assert read(api, march)["lessons"][0]["lesson"].startswith("We could not tell whether")
+    assert read(api, march)["lessons"][0]["lesson"].startswith("We cannot yet measure whether")
 
 
 def test_a_result_that_said_nothing_is_not_reported_as_a_try(api, db, march, suggested, done):

@@ -198,7 +198,7 @@ def outcomes_sections(db: Session, first: date, last: date) -> list[dict]:
                 paragraphs=["Nothing you have tried has been finished and checked yet."],
             )
         ]
-    sentence = f"Of the things you tried that have been checked: {summary.successful} worked, {summary.partially_successful} partly worked, {summary.unsuccessful} did not work and {summary.inconclusive} could not be judged."
+    sentence = f"Of the things you tried that have been checked: {summary.successful} worked, {summary.partially_successful} partly worked, {summary.unsuccessful} did not work and {summary.inconclusive} cannot be measured yet."
     if summary.waiting:
         sentence += f" {summary.waiting} finished and are waiting to be checked."
     out.append(rules.section("How it has gone", paragraphs=[sentence]))

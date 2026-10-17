@@ -4,6 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
+from app.schemas.alert_card import PriorityOut
 from app.schemas.diagnostics import DetectionOut, EvidenceOut
 
 
@@ -52,6 +53,7 @@ class OptionOut(BaseModel):
 class RecommendationOut(BaseModel):
     id: uuid.UUID
     event: DetectionOut
+    priority: PriorityOut | None = None  # High, Medium or Low, with the reason
     status: Literal[
         "open", "no_action_needed", "insufficient_evidence", "dismissed", "proposed", "accepted"
     ]

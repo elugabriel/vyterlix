@@ -550,7 +550,7 @@ def test_the_outcomes_report_tells_what_was_tried_and_what_came_of_it(api, db, m
     check(db, march, action)
     s = sections(write(api, march, "outcomes"))
     assert (
-        "1 worked, 0 partly worked, 0 did not work and 0 could not be judged"
+        "1 worked, 0 partly worked, 0 did not work and 0 cannot be measured yet"
         in s["How it has gone"]["paragraphs"][0]
     )
     assert (

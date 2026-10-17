@@ -129,7 +129,7 @@ void main() {
     expect(m.lessons.single.outcomeText, 'It worked');
     expect(
       m.patterns.single.summary,
-      'worked 2 · partly 1 · did not 0 · could not tell 0 · usually 110% of what was expected',
+      'worked 2 · partly 1 · did not 0 · cannot be measured yet 0 · usually 110% of what was expected',
     );
   });
 

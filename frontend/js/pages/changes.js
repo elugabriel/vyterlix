@@ -320,6 +320,8 @@ function decide(recommendation, event, show) {
   return area;
 }
 
+const PRIORITY_CLASS = { high: "health-at_risk", medium: "health-fair", low: "health-not_enough_data" };
+
 function recommendationView(recommendation, again, event, show) {
   const [best, ...others] = recommendation.options;
   const groups = EVIDENCE_GROUPS.map(([type, title]) => [title, recommendation.evidence.filter((e) => e.evidence_type === type)]).filter(([, items]) => items.length);
@@ -327,6 +329,7 @@ function recommendationView(recommendation, again, event, show) {
     "div",
     { class: "stack" },
     el("p", {}, el("strong", {}, recommendation.headline)),
+    recommendation.priority ? el("p", {}, el("span", { class: `badge ${PRIORITY_CLASS[recommendation.priority.level]}` }, `${recommendation.priority.label} priority`), " ", recommendation.priority.reason) : null,
     RECOMMENDATION_NOTICE[recommendation.status] ? el("p", { class: "muted" }, RECOMMENDATION_NOTICE[recommendation.status]) : null,
     best
       ? el(

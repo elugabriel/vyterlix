@@ -33,7 +33,7 @@ class Lesson {
         'successful': 'It worked',
         'partially_successful': 'It partly worked',
         'unsuccessful': 'It did not work',
-        'inconclusive': 'We cannot tell',
+        'inconclusive': 'Cannot be measured yet',
       }[outcome] ??
       outcome;
 }
@@ -72,7 +72,7 @@ class ActionPattern {
       'worked $worked',
       'partly $partly',
       'did not $didNot',
-      'could not tell $couldNotTell',
+      'cannot be measured yet $couldNotTell',
     ];
     return '${parts.join(' · ')}${achievedPct == null ? '' : ' · usually $achievedPct% of what was expected'}';
   }

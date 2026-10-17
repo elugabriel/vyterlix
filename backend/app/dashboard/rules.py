@@ -79,7 +79,7 @@ def results_sentence(measured: int, successful: int, partly: int, failed: int, u
     if measured == 1:
         one = (
             "worked" if successful else "partly worked" if partly
-            else "did not work" if failed else "is one we cannot tell about yet"
+            else "did not work" if failed else "cannot be measured yet"
         )  # fmt: skip
         return f"The one action we have checked {one}."
     parts = [
@@ -88,7 +88,7 @@ def results_sentence(measured: int, successful: int, partly: int, failed: int, u
             (successful, f"{successful} worked"),
             (partly, f"{partly} partly worked"),
             (failed, f"{failed} did not work"),
-            (unclear, f"for {unclear} we cannot tell"),
+            (unclear, f"{unclear} cannot be measured yet"),
         )
         if count
     ]

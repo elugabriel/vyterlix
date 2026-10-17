@@ -603,7 +603,7 @@ def test_outcomes_after_a_result(api, db, march, suggested):
     figures(db, march, action, 100000)
     check(db, march, action)
     content = said(api, march, "did it work?")["answer"]["content"]
-    assert "1 worked, 0 partly worked, 0 did not work and 0 could not be judged" in content
+    assert "1 worked, 0 partly worked, 0 did not work and 0 cannot be measured yet" in content
     assert f'"{action["title"]}" worked for Sales' in content
 
 

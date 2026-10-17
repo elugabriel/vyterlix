@@ -320,7 +320,23 @@ def dismiss(db: Session, tenant, event_id: uuid.UUID, body: DismissIn, meta: Req
             code="not_open",
         )
     recommendation.status = "dismissed"
-    recommendation.basis = {**(recommendation.basis or {}), "dismissed_reason": body.reason}
+    top = db.execute(
+        select(Intervention.code, RecommendationOption.target_label, RecommendationOption.title)
+        .join(Intervention, Intervention.id == RecommendationOption.intervention_id)
+        .where(
+            RecommendationOption.recommendation_id == recommendation.id,
+            RecommendationOption.is_recommended.is_(True),
+        )
+    ).first()
+    recommendation.basis = {
+        **(recommendation.basis or {}),
+        "dismissed_reason": body.reason,
+        "dismissed_on": today_uk().isoformat(),
+        # what the owner said no to, so the same thing is not put in front of them again soon
+        "dismissed_option": (
+            None if top is None else {"code": top[0], "target": top[1], "title": top[2]}
+        ),
+    }
     record_audit(
         db, AuditAction.RECOMMENDATION_DISMISSED, actor_user_id=tenant.user.id,
         organization_id=tenant.organization_id, target_type="recommendation",

@@ -9,16 +9,17 @@ import { el } from "./dom.js";
 
 // [page, words, icon, group]
 export const NAV = [
-  ["dashboard.html", "Today", "today", "Overview"],
-  ["changes.html", "What changed", "changes", "Overview"],
-  ["actions.html", "Actions", "actions", "Overview"],
-  ["forecast.html", "Forecast", "forecast", "Insight"],
-  ["kpis.html", "Key figures", "kpis", "Insight"],
-  ["health.html", "Health", "health", "Insight"],
-  ["reports.html", "Reports", "reports", "Insight"],
-  ["alerts.html", "Alerts", "alerts", "Help and memory"],
-  ["assistant.html", "Ask Vyterlix", "assistant", "Help and memory"],
-  ["memory.html", "What we know", "memory", "Help and memory"],
+  // The five stages of the product, in the order a business meets them
+  ["dashboard.html", "Today", "today", "Understand"],
+  ["kpis.html", "Key figures", "kpis", "Understand"],
+  ["health.html", "Health", "health", "Understand"],
+  ["reports.html", "Reports", "reports", "Understand"],
+  ["changes.html", "What changed", "changes", "Explain"],
+  ["assistant.html", "Ask Vyterlix", "assistant", "Explain"],
+  ["forecast.html", "Forecast", "forecast", "Predict"],
+  ["alerts.html", "Alerts", "alerts", "Recommend"],
+  ["actions.html", "Actions", "actions", "Follow up"],
+  ["memory.html", "What we know", "memory", "Follow up"],
   ["data.html", "Your data", "data", "Your business"],
   ["business.html", "Settings", "settings", "Your business"],
   ["billing.html", "Billing", "billing", "Your business"],
