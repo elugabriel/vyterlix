@@ -137,6 +137,59 @@ def judge(
     return Verdict(outcome, reason, achieved, adjusted)
 
 
+# --- actions that protect something that is already going well -----------------------------------
+# Protecting a best seller is not meant to win money back: success is the good result holding. So it
+# is judged by whether the figure stayed where it was when the action was accepted.
+
+HOLD_ACTIONS = frozenset({"protect_best_seller"})
+HOLD_SLIP = Decimal(10)  # per cent of where it started: a slip this small is "mostly held"
+
+
+def judge_hold(
+    *,
+    baseline: Decimal,
+    actual: Decimal,
+    seasonal: Decimal | None,
+    data_quality: int | None,
+    show: Callable[[Decimal], str],
+) -> Verdict:
+    """`actual` is the change since the action was accepted, positive when better off. The same
+    change a year earlier (`seasonal`) is taken off, so a quiet time of year is not blamed on it."""
+    if data_quality is not None and data_quality < MIN_QUALITY:
+        return Verdict(
+            "inconclusive",
+            f"The figures for that month are too incomplete to trust ({data_quality} out of 100).",
+        )
+    adjusted = actual - (seasonal or Decimal(0))
+    took_out = (
+        f", after allowing for {show(seasonal)} that the time of year brings" if seasonal else ""
+    )
+    if adjusted >= 0:
+        return Verdict(
+            "successful",
+            f"The good result held: the figure is {show(adjusted)} higher than when you "
+            f"started{took_out}."
+            if adjusted > 0
+            else f"The good result held: the figure is where it was when you started{took_out}.",
+            None,
+            adjusted,
+        )
+    slipped = -adjusted
+    if baseline != 0 and slipped / abs(baseline) * 100 <= HOLD_SLIP:
+        return Verdict(
+            "partially_successful",
+            f"Mostly held: the figure slipped by {show(slipped)}{took_out}.",
+            None,
+            adjusted,
+        )
+    return Verdict(
+        "unsuccessful",
+        f"The good result did not hold: the figure slipped by {show(slipped)}{took_out}.",
+        None,
+        adjusted,
+    )
+
+
 # --- sales are not the whole story -----------------------------------------------------------------
 # A promotion, a price cut or an offer can lift sales and still cost the business money. So when the
 # figure an action was meant to move is a sales figure, and the action is one that gives something

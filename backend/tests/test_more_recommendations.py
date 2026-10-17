@@ -223,3 +223,68 @@ def test_a_rise_driven_by_one_product_suggests_protecting_it(api, boom):
         == "Protect your best seller: check stock and avoid needless discounts: Brownie"
     )
     assert "win back" not in body["options"][0]["description"]  # nothing is being won back
+
+
+# --- protecting the best seller is judged by the good result holding --------------------------------------
+
+
+def hold(baseline, actual, seasonal=None, quality=100):
+    from app.outcomes import rules as outcome_rules
+
+    return outcome_rules.judge_hold(
+        baseline=D(baseline), actual=D(actual),
+        seasonal=None if seasonal is None else D(seasonal),
+        data_quality=quality, show=lambda v: f"£{v:.0f}",
+    )  # fmt: skip
+
+
+@pytest.mark.parametrize(
+    ("actual", "outcome"),
+    [(200, "successful"), (0, "successful"), (-50, "partially_successful"),
+     (-100, "partially_successful"), (-101, "unsuccessful"), (-600, "unsuccessful")],
+)  # fmt: skip
+def test_holding_is_judged_against_where_it_started(actual, outcome):
+    assert hold(1000, actual).outcome == outcome
+
+
+def test_the_reason_says_whether_it_held():
+    assert "held" in hold(1000, 0).reason and "higher" in hold(1000, 200).reason
+    assert "did not hold" in hold(1000, -600).reason and "Mostly held" in hold(1000, -50).reason
+
+
+def test_a_quiet_time_of_year_is_not_blamed_on_the_action():
+    # down £80 on paper, but the same months a year earlier fell by £80 on their own
+    assert hold(1000, -80, seasonal=-80).outcome == "successful"
+
+
+def test_poor_data_makes_it_inconclusive():
+    assert hold(1000, 0, quality=10).outcome == "inconclusive"
+
+
+def test_only_protect_best_seller_is_judged_this_way():
+    from app.outcomes import rules as outcome_rules
+
+    assert outcome_rules.HOLD_ACTIONS == {"protect_best_seller"}
+
+
+def test_a_best_seller_that_held_is_a_success_even_though_no_money_was_expected(api, db, boom):
+    from tests.test_outcomes import check, figures, finish
+
+    event = event_for(api, boom, "revenue")
+    recommend(api, boom, event)
+    action = finish(api, boom, event)
+    baseline = D(action["decision"]["baseline_value"])
+    figures(db, boom, action, baseline + 10)
+    result = check(db, boom, action)
+    assert result.outcome == "successful" and "held" in result.reason
+
+
+def test_a_best_seller_whose_sales_fell_away_is_not_a_success(api, db, boom):
+    from tests.test_outcomes import check, figures, finish
+
+    event = event_for(api, boom, "revenue")
+    recommend(api, boom, event)
+    action = finish(api, boom, event)
+    baseline = D(action["decision"]["baseline_value"])
+    figures(db, boom, action, baseline * D("0.5"))
+    assert check(db, boom, action).outcome == "unsuccessful"

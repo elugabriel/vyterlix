@@ -248,13 +248,22 @@ def measure(
     baseline = Decimal(intervention.baseline_value)
     actual = rules.improvement(direction, baseline, Decimal(now_value.value))
     seasonal = _seasonal(db, kpi.id, direction, intervention.baseline_period, plan.measure_month)
-    verdict = rules.judge(
-        expected=expected,
-        actual=actual,
-        seasonal=seasonal,
-        data_quality=now_value.data_quality,
-        show=lambda v: show(v, kpi.unit),
-    )
+    if intervention.library_code in rules.HOLD_ACTIONS:
+        verdict = rules.judge_hold(
+            baseline=baseline,
+            actual=actual,
+            seasonal=seasonal,
+            data_quality=now_value.data_quality,
+            show=lambda v: show(v, kpi.unit),
+        )
+    else:
+        verdict = rules.judge(
+            expected=expected,
+            actual=actual,
+            seasonal=seasonal,
+            data_quality=now_value.data_quality,
+            show=lambda v: show(v, kpi.unit),
+        )
     verdict = _check_profit(db, kpi, intervention, plan, verdict)
     return _store(
         db,
