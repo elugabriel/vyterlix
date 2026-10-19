@@ -33,6 +33,7 @@ class AuditAction(StrEnum):
     AUTH_LOGIN_BLOCKED = "auth.login_blocked"
     AUTH_LOGOUT = "auth.logout"
     AUTH_SESSION_REVOKED = "auth.session_revoked"
+    AUTH_SESSION_RENAMED = "auth.session_renamed"
     AUTH_SESSIONS_REVOKED = "auth.sessions_revoked"
     AUTH_PASSWORD_RESET_REQUESTED = "auth.password_reset_requested"
     AUTH_PASSWORD_RESET = "auth.password_reset"

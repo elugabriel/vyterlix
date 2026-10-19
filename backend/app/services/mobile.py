@@ -89,6 +89,30 @@ def list_sessions(db: Session, user: User, current: uuid.UUID) -> list[SessionOu
     ]  # fmt: skip
 
 
+def rename_session(
+    db: Session, user: User, session_id: uuid.UUID, name: str, meta: RequestMeta, current: uuid.UUID
+) -> SessionOut:
+    """Give one of the person's own devices a name (a session that is not theirs is not found)."""
+    session = db.scalar(
+        select(UserSession).where(UserSession.id == session_id, *_live(user.id)).with_for_update()
+    )
+    if session is None:
+        raise NotFoundError("That device was not found", code="session_not_found")
+    session.device_name = name
+    record_audit(
+        db, AuditAction.AUTH_SESSION_RENAMED, actor_user_id=user.id, target_type="session",
+        target_id=session_id, ip_address=meta.ip_address, user_agent=meta.user_agent,
+        details={"device_name": name},
+    )  # fmt: skip
+    db.commit()
+    return SessionOut(
+        id=session.id, client=session.client, device_name=session.device_name,
+        user_agent=session.user_agent, created_at=session.created_at,
+        last_used_at=session.last_used_at, expires_at=session.expires_at,
+        current=session.id == current,
+    )  # fmt: skip
+
+
 def revoke_session(
     db: Session, user: User, session_id: uuid.UUID, meta: RequestMeta, current: uuid.UUID
 ) -> None:

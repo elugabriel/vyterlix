@@ -594,3 +594,85 @@ def test_a_session_must_be_a_web_or_a_mobile_one_and_a_push_address_is_unique(db
     with pytest.raises(IntegrityError), db.begin_nested():
         db.add(PushDevice(user_id=uid, platform="ios", token="short"))
         db.flush()
+
+
+# --- naming a device -----------------------------------------------------------------------------------------------
+
+
+def test_a_device_can_be_given_a_name_from_another(api, db, owner):
+    api.cookies.clear()
+    laptop = phone_login(api, device_name="Laptop")
+    phone = phone_login(api)  # arrived with no name
+    phone_id = next(
+        r["id"]
+        for r in api.get(f"{ME}/sessions", headers=bearer(laptop)).json()
+        if r["device_name"] is None
+    )
+    res = api.patch(
+        f"{ME}/sessions/{phone_id}", json={"device_name": "  Jo's iPhone "}, headers=bearer(laptop)
+    )
+    assert (
+        res.status_code == 200
+        and res.json()["device_name"] == "Jo's iPhone"
+        and res.json()["current"] is False
+    )
+    assert "Jo's iPhone" in [
+        r["device_name"] for r in api.get(f"{ME}/sessions", headers=bearer(phone)).json()
+    ]
+    [entry] = db.scalars(select(AuditLog).where(AuditLog.action == "auth.session_renamed")).all()
+    assert entry.target_id == phone_id and entry.details == {"device_name": "Jo's iPhone"}
+
+
+def test_a_device_can_name_itself(api, db, owner):
+    api.cookies.clear()
+    me = phone_login(api)
+    mine = api.get(f"{ME}/sessions", headers=bearer(me)).json()[0]
+    res = api.patch(
+        f"{ME}/sessions/{mine['id']}", json={"device_name": "My phone"}, headers=bearer(me)
+    )
+    assert res.json()["current"] is True and res.json()["device_name"] == "My phone"
+
+
+@pytest.mark.parametrize(
+    "body",
+    [{}, {"device_name": "   "}, {"device_name": "x" * 101}, {"device_name": "a", "client": "web"}],
+)
+def test_a_bad_name_is_refused(api, db, owner, body):
+    api.cookies.clear()
+    me = phone_login(api)
+    mine = api.get(f"{ME}/sessions", headers=bearer(me)).json()[0]
+    assert (
+        api.patch(f"{ME}/sessions/{mine['id']}", json=body, headers=bearer(me)).status_code == 422
+    )
+
+
+def test_someone_elses_device_cannot_be_renamed(api, db, signup, owner):
+    api.cookies.clear()
+    theirs = phone_login(api, device_name="Theirs")
+    signup("other@rival.co.uk")
+    mine = phone_login(api, email="other@rival.co.uk")
+    theirs_id = api.get(f"{ME}/sessions", headers=bearer(theirs)).json()[0]["id"]
+    res = api.patch(
+        f"{ME}/sessions/{theirs_id}", json={"device_name": "Hacked"}, headers=bearer(mine)
+    )
+    assert res.status_code == 404 and res.json()["error"]["code"] == "session_not_found"
+    assert api.get(f"{ME}/sessions", headers=bearer(theirs)).json()[0]["device_name"] == "Theirs"
+
+
+def test_a_signed_out_device_cannot_be_renamed(api, db, owner):
+    api.cookies.clear()
+    laptop = phone_login(api, device_name="Laptop")
+    lost = phone_login(api, device_name="Lost")
+    lost_id = next(
+        r["id"]
+        for r in api.get(f"{ME}/sessions", headers=bearer(laptop)).json()
+        if r["device_name"] == "Lost"
+    )
+    api.delete(f"{ME}/sessions/{lost_id}", headers=bearer(laptop))
+    assert (
+        api.patch(
+            f"{ME}/sessions/{lost_id}", json={"device_name": "x"}, headers=bearer(laptop)
+        ).status_code
+        == 404
+    )
+    assert lost

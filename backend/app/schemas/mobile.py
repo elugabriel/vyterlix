@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 
 class AppConfigOut(BaseModel):
@@ -23,6 +23,16 @@ class SessionOut(BaseModel):
     last_used_at: datetime | None
     expires_at: datetime
     current: bool  # the device making this request
+
+
+class SessionRenameIn(BaseModel):
+    """Name a device so it is easy to spot in the list ("Jo's iPhone")."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    device_name: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)
+    ]
 
 
 class RevokedOut(BaseModel):

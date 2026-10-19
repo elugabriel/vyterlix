@@ -23,6 +23,7 @@ export const NAV = [
   ["data.html", "Your data", "data", "Your business"],
   ["business.html", "Settings", "settings", "Your business"],
   ["billing.html", "Billing", "billing", "Your business"],
+  ["account.html", "Your account", "account", "Your business"],
 ];
 // Screens that belong under another entry, so that entry stays lit while you are on them
 const BELONGS_TO = {
@@ -50,6 +51,7 @@ const ICONS = {
   memory: ["M9 18h6", "M10 21h4", "M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"],
   data: ["M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z", "M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6", "M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"],
   settings: ["M4 6h10", "M18 6h2", "M4 12h2", "M10 12h10", "M4 18h12", "M20 18h0", "M14 4v4", "M8 10v4", "M18 16v4"],
+  account: ["M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", "M4 21a8 8 0 0 1 16 0"],
   billing: ["M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z", "M3 10h18"],
 };
 

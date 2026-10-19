@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Your account · Vyterlix</title>
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <meta name="theme-color" content="#041040">
+  <link rel="stylesheet" href="css/base.css">
+  <script src="js/config.js"></script>
+  <script type="module" src="js/pages/account.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="app.html">Vyterlix</a>
+    <div class="topbar-user">
+      <span id="user-name" class="muted"></span>
+      <button id="logout" type="button" class="secondary">Log out</button>
+    </div>
+  </header>
+  <main class="container stack">
+    <p><a href="app.html">← Your businesses</a></p>
+    <div id="message" class="message" role="alert" hidden></div>
+
+    <section class="card">
+      <h1 style="margin-top:0">Where you are signed in</h1>
+      <p class="muted">These are the browsers and phones signed in to your account. If you do not recognise one, sign it out. Giving a device a name, like "Jo's iPhone", makes it easier to spot.</p>
+      <div id="devices" class="stack"></div>
+    </section>
+  </main>
+</body>
+</html>

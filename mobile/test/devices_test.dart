@@ -46,6 +46,10 @@ Future<void> open(WidgetTester tester, FakeServer server) async {
 FakeServer devicesServer() => happyServer()
   ..json('GET /me/sessions', sessionsJson())
   ..on('DELETE /me/sessions/s2', (_) => http.Response('', 204))
+  ..json('PATCH /me/sessions/s2', {
+    ...sessionsJson()[1],
+    'device_name': "Jo's laptop",
+  })
   ..json('POST /me/sessions/revoke-others', {'sessions_ended': 1});
 
 void main() {
@@ -60,6 +64,36 @@ void main() {
     expect(find.text('Signed in 20/09/2026, 08:00'), findsOneWidget);
     expect(find.byKey(const ValueKey('end-s1')), findsNothing);
     expect(find.byKey(const ValueKey('end-s2')), findsOneWidget);
+  });
+
+  testWidgets('a device can be given a name', (tester) async {
+    final server = devicesServer();
+    await open(tester, server);
+    await tester.tap(find.byKey(const ValueKey('name-s2')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), "  Jo's laptop ");
+    await tester.tap(find.text('Save name'));
+    await tester.pumpAndSettle();
+    final sent = server.bodyOf(server.to('PATCH /me/sessions/s2').single);
+    expect(sent['device_name'], "Jo's laptop");
+    expect(find.text("Named it Jo's laptop."), findsOneWidget);
+  });
+
+  testWidgets('naming can be cancelled and a blank name sends nothing', (
+    tester,
+  ) async {
+    final server = devicesServer();
+    await open(tester, server);
+    await tester.tap(find.byKey(const ValueKey('name-s1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('name-s1')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '   ');
+    await tester.tap(find.text('Save name'));
+    await tester.pumpAndSettle();
+    expect(server.to('PATCH /me/sessions/s1'), isEmpty);
   });
 
   testWidgets('another device can be signed out, after asking', (tester) async {

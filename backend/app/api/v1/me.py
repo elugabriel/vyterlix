@@ -5,7 +5,13 @@ from fastapi import APIRouter, Depends, Response
 
 from app.api.deps import DB, CurrentPrincipal, CurrentUser, Meta
 from app.schemas.auth import ChangePasswordRequest, MessageOut, UpdateProfileRequest, UserOut
-from app.schemas.mobile import PushDeviceIn, PushDeviceOut, RevokedOut, SessionOut
+from app.schemas.mobile import (
+    PushDeviceIn,
+    PushDeviceOut,
+    RevokedOut,
+    SessionOut,
+    SessionRenameIn,
+)
 from app.services import mobile
 from app.services.email import EmailSender, get_email_sender
 from app.services.profile import change_password, update_profile
@@ -56,6 +62,16 @@ def my_sessions(principal: CurrentPrincipal, db: DB) -> list[SessionOut]:
 def sign_out_other_devices(principal: CurrentPrincipal, db: DB, meta: Meta) -> RevokedOut:
     ended = mobile.revoke_other_sessions(db, principal.user, principal.session_id, meta)
     return RevokedOut(sessions_ended=ended)
+
+
+@router.patch("/sessions/{session_id}", response_model=SessionOut)
+def name_a_device(
+    session_id: uuid.UUID, body: SessionRenameIn, principal: CurrentPrincipal, db: DB, meta: Meta
+) -> SessionOut:
+    """Name one of your devices, for example "Jo's iPhone"."""
+    return mobile.rename_session(
+        db, principal.user, session_id, body.device_name, meta, principal.session_id
+    )
 
 
 @router.delete("/sessions/{session_id}", status_code=204)

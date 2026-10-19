@@ -84,6 +84,18 @@ class _DevicesScreenState extends State<DevicesScreen> {
   String _title(Map<String, dynamic> s) =>
       '${s['device_name'] ?? (s['client'] == 'mobile' ? 'A phone' : 'A web browser')}';
 
+  /// Ask for a name and give it to the device, so it is easy to spot ("Jo's iPhone").
+  Future<void> _rename(Map<String, dynamic> s) async {
+    final name = await showDialog<String>(
+      context: context,
+      builder: (context) => _NameDialog(start: '${s['device_name'] ?? ''}'),
+    );
+    if (name == null || name.isEmpty) return;
+    await _act((api) async {
+      await api.patch('/me/sessions/${s['id']}', body: {'device_name': name});
+    }, 'Named it $name.');
+  }
+
   Future<void> _end(Map<String, dynamic> s) async {
     final name = _title(s);
     if (!await _confirm('Sign out of $name?', 'Sign it out')) return;
@@ -169,15 +181,21 @@ class _DevicesScreenState extends State<DevicesScreen> {
                                   : 'Last used ${ukDateTime('${s['last_used_at']}')}',
                               style: TextStyle(color: muted, fontSize: 13),
                             ),
-                            if (s['current'] != true)
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: TextButton(
-                                  key: ValueKey('end-${s['id']}'),
-                                  onPressed: _busy ? null : () => _end(s),
-                                  child: const Text('Sign it out'),
+                            Wrap(
+                              children: [
+                                TextButton(
+                                  key: ValueKey('name-${s['id']}'),
+                                  onPressed: _busy ? null : () => _rename(s),
+                                  child: const Text('Give it a name'),
                                 ),
-                              ),
+                                if (s['current'] != true)
+                                  TextButton(
+                                    key: ValueKey('end-${s['id']}'),
+                                    onPressed: _busy ? null : () => _end(s),
+                                    child: const Text('Sign it out'),
+                                  ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -190,6 +208,50 @@ class _DevicesScreenState extends State<DevicesScreen> {
                 ],
               ),
             ),
+    );
+  }
+}
+
+class _NameDialog extends StatefulWidget {
+  const _NameDialog({required this.start});
+
+  final String start;
+
+  @override
+  State<_NameDialog> createState() => _NameDialogState();
+}
+
+class _NameDialogState extends State<_NameDialog> {
+  late final _controller = TextEditingController(text: widget.start);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Name this device'),
+      content: TextField(
+        controller: _controller,
+        maxLength: 100,
+        autofocus: true,
+        decoration: const InputDecoration(
+          labelText: "For example: Jo's iPhone",
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _controller.text.trim()),
+          child: const Text('Save name'),
+        ),
+      ],
     );
   }
 }
