@@ -296,6 +296,9 @@ def list_kpis(db: Session, granularity: str = "month") -> KpisOut:
     if sells == "services":
         # No stock to count: do not show a Stock group of figures that can never be worked out
         definitions = [d for d in definitions if d.category != "inventory"]
+    if not has_records(db, "ratings"):
+        # Ratings are for a business whose customers have been asked how it went
+        definitions = [d for d in definitions if "ratings" not in d.requires]
     if not has_records(db, "pipeline"):
         # Leads and win rates are for a business that quotes for work
         definitions = [d for d in definitions if "pipeline" not in d.requires]

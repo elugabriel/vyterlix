@@ -32,6 +32,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   String _day = _isoDay(DateTime.now());
   String _status = 'completed';
   String? _cancelledOn;
+  int? _rating; // 1 to 5, only for an appointment that went ahead
   String? _customer;
   List<(String, String)> _customers = [];
   List<String> _usedServices = [];
@@ -122,13 +123,17 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
           'customer_id': _customer,
           'staff': _staff.text.trim().isEmpty ? null : _staff.text.trim(),
           'cancelled_on': _status == 'cancelled' ? _cancelledOn : null,
+          'rating': _status == 'completed' ? _rating : null,
           'notes': _notes.text.trim().isEmpty ? null : _notes.text.trim(),
         },
       );
       if (!mounted) return;
       _service.clear();
       _notes.clear();
-      setState(() => _saved = 'Appointment saved.');
+      setState(() {
+        _saved = 'Appointment saved.';
+        _rating = null;
+      });
       await _loadChoices();
     } on ApiException catch (error) {
       if (mounted) setState(() => _error = error.message);
@@ -201,6 +206,42 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                     ],
                     onChanged: (v) => setState(() => _status = v ?? _status),
                   ),
+                  if (_status == 'completed') ...[
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<int?>(
+                      initialValue: _rating,
+                      decoration: const InputDecoration(
+                        labelText: 'How did the customer rate it? (optional)',
+                      ),
+                      items: const [
+                        DropdownMenuItem<int?>(
+                          value: null,
+                          child: Text('Not rated'),
+                        ),
+                        DropdownMenuItem<int?>(
+                          value: 5,
+                          child: Text('5: excellent'),
+                        ),
+                        DropdownMenuItem<int?>(
+                          value: 4,
+                          child: Text('4: good'),
+                        ),
+                        DropdownMenuItem<int?>(
+                          value: 3,
+                          child: Text('3: fair'),
+                        ),
+                        DropdownMenuItem<int?>(
+                          value: 2,
+                          child: Text('2: poor'),
+                        ),
+                        DropdownMenuItem<int?>(
+                          value: 1,
+                          child: Text('1: very poor'),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() => _rating = v),
+                    ),
+                  ],
                   if (_status == 'cancelled') ...[
                     const SizedBox(height: 12),
                     OutlinedButton.icon(

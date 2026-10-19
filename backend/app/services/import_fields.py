@@ -650,6 +650,18 @@ BOOKINGS = (
         "cancellation date",
         "date cancelled",
     ),
+    _f(
+        "rating",
+        "Customer rating",
+        "How the customer rated it, from 1 (poor) to 5 (excellent). "
+        "Only for appointments that went ahead.",
+        "quantity",
+        "rating",
+        "score",
+        "stars",
+        "satisfaction",
+        "review",
+    ),
     _f("notes", "Notes", "Anything else worth keeping.", "text", "notes", "note", "comment"),
     _f(
         "reference",

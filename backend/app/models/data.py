@@ -25,6 +25,7 @@ from sqlalchemy import (
     ForeignKeyConstraint,
     Index,
     Numeric,
+    SmallInteger,
     String,
     Text,
     UniqueConstraint,
@@ -303,6 +304,10 @@ class Booking(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigin
             "cancelled_on IS NULL OR (status = 'cancelled' AND cancelled_on <= booked_for)",
             name="cancelled_on_fits",
         ),
+        CheckConstraint(
+            "rating IS NULL OR (status = 'completed' AND rating BETWEEN 1 AND 5)",
+            name="rating_fits",
+        ),
         Index("ix_bookings_org_date", "organization_id", "booked_for"),
         Index("ix_bookings_org_customer", "organization_id", "customer_id"),
     )
@@ -313,6 +318,7 @@ class Booking(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigin
     customer_id: Mapped[uuid.UUID | None] = mapped_column()
     staff: Mapped[str | None] = mapped_column(String(100))  # who was to do it
     cancelled_on: Mapped[date | None] = mapped_column(Date)  # the day they cancelled
+    rating: Mapped[int | None] = mapped_column(SmallInteger)  # how the customer rated it, 1 to 5
     notes: Mapped[str | None] = mapped_column(String(300))
 
 

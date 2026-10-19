@@ -491,17 +491,23 @@ function booking() {
   const cancelled = input("cancelled_on", { type: "date" });
   const cancelledField = field("Day they cancelled", cancelled, "Leave blank if you do not know. A cancellation the day before or on the day counts as late.");
   cancelledField.hidden = true;
-  status.addEventListener("change", () => (cancelledField.hidden = status.value !== "cancelled"));
+  const ratingField = field("How did the customer rate it? (optional)", select("rating", [["5", "5: excellent"], ["4", "4: good"], ["3", "3: fair"], ["2", "2: poor"], ["1", "1: very poor"]], { placeholder: "Not rated" }), "It lets Vyterlix show how happy your customers are.");
+  const sync = () => {
+    cancelledField.hidden = status.value !== "cancelled";
+    ratingField.hidden = status.value !== "completed";
+  };
+  status.addEventListener("change", sync);
   const node = el(
     "form",
     { novalidate: true },
     el("div", { class: "row" }, field("Service", picker("service", choices.usedServices, { maxlength: 200, required: true }), "Pick one you have used, or type a new one. For example: haircut, boiler service, consultation."), dateField("booked_for", "Day of the appointment")),
-    el("div", { class: "row" }, field("What happened?", status), cancelledField),
+    el("div", { class: "row" }, field("What happened?", status), cancelledField, ratingField),
     el("div", { class: "row" }, field("Customer (optional)", select("customer_id", choices.customers, { placeholder: "Not recorded" }), "Choose one to see who books again."), field("Who was doing it? (optional)", picker("staff", choices.usedStaff, { maxlength: 100 }))),
     el("div", { class: "row" }, field("Notes (optional)", input("notes", { maxlength: 300 }))),
     choices.customers.length ? null : el("p", { class: "hint" }, "To see who books again, add your customers first (the Customer tab)."),
     el("button", { type: "submit" }, "Save appointment"),
   );
+  sync();
   return {
     form: {
       node,
@@ -513,6 +519,7 @@ function booking() {
           customer_id: orNull(v.customer_id),
           staff: orNull(v.staff),
           cancelled_on: v.status === "cancelled" ? orNull(v.cancelled_on) : null,
+          rating: v.status === "completed" && v.rating ? Number(v.rating) : null,
           notes: orNull(v.notes),
         }),
     },
@@ -523,7 +530,7 @@ function booking() {
       cells: (b) => [
         ukDate(b.booked_for),
         b.service,
-        BOOKING_STATUSES.find(([k]) => k === b.status)?.[1] ?? b.status,
+        `${BOOKING_STATUSES.find(([k]) => k === b.status)?.[1] ?? b.status}${b.rating ? ` (rated ${b.rating}/5)` : ""}`,
         b.customer_id ? (customerName(b.customer_id) ?? "Unknown customer") : "Not recorded",
       ],
     },

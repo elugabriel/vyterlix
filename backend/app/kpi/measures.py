@@ -54,6 +54,7 @@ PRESENCE = {
     "bookings": select(Booking.id),
     "invoices": select(Sale.id).where(Sale.due_on.is_not(None)),
     "pipeline": select(Opportunity.id),
+    "ratings": select(Booking.id).where(Booking.rating.is_not(None)),
 }
 
 Series = dict[date, Decimal]
@@ -322,6 +323,14 @@ def _late_cancellations(db: Session, granularity: str, start: date, end: date) -
     )(db, granularity, start, end)
 
 
+# --- how customers rated the appointments -------------------------------------------------------
+# Only appointments that were rated count. Happy is 4 or 5, unhappy is 1 or 2; a 3 is neither.
+
+
+def _rated(*conditions) -> Compute:
+    return _bookings(Booking.rating.is_not(None), *conditions)
+
+
 # --- leads, proposals and renewals --------------------------------------------------------------
 # A lead counts in the month it came in, a proposal in the month it was sent, and a win or a loss in
 # the month it was decided. The win rate is of the ones decided, so work still being chased does not
@@ -518,6 +527,9 @@ MEASURES: dict[str, Measure] = {
         Measure("products_tracked", "Products with stock records", "stock", _products_tracked),
         Measure("products_out_of_stock", "Products out of stock", "stock", _products_out_of_stock),
         Measure("period_days", "Days in the period", "sales", _period_days),
+        Measure("bookings_rated", "Appointments rated", "ratings", _rated()),
+        Measure("ratings_happy", "Rated 4 or 5", "ratings", _rated(Booking.rating >= 4)),
+        Measure("ratings_unhappy", "Rated 1 or 2", "ratings", _rated(Booking.rating <= 2)),
         Measure("leads_in", "New leads", "pipeline", _opportunities(Opportunity.created_on)),
         Measure(
             "proposals_sent",

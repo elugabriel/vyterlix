@@ -363,6 +363,18 @@ def _booking_status(text: str) -> str:
     return word
 
 
+def _rating(text: str) -> int:
+    """1 to 5, written as 4, 4.0, 4/5 or 4 stars."""
+    word = text.strip().lower().replace("stars", "").replace("star", "").split("/")[0].strip()
+    try:
+        number = float(word)
+    except ValueError:
+        raise CellError("invalid_rating", f"'{text.strip()}' isn't a rating from 1 to 5.") from None
+    if number != int(number) or not 1 <= number <= 5:
+        raise CellError("invalid_rating", f"'{text.strip()}' isn't a rating from 1 to 5.")
+    return int(number)
+
+
 def _booking(row: _Row, options: dict, today: date | None) -> None:
     # an appointment can be booked up to a year ahead
     day = row.read(
@@ -385,10 +397,14 @@ def _booking(row: _Row, options: dict, today: date | None) -> None:
         )
     elif cancelled_on is not None and day is not None and cancelled_on > day:
         row.error("cancelled_on", "cancelled_after", "It cannot be cancelled after its own day.")
+    rating = row.read("rating", _rating)
+    if rating is not None and status != "completed":
+        row.error("rating", "not_completed", "Only an appointment that went ahead can be rated.")
     email = row.read("customer_email", vp.parse_email)
     reference = row.text("reference", 200)
     row.out.values.update(
         {
+            "rating": rating,
             "booked_for": day,
             "service": service,
             "status": status,

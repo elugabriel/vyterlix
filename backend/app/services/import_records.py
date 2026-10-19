@@ -404,6 +404,7 @@ def _booking(r: Resolver, v: dict[str, Any], booking_id: uuid.UUID, tables: dict
             "customer_id": r.customer_id(v),
             "staff": v.get("staff"),
             "cancelled_on": v.get("cancelled_on"),
+            "rating": v.get("rating"),
             "notes": v.get("notes"),
             "source_ref": v.get("reference"),
             **r.common,

@@ -114,6 +114,26 @@ WORDS: dict[str, Words] = {
             "This could reduce next month's sales. It is worth reconnecting with the customers who did not come back.",
         ),
     ),
+    "happy_ratings_pct": Words(
+        Say(
+            "A bigger share of your customers rated you 4 or 5 than {before}.",
+            "That is a good sign: more customers are happy with what you did.",
+        ),
+        Say(
+            "A smaller share of your customers rated you 4 or 5 than {before}.",
+            "Happy customers come back and recommend you. It is worth finding out what changed.",
+        ),
+    ),
+    "unhappy_ratings_pct": Words(
+        Say(
+            "A bigger share of your customers rated you 1 or 2 than {before}.",
+            "An unhappy customer is more likely to leave. A personal call can often put it right.",
+        ),
+        Say(
+            "A smaller share of your customers rated you 1 or 2 than {before}.",
+            "That is a good sign: fewer customers are unhappy.",
+        ),
+    ),
     "new_leads": Words(
         Say(
             "More enquiries came in than {before}.",

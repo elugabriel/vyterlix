@@ -150,6 +150,39 @@ void main() {
     expect(server.to('POST /organizations/b1/opportunities'), isEmpty);
   });
 
+  testWidgets('a completed appointment can be rated', (tester) async {
+    final server = entryServer();
+    await open(tester, server);
+    await tester.tap(find.text('Type in an appointment'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Service'), 'Cut');
+    await tester.tap(find.byType(DropdownButtonFormField<int?>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('4: good').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save appointment'));
+    await tester.pumpAndSettle();
+    final body = server.bodyOf(
+      server.to('POST /organizations/b1/bookings').single,
+    );
+    expect(body['status'], 'completed');
+    expect(body['rating'], 4);
+  });
+
+  testWidgets('an appointment that was missed has no rating to give', (
+    tester,
+  ) async {
+    final server = entryServer();
+    await open(tester, server);
+    await tester.tap(find.text('Type in an appointment'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Did not turn up').last);
+    await tester.pumpAndSettle();
+    expect(find.text('How did the customer rate it? (optional)'), findsNothing);
+  });
+
   testWidgets('an appointment needs a service', (tester) async {
     final server = entryServer();
     await open(tester, server);

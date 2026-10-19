@@ -497,6 +497,11 @@ Staff = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, ma
 BookingNote = Annotated[str, StringConstraints(strip_whitespace=True, max_length=300)]
 
 
+def check_rating(status: str, rating: int | None) -> None:
+    if rating is not None and status != "completed":
+        raise ValueError("Only an appointment that went ahead can be rated")
+
+
 def check_cancellation(status: str, cancelled_on: date | None, booked_for: date | None) -> None:
     if cancelled_on is None:
         return
@@ -515,11 +520,13 @@ class BookingCreate(BaseModel):
     customer_id: uuid.UUID | None = None
     staff: Staff | None = None
     cancelled_on: date | None = None
+    rating: Annotated[int, Field(ge=1, le=5)] | None = None  # how the customer rated it
     notes: BookingNote | None = None
 
     @model_validator(mode="after")
     def _cancellation(self) -> "BookingCreate":
         check_cancellation(self.status, self.cancelled_on, self.booked_for)
+        check_rating(self.status, self.rating)
         return self
 
 
@@ -532,6 +539,7 @@ class BookingPatch(BaseModel):
     customer_id: uuid.UUID | None = None
     staff: Staff | None = None
     cancelled_on: date | None = None
+    rating: Annotated[int, Field(ge=1, le=5)] | None = None
     notes: BookingNote | None = None
 
 
@@ -545,6 +553,7 @@ class BookingOut(BaseModel):
     customer_id: uuid.UUID | None
     staff: str | None
     cancelled_on: date | None
+    rating: int | None = None
     notes: str | None
     source: str
     import_id: uuid.UUID | None

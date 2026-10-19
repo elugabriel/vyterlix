@@ -842,9 +842,11 @@ def update_booking(
     booking = _get(db, Booking, booking_id, "Booking")
     if "customer_id" in body.model_fields_set:
         _must_exist(db, Customer, body.customer_id, "customer_id", "customer")
-    _apply(booking, body, nullable={"customer_id", "staff", "cancelled_on", "notes"})
+    _apply(booking, body, nullable={"customer_id", "staff", "cancelled_on", "rating", "notes"})
     if booking.status != "cancelled":
         booking.cancelled_on = None  # no longer cancelled, so there is no day to keep
+    if booking.status != "completed":
+        booking.rating = None  # it did not go ahead, so there is nothing to rate
     try:
         check_cancellation(booking.status, booking.cancelled_on, booking.booked_for)
     except ValueError as exc:
