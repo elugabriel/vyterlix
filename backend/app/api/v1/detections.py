@@ -7,8 +7,10 @@ from fastapi import APIRouter, Depends, Query
 from app.api.deps import DB, Tenant, require_permission
 from app.core.permissions import Perm
 from app.schemas.diagnostics import DetectionOut, DiagnosisOut
+from app.schemas.journey import JourneyOut
 from app.services.detection import get_event, list_events
 from app.services.diagnosis import diagnose, read
+from app.services.journey import journey
 
 router = APIRouter(prefix="/organizations/{organization_id}/changes", tags=["diagnostics"])
 
@@ -45,6 +47,13 @@ def changes(
 @router.get("/{event_id}", response_model=DetectionOut)
 def one_change(event_id: uuid.UUID, tenant: Viewer, db: DB):
     return get_event(db, event_id)
+
+
+@router.get("/{event_id}/journey", response_model=JourneyOut)
+def one_change_journey(event_id: uuid.UUID, tenant: Viewer, db: DB):
+    """One change from start to finish: what happened, why, what we suggest, the decision, how it
+    is going and how it turned out, with the step it is up to now."""
+    return journey(db, tenant, event_id)
 
 
 @router.get("/{event_id}/diagnosis", response_model=DiagnosisOut)

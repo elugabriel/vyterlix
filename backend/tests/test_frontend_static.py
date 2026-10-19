@@ -103,6 +103,7 @@ def test_every_api_method_the_pages_call_exists():
         "kpis",
         "health",
         "changes",
+        "change",
         "forecast",
         "actions",
         "memory",

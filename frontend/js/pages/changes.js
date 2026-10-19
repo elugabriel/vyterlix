@@ -162,6 +162,8 @@ function eventRow({ change, unusual }) {
     diagnosisPanel(event),
     event.effect === "bad" ? recommendationPanel(event) : null,
     splittable[event.kpi_code] ? whereFrom(event) : null,
+    el("a", { href: `change.html?org=${orgId}&event=${event.id}` }, "See the whole story"),
+    " · ",
     el("a", { href: `kpis.html?org=${orgId}#${event.kpi_code}` }, "See this figure"),
   );
 }

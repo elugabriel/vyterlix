@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -262,6 +264,7 @@ class ChangeDetailScreen extends StatefulWidget {
 
 class _ChangeDetailScreenState extends State<ChangeDetailScreen> {
   Diagnosis? _diagnosis;
+  List<JourneyStep> _steps = const [];
   bool _loaded = false;
   bool _busy = false;
   String? _error;
@@ -277,8 +280,28 @@ class _ChangeDetailScreenState extends State<ChangeDetailScreen> {
     _load();
   }
 
+  /// Where this change is up to. A bonus: without it the screen simply has no step list.
+  Future<void> _loadJourney() async {
+    try {
+      final data = await context.read<ApiClient>().get(
+        '$_path/journey',
+      ) as Map<String, dynamic>;
+      if (mounted) {
+        setState(
+          () => _steps = [
+            for (final s in (data['steps'] as List? ?? const []))
+              JourneyStep.fromJson(s as Map<String, dynamic>),
+          ],
+        );
+      }
+    } on ApiException {
+      // no step list
+    }
+  }
+
   Future<void> _load() async {
     setState(() => _error = null);
+    unawaited(_loadJourney());
     try {
       final data = await context.read<ApiClient>().get('$_path/diagnosis');
       if (mounted) {
@@ -308,6 +331,7 @@ class _ChangeDetailScreenState extends State<ChangeDetailScreen> {
         setState(
           () => _diagnosis = Diagnosis.fromJson(data as Map<String, dynamic>),
         );
+        unawaited(_loadJourney());
       }
     } on ApiException catch (error) {
       if (mounted) {
@@ -397,6 +421,62 @@ class _ChangeDetailScreenState extends State<ChangeDetailScreen> {
             'This is about what your busy and quiet seasons lead you to expect.',
             style: TextStyle(color: muted),
           ),
+        ],
+        if (_steps.isNotEmpty) ...[
+          const SectionTitle('Where this is up to'),
+          for (final step in _steps)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 22,
+                    child: Text(
+                      switch (step.state) {
+                        'done' => '✓',
+                        'current' => '●',
+                        'not_needed' => '–',
+                        _ => '○',
+                      },
+                      style: TextStyle(
+                        color: switch (step.state) {
+                          'done' => Palette.ok,
+                          'current' => Theme.of(context).colorScheme.primary,
+                          _ => muted,
+                        },
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          step.label,
+                          style: TextStyle(
+                            fontWeight: step.state == 'current'
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color:
+                                step.state == 'todo' ||
+                                    step.state == 'not_needed'
+                                ? muted
+                                : null,
+                          ),
+                        ),
+                        if (step.note != null)
+                          Text(
+                            step.note!,
+                            style: TextStyle(color: muted, fontSize: 12),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
         const SectionTitle('Why it happened'),
         if (diagnosis == null) ...[

@@ -33,6 +33,7 @@ const BELONGS_TO = {
   "integrations-callback.html": "data.html",
   "onboarding.html": "business.html",
   "notifications.html": "alerts.html",
+  "change.html": "changes.html",
 };
 
 // Simple line icons (24 by 24, drawn with a stroke)

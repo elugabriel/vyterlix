@@ -540,3 +540,26 @@ class Diagnosis {
   final String? confidenceNote;
   final List<Evidence> evidence;
 }
+
+/// One step of a change's journey: what happened, why, what we suggest, your decision, getting it
+/// done, how it went. `state` is done, current, todo or not_needed.
+class JourneyStep {
+  const JourneyStep({
+    required this.key,
+    required this.label,
+    required this.state,
+    this.note,
+  });
+
+  factory JourneyStep.fromJson(Map<String, dynamic> json) => JourneyStep(
+    key: '${json['key']}',
+    label: '${json['label']}',
+    state: '${json['state']}',
+    note: json['note'] as String?,
+  );
+
+  final String key;
+  final String label;
+  final String state;
+  final String? note;
+}

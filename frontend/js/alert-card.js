@@ -57,6 +57,7 @@ function draw(holder, card, ctx) {
       el("span", { class: "muted" }, CATEGORY_TEXT[a.category] ?? a.category),
     ),
     el("h2", {}, card.headline),
+    card.event_id ? el("p", {}, el("a", { href: `change.html?org=${ctx.orgId}&event=${card.event_id}` }, "See the whole story of this change")) : null,
     card.state === "other" ? el("p", {}, card.happened) : el("p", { class: `plain-says plain-${card.tone}` }, card.happened),
     card.why_it_matters ? el("p", { class: "muted" }, card.why_it_matters) : null,
     card.numbers ? el("p", { class: "muted" }, card.numbers) : null,

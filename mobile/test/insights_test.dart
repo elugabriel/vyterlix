@@ -713,6 +713,38 @@ void main() {
       );
     });
 
+    testWidgets('one change says which step it is up to', (tester) async {
+      final server = happyServer()
+        ..json('GET /organizations/b1/changes/ch1/journey', {
+          'steps': [
+            {'key': 'happened', 'label': 'What happened', 'state': 'done'},
+            {'key': 'why', 'label': 'Why it happened', 'state': 'done'},
+            {
+              'key': 'suggest',
+              'label': 'What we suggest',
+              'state': 'done',
+              'note': 'Best next step: Offer a bundle.',
+            },
+            {
+              'key': 'decide',
+              'label': 'Your decision',
+              'state': 'current',
+              'note': 'Waiting for you.',
+            },
+            {'key': 'doing', 'label': 'Getting it done', 'state': 'todo'},
+            {'key': 'result', 'label': 'How it went', 'state': 'todo'},
+          ],
+        });
+      await openBusiness(tester, server);
+      await openMore(tester, 'What changed');
+      await tester.tap(find.text('Change ch1 summary'));
+      await tester.pumpAndSettle();
+      expect(find.text('Where this is up to'), findsOneWidget);
+      expect(find.text('Your decision'), findsOneWidget);
+      expect(find.text('Waiting for you.'), findsOneWidget);
+      expect(find.text('Getting it done'), findsOneWidget);
+    });
+
     testWidgets(
       'one change shows why it happened, how sure we are and the evidence',
       (tester) async {

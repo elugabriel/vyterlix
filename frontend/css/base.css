@@ -675,6 +675,14 @@ progress::-moz-progress-bar { background: var(--gradient); border-radius: 999px;
 .outcome-bar .glance-warn { background: var(--warn); }
 .outcome-bar .glance-bad-bar { background: var(--bad); }
 .outcome-bar .glance-grey { background: var(--border-strong); }
+.journey-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.journey-step { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); font-size: 0.85rem; }
+.journey-step .journey-mark { font-weight: 700; color: var(--muted); }
+.journey-step.step-done { border-color: var(--ok); }
+.journey-step.step-done .journey-mark { color: var(--ok); }
+.journey-step.step-current { border-color: var(--accent); background: var(--accent-soft); }
+.journey-step.step-current .journey-mark { color: var(--accent); }
+.journey-step.step-skipped { opacity: 0.6; }
 .outcome-bar-box p { margin: 4px 0 0; font-size: 12px; }
 .first-card { display: grid; gap: 6px; padding: 18px 20px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius); }
 .first-card p { margin: 0; }
