@@ -51,16 +51,18 @@ async function load() {
 
 async function loadBreakdowns(slots) {
   const noStock = sells === "services";
-  const [channels, products, movers, followUp, serviceList] = await Promise.all([
+  const [channels, products, movers, followUp, serviceList, teamList] = await Promise.all([
     guard(message, () => api.get(`${base}/breakdown/channel`)),
     guard(message, () => api.get(`${base}/breakdown/product`)),
     noStock ? null : guard(message, () => api.get(`${base}/stock/movers`)),
     sells === "products" ? null : guard(message, () => api.get(`${base}/customers/follow-up`)),
     sells === "products" ? null : guard(message, () => api.get(`${base}/services`)),
+    sells === "products" ? null : guard(message, () => api.get(`${base}/team`)),
   ]);
   if (channels && channels.rows.length) slots.append(breakdownCard("Where your sales come from", "Sales", channels, false));
   if (products && products.rows.length) slots.append(breakdownCard("Your best sellers", "Items sold", products, true));
   if (serviceList && serviceList.rows.length) slots.append(servicesCard(serviceList));
+  if (teamList && teamList.members.length) slots.append(teamCard(teamList));
   if (followUp && followUp.customers.length) slots.append(followUpCard(followUp));
   if (movers && (movers.fast.length || movers.slow.length || movers.dead.length)) slots.append(moversCard(movers));
 }
@@ -83,6 +85,20 @@ function breakdownCard(title, countHeading, data, withProfit) {
       ]),
       { empty: "No sales in this period." },
     ),
+  );
+}
+
+function teamCard(data) {
+  return el(
+    "section",
+    { class: "card" },
+    el("h2", { style: "margin-top:0" }, "Your team"),
+    ...data.notes.map((n) => el("p", {}, n)),
+    table(
+      ["Who", "Kept", "Cancelled", "Did not turn up", "Share of the work", "Average rating"],
+      data.members.map((m) => [m.staff, number(m.kept), number(m.cancelled), number(m.missed), m.share_pct === null ? "–" : `${m.share_pct}%`, m.average_rating === null ? "Not rated" : `${m.average_rating} out of 5`]),
+    ),
+    el("p", { class: "muted" }, `The last three months of appointments, up to ${ukDate(data.period_to)}.`),
   );
 }
 

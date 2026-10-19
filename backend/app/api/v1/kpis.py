@@ -14,11 +14,18 @@ from app.schemas.kpi import (
     KpisOut,
     MoversOut,
     ServicesOut,
+    TeamOut,
 )
 from app.services import job_handlers  # noqa: F401  (registers the handlers)
 from app.services.jobs import enqueue
 from app.services.kpi import kpi_history, list_kpis
-from app.services.kpi_breakdown import breakdown, customers_to_follow_up, movers, popular_services
+from app.services.kpi_breakdown import (
+    breakdown,
+    customers_to_follow_up,
+    movers,
+    popular_services,
+    team_workload,
+)
 
 router = APIRouter(prefix="/organizations/{organization_id}/kpis", tags=["kpis"])
 
@@ -67,6 +74,12 @@ def sales_breakdown(
 def services_booked(tenant: Viewer, db: DB, limit: Annotated[int, Query(ge=1, le=25)] = 10):
     """The services people book, most popular first, and which ones people do not come back for."""
     return popular_services(db, limit=limit)
+
+
+@router.get("/team", response_model=TeamOut)
+def team(tenant: Viewer, db: DB):
+    """Who did the appointments over the last three months, and how they went."""
+    return team_workload(db)
 
 
 @router.get("/customers/follow-up", response_model=FollowUpOut)

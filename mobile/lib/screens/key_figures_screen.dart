@@ -40,6 +40,7 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
   List<Kpi>? _kpis;
   QuietCustomers? _followUp;
   ServicesBooked? _services;
+  TeamWorkload? _team;
   String? _workedOut;
   String? _error;
 
@@ -86,6 +87,15 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
         '$_base/services',
       ) as Map<String, dynamic>;
       if (mounted) setState(() => _services = ServicesBooked.fromJson(data));
+    } on ApiException {
+      // a bonus too
+    }
+    if (!mounted) return;
+    try {
+      final data = await context.read<ApiClient>().get(
+        '$_base/team',
+      ) as Map<String, dynamic>;
+      if (mounted) setState(() => _team = TeamWorkload.fromJson(data));
     } on ApiException {
       // a bonus too
     }
@@ -158,12 +168,38 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
             ],
           if (_services != null && _services!.rows.isNotEmpty)
             ..._servicesView(_services!, muted),
+          if (_team != null && _team!.members.isNotEmpty)
+            ..._teamView(_team!, muted),
           if (_followUp != null && _followUp!.customers.isNotEmpty)
             ..._followUpView(_followUp!, muted),
         ],
       ),
     );
   }
+
+  List<Widget> _teamView(TeamWorkload t, Color muted) => [
+    const SectionTitle('Your team'),
+    for (final note in t.notes)
+      Padding(padding: const EdgeInsets.only(bottom: 4), child: Text(note)),
+    const SizedBox(height: 4),
+    for (final m in t.members)
+      Card(
+        child: ListTile(
+          title: Text(
+            m.staff,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          subtitle: Text(
+            '${m.kept} kept · ${m.cancelled} cancelled · ${m.missed} did not turn up'
+            '${m.averageRating == null ? '' : ' · rated ${m.averageRating} out of 5'}',
+          ),
+          trailing: Text(
+            m.sharePct == null ? '' : '${m.sharePct}%',
+            style: TextStyle(color: muted, fontSize: 12),
+          ),
+        ),
+      ),
+  ];
 
   List<Widget> _servicesView(ServicesBooked s, Color muted) => [
     const SectionTitle('Your services'),

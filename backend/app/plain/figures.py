@@ -114,6 +114,16 @@ WORDS: dict[str, Words] = {
             "This could reduce next month's sales. It is worth reconnecting with the customers who did not come back.",
         ),
     ),
+    "regular_clients": Words(
+        Say(
+            "More clients came three or more times in the last three months than {before}.",
+            "Regulars are the steadiest part of your income. They are the ones to offer a standing booking or a regular arrangement.",
+        ),
+        Say(
+            "Fewer clients came three or more times in the last three months than {before}.",
+            "Fewer regulars means less steady income. It is worth getting in touch with the ones who have stopped coming.",
+        ),
+    ),
     "happy_ratings_pct": Words(
         Say(
             "A bigger share of your customers rated you 4 or 5 than {before}.",

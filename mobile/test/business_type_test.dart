@@ -36,6 +36,19 @@ FakeServer serverFor(String? sells) {
       {'id': 'b2', 'name': 'Second Shop', 'role': 'viewer'},
     ])
     ..json('GET /organizations/b1/kpis/customers/follow-up', followUp())
+    ..json('GET /organizations/b1/kpis/team', {
+      'members': [
+        {
+          'staff': 'Ola',
+          'kept': 7,
+          'cancelled': 1,
+          'missed': 0,
+          'share_pct': '70.0',
+          'average_rating': '4.7',
+        },
+      ],
+      'notes': ['Ola did 70.0% of the appointments.'],
+    })
     ..json('GET /organizations/b1/kpis/services', {
       'rows': [
         {

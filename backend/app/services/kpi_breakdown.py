@@ -30,6 +30,8 @@ from app.schemas.kpi import (
     MoversOut,
     ServiceRowOut,
     ServicesOut,
+    TeamMemberOut,
+    TeamOut,
 )
 
 ZERO = Decimal("0")
@@ -417,3 +419,63 @@ def booking_choices(db: Session) -> BookingChoicesOut:
         return [value for (value,) in rows]
 
     return BookingChoicesOut(services=used(Booking.service), staff=used(Booking.staff))
+
+
+# --- the team (appointments) -----------------------------------------------------------------------
+
+BUSY_SHARE = Decimal("60")  # one person doing more than this share is worth a note...
+BUSY_MIN_PEOPLE = 2  # ...but only when there is someone else who could share it
+
+
+def team_workload(db: Session) -> TeamOut:
+    """Who did the appointments over the last three months, and how they went. This is workload, not
+    capacity: Vyterlix does not know anyone's working hours, so it cannot say who has room for more."""
+    last = db.scalar(select(func.max(Booking.booked_for)).where(Booking.status != "booked"))
+    if last is None:
+        return TeamOut(period_from=None, period_to=None, kept=0, members=[], notes=[])
+    first = last - timedelta(days=SERVICE_WINDOW_DAYS)
+    rows = db.execute(
+        select(Booking.staff, Booking.status, Booking.rating).where(
+            Booking.booked_for > first,
+            Booking.booked_for <= last,
+            Booking.status != "booked",
+            Booking.staff.is_not(None),
+        )
+    ).all()
+    people: dict[str, dict] = {}
+    for staff, status, rating in rows:
+        p = people.setdefault(staff, {"completed": 0, "cancelled": 0, "no_show": 0, "ratings": []})
+        p[status] += 1
+        if rating is not None:
+            p["ratings"].append(rating)
+    kept_total = sum(p["completed"] for p in people.values())
+    members = [
+        TeamMemberOut(
+            staff=name, kept=p["completed"], cancelled=p["cancelled"], missed=p["no_show"],
+            share_pct=_pct(p["completed"], kept_total),
+            average_rating=None if not p["ratings"] else str(
+                (Decimal(sum(p["ratings"])) / len(p["ratings"])).quantize(Decimal("0.1"))
+            ),
+        )
+        for name, p in people.items()
+    ]  # fmt: skip
+    members.sort(key=lambda m: (-m.kept, m.staff.lower()))
+    notes: list[str] = []
+    if (
+        len(members) >= BUSY_MIN_PEOPLE
+        and members[0].share_pct
+        and Decimal(members[0].share_pct) > BUSY_SHARE
+    ):
+        notes.append(
+            f"{members[0].staff} did {members[0].share_pct}% of the appointments. If they are away, "
+            "a lot of your income waits for them. It may be worth sharing the work."
+        )
+    if members:
+        notes.append(
+            "This shows who did the appointments, not who has room for more: add working hours to "
+            "see that."
+        )
+    return TeamOut(
+        period_from=first + timedelta(days=1), period_to=last, kept=kept_total,
+        members=members, notes=notes,
+    )  # fmt: skip

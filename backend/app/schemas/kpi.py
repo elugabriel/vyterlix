@@ -154,6 +154,25 @@ class ServicesOut(BaseModel):
     notes: list[str]  # plain sentences: the most popular, and any with weak rebooking
 
 
+class TeamMemberOut(BaseModel):
+    staff: str
+    kept: int
+    cancelled: int
+    missed: int
+    share_pct: str | None  # of every appointment kept in the window
+    average_rating: str | None  # out of 5, from the appointments that were rated
+
+
+class TeamOut(BaseModel):
+    """Who is carrying the appointments: how many each person did, and how they went."""
+
+    period_from: date | None
+    period_to: date | None
+    kept: int
+    members: list[TeamMemberOut]
+    notes: list[str]
+
+
 class BookingChoicesOut(BaseModel):
     """The services and staff already used, so they can be picked rather than retyped."""
 

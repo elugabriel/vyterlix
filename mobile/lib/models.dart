@@ -558,6 +558,51 @@ class ServiceRow {
   final String? rebookedPct;
 }
 
+class TeamMember {
+  const TeamMember({
+    required this.staff,
+    required this.kept,
+    required this.cancelled,
+    required this.missed,
+    required this.sharePct,
+    required this.averageRating,
+  });
+
+  factory TeamMember.fromJson(Map<String, dynamic> json) => TeamMember(
+    staff: '${json['staff']}',
+    kept: (json['kept'] as num).toInt(),
+    cancelled: (json['cancelled'] as num).toInt(),
+    missed: (json['missed'] as num).toInt(),
+    sharePct: json['share_pct'] == null ? null : '${json['share_pct']}',
+    averageRating: json['average_rating'] == null
+        ? null
+        : '${json['average_rating']}',
+  );
+
+  final String staff;
+  final int kept;
+  final int cancelled;
+  final int missed;
+  final String? sharePct;
+  final String? averageRating;
+}
+
+/// Who did the appointments over the last three months, with plain notes about it.
+class TeamWorkload {
+  const TeamWorkload({required this.members, required this.notes});
+
+  factory TeamWorkload.fromJson(Map<String, dynamic> json) => TeamWorkload(
+    members: [
+      for (final m in (json['members'] as List? ?? const []))
+        TeamMember.fromJson(m as Map<String, dynamic>),
+    ],
+    notes: [for (final n in (json['notes'] as List? ?? const [])) '$n'],
+  );
+
+  final List<TeamMember> members;
+  final List<String> notes;
+}
+
 /// The services people book, most popular first, and plain notes about them.
 class ServicesBooked {
   const ServicesBooked({required this.rows, required this.notes});

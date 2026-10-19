@@ -585,6 +585,7 @@ def test_every_action_in_the_library_answers_something_and_helps_a_figure_we_can
     explainable |= {"customer_retention_pct", "repeat_customer_rate_pct", "customer_churn_pct"}
     explainable |= {"money_owed", "overdue_invoices", "days_to_get_paid"}
     explainable |= {"happy_ratings_pct", "unhappy_ratings_pct"}
+    explainable |= {"regular_clients"}
     explainable |= {"new_leads", "proposals_sent", "win_rate_pct", "work_won", "renewal_rate_pct"}
     for item in db.scalars(select(Intervention)):
         assert item.addresses, item.code

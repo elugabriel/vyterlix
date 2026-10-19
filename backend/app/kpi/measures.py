@@ -25,7 +25,7 @@ Conventions (they matter for the numbers, so they are written down here):
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 from sqlalchemy import Date, case, cast, func, literal_column, select, text
@@ -284,6 +284,33 @@ def _kept_customers(db: Session, granularity: str, start: date, end: date) -> Se
                      distinct=Booking.customer_id)(db, granularity, start, end)  # fmt: skip
 
 
+REGULAR_VISITS = 3  # a regular is someone who kept this many appointments...
+REGULAR_DAYS = 90  # ...in the last three months
+
+
+def _regular_clients(db: Session, granularity: str, start: date, end: date) -> Series:
+    """Customers who kept at least REGULAR_VISITS appointments in the REGULAR_DAYS up to the end of
+    each period: the people a repeat contract or a standing booking would be for."""
+    first = periods.start_of(start, granularity)
+    out: Series = {}
+    for period in periods.series(first, periods.start_of(end, granularity), granularity):
+        last = periods.end_of(period, granularity)
+        kept = (
+            select(Booking.customer_id)
+            .where(
+                Booking.status == "completed",
+                Booking.customer_id.is_not(None),
+                Booking.booked_for > last - timedelta(days=REGULAR_DAYS),
+                Booking.booked_for <= last,
+            )
+            .group_by(Booking.customer_id)
+            .having(func.count() >= REGULAR_VISITS)
+            .subquery()
+        )
+        out[period] = Decimal(db.scalar(select(func.count()).select_from(kept)) or 0)
+    return out
+
+
 def _rebooked_customers(db: Session, granularity: str, start: date, end: date) -> Series:
     """Customers who kept an appointment in the period and have another one after their last."""
     bucket = _bucket(Booking.booked_for, granularity)
@@ -527,6 +554,12 @@ MEASURES: dict[str, Measure] = {
         Measure("products_tracked", "Products with stock records", "stock", _products_tracked),
         Measure("products_out_of_stock", "Products out of stock", "stock", _products_out_of_stock),
         Measure("period_days", "Days in the period", "sales", _period_days),
+        Measure(
+            "regular_clients",
+            "Clients with three or more visits in three months",
+            "bookings",
+            _regular_clients,
+        ),
         Measure("bookings_rated", "Appointments rated", "ratings", _rated()),
         Measure("ratings_happy", "Rated 4 or 5", "ratings", _rated(Booking.rating >= 4)),
         Measure("ratings_unhappy", "Rated 1 or 2", "ratings", _rated(Booking.rating <= 2)),
