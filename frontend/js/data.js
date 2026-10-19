@@ -14,6 +14,7 @@ export const DATASETS = [
   ["products", "Products"],
   ["stock_movements", "Stock movements"],
   ["bookings", "Appointments"],
+  ["opportunities", "Leads and proposals"],
 ];
 
 const DATASET_LABEL = Object.fromEntries(DATASETS);
@@ -40,6 +41,7 @@ const RECORD_LABEL = {
   products: "products",
   stock_movements: "stock movements",
   bookings: "appointments",
+  opportunities: "leads and proposals",
   business_list_items: "list entries (channels, categories...)",
 };
 

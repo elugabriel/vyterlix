@@ -46,6 +46,7 @@ DATASETS = (
     "products",
     "stock_movements",
     "bookings",
+    "opportunities",
 )
 FILE_SOURCES = ("csv", "excel")  # .csv and .xlsx uploads
 SOURCE_KINDS = ("csv", "excel", "xero", "shopify", "woocommerce", "google_analytics")

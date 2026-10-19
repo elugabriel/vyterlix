@@ -441,6 +441,7 @@ void main() {
       );
       expect(datasetLabel('stock_movements'), 'Stock movements');
       expect(datasetLabel('bookings'), 'Appointments');
+      expect(datasetLabel('opportunities'), 'Leads and proposals');
       expect(
         describeCounts({'bookings': 3, 'customers': 2}),
         '3 appointments, 2 customers',

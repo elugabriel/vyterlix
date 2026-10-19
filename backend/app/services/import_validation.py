@@ -27,7 +27,16 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.errors import AppError, ConflictError
-from app.models.data import Booking, Customer, Expense, Product, Sale, StockMovement, Supplier
+from app.models.data import (
+    Booking,
+    Customer,
+    Expense,
+    Opportunity,
+    Product,
+    Sale,
+    StockMovement,
+    Supplier,
+)
 from app.models.imports import DataImport, DataImportRow
 from app.schemas.import_validation import RowOut, RowsOut, ValidationOut
 from app.services import import_fields as fields
@@ -48,6 +57,7 @@ _REFERENCE_MODELS = {
     "stock_movements": StockMovement,
     "customers": Customer,
     "bookings": Booking,
+    "opportunities": Opportunity,
 }
 _DATE_FIELDS = {"sales": "sold_on", "expenses": "spent_on"}
 # Rows recognised by name or email have no ID that could disagree: a second "Flour Co" is just
@@ -193,7 +203,7 @@ def _warnings(data_import: DataImport, tally: _Tally, total: int) -> list[dict[s
             }
         )
     if (
-        dataset in ("sales", "expenses", "stock_movements", "bookings")
+        dataset in ("sales", "expenses", "stock_movements", "bookings", "opportunities")
         and "reference" not in mapping
     ):
         warnings.append(

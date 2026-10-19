@@ -8,6 +8,7 @@ const datasets = [
   ('products', 'Products'),
   ('stock_movements', 'Stock movements'),
   ('bookings', 'Appointments'),
+  ('opportunities', 'Leads and proposals'),
 ];
 
 String datasetLabel(String code) {

@@ -27,6 +27,7 @@ from app.models.data import (
     Booking,
     Customer,
     Expense,
+    Opportunity,
     Product,
     Sale,
     SaleLine,
@@ -44,6 +45,7 @@ MODELS = {
     "suppliers": Supplier,
     "products": Product,
     "bookings": Booking,
+    "opportunities": Opportunity,
 }
 # Where each kind of file's own records go (the table a row points at).
 MAIN_TABLE = {
@@ -54,6 +56,7 @@ MAIN_TABLE = {
     "suppliers": "suppliers",
     "products": "products",
     "bookings": "bookings",
+    "opportunities": "opportunities",
 }
 # Insert order (parents before children) and the reverse for undo.
 INSERT_ORDER = (
@@ -65,6 +68,7 @@ INSERT_ORDER = (
     "suppliers",
     "products",
     "bookings",
+    "opportunities",
 )
 UNIT_PRICE_PLACES = Decimal("0.0001")
 
@@ -123,7 +127,7 @@ class Resolver:
             self._items("offering", [v.get("category") for v in values])
         elif dataset == "stock_movements":
             self._products([(v.get("sku"), v.get("product")) for v in values])
-        elif dataset == "bookings":
+        elif dataset in ("bookings", "opportunities"):
             self._customers(values)
 
     # --- lookups used while building --------------------------------------------------------------
@@ -407,6 +411,25 @@ def _booking(r: Resolver, v: dict[str, Any], booking_id: uuid.UUID, tables: dict
     )
 
 
+def _opportunity(r: Resolver, v: dict[str, Any], opportunity_id: uuid.UUID, tables: dict) -> None:
+    tables["opportunities"].append(
+        {
+            "id": opportunity_id,
+            "name": v["name"],
+            "stage": v["stage"],
+            "kind": v["kind"],
+            "customer_id": r.customer_id(v),
+            "value": v.get("value"),
+            "created_on": v["created_on"],
+            "proposal_on": v.get("proposal_on"),
+            "closed_on": v.get("closed_on"),
+            "notes": v.get("notes"),
+            "source_ref": v.get("reference"),
+            **r.common,
+        }
+    )
+
+
 _BUILDERS = {
     "sales": _sale,
     "expenses": _expense,
@@ -415,6 +438,7 @@ _BUILDERS = {
     "products": _product,
     "stock_movements": _stock_movement,
     "bookings": _booking,
+    "opportunities": _opportunity,
 }
 
 

@@ -22,6 +22,7 @@ const _recordLabel = {
   'products': 'products',
   'stock_movements': 'stock movements',
   'bookings': 'appointments',
+  'opportunities': 'leads and proposals',
   'business_list_items': 'list entries (channels, categories...)',
 };
 

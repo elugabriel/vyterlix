@@ -16,7 +16,12 @@ from datetime import date
 from decimal import Decimal
 from typing import Any
 
-from app.models.data import BOOKING_STATUSES, STOCK_MOVEMENT_KINDS
+from app.models.data import (
+    BOOKING_STATUSES,
+    OPPORTUNITY_KINDS,
+    OPPORTUNITY_STAGES,
+    STOCK_MOVEMENT_KINDS,
+)
 from app.services import import_fields as fields
 from app.services import value_parsers as vp
 from app.services.money import VatError, vat_split
@@ -399,6 +404,89 @@ def _booking(row: _Row, options: dict, today: date | None) -> None:
     row.out.key = ("ref", reference) if reference else None
 
 
+def _opportunity_stage(text: str) -> str:
+    word = text.strip().lower().replace("-", "_").replace(" ", "_")
+    word = {
+        "enquiry": "lead", "new": "lead", "open": "lead", "prospect": "lead",
+        "proposed": "proposal", "quote": "proposal", "quoted": "proposal", "sent": "proposal",
+        "proposal_sent": "proposal", "pitched": "proposal",
+        "closed_won": "won", "accepted": "won", "signed": "won", "win": "won",
+        "closed_lost": "lost", "declined": "lost", "rejected": "lost", "loss": "lost",
+    }.get(word, word)  # fmt: skip
+    if word not in OPPORTUNITY_STAGES:
+        raise CellError(
+            "invalid_stage",
+            f"'{text.strip()}' isn't a stage. Use one of: " + ", ".join(OPPORTUNITY_STAGES) + ".",
+        )
+    return word
+
+
+def _opportunity_kind(text: str) -> str:
+    word = text.strip().lower().replace("-", "_").replace(" ", "_")
+    word = {"renewing": "renewal", "renew": "renewal", "existing": "renewal", "repeat": "renewal",
+            "new_work": "new", "new_client": "new"}.get(word, word)  # fmt: skip
+    if word not in OPPORTUNITY_KINDS:
+        raise CellError(
+            "invalid_kind", f"'{text.strip()}' isn't new work or a renewal. Use new or renewal."
+        )
+    return word
+
+
+def _opportunity(row: _Row, options: dict, today: date | None) -> None:
+    now = today or date.today()
+    name = row.text("name", 200, required=True)
+    created = row.read("created_on", lambda t: vp.parse_date(t, today=today)) or now
+    proposal = row.read("proposal_on", lambda t: vp.parse_date(t, today=today))
+    closed = row.read("closed_on", lambda t: vp.parse_date(t, today=today))
+    stage = row.read("stage", _opportunity_stage)
+    if stage is None and not row.cell("stage"):  # worked out from the dates
+        if closed is not None:
+            row.error(
+                "stage",
+                "stage_needed",
+                "There is a day it was decided, but not whether it was won or lost.",
+            )
+        stage = "proposal" if proposal else "lead"
+    kind = row.read("kind", _opportunity_kind) or "new"
+    value = row.read("value", vp.parse_money)
+    if value is not None and value < 0:
+        row.error("value", "negative_amount", "What it is worth can't be negative.")
+    if stage in ("won", "lost"):
+        closed = closed or now
+    else:
+        closed = None
+    if stage == "proposal" and proposal is None:
+        proposal = now
+    if stage == "lead":
+        proposal = None
+    for key, later in (("proposal_on", proposal), ("closed_on", closed)):
+        if later is not None and later < created:
+            row.error(key, "before_the_lead", "That cannot be before the day the lead came in.")
+    if proposal is not None and closed is not None and closed < proposal:
+        row.error(
+            "closed_on", "before_the_proposal", "That cannot be before the proposal was sent."
+        )
+    email = row.read("customer_email", vp.parse_email)
+    reference = row.text("reference", 200)
+    row.out.values.update(
+        {
+            "name": name,
+            "stage": stage,
+            "kind": kind,
+            "value": value,
+            "created_on": created,
+            "proposal_on": proposal,
+            "closed_on": closed,
+            "customer_name": row.text("customer_name", 200),
+            "customer_email": email,
+            "notes": row.text("notes", 300),
+            "reference": reference,
+        }
+    )
+    row.out.reference = reference
+    row.out.key = ("ref", reference) if reference else None
+
+
 _PARSERS: dict[str, Callable[[_Row, dict, date | None], None]] = {
     "sales": lambda r, o, t: _transaction(r, o, t, dataset="sales"),
     "expenses": lambda r, o, t: _transaction(r, o, t, dataset="expenses"),
@@ -407,4 +495,5 @@ _PARSERS: dict[str, Callable[[_Row, dict, date | None], None]] = {
     "products": _product,
     "stock_movements": _stock_movement,
     "bookings": _booking,
+    "opportunities": _opportunity,
 }
