@@ -13,6 +13,7 @@ from app.schemas.kpi import (
     KpiHistoryOut,
     KpisOut,
     MoversOut,
+    ProjectsOut,
     ServicesOut,
     TeamOut,
 )
@@ -24,6 +25,7 @@ from app.services.kpi_breakdown import (
     customers_to_follow_up,
     movers,
     popular_services,
+    project_profit,
     team_workload,
 )
 
@@ -74,6 +76,12 @@ def sales_breakdown(
 def services_booked(tenant: Viewer, db: DB, limit: Annotated[int, Query(ge=1, le=25)] = 10):
     """The services people book, most popular first, and which ones people do not come back for."""
     return popular_services(db, limit=limit)
+
+
+@router.get("/projects", response_model=ProjectsOut)
+def projects_profit(tenant: Viewer, db: DB):
+    """What each project has earned and cost, the ones losing money first."""
+    return project_profit(db)
 
 
 @router.get("/team", response_model=TeamOut)

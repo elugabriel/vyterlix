@@ -170,6 +170,7 @@ def _transaction(row: _Row, options: dict, today: date | None, *, dataset: str) 
             "product": row.text("product", 200),
             "sku": row.text("sku", 100),
             "channel": row.text("channel", 100),
+            "project": row.text("project", 200),
             "notes": row.text("notes", 2000),
             "due_on": row.read("due_on", lambda t: vp.parse_date(t, today=today, ahead_days=366)),
             "paid_on": row.read("paid_on", lambda t: vp.parse_date(t, today=today)),
@@ -183,6 +184,7 @@ def _transaction(row: _Row, options: dict, today: date | None, *, dataset: str) 
         extras = {
             "supplier": row.text("supplier", 200),
             "category": row.text("category", 100),
+            "project": row.text("project", 200),
             "description": row.text("description", 300),
         }
 

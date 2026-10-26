@@ -25,6 +25,7 @@ from app.models.data import (
     BOOKING_STATUSES,
     OPPORTUNITY_KINDS,
     OPPORTUNITY_STAGES,
+    PROJECT_STATUSES,
     SALE_KINDS,
     STOCK_MOVEMENT_KINDS,
 )
@@ -156,6 +157,7 @@ class SaleCreate(VatFields):
     sales_channel_id: uuid.UUID | None = None
     reference: Reference | None = None  # e.g. an invoice number, unique per business
     notes: Notes | None = None
+    project_id: uuid.UUID | None = None  # the project it was earned on
     due_on: date | None = None  # an invoice: the day it must be paid by
     paid_on: TradingDate | None = None  # and the day it was paid
     lines: list[SaleLineIn] = Field(default_factory=list, max_length=100)
@@ -183,6 +185,7 @@ class SalePatch(BaseModel):
     sales_channel_id: uuid.UUID | None = None
     reference: Reference | None = None
     notes: Notes | None = None
+    project_id: uuid.UUID | None = None
     due_on: date | None = None
     paid_on: TradingDate | None = None
     lines: list[SaleLineIn] | None = Field(default=None, max_length=100)
@@ -220,6 +223,7 @@ class SaleOut(BaseModel):
     currency: str
     reference: str | None = Field(default=None, validation_alias="source_ref")
     notes: str | None
+    project_id: uuid.UUID | None = None
     due_on: date | None = None
     paid_on: date | None = None
     source: str
@@ -238,6 +242,7 @@ class ExpenseCreate(VatFields):
     spent_on: TradingDate
     supplier_id: uuid.UUID | None = None
     cost_category_id: uuid.UUID | None = None
+    project_id: uuid.UUID | None = None  # the project it was spent on
     description: Description | None = None
     reference: Reference | None = None
 
@@ -253,6 +258,7 @@ class ExpensePatch(BaseModel):
     vat_amount: Pounds | None = None
     supplier_id: uuid.UUID | None = None
     cost_category_id: uuid.UUID | None = None
+    project_id: uuid.UUID | None = None
     description: Description | None = None
     reference: Reference | None = None
 
@@ -269,6 +275,7 @@ class ExpenseOut(BaseModel):
     spent_on: date
     supplier_id: uuid.UUID | None
     cost_category_id: uuid.UUID | None
+    project_id: uuid.UUID | None = None
     description: str | None
     net_amount: Money2
     vat_amount: Money2
@@ -623,3 +630,50 @@ class OpportunityOut(BaseModel):
 class OpportunitiesPage(BaseModel):
     total: int
     items: list[OpportunityOut]
+
+
+# --- projects ---------------------------------------------------------------------------------
+
+ProjectStatus = Literal[PROJECT_STATUSES]
+
+
+class ProjectCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: Name
+    status: ProjectStatus = "active"
+    customer_id: uuid.UUID | None = None
+    budget: Pounds | None = None
+    started_on: TradingDate | None = None
+    notes: BookingNote | None = None
+
+
+class ProjectPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: Name | None = None
+    status: ProjectStatus | None = None
+    customer_id: uuid.UUID | None = None
+    budget: Pounds | None = None
+    started_on: TradingDate | None = None
+    notes: BookingNote | None = None
+
+
+class ProjectOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    status: str
+    customer_id: uuid.UUID | None
+    budget: Money2 | None
+    started_on: date | None
+    notes: str | None
+    source: str
+    import_id: uuid.UUID | None
+    created_at: datetime
+
+
+class ProjectsPage(BaseModel):
+    total: int
+    items: list[ProjectOut]

@@ -33,6 +33,10 @@ from app.schemas.trading import (
     ProductOut,
     ProductPatch,
     ProductsPage,
+    ProjectCreate,
+    ProjectOut,
+    ProjectPatch,
+    ProjectsPage,
     SaleCreate,
     SaleOut,
     SalePatch,
@@ -69,6 +73,7 @@ products_router = _router("products")
 stock_router = _router("stock-movements")
 bookings_router = _router("bookings")
 opportunities_router = _router("opportunities")
+projects_router = _router("projects")
 
 
 # --- sales -------------------------------------------------------------------------------------
@@ -428,4 +433,44 @@ def update_opportunity(
 @opportunities_router.delete("/{opportunity_id}", status_code=NoContent)
 def delete_opportunity(opportunity_id: uuid.UUID, tenant: DataManager, db: DB, meta: Meta):
     svc.delete_opportunity(db, tenant, opportunity_id, meta)
+    return Response(status_code=NoContent)
+
+
+# --- projects ------------------------------------------------------------------------------------
+
+
+@projects_router.post("", status_code=status.HTTP_201_CREATED, response_model=ProjectOut)
+def create_project(body: ProjectCreate, tenant: DataManager, db: DB, meta: Meta):
+    return svc.create_project(db, tenant, body, meta)
+
+
+@projects_router.get("", response_model=ProjectsPage)
+def list_projects(
+    tenant: DataManager,
+    db: DB,
+    project_status: Annotated[Literal["active", "finished"] | None, Query(alias="status")] = None,
+    q: Search = None,
+    limit: Limit = 50,
+    offset: Offset = 0,
+):
+    """By name. `q` searches the name."""
+    return svc.list_projects(db, status=project_status, q=q, limit=limit, offset=offset)
+
+
+@projects_router.get("/{project_id}", response_model=ProjectOut)
+def get_project(project_id: uuid.UUID, tenant: DataManager, db: DB):
+    return svc.get_project(db, project_id)
+
+
+@projects_router.patch("/{project_id}", response_model=ProjectOut)
+def update_project(
+    project_id: uuid.UUID, body: ProjectPatch, tenant: DataManager, db: DB, meta: Meta
+):
+    return svc.update_project(db, tenant, project_id, body, meta)
+
+
+@projects_router.delete("/{project_id}", status_code=NoContent)
+def delete_project(project_id: uuid.UUID, tenant: DataManager, db: DB, meta: Meta):
+    """Only a project with no sales or costs can be deleted; otherwise mark it finished."""
+    svc.delete_project(db, tenant, project_id, meta)
     return Response(status_code=NoContent)

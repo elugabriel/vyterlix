@@ -173,6 +173,29 @@ class TeamOut(BaseModel):
     notes: list[str]
 
 
+class ProjectProfitOut(BaseModel):
+    project_id: uuid.UUID
+    name: str
+    status: str
+    client: str | None
+    revenue: str  # sales on the project, before VAT, after refunds
+    costs: str  # costs on the project, before VAT, after credits
+    profit: str
+    margin_pct: str | None  # profit as a share of revenue
+    budget: str | None
+    budget_used_pct: str | None  # costs as a share of the budget
+
+
+class ProjectsOut(BaseModel):
+    """What each project has earned and cost, the ones losing money first."""
+
+    total_revenue: str
+    total_costs: str
+    unallocated_costs: str  # costs not on any project
+    rows: list[ProjectProfitOut]
+    notes: list[str]
+
+
 class BookingChoicesOut(BaseModel):
     """The services and staff already used, so they can be picked rather than retyped."""
 

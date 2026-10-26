@@ -33,6 +33,7 @@ from app.models.data import (
     Expense,
     Opportunity,
     Product,
+    Project,
     Sale,
     SaleLine,
     StockMovement,
@@ -59,6 +60,10 @@ from app.schemas.trading import (
     ProductOut,
     ProductPatch,
     ProductsPage,
+    ProjectCreate,
+    ProjectOut,
+    ProjectPatch,
+    ProjectsPage,
     SaleCreate,
     SaleLineIn,
     SaleLineOut,
@@ -275,6 +280,7 @@ def create_sale(db: Session, tenant, body: SaleCreate, meta: RequestMeta) -> Sal
     _must_be_listed(
         db, body.sales_channel_id, "sales_channel", "sales_channel_id", "sales channels"
     )
+    _must_exist(db, Project, body.project_id, "project_id", "project")
     net, vat, gross = _amounts(
         body.amount,
         body.amount_includes_vat,
@@ -287,6 +293,7 @@ def create_sale(db: Session, tenant, body: SaleCreate, meta: RequestMeta) -> Sal
         sold_on=body.sold_on,
         customer_id=body.customer_id,
         sales_channel_id=body.sales_channel_id,
+        project_id=body.project_id,
         net_amount=net,
         vat_amount=vat,
         gross_amount=gross,
@@ -331,6 +338,8 @@ def update_sale(
         _must_be_listed(
             db, body.sales_channel_id, "sales_channel", "sales_channel_id", "sales channels"
         )
+    if "project_id" in sent:
+        _must_exist(db, Project, body.project_id, "project_id", "project")
     existing_lines = db.scalars(select(SaleLine).where(SaleLine.sale_id == sale.id)).all()
     if money and existing_lines and body.lines is None:
         raise _invalid(
@@ -343,6 +352,7 @@ def update_sale(
         value = getattr(body, name)
         if value is None and name not in {
             "customer_id", "sales_channel_id", "reference", "notes", "due_on", "paid_on",
+            "project_id",
         }:  # fmt: skip
             raise _invalid(name, "cannot_be_blank", "That can't be left blank.")
         setattr(
@@ -425,6 +435,7 @@ def _like(text: str) -> str:
 @_atomic
 def create_expense(db: Session, tenant, body: ExpenseCreate, meta: RequestMeta) -> ExpenseOut:
     _must_exist(db, Supplier, body.supplier_id, "supplier_id", "supplier")
+    _must_exist(db, Project, body.project_id, "project_id", "project")
     _must_be_listed(
         db, body.cost_category_id, "cost_category", "cost_category_id", "cost categories"
     )
@@ -440,6 +451,7 @@ def create_expense(db: Session, tenant, body: ExpenseCreate, meta: RequestMeta) 
         spent_on=body.spent_on,
         supplier_id=body.supplier_id,
         cost_category_id=body.cost_category_id,
+        project_id=body.project_id,
         description=body.description,
         net_amount=net,
         vat_amount=vat,
@@ -479,11 +491,14 @@ def update_expense(
         _must_be_listed(
             db, body.cost_category_id, "cost_category", "cost_category_id", "cost categories"
         )
+    if "project_id" in sent:
+        _must_exist(db, Project, body.project_id, "project_id", "project")
     for name in sent - {"amount", "amount_includes_vat", "vat_rate", "vat_amount"}:
         value = getattr(body, name)
         if value is None and name not in {
             "supplier_id",
             "cost_category_id",
+            "project_id",
             "description",
             "reference",
         }:
@@ -989,3 +1004,54 @@ def list_opportunities(
         query = query.where(Opportunity.name.ilike(f"%{_like(q)}%", escape="\\"))
     total, rows = _page(db, query, (Opportunity.created_on.desc(), Opportunity.id), limit, offset)
     return OpportunitiesPage(total=total, items=[OpportunityOut.model_validate(r) for r in rows])
+
+
+# --- projects ------------------------------------------------
+
+
+@_atomic
+def create_project(db: Session, tenant, body: ProjectCreate, meta: RequestMeta) -> ProjectOut:
+    _must_exist(db, Customer, body.customer_id, "customer_id", "customer")
+    project = Project(**body.model_dump(), source="manual")
+    db.add(project)
+    db.flush()
+    _audit(db, tenant, meta, AuditAction.RECORD_CREATED, "projects", project.id)
+    return ProjectOut.model_validate(project)
+
+
+def get_project(db: Session, project_id: uuid.UUID) -> ProjectOut:
+    return ProjectOut.model_validate(_get(db, Project, project_id, "Project"))
+
+
+@_atomic
+def update_project(
+    db: Session, tenant, project_id: uuid.UUID, body: ProjectPatch, meta: RequestMeta
+) -> ProjectOut:
+    project = _get(db, Project, project_id, "Project")
+    if "customer_id" in body.model_fields_set:
+        _must_exist(db, Customer, body.customer_id, "customer_id", "customer")
+    _apply(project, body, nullable={"customer_id", "budget", "started_on", "notes"})
+    db.flush()
+    _audit(
+        db, tenant, meta, AuditAction.RECORD_UPDATED, "projects", project.id,
+        fields=sorted(body.model_fields_set),
+    )  # fmt: skip
+    db.refresh(project)
+    return ProjectOut.model_validate(project)
+
+
+def delete_project(db: Session, tenant, project_id: uuid.UUID, meta: RequestMeta) -> None:
+    """Only a project with no sales or costs can be deleted; otherwise mark it finished."""
+    _delete(db, tenant, meta, Project, project_id, "projects", "project", archivable=False)
+
+
+def list_projects(
+    db: Session, *, status: str | None, q: str | None, limit: int, offset: int
+) -> ProjectsPage:
+    query = select(Project)
+    if status:
+        query = query.where(Project.status == status)
+    if q:
+        query = query.where(Project.name.ilike(f"%{_like(q)}%", escape="\\"))
+    total, rows = _page(db, query, (func.lower(Project.name), Project.id), limit, offset)
+    return ProjectsPage(total=total, items=[ProjectOut.model_validate(r) for r in rows])

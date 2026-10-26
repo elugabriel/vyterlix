@@ -19,7 +19,16 @@ from app.core.uk import today_uk
 from app.kpi import periods
 from app.kpi.measures import _hash_joins
 from app.models.business import BusinessListItem
-from app.models.data import Booking, Customer, Product, Sale, SaleLine, StockMovement
+from app.models.data import (
+    Booking,
+    Customer,
+    Expense,
+    Product,
+    Project,
+    Sale,
+    SaleLine,
+    StockMovement,
+)
 from app.schemas.kpi import (
     BookingChoicesOut,
     BreakdownOut,
@@ -28,6 +37,8 @@ from app.schemas.kpi import (
     FollowUpOut,
     MoverOut,
     MoversOut,
+    ProjectProfitOut,
+    ProjectsOut,
     ServiceRowOut,
     ServicesOut,
     TeamMemberOut,
@@ -478,4 +489,73 @@ def team_workload(db: Session) -> TeamOut:
     return TeamOut(
         period_from=first + timedelta(days=1), period_to=last, kept=kept_total,
         members=members, notes=notes,
+    )  # fmt: skip
+
+
+# --- projects ---------------------------------------------------------------------------------------
+
+BUDGET_WARNING = Decimal("90")  # per cent of the budget used before it is worth saying
+
+
+def project_profit(db: Session) -> ProjectsOut:
+    """What each project has earned and cost: sales and costs followed together, before VAT. The
+    projects losing money come first. Costs not put on any project are totalled, so a person can see
+    how much of their spending these figures leave out."""
+    revenue = dict(
+        db.execute(
+            select(Sale.project_id, func.sum(Sale.net_amount))
+            .where(Sale.project_id.is_not(None))
+            .group_by(Sale.project_id)
+        ).all()
+    )
+    costs = dict(
+        db.execute(
+            select(Expense.project_id, func.sum(Expense.net_amount))
+            .where(Expense.project_id.is_not(None))
+            .group_by(Expense.project_id)
+        ).all()
+    )
+    unallocated = Decimal(
+        db.scalar(select(func.sum(Expense.net_amount)).where(Expense.project_id.is_(None))) or 0
+    )
+    names = {
+        p.id: p
+        for p in db.scalars(
+            select(Project).where(Project.id.in_({*revenue, *costs}) | (Project.status == "active"))
+        )
+    }
+    clients = dict(db.execute(select(Customer.id, Customer.name)).all()) if names else {}
+    rows = []
+    for pid, project in names.items():
+        earned, spent = Decimal(revenue.get(pid) or 0), Decimal(costs.get(pid) or 0)
+        profit = earned - spent
+        rows.append(
+            ProjectProfitOut(
+                project_id=pid, name=project.name, status=project.status,
+                client=clients.get(project.customer_id), revenue=_pounds(earned),
+                costs=_pounds(spent), profit=_pounds(profit),
+                margin_pct=None if earned == 0 else str((profit / earned * 100).quantize(Decimal("0.1"))),
+                budget=None if project.budget is None else _pounds(project.budget),
+                budget_used_pct=None if not project.budget else str((spent / project.budget * 100).quantize(Decimal("1"))),
+            )
+        )  # fmt: skip
+    rows.sort(key=lambda r: (Decimal(r.profit) >= 0, Decimal(r.profit), r.name.lower()))
+    notes: list[str] = []
+    for r in rows:
+        if Decimal(r.profit) < 0:
+            notes.append(
+                f"{r.name} has cost £{Decimal(r.costs):,.2f} and earned £{Decimal(r.revenue):,.2f}: "
+                f"it is losing £{abs(Decimal(r.profit)):,.2f} so far."
+            )
+        elif r.budget_used_pct is not None and Decimal(r.budget_used_pct) >= BUDGET_WARNING:
+            notes.append(f"{r.name} has used {r.budget_used_pct}% of its budget.")
+    if rows and unallocated > 0:
+        notes.append(
+            f"£{unallocated:,.2f} of your costs are not on any project, so these profits leave "
+            "out your running costs and overheads."
+        )
+    return ProjectsOut(
+        total_revenue=_pounds(sum((Decimal(r.revenue) for r in rows), Decimal(0))),
+        total_costs=_pounds(sum((Decimal(r.costs) for r in rows), Decimal(0))),
+        unallocated_costs=_pounds(unallocated), rows=rows, notes=notes,
     )  # fmt: skip

@@ -23,6 +23,7 @@ from app.models.data import (
     Expense,
     Opportunity,
     Product,
+    Project,
     Sale,
     SaleLine,
     StockMovement,
@@ -39,7 +40,17 @@ from app.services.import_validation import existing_keys
 
 BATCH = 1000
 # Children before parents, so nothing is deleted while something still points at it.
-UNDO_ORDER = (Opportunity, Booking, StockMovement, Sale, Expense, Customer, Supplier, Product)
+UNDO_ORDER = (
+    Opportunity,
+    Booking,
+    StockMovement,
+    Sale,
+    Expense,
+    Project,
+    Customer,
+    Supplier,
+    Product,
+)
 
 
 DATA_TABLES = (
@@ -52,6 +63,7 @@ DATA_TABLES = (
     "products",
     "bookings",
     "opportunities",
+    "projects",
 )
 
 

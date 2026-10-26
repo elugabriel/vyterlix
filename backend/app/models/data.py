@@ -48,6 +48,8 @@ BOOKING_STATUSES = ("booked", "completed", "cancelled", "no_show")
 # A piece of work you are trying to win: a lead, a proposal sent, then won or lost.
 OPPORTUNITY_STAGES = ("lead", "proposal", "won", "lost")
 OPPORTUNITY_KINDS = ("new", "renewal")
+# A piece of work whose money in and money out are followed together.
+PROJECT_STATUSES = ("active", "finished")
 
 Money = Numeric(18, 4)
 Quantity = Numeric(18, 4)
@@ -166,6 +168,7 @@ class Sale(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOriginMix
         *_amounts_rules(),
         _tenant_fk("customer_id", "customers"),
         _tenant_fk("sales_channel_id", "business_list_items"),
+        _tenant_fk("project_id", "projects"),
         CheckConstraint(_one_of("kind", SALE_KINDS), name="kind_valid"),
         CheckConstraint(
             "(kind = 'sale' AND net_amount >= 0 AND vat_amount >= 0)"
@@ -178,12 +181,14 @@ class Sale(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOriginMix
         # Foreign-key lookups: without these, deleting a customer or channel scans every sale.
         Index("ix_sales_org_customer", "organization_id", "customer_id"),
         Index("ix_sales_org_channel", "organization_id", "sales_channel_id"),
+        Index("ix_sales_org_project", "organization_id", "project_id"),
     )
 
     kind: Mapped[str] = mapped_column(String(10), server_default="sale")
     sold_on: Mapped[date] = mapped_column(Date)  # the business's own (UK) trading date
     customer_id: Mapped[uuid.UUID | None] = mapped_column()
     sales_channel_id: Mapped[uuid.UUID | None] = mapped_column()
+    project_id: Mapped[uuid.UUID | None] = mapped_column()  # the project it was earned on
     net_amount: Mapped[Decimal] = mapped_column(Money)  # excluding VAT, after discounts
     vat_amount: Mapped[Decimal] = mapped_column(Money, server_default=text("0"))
     gross_amount: Mapped[Decimal] = mapped_column(Money)  # what the customer paid
@@ -238,6 +243,7 @@ class Expense(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigin
         *_amounts_rules(),
         _tenant_fk("supplier_id", "suppliers"),
         _tenant_fk("cost_category_id", "business_list_items"),
+        _tenant_fk("project_id", "projects"),
         CheckConstraint(_one_of("kind", EXPENSE_KINDS), name="kind_valid"),
         CheckConstraint(
             "(kind = 'expense' AND net_amount >= 0 AND vat_amount >= 0)"
@@ -247,12 +253,14 @@ class Expense(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigin
         Index("ix_expenses_org_date", "organization_id", "spent_on"),
         Index("ix_expenses_org_supplier", "organization_id", "supplier_id"),
         Index("ix_expenses_org_category", "organization_id", "cost_category_id"),
+        Index("ix_expenses_org_project", "organization_id", "project_id"),
     )
 
     kind: Mapped[str] = mapped_column(String(10), server_default="expense")
     spent_on: Mapped[date] = mapped_column(Date)
     supplier_id: Mapped[uuid.UUID | None] = mapped_column()
     cost_category_id: Mapped[uuid.UUID | None] = mapped_column()
+    project_id: Mapped[uuid.UUID | None] = mapped_column()  # the project it was spent on
     description: Mapped[str | None] = mapped_column(String(300))
     net_amount: Mapped[Decimal] = mapped_column(Money)
     vat_amount: Mapped[Decimal] = mapped_column(Money, server_default=text("0"))
@@ -349,4 +357,26 @@ class Opportunity(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOr
     created_on: Mapped[date] = mapped_column(Date)  # the day the lead came in
     proposal_on: Mapped[date | None] = mapped_column(Date)  # the day the proposal was sent
     closed_on: Mapped[date | None] = mapped_column(Date)  # the day it was won or lost
+    notes: Mapped[str | None] = mapped_column(String(300))
+
+
+class Project(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOriginMixin, Base):
+    """A piece of work (a job, a client engagement, a campaign) whose sales and costs are followed
+    together, so a business can see which work makes money and which loses it."""
+
+    __tablename__ = "projects"
+    __table_args__ = (
+        *_origin_rules("projects"),
+        _tenant_fk("customer_id", "customers"),
+        CheckConstraint("length(trim(name)) > 0", name="name_not_blank"),
+        CheckConstraint(_one_of("status", PROJECT_STATUSES), name="status_valid"),
+        CheckConstraint("budget IS NULL OR budget >= 0", name="budget_not_negative"),
+        Index("ix_projects_org_customer", "organization_id", "customer_id"),
+    )
+
+    name: Mapped[str] = mapped_column(String(200))
+    status: Mapped[str] = mapped_column(String(10), server_default="active")
+    customer_id: Mapped[uuid.UUID | None] = mapped_column()
+    budget: Mapped[Decimal | None] = mapped_column(Money)  # what the costs should stay within
+    started_on: Mapped[date | None] = mapped_column(Date)
     notes: Mapped[str | None] = mapped_column(String(300))

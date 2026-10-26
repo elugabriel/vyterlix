@@ -29,6 +29,7 @@ from app.models.data import (
     Expense,
     Opportunity,
     Product,
+    Project,
     Sale,
     SaleLine,
     StockMovement,
@@ -46,6 +47,7 @@ MODELS = {
     "products": Product,
     "bookings": Booking,
     "opportunities": Opportunity,
+    "projects": Project,
 }
 # Where each kind of file's own records go (the table a row points at).
 MAIN_TABLE = {
@@ -57,6 +59,7 @@ MAIN_TABLE = {
     "products": "products",
     "bookings": "bookings",
     "opportunities": "opportunities",
+    "projects": "projects",
 }
 # Insert order (parents before children) and the reverse for undo.
 INSERT_ORDER = (
@@ -107,6 +110,7 @@ class Resolver:
         self.customers: dict[tuple[str, str], uuid.UUID] = {}
         self.products: dict[tuple[str, str], uuid.UUID] = {}
         self.suppliers: dict[str, uuid.UUID] = {}
+        self.projects: dict[str, uuid.UUID] = {}
         self.items: dict[tuple[str, str], uuid.UUID] = {}
         self.created: Counter[str] = Counter()
 
@@ -118,9 +122,11 @@ class Resolver:
             self._customers(values)
             self._products([(v.get("sku"), v.get("product")) for v in values])
             self._items("sales_channel", [v.get("channel") for v in values])
+            self._projects([v.get("project") for v in values])
         elif dataset == "expenses":
             self._suppliers([v.get("supplier") for v in values])
             self._items("cost_category", [v.get("category") for v in values])
+            self._projects([v.get("project") for v in values])
         elif dataset == "customers":
             self._items("customer_type", [v.get("customer_type") for v in values])
         elif dataset == "products":
@@ -139,6 +145,9 @@ class Resolver:
     def product_id(self, sku: str | None, name: str | None) -> uuid.UUID | None:
         key = _product_key(sku, name)
         return self.products.get(key) if key else None
+
+    def project_id(self, name: str | None) -> uuid.UUID | None:
+        return self.projects.get(name.casefold()) if name else None
 
     def supplier_id(self, name: str | None) -> uuid.UUID | None:
         return self.suppliers.get(name.casefold()) if name else None
@@ -219,6 +228,27 @@ class Resolver:
                 new.append({"id": self.products[key], **data, **self.common})
         self._insert("products", new)
 
+    def _projects(self, names: list[str | None]) -> None:
+        """Find the projects rows name, and make the ones that do not exist yet (so a file can bring
+        its projects with it). Undoing the import removes the ones it made."""
+        wanted = _first_spellings(n for n in names if n and n.casefold() not in self.projects)
+        if not wanted:
+            return
+        lowered = func.lower(Project.name)
+        rows = self.db.execute(
+            select(Project.id, lowered)
+            .where(lowered.in_(list(wanted)))
+            .order_by(Project.created_at)
+        )
+        for found_id, name in rows:
+            self.projects.setdefault(name, found_id)
+        new = []
+        for key, name in wanted.items():
+            if key not in self.projects:
+                self.projects[key] = uuid.uuid4()
+                new.append({"id": self.projects[key], "name": name, **self.common})
+        self._insert("projects", new)
+
     def _suppliers(self, names: list[str | None]) -> None:
         wanted = _first_spellings(n for n in names if n and n.casefold() not in self.suppliers)
         if not wanted:
@@ -292,6 +322,7 @@ def _sale(r: Resolver, v: dict[str, Any], sale_id: uuid.UUID, tables: dict) -> N
             "sold_on": v["sold_on"],
             "customer_id": r.customer_id(v),
             "sales_channel_id": r.item_id("sales_channel", v.get("channel")),
+            "project_id": r.project_id(v.get("project")),
             "net_amount": v["net_amount"],
             "vat_amount": v["vat_amount"],
             "gross_amount": v["gross_amount"],
@@ -333,6 +364,7 @@ def _expense(r: Resolver, v: dict[str, Any], expense_id: uuid.UUID, tables: dict
             "spent_on": v["spent_on"],
             "supplier_id": r.supplier_id(v.get("supplier")),
             "cost_category_id": r.item_id("cost_category", v.get("category")),
+            "project_id": r.project_id(v.get("project")),
             "description": v.get("description"),
             "net_amount": v["net_amount"],
             "vat_amount": v["vat_amount"],
