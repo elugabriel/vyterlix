@@ -213,6 +213,7 @@ def complete_connect(
     code: str,
     meta: RequestMeta,
     *,
+    params: dict[str, str] | None = None,
     now: datetime | None = None,
 ) -> IntegrationOut:
     now = now or utcnow()
@@ -238,6 +239,9 @@ def complete_connect(
         tokens = provider.exchange_code(
             code=code, redirect_uri=_redirect_uri(), code_verifier=verifier
         )
+        kept = {k: str(v)[:200] for k, v in (params or {}).items() if k in provider.callback_params}
+        if kept:
+            tokens = replace(tokens, extra={**tokens.extra, **kept})
         account = provider.account(tokens)
     except ProviderUnavailable as exc:
         raise AppError(exc.message, code=exc.code, status_code=503) from exc

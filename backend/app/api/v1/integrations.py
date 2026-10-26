@@ -58,7 +58,7 @@ def connect(body: ConnectIn, tenant: IntegrationManager, db: DB):
 @router.post("/callback", response_model=IntegrationOut)
 def callback(body: CallbackIn, tenant: IntegrationManager, db: DB, meta: Meta):
     """Step 2: the page the provider sent the person back to passes on `state` and `code`."""
-    return complete_connect(db, tenant, body.state, body.code, meta)
+    return complete_connect(db, tenant, body.state, body.code, meta, params=body.params)
 
 
 @router.get("/{integration_id}", response_model=IntegrationOut)

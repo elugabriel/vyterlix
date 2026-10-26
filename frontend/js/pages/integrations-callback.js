@@ -40,6 +40,8 @@ async function finish() {
   const code = params.get("code");
   const state = params.get("state");
   const refused = params.get("error");
+  // Anything else the provider added (QuickBooks sends which company was shared as realmId).
+  const extra = Object.fromEntries([...params].filter(([k]) => !["code", "state", "error", "error_description"].includes(k)).slice(0, 5));
   history.replaceState(null, "", location.pathname);
   const orgId = readStoredOrg();
 
@@ -55,7 +57,7 @@ async function finish() {
   }
   content.replaceChildren(el("p", { class: "muted", role: "status" }, "Finishing your connection…"));
   try {
-    const connection = await api.post(`/organizations/${orgId}/integrations/callback`, { state, code });
+    const connection = await api.post(`/organizations/${orgId}/integrations/callback`, { state, code, params: extra });
     showMessage(message, "success", `Connected: ${connection.display_name}.`);
     content.replaceChildren(
       el("p", {}, "You can now fetch its data from the Connections page."),

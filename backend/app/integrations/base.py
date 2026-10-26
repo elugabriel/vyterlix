@@ -94,6 +94,9 @@ class Provider(ABC):
     scopes: tuple[str, ...] = ()
     # What we read, in plain English. Shown BEFORE connecting. Read-only providers only.
     permissions: tuple[str, ...] = ()
+    # Extra values the provider sends back on the redirect address that the connection needs (for
+    # QuickBooks, which company was shared). They are kept with the tokens, encrypted.
+    callback_params: tuple[str, ...] = ()
 
     def is_configured(self, settings: Settings) -> bool:
         """False until the business running Vyterlix has registered with this provider."""

@@ -27,6 +27,9 @@ class ConnectOut(BaseModel):
 class CallbackIn(BaseModel):
     state: str = Field(min_length=10, max_length=200)
     code: str = Field(min_length=1, max_length=2000)
+    # Anything else the provider put on the redirect address (QuickBooks: realmId). Only the names
+    # the provider asks for are kept.
+    params: dict[str, str] = Field(default_factory=dict, max_length=10)
 
 
 class IntegrationOut(BaseModel):

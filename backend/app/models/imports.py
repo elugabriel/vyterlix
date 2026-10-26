@@ -49,7 +49,7 @@ DATASETS = (
     "opportunities",
 )
 FILE_SOURCES = ("csv", "excel")  # .csv and .xlsx uploads
-SOURCE_KINDS = ("csv", "excel", "xero", "shopify", "woocommerce", "google_analytics")
+SOURCE_KINDS = ("csv", "excel", "xero", "quickbooks", "shopify", "woocommerce", "google_analytics")
 FILE_SUFFIXES = {"csv": ".csv", "excel": ".xlsx"}
 IMPORT_STATUSES = (
     "uploaded",  # file stored and read; waiting for column mapping

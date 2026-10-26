@@ -78,6 +78,11 @@ class Settings(BaseSettings):
     # Xero (registered on the Xero developer portal). Set both, in the environment, never in code.
     xero_client_id: str | None = None
     xero_client_secret: SecretStr | None = None
+    # QuickBooks Online (Intuit developer portal). "sandbox" talks to the practice companies and
+    # "production" to real ones, which Intuit only allows after it has reviewed the app.
+    quickbooks_client_id: str | None = None
+    quickbooks_client_secret: SecretStr | None = None
+    quickbooks_environment: str = "sandbox"
     previous_encryption_keys: list[str] = []
     oauth_state_ttl_minutes: int = 10  # how long a "connect" attempt stays valid
     token_refresh_margin_seconds: int = 120  # refresh access tokens this long before they expire

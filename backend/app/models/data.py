@@ -38,7 +38,16 @@ from app.models.business import UK_POSTCODE_REGEX
 from app.models.identity import _one_of
 
 # Where a record came from. "manual" = typed in; the connectors arrive in Phase 4 Part B.
-DATA_SOURCES = ("manual", "csv", "excel", "xero", "shopify", "woocommerce", "google_analytics")
+DATA_SOURCES = (
+    "manual",
+    "csv",
+    "excel",
+    "xero",
+    "quickbooks",
+    "shopify",
+    "woocommerce",
+    "google_analytics",
+)
 UK_VAT_RATES = ("0", "5", "20")  # %, as NUMERIC text; NULL = exempt / outside the scope of VAT
 SALE_KINDS = ("sale", "refund")
 EXPENSE_KINDS = ("expense", "credit")
