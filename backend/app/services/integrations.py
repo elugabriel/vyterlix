@@ -44,7 +44,7 @@ from app.integrations.base import (
 from app.integrations.registry import PROVIDERS, get_provider
 from app.models.integrations import Integration, IntegrationOAuthState, IntegrationSync
 from app.schemas.integrations import ConnectOut, IntegrationOut, SyncOut
-from app.services import billing, system_events
+from app.services import billing, integration_ingest, system_events
 from app.services.audit import AuditAction, record_audit
 from app.services.auth import RequestMeta
 from app.services.crypto import CryptoError, decrypt_json, decrypt_text, encrypt_json, encrypt_text
@@ -407,7 +407,7 @@ def run_sync(ctx: JobContext) -> dict[str, Any]:
     db.add(sync)
     integration.last_sync_at = now
     db.commit()  # visible straight away as "running"
-    sync_id, integration_id = sync.id, integration.id
+    sync_id, integration_id, provider_key = sync.id, integration.id, integration.provider
 
     try:
         tokens = valid_tokens(db, integration, provider, now=now)
@@ -425,6 +425,12 @@ def run_sync(ctx: JobContext) -> dict[str, Any]:
                 now=now,
             )
         )
+        created_count = outcome.records_created
+        if outcome.datasets:  # bring what was fetched into the business's data
+            made = integration_ingest.ingest(
+                db, ctx.tenant.organization_id, provider_key, outcome.datasets
+            )
+            created_count = made["sales"] + made["expenses"]
     except ReauthRequired as exc:
         db.rollback()
         _record_failure(db, sync_id, integration_id, exc.code, exc.message, needs_reauth=True)
@@ -446,7 +452,7 @@ def run_sync(ctx: JobContext) -> dict[str, Any]:
     sync = db.get(IntegrationSync, sync_id)
     integration = get_integration(db, integration_id)
     sync.status, sync.finished_at = "succeeded", finished
-    sync.records_fetched, sync.records_created = outcome.records_fetched, outcome.records_created
+    sync.records_fetched, sync.records_created = outcome.records_fetched, created_count
     sync.data_import_id = outcome.data_import_id
     integration.last_sync_status = "succeeded"
     integration.last_successful_sync_at = finished
@@ -458,7 +464,8 @@ def run_sync(ctx: JobContext) -> dict[str, Any]:
     return {
         "sync_id": str(sync_id),
         "records_fetched": outcome.records_fetched,
-        "records_created": outcome.records_created,
+        "records_created": created_count,
+        "ingested": bool(outcome.datasets) and created_count > 0,
     }
 
 

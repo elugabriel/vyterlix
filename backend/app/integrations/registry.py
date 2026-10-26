@@ -5,8 +5,9 @@ from app.core.config import get_settings
 from app.core.errors import AppError
 from app.integrations.base import Provider
 from app.integrations.sandbox import SandboxProvider
+from app.integrations.xero import XeroProvider
 
-PROVIDERS: dict[str, Provider] = {p.key: p for p in (SandboxProvider(),)}
+PROVIDERS: dict[str, Provider] = {p.key: p for p in (SandboxProvider(), XeroProvider())}
 
 
 def get_provider(key: str) -> Provider:

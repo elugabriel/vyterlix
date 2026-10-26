@@ -83,6 +83,9 @@ class SyncOutcome:
     records_created: int = 0
     cursor: dict[str, Any] | None = None  # saved for the next sync (None = keep the old one)
     data_import_id: Any = None  # the import this sync produced, for provenance
+    # What was fetched, ready to be stored: {"sales": [row, ...], "expenses": [...]}. Each row is
+    # shaped like a row read from a file, with the provider's own id in `reference`.
+    datasets: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
 
 
 class Provider(ABC):

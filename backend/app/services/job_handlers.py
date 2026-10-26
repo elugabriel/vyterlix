@@ -64,7 +64,10 @@ def undo(ctx: JobContext) -> BaseModel:
 
 @register("integration.sync", Perm.DATA_MANAGE)
 def sync_integration(ctx: JobContext) -> dict:
-    return run_sync(ctx)
+    result = run_sync(ctx)
+    if result.get("ingested"):  # new records came in, so the figures are out of date
+        _refresh_kpis_later(ctx)
+    return result
 
 
 @register("kpi.calculate", Perm.DATA_MANAGE)

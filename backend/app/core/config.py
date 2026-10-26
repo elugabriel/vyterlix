@@ -75,6 +75,9 @@ class Settings(BaseSettings):
     stripe_secret_key: SecretStr | None = None
     stripe_webhook_secret: SecretStr | None = None
     paystack_secret_key: SecretStr | None = None
+    # Xero (registered on the Xero developer portal). Set both, in the environment, never in code.
+    xero_client_id: str | None = None
+    xero_client_secret: SecretStr | None = None
     previous_encryption_keys: list[str] = []
     oauth_state_ttl_minutes: int = 10  # how long a "connect" attempt stays valid
     token_refresh_margin_seconds: int = 120  # refresh access tokens this long before they expire
