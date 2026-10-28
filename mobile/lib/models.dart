@@ -558,6 +558,56 @@ class ServiceRow {
   final String? rebookedPct;
 }
 
+class ProjectRow {
+  const ProjectRow({
+    required this.name,
+    required this.client,
+    required this.revenue,
+    required this.costs,
+    required this.profit,
+    required this.marginPct,
+    required this.budgetUsedPct,
+  });
+
+  factory ProjectRow.fromJson(Map<String, dynamic> json) => ProjectRow(
+    name: '${json['name']}',
+    client: json['client'] as String?,
+    revenue: '${json['revenue']}',
+    costs: '${json['costs']}',
+    profit: '${json['profit']}',
+    marginPct: json['margin_pct'] == null ? null : '${json['margin_pct']}',
+    budgetUsedPct: json['budget_used_pct'] == null
+        ? null
+        : '${json['budget_used_pct']}',
+  );
+
+  final String name;
+  final String? client;
+  final String revenue;
+  final String costs;
+  final String profit;
+  final String? marginPct;
+  final String? budgetUsedPct;
+
+  bool get losingMoney => (double.tryParse(profit) ?? 0) < 0;
+}
+
+/// What each project has earned and cost, the ones losing money first, with plain notes.
+class ProjectsProfit {
+  const ProjectsProfit({required this.rows, required this.notes});
+
+  factory ProjectsProfit.fromJson(Map<String, dynamic> json) => ProjectsProfit(
+    rows: [
+      for (final r in (json['rows'] as List? ?? const []))
+        ProjectRow.fromJson(r as Map<String, dynamic>),
+    ],
+    notes: [for (final n in (json['notes'] as List? ?? const [])) '$n'],
+  );
+
+  final List<ProjectRow> rows;
+  final List<String> notes;
+}
+
 class TeamMember {
   const TeamMember({
     required this.staff,

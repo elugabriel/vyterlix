@@ -51,16 +51,18 @@ async function load() {
 
 async function loadBreakdowns(slots) {
   const noStock = sells === "services";
-  const [channels, products, movers, followUp, serviceList, teamList] = await Promise.all([
+  const [channels, products, movers, followUp, serviceList, teamList, projectList] = await Promise.all([
     guard(message, () => api.get(`${base}/breakdown/channel`)),
     guard(message, () => api.get(`${base}/breakdown/product`)),
     noStock ? null : guard(message, () => api.get(`${base}/stock/movers`)),
     sells === "products" ? null : guard(message, () => api.get(`${base}/customers/follow-up`)),
     sells === "products" ? null : guard(message, () => api.get(`${base}/services`)),
     sells === "products" ? null : guard(message, () => api.get(`${base}/team`)),
+    guard(message, () => api.get(`${base}/projects`)),
   ]);
   if (channels && channels.rows.length) slots.append(breakdownCard("Where your sales come from", "Sales", channels, false));
   if (products && products.rows.length) slots.append(breakdownCard("Your best sellers", "Items sold", products, true));
+  if (projectList && projectList.rows.length) slots.append(projectsCard(projectList));
   if (serviceList && serviceList.rows.length) slots.append(servicesCard(serviceList));
   if (teamList && teamList.members.length) slots.append(teamCard(teamList));
   if (followUp && followUp.customers.length) slots.append(followUpCard(followUp));
@@ -85,6 +87,27 @@ function breakdownCard(title, countHeading, data, withProfit) {
       ]),
       { empty: "No sales in this period." },
     ),
+  );
+}
+
+function projectsCard(data) {
+  return el(
+    "section",
+    { class: "card" },
+    el("h2", { style: "margin-top:0" }, "Your projects"),
+    ...data.notes.map((n) => el("p", {}, n)),
+    table(
+      ["Project", "Earned", "Cost", "Profit", "Margin", "Budget used"],
+      data.rows.map((r) => [
+        r.client ? `${r.name} (${r.client})` : r.name,
+        gbp(r.revenue),
+        gbp(r.costs),
+        el("span", { class: Number(r.profit) < 0 ? "status-bad" : "" }, gbp(r.profit)),
+        r.margin_pct === null ? "–" : `${r.margin_pct}%`,
+        r.budget_used_pct === null ? "No budget" : `${r.budget_used_pct}%`,
+      ]),
+    ),
+    el("p", { class: "muted" }, "Sales and costs before VAT, for the sales and costs you put on a project."),
   );
 }
 

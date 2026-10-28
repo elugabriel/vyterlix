@@ -36,6 +36,31 @@ FakeServer serverFor(String? sells) {
       {'id': 'b2', 'name': 'Second Shop', 'role': 'viewer'},
     ])
     ..json('GET /organizations/b1/kpis/customers/follow-up', followUp())
+    ..json('GET /organizations/b1/kpis/projects', {
+      'rows': [
+        {
+          'name': 'Bathroom',
+          'client': 'Acme',
+          'revenue': '1000.00',
+          'costs': '1800.00',
+          'profit': '-800.00',
+          'margin_pct': '-80.0',
+          'budget_used_pct': '90',
+        },
+        {
+          'name': 'Kitchen',
+          'client': null,
+          'revenue': '5000.00',
+          'costs': '3000.00',
+          'profit': '2000.00',
+          'margin_pct': '40.0',
+          'budget_used_pct': null,
+        },
+      ],
+      'notes': [
+        'Bathroom has cost £1,800.00 and earned £1,000.00: it is losing £800.00 so far.',
+      ],
+    })
     ..json('GET /organizations/b1/kpis/team', {
       'members': [
         {
@@ -136,6 +161,49 @@ void main() {
       );
       expect(find.text('Ben Ola'), findsOneWidget);
       expect(find.text('£500.00'), findsOneWidget);
+    });
+
+    testWidgets(
+      'every kind of business sees what each project earned and cost',
+      (tester) async {
+        await openBusiness(tester, serverFor('products'));
+        await openMore(tester, 'Key figures');
+        await tester.scrollUntilVisible(
+          find.text('Your projects'),
+          400,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(
+          find.textContaining('Bathroom has cost £1,800.00'),
+          findsOneWidget,
+        );
+        expect(find.text('Bathroom (Acme)'), findsOneWidget);
+        expect(find.text('-£800.00'), findsOneWidget);
+        expect(find.text('£2,000.00'), findsOneWidget);
+        expect(
+          find.textContaining('Earned £5,000.00 · cost £3,000.00'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets('a service business sees who is doing the work', (
+      tester,
+    ) async {
+      await openBusiness(tester, serverFor('services'));
+      await openMore(tester, 'Key figures');
+      await tester.scrollUntilVisible(
+        find.text('Your team'),
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Ola did 70.0% of the appointments.'), findsOneWidget);
+      expect(
+        find.textContaining(
+          '7 kept · 1 cancelled · 0 did not turn up · rated 4.7 out of 5',
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets(

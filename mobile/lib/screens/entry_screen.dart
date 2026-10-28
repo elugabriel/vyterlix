@@ -43,6 +43,8 @@ class _EntryScreenState extends State<EntryScreen> {
   List<(String, String)> _channels = [];
   List<(String, String)> _categories = [];
   String? _pick; // sales channel or cost category id
+  List<(String, String)> _projects = [];
+  String? _project; // the project it belongs to
   bool _busy = false;
   String? _error;
   String? _saved;
@@ -76,13 +78,31 @@ class _EntryScreenState extends State<EntryScreen> {
     }
   }
 
+  /// The projects still under way, to put a sale or a cost on. Optional, like the lists.
+  Future<List<(String, String)>> _projectChoices() async {
+    try {
+      final data = await context.read<ApiClient>().get(
+        '$_org/projects',
+        query: {'limit': '100', 'status': 'active'},
+      );
+      return [
+        for (final p in (data as Map<String, dynamic>)['items'] as List)
+          ((p as Map<String, dynamic>)['id'] as String, p['name'] as String),
+      ];
+    } on ApiException {
+      return [];
+    }
+  }
+
   Future<void> _loadLists() async {
     final channels = await _list('sales_channel');
     final categories = await _list('cost_category');
+    final projects = await _projectChoices();
     if (mounted) {
       setState(() {
         _channels = channels;
         _categories = categories;
+        _projects = projects;
       });
     }
   }
@@ -143,10 +163,12 @@ class _EntryScreenState extends State<EntryScreen> {
         'due_on': _dueOn,
         'paid_on': _paidOn,
         'sales_channel_id': _pick,
+        'project_id': _project,
         'reference': text.isEmpty ? null : text,
         'lines': <dynamic>[],
       } else ...{
         'cost_category_id': _pick,
+        'project_id': _project,
         'description': text.isEmpty ? null : text,
       },
     };
@@ -170,6 +192,7 @@ class _EntryScreenState extends State<EntryScreen> {
         _text.clear();
         _dueOn = null;
         _paidOn = null;
+        _project = null;
       });
     } on ApiException catch (error) {
       if (mounted) setState(() => _error = error.message);
@@ -339,6 +362,28 @@ class _EntryScreenState extends State<EntryScreen> {
                           ),
                       ],
                       onChanged: (v) => setState(() => _pick = v),
+                    ),
+                  ],
+                  if (_projects.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String?>(
+                      key: const ValueKey('entry-project'),
+                      initialValue: _project,
+                      decoration: const InputDecoration(
+                        labelText: 'Project (optional)',
+                      ),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('Not on a project'),
+                        ),
+                        for (final (id, name) in _projects)
+                          DropdownMenuItem<String?>(
+                            value: id,
+                            child: Text(name),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() => _project = v),
                     ),
                   ],
                   const SizedBox(height: 8),

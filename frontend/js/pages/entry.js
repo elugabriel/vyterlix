@@ -20,6 +20,7 @@ const TABS = [
   ["supplier", "Supplier"],
   ["product", "Product"],
   ["stock", "Stock"],
+  ["project", "Project"],
   ["booking", "Appointment"],
   ["opportunity", "Lead or proposal"],
 ];
@@ -72,7 +73,7 @@ const path = (rest) => `/organizations/${orgId}/${rest}`;
 async function loadChoices() {
   const pick = (page) => page.items.map((i) => [i.id, i.name ?? i.email]);
   const listed = (items) => items.filter((i) => i.is_active).map((i) => [i.id, i.name]);
-  const [customers, suppliers, products, channels, categories, ctypes, offerings, used] = await Promise.all([
+  const [customers, suppliers, products, channels, categories, ctypes, offerings, used, projects] = await Promise.all([
     api.get(path("customers?limit=100")),
     api.get(path("suppliers?limit=100")),
     api.get(path("products?limit=100")),
@@ -81,6 +82,7 @@ async function loadChoices() {
     api.get(path("lists/customer_type")),
     api.get(path("lists/offering")),
     sells === "products" ? { services: [], staff: [] } : api.get(path("bookings/choices")),
+    api.get(path("projects?limit=100&status=active")),
   ]);
   return {
     customers: pick(customers),
@@ -91,6 +93,7 @@ async function loadChoices() {
     ctypes: listed(ctypes),
     offerings: listed(offerings),
     usedServices: used.services,
+    projects: pick(projects),
     usedStaff: used.staff,
     productNames: Object.fromEntries(pick(products)),
   };
@@ -111,7 +114,7 @@ async function render() {
       return button;
     }),
   );
-  const builder = { sale, expense, customer, supplier, product, stock, booking, opportunity }[tab];
+  const builder = { sale, expense, customer, supplier, product, stock, project, booking, opportunity }[tab];
   const { form, recent } = builder();
   const box = el("div", { class: "message", role: "alert", hidden: true });
   const listBox = el("div", {});
@@ -123,7 +126,7 @@ async function render() {
   );
   bindForm(form.node, box, async (values) => {
     await form.submit(values);
-    const refreshNeeded = ["customer", "supplier", "product"].includes(tab);
+    const refreshNeeded = ["customer", "supplier", "product", "project"].includes(tab);
     if (refreshNeeded) choices = await loadChoices();
     await render();
     showMessage(message, "success", `${label} saved.`);
@@ -225,6 +228,7 @@ function sale() {
       field("Customer (optional)", select("customer_id", choices.customers, { placeholder: "No customer" })),
       field("Sales channel (optional)", select("sales_channel_id", choices.channels, { placeholder: "Not set" })),
     ),
+    field("Project (optional)", select("project_id", choices.projects, { placeholder: "Not on a project" }), "Put a sale on a project to see what that project earns and costs."),
     el("div", { class: "row" }, field("Reference (optional)", input("reference", { maxlength: 200 }), "e.g. an invoice or receipt number. Each can only be used once."), field("Notes (optional)", input("notes", { maxlength: 2000 }))),
     el(
       "div",
@@ -245,6 +249,7 @@ function sale() {
           ...money.read(v),
           customer_id: optionalId(v.customer_id),
           sales_channel_id: optionalId(v.sales_channel_id),
+          project_id: optionalId(v.project_id),
           reference: orNull(v.reference),
           notes: orNull(v.notes),
           due_on: orNull(v.due_on),
@@ -335,6 +340,7 @@ function expense() {
       field("Supplier (optional)", select("supplier_id", choices.suppliers, { placeholder: "No supplier" })),
       field("Cost category (optional)", select("cost_category_id", choices.categories, { placeholder: "Not set" })),
     ),
+    field("Project (optional)", select("project_id", choices.projects, { placeholder: "Not on a project" }), "Put a cost on a project to see what that project earns and costs."),
     el("div", { class: "row" }, field("What it was for (optional)", input("description", { maxlength: 300 })), field("Reference (optional)", input("reference", { maxlength: 200 }))),
     el("button", { type: "submit" }, "Save expense"),
   );
@@ -348,6 +354,7 @@ function expense() {
           ...money.read(v),
           supplier_id: optionalId(v.supplier_id),
           cost_category_id: optionalId(v.cost_category_id),
+          project_id: optionalId(v.project_id),
           description: orNull(v.description),
           reference: orNull(v.reference),
         }),
@@ -388,6 +395,36 @@ function customer() {
       title: "Your customers (A to Z)",
       headers: ["Name", "Email", "Postcode", "Source", ""],
       cells: (c) => [c.name ?? "–", c.email ?? "–", c.postcode ?? "–", SOURCE[c.source] ?? c.source],
+    },
+  };
+}
+
+const PROJECT_STATUS = { active: "Under way", finished: "Finished" };
+
+function project() {
+  const node = el(
+    "form",
+    { novalidate: true },
+    el("div", { class: "row" }, field("Project name", input("name", { maxlength: 200, required: true }), "For example: Kitchen for Acme."), field("Client (optional)", select("customer_id", choices.customers, { placeholder: "Not recorded" }))),
+    el("div", { class: "row" }, field("Budget for costs (£, optional)", input("budget", { type: "number", step: "0.01", min: "0" }), "Vyterlix tells you when the costs come close to it."), field("Where is it up to?", select("status", [["active", "Under way"], ["finished", "Finished"]], { selected: "active" }))),
+    el("button", { type: "submit" }, "Save project"),
+  );
+  return {
+    form: {
+      node,
+      submit: (v) =>
+        api.post(path("projects"), {
+          name: v.name,
+          customer_id: optionalId(v.customer_id),
+          budget: orNull(v.budget),
+          status: v.status,
+        }),
+    },
+    recent: {
+      path: "projects",
+      title: "Your projects (A to Z)",
+      headers: ["Project", "Where it is up to", "Budget", ""],
+      cells: (p) => [p.name, PROJECT_STATUS[p.status] ?? p.status, p.budget === null ? "–" : gbp(p.budget)],
     },
   };
 }

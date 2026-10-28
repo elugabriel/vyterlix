@@ -17,6 +17,12 @@ FakeServer entryServer() => dataServer()
     'id': 's1',
     'gross_amount': '12.50',
   }, 201)
+  ..json('GET /organizations/b1/projects', {
+    'total': 1,
+    'items': [
+      {'id': 'pr1', 'name': 'Kitchen for Acme', 'status': 'active'},
+    ],
+  })
   ..json('GET /organizations/b1/customers', {
     'total': 1,
     'items': [
@@ -277,6 +283,37 @@ void main() {
     );
     expect(body['due_on'], isNotNull);
     expect(body['paid_on'], isNull);
+  });
+
+  testWidgets('a sale and a cost can be put on a project', (tester) async {
+    final server = entryServer();
+    await open(tester, server);
+    await tester.tap(find.text('Type in a sale or expense'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Amount (£)'), '500');
+    await tester.tap(find.byKey(const ValueKey('entry-project')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kitchen for Acme').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save sale'));
+    await tester.pumpAndSettle();
+    final sale = server.bodyOf(
+      server.to('POST /organizations/b1/sales').single,
+    );
+    expect(sale['project_id'], 'pr1');
+    await tester.tap(find.text('Expense'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Amount (£)'), '200');
+    await tester.tap(find.byKey(const ValueKey('entry-project')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kitchen for Acme').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save expense'));
+    await tester.pumpAndSettle();
+    final cost = server.bodyOf(
+      server.to('POST /organizations/b1/expenses').single,
+    );
+    expect(cost['project_id'], 'pr1');
   });
 
   testWidgets('a refund with a typed VAT amount and a channel', (tester) async {

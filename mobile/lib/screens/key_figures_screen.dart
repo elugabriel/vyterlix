@@ -41,6 +41,7 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
   QuietCustomers? _followUp;
   ServicesBooked? _services;
   TeamWorkload? _team;
+  ProjectsProfit? _projects;
   String? _workedOut;
   String? _error;
 
@@ -72,7 +73,16 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
       if (mounted) setState(() => _error = error.message);
       return;
     }
-    if (!widget.business.showFollowUp) return;
+    if (!mounted) return;
+    try {
+      final data = await context.read<ApiClient>().get(
+        '$_base/projects',
+      ) as Map<String, dynamic>;
+      if (mounted) setState(() => _projects = ProjectsProfit.fromJson(data));
+    } on ApiException {
+      // a bonus too
+    }
+    if (!widget.business.showFollowUp || !mounted) return;
     try {
       final data = await context.read<ApiClient>().get(
         '$_base/customers/follow-up',
@@ -166,6 +176,8 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
                 },
               ),
             ],
+          if (_projects != null && _projects!.rows.isNotEmpty)
+            ..._projectsView(_projects!, muted),
           if (_services != null && _services!.rows.isNotEmpty)
             ..._servicesView(_services!, muted),
           if (_team != null && _team!.members.isNotEmpty)
@@ -176,6 +188,33 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
       ),
     );
   }
+
+  List<Widget> _projectsView(ProjectsProfit p, Color muted) => [
+    const SectionTitle('Your projects'),
+    for (final note in p.notes)
+      Padding(padding: const EdgeInsets.only(bottom: 4), child: Text(note)),
+    const SizedBox(height: 4),
+    for (final r in p.rows)
+      Card(
+        child: ListTile(
+          title: Text(
+            r.client == null ? r.name : '${r.name} (${r.client})',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          subtitle: Text(
+            'Earned ${formatValue(r.revenue, 'gbp')} · cost ${formatValue(r.costs, 'gbp')}'
+            '${r.budgetUsedPct == null ? '' : ' · ${r.budgetUsedPct}% of budget used'}',
+          ),
+          trailing: Text(
+            formatValue(r.profit, 'gbp'),
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: r.losingMoney ? Palette.bad : null,
+            ),
+          ),
+        ),
+      ),
+  ];
 
   List<Widget> _teamView(TeamWorkload t, Color muted) => [
     const SectionTitle('Your team'),
