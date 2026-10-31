@@ -44,6 +44,7 @@ DATA_SOURCES = (
     "excel",
     "xero",
     "quickbooks",
+    "square",
     "shopify",
     "woocommerce",
     "google_analytics",

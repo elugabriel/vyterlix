@@ -83,6 +83,8 @@ class Settings(BaseSettings):
     quickbooks_client_id: str | None = None
     quickbooks_client_secret: SecretStr | None = None
     quickbooks_environment: str = "sandbox"
+    # Square: "sandbox" is the practice account, "production" the real ones.
+    square_environment: str = "sandbox"
     previous_encryption_keys: list[str] = []
     oauth_state_ttl_minutes: int = 10  # how long a "connect" attempt stays valid
     token_refresh_margin_seconds: int = 120  # refresh access tokens this long before they expire
