@@ -10,7 +10,9 @@ from app.schemas.integrations import (
     CallbackIn,
     ConnectIn,
     ConnectOut,
+    FieldOut,
     IntegrationOut,
+    KeysIn,
     ProviderOut,
     SyncOut,
 )
@@ -18,6 +20,7 @@ from app.schemas.jobs import JobOut
 from app.services import job_handlers  # noqa: F401  (registers the handlers)
 from app.services.integrations import (
     complete_connect,
+    connect_with_keys,
     disconnect,
     get_integration,
     integration_out,
@@ -39,7 +42,15 @@ IntegrationManager = Annotated[Tenant, Depends(require_permission(Perm.INTEGRATI
 def providers(tenant: DataManager):
     """What can be connected, and what we would read."""
     return [
-        ProviderOut(key=p.key, label=p.label, permissions=list(p.permissions))
+        ProviderOut(
+            key=p.key,
+            label=p.label,
+            permissions=list(p.permissions),
+            fields=[
+                FieldOut(name=f.name, label=f.label, help=f.help, secret=f.secret)
+                for f in p.connect_fields
+            ],
+        )
         for p in available_providers()
     ]
 
@@ -59,6 +70,12 @@ def connect(body: ConnectIn, tenant: IntegrationManager, db: DB):
 def callback(body: CallbackIn, tenant: IntegrationManager, db: DB, meta: Meta):
     """Step 2: the page the provider sent the person back to passes on `state` and `code`."""
     return complete_connect(db, tenant, body.state, body.code, meta, params=body.params)
+
+
+@router.post("/connect-keys", response_model=IntegrationOut)
+def connect_keys(body: KeysIn, tenant: IntegrationManager, db: DB, meta: Meta):
+    """For a provider with no sign-in page: check the keys the person typed and connect."""
+    return connect_with_keys(db, tenant, body.provider, body.values, meta, body.integration_id)
 
 
 @router.get("/{integration_id}", response_model=IntegrationOut)

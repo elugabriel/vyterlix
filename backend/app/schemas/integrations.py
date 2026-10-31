@@ -5,18 +5,33 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class FieldOut(BaseModel):
+    name: str
+    label: str
+    help: str
+    secret: bool
+
+
 class ProviderOut(BaseModel):
     key: str
     label: str
     # What we will read, in plain English. Shown before the person connects.
     permissions: list[str]
     read_only: bool = True
+    # Boxes to fill in when this connects with keys rather than a sign-in page (else empty).
+    fields: list[FieldOut] = []
 
 
 class ConnectIn(BaseModel):
     provider: str = Field(pattern=r"^[a-z][a-z_]*$", max_length=30)
     # Re-connecting an existing connection (sign in again): it must be the same account.
     integration_id: uuid.UUID | None = None
+
+
+class KeysIn(BaseModel):
+    provider: str = Field(pattern=r"^[a-z][a-z_]*$", max_length=30)
+    integration_id: uuid.UUID | None = None
+    values: dict[str, str] = Field(max_length=10)
 
 
 class ConnectOut(BaseModel):

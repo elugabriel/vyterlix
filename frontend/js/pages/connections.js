@@ -21,6 +21,7 @@ import { showMessage } from "../ui.js";
 
 const message = document.getElementById("message");
 const content = document.getElementById("content");
+const providerInfo = new Map(); // key -> what the API said about it (including the boxes to fill in)
 const STATUS = {
   connected: ["Connected", "status-imported"],
   needs_reauth: ["Needs you to sign in again", "status-failed"],
@@ -45,6 +46,8 @@ async function load() {
     guard(message, () => api.get(base)),
   ]);
   if (!providers || !connections) return;
+  providerInfo.clear();
+  for (const p of providers) providerInfo.set(p.key, p);
   content.replaceChildren(connectionsCard(connections), addCard(providers, connections));
 }
 
@@ -72,7 +75,7 @@ function connectionBlock(c) {
     sync.addEventListener("click", () => syncNow(c, sync, box, progress));
     actions.append(sync, disconnectControl(c, box));
   } else if (c.status === "needs_reauth") {
-    const again = el("button", { type: "button" }, "Sign in again");
+    const again = el("button", { type: "button" }, providerInfo.get(c.provider)?.fields?.length ? "Enter the keys again" : "Sign in again");
     again.addEventListener("click", () => connect(c.provider, c.id, again, box));
     actions.append(again, disconnectControl(c, box));
   } else {
@@ -190,6 +193,8 @@ function disconnectControl(c, box) {
 
 /** Ask the API where to send the person, remember which business, and go. */
 async function connect(provider, integrationId, button, box) {
+  const keyed = providerInfo.get(provider);
+  if (keyed?.fields?.length) return keyForm(keyed, integrationId, button, box);
   button.disabled = true;
   showMessage(box, "info", "");
   const body = { provider, ...(integrationId ? { integration_id: integrationId } : {}) };
@@ -210,6 +215,51 @@ async function connect(provider, integrationId, button, box) {
     // Private browsing can refuse storage; the callback page then asks the person to start again.
   }
   location.assign(target.href);
+}
+
+/** A connection with no sign-in page (a shop): the person types in its address and read-only keys. */
+function keyForm(p, integrationId, button, box) {
+  button.disabled = true;
+  const inputs = p.fields.map((f) =>
+    el("input", {
+      name: f.name,
+      type: f.secret ? "password" : "text",
+      autocomplete: "off",
+      spellcheck: "false",
+      required: true,
+    }),
+  );
+  const save = el("button", { type: "submit" }, "Connect");
+  const cancel = el("button", { type: "button", class: "secondary" }, "Cancel");
+  const form = el(
+    "form",
+    { class: "key-form" },
+    ...p.fields.map((f, i) =>
+      el("label", {}, f.label, inputs[i], f.help ? el("small", { class: "muted" }, f.help) : null),
+    ),
+    el("div", { class: "actions", style: "margin:8px 0 0" }, save, cancel),
+  );
+  cancel.addEventListener("click", () => {
+    form.remove();
+    button.disabled = false;
+  });
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    save.disabled = true;
+    showMessage(box, "info", "Checking the keys with your shop...");
+    const values = Object.fromEntries(inputs.map((node) => [node.name, node.value.trim()]));
+    const body = { provider: p.key, values, ...(integrationId ? { integration_id: integrationId } : {}) };
+    const done = await guard(box, () => api.post(`${base}/connect-keys`, body));
+    for (const node of inputs) node.value = ""; // never keep keys on the page
+    if (!done) {
+      save.disabled = false;
+      return;
+    }
+    await load();
+    showMessage(message, "success", `${done.display_name} is connected. Press Update now to bring its orders in.`);
+  });
+  box.after(form);
+  inputs[0].focus();
 }
 
 // --- adding one ----------------------------------------------------------------------------------

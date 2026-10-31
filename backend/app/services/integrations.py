@@ -248,6 +248,64 @@ def complete_connect(
     except ProviderError as exc:
         raise AppError(exc.message, code=exc.code, status_code=422) from exc
 
+    return _save_connection(
+        db, provider, tokens, account, target_id, user_id, organization_id, meta, now
+    )
+
+
+def connect_with_keys(
+    db: Session,
+    tenant,
+    provider_key: str,
+    values: dict[str, str],
+    meta: RequestMeta,
+    integration_id: uuid.UUID | None = None,
+    *,
+    now: datetime | None = None,
+) -> IntegrationOut:
+    """Connect a provider that has no sign-in page: the person types in read-only keys."""
+    now = now or utcnow()
+    user_id, organization_id = tenant.user.id, tenant.organization_id
+    provider = get_provider(provider_key)
+    if not provider.connect_fields:
+        raise AppError("That connection does not use keys.", code="wrong_provider", status_code=422)
+    if integration_id is None:
+        billing.check(db, organization_id, "integrations")
+    else:
+        if get_integration(db, integration_id).provider != provider.key:
+            raise AppError(
+                "That isn't a connection to this provider.", code="wrong_provider", status_code=422
+            )
+    wanted = {f.name for f in provider.connect_fields}
+    given = {k: v.strip() for k, v in values.items() if k in wanted}
+    missing = [f.label for f in provider.connect_fields if not given.get(f.name)]
+    if missing:
+        raise AppError(
+            f"Please fill in: {', '.join(missing)}.", code="missing_fields", status_code=422
+        )
+    try:
+        tokens = provider.connect_with_keys(given)
+        account = provider.account(tokens)
+    except ProviderUnavailable as exc:
+        raise AppError(exc.message, code=exc.code, status_code=503) from exc
+    except ProviderError as exc:
+        raise AppError(exc.message, code=exc.code, status_code=422) from exc
+    return _save_connection(
+        db, provider, tokens, account, integration_id, user_id, organization_id, meta, now
+    )
+
+
+def _save_connection(
+    db: Session,
+    provider,
+    tokens: TokenSet,
+    account: AccountInfo,
+    target_id: uuid.UUID | None,
+    user_id: uuid.UUID,
+    organization_id: uuid.UUID,
+    meta: RequestMeta,
+    now: datetime,
+) -> IntegrationOut:
     if target_id is not None:
         integration = get_integration(db, target_id)
         if integration.external_account_id != account.external_id:

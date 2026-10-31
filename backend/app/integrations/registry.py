@@ -6,10 +6,12 @@ from app.core.errors import AppError
 from app.integrations.base import Provider
 from app.integrations.quickbooks import QuickBooksProvider
 from app.integrations.sandbox import SandboxProvider
+from app.integrations.woocommerce import WooCommerceProvider
 from app.integrations.xero import XeroProvider
 
 PROVIDERS: dict[str, Provider] = {
-    p.key: p for p in (SandboxProvider(), XeroProvider(), QuickBooksProvider())
+    p.key: p
+    for p in (SandboxProvider(), XeroProvider(), QuickBooksProvider(), WooCommerceProvider())
 }
 
 

@@ -88,6 +88,16 @@ class SyncOutcome:
     datasets: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
 
 
+@dataclass(frozen=True)
+class ConnectField:
+    """One box on the form for a provider that connects with keys instead of a sign-in page."""
+
+    name: str
+    label: str
+    help: str = ""
+    secret: bool = False  # shown as dots, never sent back to the page
+
+
 class Provider(ABC):
     key: str  # lowercase code stored in the database, e.g. "xero"
     label: str  # shown to people, e.g. "Xero"
@@ -97,22 +107,29 @@ class Provider(ABC):
     # Extra values the provider sends back on the redirect address that the connection needs (for
     # QuickBooks, which company was shared). They are kept with the tokens, encrypted.
     callback_params: tuple[str, ...] = ()
+    # A provider with no sign-in page (WooCommerce: the owner makes read-only keys in their own
+    # store) lists the boxes to fill in here and overrides `connect_with_keys`.
+    connect_fields: tuple[ConnectField, ...] = ()
 
     def is_configured(self, settings: Settings) -> bool:
         """False until the business running Vyterlix has registered with this provider."""
         return True
 
-    @abstractmethod
     def authorize_url(self, *, state: str, redirect_uri: str, code_challenge: str) -> str:
         """Where to send the person to approve access."""
+        raise ProviderRejected("This connection does not use a sign-in page.")
 
-    @abstractmethod
     def exchange_code(self, *, code: str, redirect_uri: str, code_verifier: str) -> TokenSet:
         """Swap the one-time code for tokens."""
+        raise ProviderRejected("This connection does not use a sign-in page.")
 
-    @abstractmethod
     def refresh(self, tokens: TokenSet) -> TokenSet:
         """New tokens from the refresh token. Raise ReauthRequired if it no longer works."""
+        raise ReauthRequired()
+
+    def connect_with_keys(self, values: dict[str, str]) -> TokenSet:
+        """Check the keys the person typed in and return them as tokens (kept encrypted)."""
+        raise ProviderRejected("This connection does not use keys.")
 
     @abstractmethod
     def account(self, tokens: TokenSet) -> AccountInfo:
