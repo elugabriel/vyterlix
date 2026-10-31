@@ -45,6 +45,7 @@ DATA_SOURCES = (
     "xero",
     "quickbooks",
     "square",
+    "zoho",
     "shopify",
     "woocommerce",
     "google_analytics",

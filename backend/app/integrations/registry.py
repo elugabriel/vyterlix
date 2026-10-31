@@ -9,6 +9,7 @@ from app.integrations.sandbox import SandboxProvider
 from app.integrations.square import SquareProvider
 from app.integrations.woocommerce import WooCommerceProvider
 from app.integrations.xero import XeroProvider
+from app.integrations.zoho import ZohoProvider
 
 PROVIDERS: dict[str, Provider] = {
     p.key: p
@@ -18,6 +19,7 @@ PROVIDERS: dict[str, Provider] = {
         QuickBooksProvider(),
         SquareProvider(),
         WooCommerceProvider(),
+        ZohoProvider(),
     )
 }
 
