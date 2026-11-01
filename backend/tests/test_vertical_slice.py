@@ -7,11 +7,12 @@ was learned. Every step is checked against figures worked out by hand from the g
 """
 
 import uuid
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal as D
 
 from sqlalchemy import select
 
+from app.core.uk import today_uk
 from app.db.tenant import tenant_scope
 from app.demo import milestone
 from app.models.actions import BusinessAction
@@ -72,7 +73,9 @@ def test_one_shop_goes_round_the_whole_loop(api, db, storage, business):  # noqa
     assert forecast.status_code == 200, forecast.text
     predicted = forecast.json()
     assert predicted["status"] == "ok" and len(predicted["predictions"]) == 3
-    assert predicted["as_of"] == "2026-09-01"
+    # The forecast starts from the last complete month, so it moves on with the calendar.
+    this_month = today_uk().replace(day=1)
+    assert predicted["as_of"] == (this_month - timedelta(days=1)).replace(day=1).isoformat()
     for step in predicted["predictions"]:
         assert D(step["lower"]) <= D(step["value"]) <= D(step["upper"])
 

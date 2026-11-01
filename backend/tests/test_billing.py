@@ -1517,9 +1517,13 @@ def test_a_sandbox_plan_renews_when_its_period_ends_with_an_invoice_and_keeps_re
         sub = db.scalars(select(Subscription)).one()
         invoices = db.scalars(select(Invoice).order_by(Invoice.created_at)).all()
     assert rolled == 3
-    assert sub.current_period_start == rules.add_months(
-        start, 3
-    ) and sub.current_period_end == rules.add_months(start, 4)
+    # Each renewal starts where the last period ended, one month on (so a plan that began on the
+    # 31st goes 30 November, 30 December, 30 January: the month-end clamp is applied each time).
+    expected = start
+    for _ in range(3):
+        expected = rules.add_months(expected, 1)
+    assert sub.current_period_start == expected
+    assert sub.current_period_end == rules.add_months(expected, 1)
     assert len(invoices) == 3 and {i.status for i in invoices} == {"paid"}
     assert (
         invoices[0].net_pence == 19900
