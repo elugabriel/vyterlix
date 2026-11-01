@@ -41,6 +41,7 @@ from app.models.data import (
     Sale,
     SaleLine,
     StockMovement,
+    WebVisit,
 )
 
 ZERO = Decimal("0")
@@ -55,6 +56,7 @@ PRESENCE = {
     "invoices": select(Sale.id).where(Sale.due_on.is_not(None)),
     "pipeline": select(Opportunity.id),
     "ratings": select(Booking.id).where(Booking.rating.is_not(None)),
+    "web": select(WebVisit.id),
 }
 
 Series = dict[date, Decimal]
@@ -377,6 +379,19 @@ def _opportunities(day_column, *conditions, total=None) -> Compute:
     return compute
 
 
+def _web(column) -> Compute:
+    def compute(db: Session, granularity: str, start: date, end: date) -> Series:
+        bucket = _bucket(WebVisit.day, granularity)
+        query = (
+            select(bucket, func.sum(column))
+            .where(WebVisit.day >= start, WebVisit.day <= end)
+            .group_by(bucket)
+        )
+        return _decimals(db.execute(query))
+
+    return compute
+
+
 # --- invoices -----------------------------------------------------------------------------------
 # An invoice is a sale with a due day. It is owed from the day of the sale until the day it is paid
 # (a sale with no paid day is still owed). Amounts are what the customer owes, including VAT.
@@ -563,6 +578,16 @@ MEASURES: dict[str, Measure] = {
         Measure("bookings_rated", "Appointments rated", "ratings", _rated()),
         Measure("ratings_happy", "Rated 4 or 5", "ratings", _rated(Booking.rating >= 4)),
         Measure("ratings_unhappy", "Rated 1 or 2", "ratings", _rated(Booking.rating <= 2)),
+        Measure("website_visits", "Visits to your website", "web", _web(WebVisit.sessions)),
+        Measure(
+            "website_new_visitors", "New visitors to your website", "web", _web(WebVisit.new_users)
+        ),
+        Measure(
+            "website_actions",
+            "Enquiries and orders from your website",
+            "web",
+            _web(WebVisit.key_events),
+        ),
         Measure("leads_in", "New leads", "pipeline", _opportunities(Opportunity.created_on)),
         Measure(
             "proposals_sent",

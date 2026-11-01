@@ -144,6 +144,36 @@ WORDS: dict[str, Words] = {
             "That is a good sign: fewer customers are unhappy.",
         ),
     ),
+    "website_visits": Words(
+        Say(
+            "More people visited your website than {before}.",
+            "More visits means more people seeing what you offer.",
+        ),
+        Say(
+            "Fewer people visited your website than {before}.",
+            "Fewer visits can mean fewer enquiries later. It is worth checking where your visitors usually come from.",
+        ),
+    ),
+    "website_new_visitors": Words(
+        Say(
+            "More people visited your website for the first time than {before}.",
+            "New visitors are people who did not know you before, so this is a sign you are being found.",
+        ),
+        Say(
+            "Fewer people visited your website for the first time than {before}.",
+            "Fewer new visitors means fewer new people finding you.",
+        ),
+    ),
+    "website_actions": Words(
+        Say(
+            "More visitors sent an enquiry or bought than {before}.",
+            "That is a good sign: your website is turning visits into business.",
+        ),
+        Say(
+            "Fewer visitors sent an enquiry or bought than {before}.",
+            "Check that your contact form and checkout still work, and that visitors can find them easily.",
+        ),
+    ),
     "new_leads": Words(
         Say(
             "More enquiries came in than {before}.",

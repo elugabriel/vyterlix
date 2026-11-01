@@ -89,6 +89,9 @@ class Settings(BaseSettings):
     zoho_client_id: str | None = None
     zoho_client_secret: SecretStr | None = None
     zoho_region: str = "uk"
+    # Google Analytics (Google Cloud console).
+    google_client_id: str | None = None
+    google_client_secret: SecretStr | None = None
     previous_encryption_keys: list[str] = []
     oauth_state_ttl_minutes: int = 10  # how long a "connect" attempt stays valid
     token_refresh_margin_seconds: int = 120  # refresh access tokens this long before they expire

@@ -24,6 +24,7 @@ from sqlalchemy import (
     Date,
     ForeignKeyConstraint,
     Index,
+    Integer,
     Numeric,
     SmallInteger,
     String,
@@ -391,3 +392,26 @@ class Project(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigin
     budget: Mapped[Decimal | None] = mapped_column(Money)  # what the costs should stay within
     started_on: Mapped[date | None] = mapped_column(Date)
     notes: Mapped[str | None] = mapped_column(String(300))
+
+
+class WebVisit(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOriginMixin, Base):
+    """One day of visits to the business's website from one kind of source (search, social, email,
+    ...), as counted by Google Analytics. Not money: it is what the number of visits, new visitors
+    and enquiries or orders from the website are worked out from."""
+
+    __tablename__ = "web_visits"
+    __table_args__ = (
+        *_origin_rules("web_visits"),
+        CheckConstraint(
+            "sessions >= 0 AND users >= 0 AND new_users >= 0 AND key_events >= 0",
+            name="counts_not_negative",
+        ),
+        Index("ix_web_visits_org_day", "organization_id", "day"),
+    )
+
+    day: Mapped[date] = mapped_column(Date)
+    channel: Mapped[str] = mapped_column(String(60))  # e.g. "Organic Search", "Direct", "Email"
+    sessions: Mapped[int] = mapped_column(Integer, server_default="0")  # visits
+    users: Mapped[int] = mapped_column(Integer, server_default="0")  # people who visited that day
+    new_users: Mapped[int] = mapped_column(Integer, server_default="0")  # first-time visitors
+    key_events: Mapped[int] = mapped_column(Integer, server_default="0")  # enquiries, orders...

@@ -16,7 +16,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.data import Expense, Sale
+from app.models.data import Expense, Sale, WebVisit
 from app.services import import_records
 from app.services.import_rows import RowOutcome
 
@@ -40,6 +40,42 @@ CHANGEABLE = {
 }
 
 
+WEB_COUNTS = ("sessions", "users", "new_users", "key_events")
+
+
+def _ingest_web_visits(
+    db: Session, organization_id: uuid.UUID, source: str, rows: list[dict[str, Any]]
+) -> int:
+    """One row per day and kind of source. Analytics revises recent days, so what is already
+    stored is brought up to date. Returns how many days were new."""
+    refs = [r["reference"] for r in rows]
+    existing = {
+        v.source_ref: v
+        for v in db.scalars(
+            select(WebVisit).where(WebVisit.source == source, WebVisit.source_ref.in_(refs))
+        )
+    }
+    made = 0
+    for row in rows:
+        visit = existing.get(row["reference"])
+        if visit is None:
+            db.add(
+                WebVisit(
+                    organization_id=organization_id,
+                    source=source,
+                    source_ref=row["reference"],
+                    day=row["day"],
+                    channel=row["channel"],
+                    **{k: row[k] for k in WEB_COUNTS},
+                )
+            )
+            made += 1
+        else:
+            for k in WEB_COUNTS:
+                setattr(visit, k, row[k])
+    return made
+
+
 def ingest(
     db: Session, organization_id: uuid.UUID, source: str, datasets: dict[str, list[dict[str, Any]]]
 ) -> Counter:
@@ -47,6 +83,9 @@ def ingest(
     created: Counter = Counter()
     resolver = import_records.Resolver(db, organization_id, None, source)  # type: ignore[arg-type]
     for dataset, rows in datasets.items():
+        if dataset == "web_visits" and rows:
+            created["web_visits"] += _ingest_web_visits(db, organization_id, source, rows)
+            continue
         model = TABLES.get(dataset)
         if model is None or not rows:
             continue

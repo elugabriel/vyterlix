@@ -492,7 +492,7 @@ def run_sync(ctx: JobContext) -> dict[str, Any]:
             made = integration_ingest.ingest(
                 db, ctx.tenant.organization_id, provider_key, outcome.datasets
             )
-            created_count = made["sales"] + made["expenses"]
+            created_count = made["sales"] + made["expenses"] + made["web_visits"]
     except ReauthRequired as exc:
         db.rollback()
         _record_failure(db, sync_id, integration_id, exc.code, exc.message, needs_reauth=True)

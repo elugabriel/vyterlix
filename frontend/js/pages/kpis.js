@@ -14,8 +14,8 @@ import { showMessage } from "../ui.js";
 const message = document.getElementById("message");
 const content = document.getElementById("content");
 const GRANULARITY = "month";
-const CATEGORY_TITLE = { financial: "Financial Health", sales: "Sales", customer: "Customers", inventory: "Stock" };
-const CATEGORY_ORDER = ["financial", "sales", "customer", "inventory"];
+const CATEGORY_TITLE = { financial: "Financial Health", sales: "Sales", customer: "Customers", inventory: "Stock", marketing: "Your website" };
+const CATEGORY_ORDER = ["financial", "sales", "customer", "inventory", "marketing"];
 
 let orgId = null;
 let base = "";

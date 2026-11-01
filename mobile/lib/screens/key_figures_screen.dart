@@ -15,8 +15,15 @@ const _categoryTitle = {
   'sales': 'Sales',
   'customer': 'Customers',
   'inventory': 'Stock',
+  'marketing': 'Your website',
 };
-const _categoryOrder = ['financial', 'sales', 'customer', 'inventory'];
+const _categoryOrder = [
+  'financial',
+  'sales',
+  'customer',
+  'inventory',
+  'marketing',
+];
 
 /// Good news green, bad news red, nothing to say grey.
 Color changeColor(BuildContext context, int sign, String direction) {
