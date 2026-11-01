@@ -55,6 +55,8 @@ SOURCE_KINDS = (
     "xero",
     "quickbooks",
     "square",
+    "zoho",
+    "truelayer",
     "shopify",
     "woocommerce",
     "google_analytics",

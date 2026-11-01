@@ -144,6 +144,26 @@ WORDS: dict[str, Words] = {
             "That is a good sign: fewer customers are unhappy.",
         ),
     ),
+    "bank_money_in": Words(
+        Say(
+            "More money was paid into your bank than {before}.",
+            "More money coming in gives you more room to pay bills and grow.",
+        ),
+        Say(
+            "Less money was paid into your bank than {before}.",
+            "Check whether any customers are late paying, so you can chase them early.",
+        ),
+    ),
+    "bank_money_out": Words(
+        Say(
+            "More money left your bank than {before}.",
+            "That is not good or bad by itself. It is worth checking it was money you meant to spend.",
+        ),
+        Say(
+            "Less money left your bank than {before}.",
+            "That is not good or bad by itself. It is worth checking nothing that was due was missed.",
+        ),
+    ),
     "website_visits": Words(
         Say(
             "More people visited your website than {before}.",

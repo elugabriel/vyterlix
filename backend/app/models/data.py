@@ -47,6 +47,7 @@ DATA_SOURCES = (
     "quickbooks",
     "square",
     "zoho",
+    "truelayer",
     "shopify",
     "woocommerce",
     "google_analytics",
@@ -415,3 +416,24 @@ class WebVisit(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigi
     users: Mapped[int] = mapped_column(Integer, server_default="0")  # people who visited that day
     new_users: Mapped[int] = mapped_column(Integer, server_default="0")  # first-time visitors
     key_events: Mapped[int] = mapped_column(Integer, server_default="0")  # enquiries, orders...
+
+
+class BankTransaction(
+    UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOriginMixin, Base
+):
+    """One movement of money in or out of a business bank account, as the bank reports it. Not a
+    sale or a cost: the sales and costs come from invoices and till takings. This is what the money
+    in and money out of the bank are worked out from. Money in is positive, money out negative."""
+
+    __tablename__ = "bank_transactions"
+    __table_args__ = (
+        *_origin_rules("bank_transactions"),
+        CheckConstraint("amount <> 0", name="amount_not_zero"),
+        Index("ix_bank_transactions_org_day", "organization_id", "day"),
+    )
+
+    day: Mapped[date] = mapped_column(Date)
+    amount: Mapped[Decimal] = mapped_column(Money)  # pounds; in is positive, out is negative
+    description: Mapped[str | None] = mapped_column(String(300))
+    counterparty: Mapped[str | None] = mapped_column(String(200))  # who paid or was paid
+    account_name: Mapped[str | None] = mapped_column(String(100))  # which bank account

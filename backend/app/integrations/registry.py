@@ -8,6 +8,7 @@ from app.integrations.google_analytics import GoogleAnalyticsProvider
 from app.integrations.quickbooks import QuickBooksProvider
 from app.integrations.sandbox import SandboxProvider
 from app.integrations.square import SquareProvider
+from app.integrations.truelayer import TrueLayerProvider
 from app.integrations.woocommerce import WooCommerceProvider
 from app.integrations.xero import XeroProvider
 from app.integrations.zoho import ZohoProvider
@@ -20,6 +21,7 @@ PROVIDERS: dict[str, Provider] = {
         GoogleAnalyticsProvider(),
         QuickBooksProvider(),
         SquareProvider(),
+        TrueLayerProvider(),
         WooCommerceProvider(),
         ZohoProvider(),
     )

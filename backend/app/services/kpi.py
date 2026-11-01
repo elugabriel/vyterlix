@@ -29,7 +29,15 @@ from app.kpi import periods
 from app.kpi.expression import Compiled, ExpressionError, compile_expression, evaluate
 from app.kpi.measures import MEASURES, PRESENCE, compute_series, has_records
 from app.models.business import BusinessProfile
-from app.models.data import Booking, Expense, Opportunity, Sale, StockMovement, WebVisit
+from app.models.data import (
+    BankTransaction,
+    Booking,
+    Expense,
+    Opportunity,
+    Sale,
+    StockMovement,
+    WebVisit,
+)
 from app.models.kpi import KpiCalculationRun, KpiDefinition, KpiValue
 from app.plain.figures import explain_figure
 from app.schemas.kpi import KpiHistoryOut, KpiOut, KpisOut, KpiValueOut, PlainOut, RunOut
@@ -86,6 +94,7 @@ def _data_bounds(db: Session) -> tuple[date, date] | None:
         Booking.booked_for,
         Opportunity.created_on,
         WebVisit.day,
+        BankTransaction.day,
     ):
         low, high = db.execute(select(func.min(column), func.max(column))).one()
         if low is not None:
@@ -303,6 +312,9 @@ def list_kpis(db: Session, granularity: str = "month") -> KpisOut:
     if not has_records(db, "pipeline"):
         # Leads and win rates are for a business that quotes for work
         definitions = [d for d in definitions if "pipeline" not in d.requires]
+    if not has_records(db, "bank"):
+        # Bank figures are for a business whose bank account has been connected
+        definitions = [d for d in definitions if "bank" not in d.requires]
     if not has_records(db, "web"):
         # Website figures are for a business whose website visits have been connected
         definitions = [d for d in definitions if "web" not in d.requires]

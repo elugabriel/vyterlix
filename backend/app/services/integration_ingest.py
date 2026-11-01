@@ -16,7 +16,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.data import Expense, Sale, WebVisit
+from app.models.data import BankTransaction, Expense, Sale, WebVisit
 from app.services import import_records
 from app.services.import_rows import RowOutcome
 
@@ -76,6 +76,39 @@ def _ingest_web_visits(
     return made
 
 
+def _ingest_bank_transactions(
+    db: Session, organization_id: uuid.UUID, source: str, rows: list[dict[str, Any]]
+) -> int:
+    """A bank does not change a transaction once it is posted, so only new ones are added."""
+    refs = [r["reference"] for r in rows]
+    have = set(
+        db.scalars(
+            select(BankTransaction.source_ref).where(
+                BankTransaction.source == source, BankTransaction.source_ref.in_(refs)
+            )
+        )
+    )
+    made = 0
+    for row in rows:
+        if row["reference"] in have:
+            continue
+        have.add(row["reference"])
+        db.add(
+            BankTransaction(
+                organization_id=organization_id,
+                source=source,
+                source_ref=row["reference"],
+                day=row["day"],
+                amount=row["amount"],
+                description=row.get("description"),
+                counterparty=row.get("counterparty"),
+                account_name=row.get("account_name"),
+            )
+        )
+        made += 1
+    return made
+
+
 def ingest(
     db: Session, organization_id: uuid.UUID, source: str, datasets: dict[str, list[dict[str, Any]]]
 ) -> Counter:
@@ -85,6 +118,11 @@ def ingest(
     for dataset, rows in datasets.items():
         if dataset == "web_visits" and rows:
             created["web_visits"] += _ingest_web_visits(db, organization_id, source, rows)
+            continue
+        if dataset == "bank_transactions" and rows:
+            created["bank_transactions"] += _ingest_bank_transactions(
+                db, organization_id, source, rows
+            )
             continue
         model = TABLES.get(dataset)
         if model is None or not rows:
