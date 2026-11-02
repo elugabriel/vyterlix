@@ -776,10 +776,42 @@ main a.back, main #back, main p > a:only-child:not(.button), main li > a:only-ch
   button:hover, .button:hover { transform: none; }
 }
 
-/* Month names and the highlighted value under a bar chart. */
-.chart-labels { position: relative; height: 1.5em; font-size: 0.78rem; color: var(--muted); }
+/* Bar charts: the value on top of every bar, its month underneath, the year once below. */
+.chart-frame { position: relative; }
+.chart-values { position: absolute; inset: 0; pointer-events: none; }
+.chart-value { position: absolute; transform: translateX(-50%); font-size: 0.72rem; line-height: 1.2; color: var(--muted); white-space: nowrap; }
+.chart-value-marked { color: var(--text); font-weight: 700; }
+.chart-labels { position: relative; height: 1.4em; font-size: 0.74rem; color: var(--muted); }
 .chart-label { position: absolute; top: 2px; transform: translateX(-50%); white-space: nowrap; }
 .chart-label-marked { color: var(--text); font-weight: 700; }
+.chart-year { font-size: 0.74rem; text-align: left; margin-top: 4px; }
+.chart .bar-healthy { fill: var(--ok); }
+.chart .bar-fair { fill: var(--warn); }
+.chart .bar-needs_attention { fill: #c2410c; }
+.chart .bar-at_risk { fill: var(--bad); }
+
+/* One-line trend under a score, and the small "how it's made up" row. */
+.area-note { font-size: 0.9rem; }
+.area-rows { display: grid; gap: 8px; margin: 14px 0 6px; max-width: 520px; }
+.area-row { display: grid; grid-template-columns: 5.5rem minmax(5rem, 9rem) 1fr 2.2rem; gap: 10px; align-items: center; }
+.area-word { font-size: 0.8rem; color: var(--muted); }
+.area-row progress { width: 100%; }
+progress.health-bar { height: 10px; border: 0; }
+progress.health-healthy::-webkit-progress-value { background: var(--ok); }
+progress.health-healthy::-moz-progress-bar { background: var(--ok); }
+progress.health-fair::-webkit-progress-value { background: var(--warn); }
+progress.health-fair::-moz-progress-bar { background: var(--warn); }
+progress.health-needs_attention::-webkit-progress-value { background: #c2410c; }
+progress.health-needs_attention::-moz-progress-bar { background: #c2410c; }
+progress.health-at_risk::-webkit-progress-value { background: var(--bad); }
+progress.health-at_risk::-moz-progress-bar { background: var(--bad); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.8rem; margin: 0 0 10px; }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: baseline; }
+.swatch-healthy { background: var(--ok); }
+.swatch-fair { background: var(--warn); }
+.swatch-needs_attention { background: #c2410c; }
+.swatch-at_risk { background: var(--bad); }
+@media (max-width: 640px) { .area-row { grid-template-columns: 4.6rem 1fr 2rem; } .area-row .area-name { grid-column: 2 / 4; } .area-row progress { grid-column: 1 / 3; } }
 
 /* On a phone a table becomes a stack of small cards, each cell under its own heading. */
 @media (max-width: 640px) {
@@ -792,3 +824,9 @@ main a.back, main #back, main p > a:only-child:not(.button), main li > a:only-ch
   table.list td:empty { display: none; }
   .scroll { overflow: visible; }
 }
+
+/* A tiny bar picture inside a key-figure tile. */
+.spark { width: 100%; max-width: 140px; height: 36px; display: block; margin-top: 10px; }
+.spark .bar { fill: var(--accent); }
+.spark .bar-partial { opacity: 0.45; }
+.spark .bar-marked { fill: var(--warn); }

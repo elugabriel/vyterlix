@@ -9,7 +9,7 @@ import { api } from "../auth.js";
 import { openBusiness } from "../business.js";
 import { guard, put } from "../data.js";
 import { el } from "../dom.js";
-import { barChart, formatValue, periodLabel, plainBlock } from "../kpi.js";
+import { barChart, formatValue, periodLabel, sparkline } from "../kpi.js";
 
 const message = document.getElementById("message");
 const content = document.getElementById("content");
@@ -77,7 +77,6 @@ function doFirst(d) {
       { class: "first-card" },
       el("div", {}, el("span", { class: `badge ${SEVERITY_CLASS[f.severity]}` }, SEVERITY_TEXT[f.severity]), " ", el("span", { class: "muted" }, KIND_TEXT[f.kind])),
       el("p", {}, el("strong", {}, f.title)),
-      el("p", { class: "muted" }, f.detail),
       el("a", { class: "button", href: page(f.link) }, f.can_act ? BUTTON[f.kind] : "Take a look"),
     ),
   );
@@ -128,7 +127,6 @@ function attention(d) {
       { class: `attention-item sev-${i.severity}` },
       el("div", {}, el("span", { class: `badge ${SEVERITY_CLASS[i.severity]}` }, SEVERITY_TEXT[i.severity]), " ", el("span", { class: "muted" }, KIND_TEXT[i.kind])),
       el("p", {}, el("strong", {}, i.title)),
-      el("p", { class: "muted" }, i.detail),
       el("a", { class: "button secondary", href: page(i.link) }, i.can_act ? BUTTON[i.kind] : "Take a look"),
     ),
   );
@@ -155,12 +153,11 @@ function trend(figure, history) {
       { class: "card" },
       barChart(shown, figure.unit, `${figure.name} over the last months`, { marked }),
       figure.plain ? el("p", { class: "plain-says" }, figure.plain.says) : null,
-      el("p", { class: "muted" }, "Month by month. The orange bar is the latest finished month."),
     ),
   );
 }
 
-function figures(list) {
+function figures(list, histories = {}) {
   if (!list.length) return null;
   return el(
     "section",
@@ -174,11 +171,11 @@ function figures(list) {
         const good = pct === null || f.direction === "neutral" ? null : (pct >= 0) === (f.direction === "up_good");
         return el(
           "a",
-          { class: "figure", href: page(`kpis.html#${f.code}`) },
+          { class: "figure", href: page(`kpis.html#${f.code}`), title: f.plain ? f.plain.says : f.name },
           el("div", { class: "muted" }, f.name),
-          plainBlock(f.plain, { short: true }),
           el("div", { class: "big" }, f.value === null ? "–" : formatValue(f.value, f.unit)),
-          pct === null || f.unit === "percent" ? el("div", { class: "muted" }, periodLabel(f.period, "month")) : el("div", { class: good === null ? "muted" : good ? "status-ok" : "status-bad" }, `${pct >= 0 ? "▲" : "▼"} ${Math.abs(pct).toFixed(1)}% on the month before`),
+          pct === null || f.unit === "percent" ? el("div", { class: "muted" }, periodLabel(f.period, "month")) : el("div", { class: good === null ? "muted" : good ? "status-ok" : "status-bad" }, `${pct >= 0 ? "▲" : "▼"} ${Math.abs(pct).toFixed(1)}% on last month`),
+          histories[f.code] ? sparkline(histories[f.code].values, `${f.name} over the last months`) : null,
         );
       }),
     ),
@@ -204,7 +201,11 @@ async function start({ org }) {
   content.replaceChildren();
   const first = d.figures[0];
   const history = first ? await guard(message, () => api.get(`/organizations/${org.id}/kpis/${first.code}?limit=12`)) : null;
-  put(content, hero(d), setup(d.setup), goingWell(d), attention(d), doFirst(d), waitingFor(d), results(d), trend(first, history), figures(d.figures));
+  const histories = {};
+  await Promise.all(d.figures.map(async (f) => {
+    histories[f.code] = f === first ? history : await api.get(`/organizations/${org.id}/kpis/${f.code}?limit=6`).catch(() => null);
+  }));
+  put(content, hero(d), setup(d.setup), goingWell(d), attention(d), doFirst(d), waitingFor(d), results(d), trend(first, history), figures(d.figures, histories));
   if (!d.health && !d.figures.length) {
     put(content, el("p", { class: "muted" }, "There are no figures yet. Bring in your sales, costs and customers from "), el("a", { href: page("data.html") }, "Your data"), el("span", { class: "muted" }, " and they will appear here."));
   }

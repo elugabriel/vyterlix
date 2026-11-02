@@ -82,8 +82,18 @@ export function missingText(value, requires = []) {
   return "Can't be worked out for this period (for example, nothing was sold, or there is no earlier period to compare with).";
 }
 
-/** A small bar chart of a KPI over time (finished periods solid, the one in progress faded). */
-export function barChart(values, unit, label, { marked = null } = {}) {
+/** A short number for the top of a bar: "£1.8k", "55", "22%". */
+function shortValue(value, unit) {
+  const n = Number(value);
+  if (unit === "gbp") return Math.abs(n) >= 1000 ? `${n < 0 ? "-" : ""}£${(Math.abs(n) / 1000).toFixed(1)}k` : gbp(n).replace(/\.00$/, "");
+  if (unit === "percent") return `${Math.round(n)}%`;
+  return Math.abs(n) >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(Math.round(n * 10) / 10);
+}
+
+/** A bar chart of a KPI over time: every bar has its month underneath and its value on top, so it can be
+ * read without a sentence. Finished periods are solid, the one in progress faded, `marked` is picked out,
+ * and `tone(v)` can colour a bar (health uses it). */
+export function barChart(values, unit, label, { marked = null, tone = null } = {}) {
   const shown = values.filter((v) => v.status === "ok");
   const width = 560;
   const height = 120;
@@ -94,17 +104,17 @@ export function barChart(values, unit, label, { marked = null } = {}) {
   const span = max - min || 1;
   const gap = 4;
   const barWidth = Math.max(4, (width - gap * (shown.length - 1)) / shown.length);
-  const zero = height - ((0 - min) / span) * (height - 8);
+  const yOf = (n) => height - ((n - min) / span) * (height - 24);
+  const zero = yOf(0);
   const bars = shown.map((v, i) => {
-    const n = Number(v.value);
-    const y = height - ((n - min) / span) * (height - 8);
-    const top = Math.min(y, zero);
+    const y = yOf(Number(v.value));
+    const colour = tone ? ` bar-${tone(v)}` : "";
     const bar = svg("rect", {
       x: i * (barWidth + gap),
-      y: top,
+      y: Math.min(y, zero),
       width: barWidth,
       height: Math.max(1, Math.abs(zero - y)),
-      class: `${v.is_complete ? "bar" : "bar bar-partial"}${marked && v.period_start === marked ? " bar-marked" : ""}`,
+      class: `${v.is_complete ? "bar" : "bar bar-partial"}${colour}${marked && v.period_start === marked ? " bar-marked" : ""}`,
       rx: 2,
     });
     bar.append(svg("title", {}, `${v.period_start}: ${formatValue(v.value, unit)}`));
@@ -116,21 +126,52 @@ export function barChart(values, unit, label, { marked = null } = {}) {
     svg("line", { x1: 0, x2: width, y1: zero, y2: zero, class: "axis" }),
     ...bars,
   );
-  // Month names under the chart (first, last, and the one the chart is about), and its value, so a
-  // bar can be read without hunting for the sentence that explains it.
-  const monthLabel = (v) => `${MONTHS[Number(v.period_start.slice(5, 7)) - 1].slice(0, 3)} ${v.period_start.slice(0, 4)}`;
-  const at = (i) => Math.min(94, Math.max(6, ((i * (barWidth + gap) + barWidth / 2) / width) * 100));
-  const picks = new Map([[0, monthLabel(shown[0])], [shown.length - 1, monthLabel(shown[shown.length - 1])]]);
-  const markedIndex = marked ? shown.findIndex((v) => v.period_start === marked) : -1;
-  if (markedIndex >= 0) picks.set(markedIndex, `${monthLabel(shown[markedIndex])}: ${formatValue(shown[markedIndex].value, unit)}`);
-  // Keep labels from landing on top of each other: drop the end ones that are close to the marked one.
-  const marks = [...picks.entries()].filter(([i]) => markedIndex < 0 || i === markedIndex || Math.abs(at(i) - at(markedIndex)) > 22);
-  const labels = el(
+  const centre = (i) => ((i * (barWidth + gap) + barWidth / 2) / width) * 100;
+  const monthName = (v) => MONTHS[Number(v.period_start.slice(5, 7)) - 1].slice(0, 3);
+  const narrow = window.matchMedia("(max-width: 640px)").matches;
+  const everyOther = shown.length > 12;
+  const valuesThin = shown.length > (narrow ? 6 : 12);
+  const isMarked = (v) => marked && v.period_start === marked;
+  // Values sit just above (or, for a loss, just below) their bar; months sit under the chart.
+  const tops = el(
+    "div",
+    { class: "chart-values", "aria-hidden": "true" },
+    ...shown.map((v, i) => {
+      const n = Number(v.value);
+      const y = yOf(n);
+      const style = n < 0 ? `left:${centre(i)}%;top:${(Math.max(y, zero) / height) * 100}%` : `left:${centre(i)}%;top:calc(${(y / height) * 100}% - 1.35em)`;
+      return valuesThin && i % 2 !== shown.length % 2 && !isMarked(v) ? null : el("span", { class: `chart-value${isMarked(v) ? " chart-value-marked" : ""}`, style }, shortValue(v.value, unit));
+    }),
+  );
+  const months = el(
     "div",
     { class: "chart-labels", "aria-hidden": "true" },
-    ...marks.map(([i, text]) => el("span", { class: i === markedIndex ? "chart-label chart-label-marked" : "chart-label", style: `left:${at(i)}%` }, text)),
+    ...shown.map((v, i) => (everyOther && i % 2 !== shown.length % 2 && !isMarked(v) ? null : el("span", { class: `chart-label${isMarked(v) ? " chart-label-marked" : ""}`, style: `left:${centre(i)}%` }, monthName(v)))),
   );
-  return el("div", { class: "chart-box" }, chart, labels);
+  const year = shown[0].period_start.slice(0, 4) === shown[shown.length - 1].period_start.slice(0, 4) ? shown[0].period_start.slice(0, 4) : `${shown[0].period_start.slice(0, 4)} to ${shown[shown.length - 1].period_start.slice(0, 4)}`;
+  return el("div", { class: "chart-box" }, el("div", { class: "chart-frame" }, chart, tops), months, el("div", { class: "chart-year muted", "aria-hidden": "true" }, year));
+}
+
+/** A tiny bar picture of the last few months, for a figure's tile. The newest finished month is orange. */
+export function sparkline(values, label) {
+  const shown = values.filter((v) => v.status === "ok").slice(-6);
+  if (shown.length < 2) return null;
+  const width = 120;
+  const height = 36;
+  const numbers = shown.map((v) => Number(v.value));
+  const max = Math.max(0, ...numbers);
+  const min = Math.min(0, ...numbers);
+  const span = max - min || 1;
+  const gap = 4;
+  const barWidth = (width - gap * (shown.length - 1)) / shown.length;
+  const lastFinished = shown.findLastIndex((v) => v.is_complete);
+  const yOf = (n) => height - ((n - min) / span) * (height - 3);
+  const zero = yOf(0);
+  return svg(
+    "svg",
+    { viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": label, class: "spark" },
+    ...shown.map((v, i) => svg("rect", { x: i * (barWidth + gap), y: Math.min(yOf(Number(v.value)), zero), width: barWidth, height: Math.max(1.5, Math.abs(zero - yOf(Number(v.value)))), rx: 2, class: i === lastFinished ? "bar bar-marked" : v.is_complete ? "bar" : "bar bar-partial" })),
+  );
 }
 
 /** A line of past figures, then the forecast as a dashed line with its range shaded around it. Months
