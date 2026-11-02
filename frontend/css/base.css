@@ -830,3 +830,26 @@ progress.health-at_risk::-moz-progress-bar { background: var(--bad); }
 .spark .bar { fill: var(--accent); }
 .spark .bar-partial { opacity: 0.45; }
 .spark .bar-marked { fill: var(--warn); }
+.spark-slot { min-height: 40px; }
+.spark-caption { font-size: 0.72rem; margin-top: 2px; }
+.kpi-change { font-size: 0.9rem; }
+.share-bar { display: inline-flex; align-items: center; gap: 8px; min-width: 8rem; }
+.share-track { flex: 1; height: 8px; border-radius: 999px; background: var(--border); overflow: hidden; min-width: 60px; }
+.share-fill { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+.share-over { background: var(--bad); }
+
+/* What changed: a row per figure with the size of the move, and last month against this month as two bars. */
+.change-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.change-size { font-size: 1.4rem; font-weight: 750; letter-spacing: -0.02em; }
+.ba { display: grid; gap: 6px; margin: 10px 0 4px; max-width: 520px; }
+.ba-row { display: grid; grid-template-columns: 5.5rem 1fr 6.5rem; gap: 10px; align-items: center; }
+.ba-label { font-size: 0.8rem; }
+.ba-value { font-size: 0.9rem; text-align: right; font-variant-numeric: tabular-nums; }
+.share-fill.ba-before { background: #9bb4a6; }
+.share-fill.ba-good { background: var(--ok); }
+.ba .share-track { height: 12px; }
+.change-more { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; align-items: flex-start; }
+.change-more > details { flex: 0 0 auto; margin: 0; }
+.change-more > details[open] { flex-basis: 100%; }
+.change-more > details > summary { display: inline-flex; align-items: center; border: 1px solid var(--border-strong); border-radius: 999px; padding: 6px 14px; font-size: 0.9rem; background: var(--surface); }
+.change-more > details[open] > summary { margin-bottom: 8px; }

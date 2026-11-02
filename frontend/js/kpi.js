@@ -174,6 +174,19 @@ export function sparkline(values, label) {
   );
 }
 
+/** A thin horizontal bar with its percentage beside it, for "share of sales" and "budget used" cells.
+ * With `over`, a bar past that mark turns red. */
+export function shareBar(pct, { over = null } = {}) {
+  const shown = Math.max(0, Math.min(100, pct));
+  const tooMuch = over !== null && pct > over;
+  return el(
+    "span",
+    { class: "share-bar" },
+    el("span", { class: "share-track", "aria-hidden": "true" }, el("span", { class: tooMuch ? "share-fill share-over" : "share-fill", style: `width:${shown}%` })),
+    el("span", { class: tooMuch ? "status-bad" : "" }, `${Number.isInteger(pct) ? pct : pct.toFixed(1)}%`),
+  );
+}
+
 /** A line of past figures, then the forecast as a dashed line with its range shaded around it. Months
  * that have since finished show what really happened as a ring. `history` is [{period_start, value}],
  * `predictions` is [{period_start, value, lower, upper, actual_value}]. */

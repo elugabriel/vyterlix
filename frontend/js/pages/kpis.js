@@ -8,7 +8,7 @@ import { openBusiness } from "../business.js";
 import { guard, jobProgress, number, put, table, waitForJob } from "../data.js";
 import { el } from "../dom.js";
 import { gbp, ukDate, ukDateTime } from "../format.js";
-import { barChart, changeClass, changeText, formatValue, missingText, periodLabel, plainBlock } from "../kpi.js";
+import { barChart, changeClass, changeText, formatValue, missingText, periodLabel, plainBlock, shareBar, sparkline } from "../kpi.js";
 import { showMessage } from "../ui.js";
 
 const message = document.getElementById("message");
@@ -44,6 +44,7 @@ async function load() {
     ...CATEGORY_ORDER.filter((c) => groups[c]).map((c) => groupCard(c, groups[c])),
     slots,
   );
+  drawSparks();
   await loadBreakdowns(slots);
 }
 
@@ -81,7 +82,7 @@ function breakdownCard(title, countHeading, data, withProfit) {
       data.rows.map((r) => [
         r.label,
         gbp(r.revenue),
-        r.share_pct === null ? "–" : `${Number(r.share_pct).toFixed(1)}%`,
+        r.share_pct === null ? "–" : shareBar(Number(r.share_pct)),
         number(r.count),
         ...(withProfit ? [r.gross_profit === null ? "–" : gbp(r.gross_profit)] : []),
       ]),
@@ -104,7 +105,7 @@ function projectsCard(data) {
         gbp(r.costs),
         el("span", { class: Number(r.profit) < 0 ? "status-bad" : "" }, gbp(r.profit)),
         r.margin_pct === null ? "–" : `${r.margin_pct}%`,
-        r.budget_used_pct === null ? "No budget" : `${r.budget_used_pct}%`,
+        r.budget_used_pct === null ? "No budget" : shareBar(Number(r.budget_used_pct), { over: 100 }),
       ]),
     ),
     el("p", { class: "muted" }, "Sales and costs before VAT, for the sales and costs you put on a project."),
@@ -119,7 +120,7 @@ function teamCard(data) {
     ...data.notes.map((n) => el("p", {}, n)),
     table(
       ["Who", "Kept", "Cancelled", "Did not turn up", "Share of the work", "Average rating"],
-      data.members.map((m) => [m.staff, number(m.kept), number(m.cancelled), number(m.missed), m.share_pct === null ? "–" : `${m.share_pct}%`, m.average_rating === null ? "Not rated" : `${m.average_rating} out of 5`]),
+      data.members.map((m) => [m.staff, number(m.kept), number(m.cancelled), number(m.missed), m.share_pct === null ? "–" : shareBar(Number(m.share_pct)), m.average_rating === null ? "Not rated" : `${m.average_rating} out of 5`]),
     ),
     el("p", { class: "muted" }, `The last three months of appointments, up to ${ukDate(data.period_to)}.`),
   );
@@ -214,7 +215,7 @@ function headerCard(data) {
   return el(
     "section",
     { class: "card" },
-    el("p", { style: "margin-top:0" }, note),
+    el("p", { style: "margin-top:0", class: "muted" }, note),
     !anyValue && !never ? el("p", { class: "muted" }, "There are no sales or expenses to work from yet. Add some under Your data.") : null,
     box,
     progress.node,
@@ -242,27 +243,37 @@ function kpiTile(kpi) {
     return tile;
   }
   const change = changeText(latest, kpi.unit, GRANULARITY);
+  const spark = el("div", { class: "spark-slot" });
   put(
     tile,
-    plainBlock(kpi.plain),
     el("div", { class: latest.status === "ok" ? "kpi-value" : "kpi-value muted" }, formatValue(latest.value, kpi.unit)),
-    el("div", { class: "muted" }, periodLabel(latest.period_start, GRANULARITY)),
     latest.status !== "ok" ? el("div", { class: "muted" }, missingText(latest, kpi.requires)) : null,
-    change ? el("div", { class: changeClass(change.sign, kpi.direction) }, `${change.sign > 0 ? "▲" : change.sign < 0 ? "▼" : "•"} ${change.text}`) : null,
-    kpi.current && kpi.current.status === "ok"
-      ? el("div", { class: "muted" }, `${periodLabel(kpi.current.period_start, GRANULARITY)} so far: ${formatValue(kpi.current.value, kpi.unit)}`)
-      : null,
+    change ? el("div", { class: `${changeClass(change.sign, kpi.direction)} kpi-change` }, `${change.sign > 0 ? "▲" : change.sign < 0 ? "▼" : "•"} ${change.text.replace("the month before", "last month")}`) : null,
+    spark,
     latest.data_quality !== null && latest.data_quality < 80
-      ? el("div", { class: "status-bad" }, `Based on incomplete data (${latest.data_quality}/100)`)
+      ? el("div", { class: "status-bad kpi-change" }, `Some data missing (${latest.data_quality}/100)`)
       : null,
   );
-  tile.append(detailsFor(kpi));
+  tile.append(detailsFor(kpi, latest));
+  if (latest.status === "ok") sparks.push([kpi, spark]);
   return tile;
 }
 
-function detailsFor(kpi) {
+// The little six-month picture in each tile is fetched after the page is up, so the numbers show straight away.
+const sparks = [];
+async function drawSparks() {
+  await Promise.all(
+    sparks.splice(0).map(async ([kpi, slot]) => {
+      const history = await api.get(`${base}/${kpi.code}?granularity=${GRANULARITY}&limit=6`).catch(() => null);
+      const picture = history ? sparkline(history.values, `${kpi.name}, last months`) : null;
+      if (picture) slot.append(picture, el("div", { class: "spark-caption muted" }, `${periodLabel(history.values.filter((v) => v.status === "ok")[0].period_start, GRANULARITY).slice(0, 3)} to ${periodLabel(kpi.latest.period_start, GRANULARITY).slice(0, 3)}`));
+    }),
+  );
+}
+
+function detailsFor(kpi, latest) {
   const holder = el("div", {});
-  const details = el("details", {}, el("summary", {}, "See the details and how it's worked out"), holder);
+  const details = el("details", {}, el("summary", {}, "More about this figure"), holder);
   let loaded = false;
   details.addEventListener("toggle", async () => {
     if (!details.open || loaded) return;
@@ -270,7 +281,9 @@ function detailsFor(kpi) {
     const history = await guard(message, () => api.get(`${base}/${kpi.code}?granularity=${GRANULARITY}&limit=24`));
     if (!history) return;
     holder.replaceChildren(
+      plainBlock(kpi.plain),
       el("p", { class: "muted" }, kpi.description),
+      kpi.current && kpi.current.status === "ok" ? el("p", { class: "muted" }, `${periodLabel(kpi.current.period_start, GRANULARITY)} so far: ${formatValue(kpi.current.value, kpi.unit)}`) : null,
       barChart(history.values, kpi.unit, `${kpi.name} by month`),
       table(
         ["Month", "Figure", "Data quality"],

@@ -82,7 +82,7 @@ async function start({ user, org }) {
   effect.addEventListener("change", refresh);
   hideExpected.addEventListener("change", refresh);
   content.replaceChildren(
-    el("p", { class: "muted" }, "Here are the figures that moved by more than usual, in plain words. Small ups and downs are left out; only the bigger movements appear."),
+    el("p", { class: "muted" }, "Figures that moved by more than usual. Small ups and downs are left out."),
     filters,
     results,
   );
@@ -109,7 +109,7 @@ async function show(slot, effect, hideExpected) {
     entry[event.kind === "anomaly" ? "unusual" : "change"] = event;
     figures.set(event.kpi_code, entry);
   }
-  slot.replaceChildren(...[...months].map(([month, figures]) => monthCard(month, [...figures.values()])));
+  slot.replaceChildren(summaryBar(events), ...[...months].map(([month, figures]) => monthCard(month, [...figures.values()])));
 }
 
 function emptyCard(filtered) {
@@ -137,31 +137,67 @@ function monthCard(month, events) {
   );
 }
 
+/** How many changes are good news and how many are worth a look, as one bar. */
+function summaryBar(events) {
+  const latest = events.reduce((a, e) => (e.period_start > a ? e.period_start : a), "");
+  const one = events.filter((e) => e.kind === "material_change" && e.period_start === latest);
+  const counts = [
+    [one.filter((e) => e.effect === "bad").length, "glance-bad-bar", "worth a look"],
+    [one.filter((e) => e.effect === "neutral").length, "glance-grey", "neutral"],
+    [one.filter((e) => e.effect === "good").length, "glance-ok", "good news"],
+  ].filter(([n]) => n > 0);
+  if (!counts.length) return el("span");
+  return el(
+    "section",
+    { class: "card outcome-bar-box" },
+    el("div", { class: "outcome-bar", role: "img", "aria-label": counts.map(([n, , w]) => `${n} ${w}`).join(", ") }, ...counts.map(([n, c]) => el("span", { class: c, style: `flex:${n}` }))),
+    el("p", { class: "muted" }, `${periodLabel(latest, "month")}: ${counts.map(([n, , w]) => `${n} ${w}`).join(" · ")}`),
+  );
+}
+
+/** Last month and this month as two bars of the same scale, so the size of the move can be seen at a glance. */
+function beforeAfter(event) {
+  const before = Number(event.reference_value);
+  const now = Number(event.value);
+  const top = Math.max(Math.abs(before), Math.abs(now)) || 1;
+  const row = (label, n, text, cls) =>
+    el(
+      "div",
+      { class: "ba-row" },
+      el("span", { class: "ba-label muted" }, label),
+      el("span", { class: "share-track", "aria-hidden": "true" }, el("span", { class: `share-fill ${cls}`, style: `width:${Math.max(2, (Math.abs(n) / top) * 100)}%` })),
+      el("span", { class: "ba-value" }, text),
+    );
+  return el("div", { class: "ba" }, row("Last month", before, formatValue(event.reference_value, event.unit), "ba-before"), row("This month", now, formatValue(event.value, event.unit), event.effect === "good" ? "ba-good" : event.effect === "bad" ? "share-over" : "ba-before"));
+}
+
 function eventRow({ change, unusual }) {
   const event = change ?? unusual;
   const words = event.plain;
-  return el(
-    "div",
-    { class: "kpi" },
-    el(
-      "div",
-      {},
-      el("strong", {}, `${ARROW[event.direction]} ${words ? words.headline : event.kpi_name}`),
-      " ",
-      el("span", { class: `badge ${EFFECT_CLASS[event.effect]}` }, EFFECT_TEXT[event.effect]),
-      " ",
-      el("span", { class: "muted" }, SEVERITY_TEXT[event.severity]),
-      unusual && change ? el("span", { class: "badge" }, "Also unusual for your business") : null,
-    ),
-    el("p", { class: "plain-says" }, words ? words.happened : event.summary),
+  const size = `${event.direction === "up" ? "+" : "-"}${Math.abs(Number(event.change)).toFixed(1)}${event.change_unit === "points" ? " pts" : "%"}`;
+  const more = el(
+    "details",
+    {},
+    el("summary", {}, "The details"),
     words ? el("p", { class: "muted" }, words.numbers) : null,
     words ? el("p", {}, words.why) : null,
     change && unusual && unusual.plain ? el("p", { class: "muted" }, `${unusual.plain.numbers} That is further from normal than it usually strays.`) : null,
     event.explained_by_season && !unusual ? el("p", { class: "muted" }, "Expected for the time of year, so probably nothing to worry about.") : null,
     words && words.data_note ? el("p", { class: "status-bad" }, words.data_note) : null,
-    diagnosisPanel(event),
-    event.effect === "bad" ? recommendationPanel(event) : null,
-    splittable[event.kpi_code] ? whereFrom(event) : null,
+  );
+  return el(
+    "div",
+    { class: `kpi change-row change-${event.effect}` },
+    el(
+      "div",
+      { class: "change-head" },
+      el("strong", {}, event.kpi_name),
+      el("span", { class: `change-size ${EFFECT_CLASS[event.effect]}` }, `${ARROW[event.direction]} ${size}`),
+    ),
+    el("div", {}, el("span", { class: `badge ${EFFECT_CLASS[event.effect]}` }, EFFECT_TEXT[event.effect]), " ", event.severity === "major" ? el("span", { class: "muted" }, SEVERITY_TEXT.major) : null, unusual && change ? el("span", { class: "badge" }, "Also unusual for your business") : null),
+    beforeAfter(event),
+    el("p", { class: "plain-says" }, words ? words.happened : event.summary),
+    el("div", { class: "change-more" }, more, diagnosisPanel(event), event.effect === "bad" ? recommendationPanel(event) : null, splittable[event.kpi_code] ? whereFrom(event) : null),
     el("a", { href: `change.html?org=${orgId}&event=${event.id}` }, "See the whole story"),
     " · ",
     el("a", { href: `kpis.html?org=${orgId}#${event.kpi_code}` }, "See this figure"),
