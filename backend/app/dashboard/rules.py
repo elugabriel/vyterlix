@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 
 from app.alerts.rules import RANK
 
-MAX_ITEMS = 12
+MAX_ITEMS = 3  # the first screen is for what to do first; the rest is one tap away
 KIND_ORDER = ("approval", "action_overdue", "alert", "follow_up", "action_due_soon", "suggestion")
 HEADLINE_FIGURES = (
     "revenue",

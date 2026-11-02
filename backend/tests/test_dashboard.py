@@ -42,9 +42,9 @@ def test_the_same_kind_and_seriousness_are_in_alphabetical_order():
 
 def test_only_so_many_are_shown_and_the_rest_are_counted():
     shown, more = rules.top([item(title=f"{n:02}") for n in range(15)])
-    assert len(shown) == rules.MAX_ITEMS == 12 and more == 3
-    shown, more = rules.top([item(title=f"{n:02}") for n in range(12)])
-    assert len(shown) == 12 and more == 0
+    assert len(shown) == rules.MAX_ITEMS == 3 and more == 12
+    shown, more = rules.top([item(title=f"{n:02}") for n in range(3)])
+    assert len(shown) == 3 and more == 0
 
 
 @pytest.mark.parametrize(
@@ -116,7 +116,9 @@ def test_what_needs_attention_comes_first_most_serious_first(api, march):
     body = dash(api, march)
     assert body["headline"] == "7 things need your attention today, 6 of them serious."
     severities = [RANK[i["severity"]] for i in body["attention"]]
-    assert severities == sorted(severities, reverse=True) and len(body["attention"]) == 7
+    # only the first three are shown; the other four are one tap away
+    assert severities == sorted(severities, reverse=True) and len(body["attention"]) == 3
+    assert body["more_attention"] == 4
     first = body["attention"][0]
     assert (first["kind"], first["severity"], first["can_act"]) == ("alert", "high", True)
     assert (
@@ -125,22 +127,22 @@ def test_what_needs_attention_comes_first_most_serious_first(api, march):
         and first["title"]
         and first["detail"]
     )
-    assert body["attention"][-1]["title"].startswith(
-        "No new sales for "
-    )  # the one that is only medium
+    # the one that is only medium is among the ones left for the Alerts page
+    assert not any(i["title"].startswith("No new sales for ") for i in body["attention"])
 
 
 def test_the_smaller_alerts_are_left_for_the_alerts_page(api, march):
     put_rule(api, march, "data_stale", {"severity": "low"})
     evaluate(api, march)
     assert not any(i["title"].startswith("No new sales") for i in dash(api, march)["attention"])
-    assert len(dash(api, march)["attention"]) == 6
+    assert dash(api, march)["headline"] == "6 things need your attention today, 6 of them serious."
 
 
 def test_a_viewer_sees_what_is_going_on_but_is_given_nothing_to_do(api, march):
     evaluate(api, march)
     body = dash(api, march, "viewer")
-    assert body["role"] == "viewer" and body["can_act"] is False and len(body["attention"]) == 7
+    assert body["role"] == "viewer" and body["can_act"] is False and len(body["attention"]) == 3
+    assert body["more_attention"] == 4
     assert not any(i["can_act"] for i in body["attention"])
 
 
@@ -290,8 +292,9 @@ def test_the_owner_is_asked_to_approve_what_was_suggested_outside_someones_area(
 
 
 def test_an_approval_comes_before_other_things_of_the_same_seriousness(
-    api, db, signup, march, suggested
+    api, db, signup, march, suggested, monkeypatch
 ):
+    monkeypatch.setattr(rules, "MAX_ITEMS", 12)  # see the whole order, not just the first three
     event, _ = suggested
     who = add_manager(api, db, signup, march, ["customer"])
     accept(api, march, event, who=who)

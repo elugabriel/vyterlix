@@ -116,7 +116,21 @@ export function barChart(values, unit, label, { marked = null } = {}) {
     svg("line", { x1: 0, x2: width, y1: zero, y2: zero, class: "axis" }),
     ...bars,
   );
-  return el("div", { class: "chart-box" }, chart);
+  // Month names under the chart (first, last, and the one the chart is about), and its value, so a
+  // bar can be read without hunting for the sentence that explains it.
+  const monthLabel = (v) => `${MONTHS[Number(v.period_start.slice(5, 7)) - 1].slice(0, 3)} ${v.period_start.slice(0, 4)}`;
+  const at = (i) => Math.min(94, Math.max(6, ((i * (barWidth + gap) + barWidth / 2) / width) * 100));
+  const picks = new Map([[0, monthLabel(shown[0])], [shown.length - 1, monthLabel(shown[shown.length - 1])]]);
+  const markedIndex = marked ? shown.findIndex((v) => v.period_start === marked) : -1;
+  if (markedIndex >= 0) picks.set(markedIndex, `${monthLabel(shown[markedIndex])}: ${formatValue(shown[markedIndex].value, unit)}`);
+  // Keep labels from landing on top of each other: drop the end ones that are close to the marked one.
+  const marks = [...picks.entries()].filter(([i]) => markedIndex < 0 || i === markedIndex || Math.abs(at(i) - at(markedIndex)) > 22);
+  const labels = el(
+    "div",
+    { class: "chart-labels", "aria-hidden": "true" },
+    ...marks.map(([i, text]) => el("span", { class: i === markedIndex ? "chart-label chart-label-marked" : "chart-label", style: `left:${at(i)}%` }, text)),
+  );
+  return el("div", { class: "chart-box" }, chart, labels);
 }
 
 /** A line of past figures, then the forecast as a dashed line with its range shaded around it. Months

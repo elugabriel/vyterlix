@@ -407,6 +407,14 @@ def summary_of(api, business, who="owner"):
     return api.get(f"{ORGS}/{business[0]}/alerts/summary", headers=business[2][who]).json()
 
 
+@pytest.fixture(autouse=True)
+def see_every_item(monkeypatch):
+    """Today shows only the first three things; these tests are about the cards, so show them all."""
+    from app.dashboard import rules as dashboard_rules
+
+    monkeypatch.setattr(dashboard_rules, "MAX_ITEMS", 12)
+
+
 def attention_ids(api, business):
     return {
         i["id"]

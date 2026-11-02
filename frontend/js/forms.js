@@ -32,6 +32,8 @@ export function select(name, options, { selected = "", placeholder = null, ...at
     placeholder !== null ? el("option", { value: "" }, placeholder) : null,
     ...options.map(([value, label]) => el("option", { value: String(value) }, label)),
   );
+  // A select with only a placeholder ("Any state") has no label of its own: use the placeholder.
+  if (placeholder && !node.hasAttribute("aria-label")) node.setAttribute("aria-label", placeholder);
   const chosen = selected === null || selected === undefined ? "" : String(selected);
   // With no starting choice and no placeholder, a select shows its first option, as a browser
   // would (assigning "" would leave nothing selected and the form would send an empty value).

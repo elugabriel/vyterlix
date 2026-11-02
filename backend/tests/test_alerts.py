@@ -544,9 +544,16 @@ def test_only_the_latest_two_months_are_news_and_the_boundary_month_counts(db, m
     events = [_event(date(2026, 3, 1)), _event(date(2026, 2, 1)), _event(date(2026, 1, 1))]
     monkeypatch.setattr(detection, "list_events", lambda db, **kw: events)
     with scoped(db, march):
+        # one alert per figure: the newest month it moved against you
         found = alerts._changes(db, settings, date(2026, 3, 1))
-        assert [c.data["month"] for c in found] == ["2026-03-01", "2026-02-01"]
+        assert [c.data["month"] for c in found] == ["2026-03-01"]
         assert alerts._changes(db, settings, None) == []
+        # the boundary month still counts when it is the newest, and the one before it does not
+        monkeypatch.setattr(detection, "list_events", lambda db, **kw: events[1:])
+        found = alerts._changes(db, settings, date(2026, 3, 1))
+        assert [c.data["month"] for c in found] == ["2026-02-01"]
+        monkeypatch.setattr(detection, "list_events", lambda db, **kw: events[2:])
+        assert alerts._changes(db, settings, date(2026, 3, 1)) == []
 
 
 def test_a_forecast_exactly_as_far_down_as_you_asked_is_an_alert(db, march, monkeypatch):
@@ -1442,3 +1449,29 @@ def test_a_notification_must_have_a_known_email_state(db, march):
         )
         with pytest.raises(IntegrityError):
             db.flush()
+
+
+def test_an_unusual_month_is_said_in_plain_words_not_as_points_below_the_usual(
+    db, march, monkeypatch
+):
+    from types import SimpleNamespace
+
+    from app.services import detection
+
+    event = _event(date(2026, 3, 1), category="financial")
+    event.__dict__.update(
+        kpi_code="profit_margin", kpi_name="Profit margin", kind="anomaly", unit="percent",
+        direction="down", effect="bad", value="-245.8", reference_value="78.4", change="324.2",
+        change_unit="points", explained_by_season=False, data_quality=90,
+        summary="Profit margin in March 2026 was -245.8%, 324.2 points below your usual 78.4%.",
+    )  # fmt: skip
+    assert isinstance(event, SimpleNamespace)
+    settings = {
+        code: (True, "high", {"min_size": "major"}) for code in rules.CHANGE_RULE_FOR.values()
+    }
+    monkeypatch.setattr(detection, "list_events", lambda db, **kw: [event])
+    with scoped(db, march):
+        [found] = alerts._changes(db, settings, date(2026, 3, 1))
+    assert found.title.startswith("Profit margin") and "points below" not in found.title
+    assert "usual 78.4%" not in found.title and "March 2026" in found.title
+    assert found.data["kpi"] == "profit_margin"

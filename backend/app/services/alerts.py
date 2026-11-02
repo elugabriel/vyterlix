@@ -27,6 +27,7 @@ from app.models.alerts import Alert, AlertEvent, AlertRule
 from app.models.data import Sale
 from app.models.identity import User
 from app.models.kpi import KpiDefinition, KpiValue
+from app.plain.changes import explain_change
 from app.schemas.alerts import (
     AlertCountsOut,
     AlertDetailOut,
@@ -193,7 +194,7 @@ def raise_alert(
         existing.last_seen_at = now
         if rules.RANK[c.severity] > rules.RANK[existing.severity]:
             existing.severity = c.severity  # it has got worse
-        existing.body = c.body
+        existing.title, existing.body = c.title[:200], c.body  # said in today's words
         return existing, False
     alert = Alert(
         organization_id=organization_id, rule_code=c.rule_code, category=c.category, kpi_category=c.kpi_category,
@@ -240,23 +241,42 @@ def _changes(db: Session, settings: dict, latest: date | None) -> list[Candidate
     if latest is None:
         return found
     floor = _month_back(latest, RECENT_MONTHS - 1)
+    newest: dict[str, object] = {}  # one alert per figure: the latest month it moved against you
     for event in detection.list_events(db, effect="bad", include_expected=False, limit=500):
         code = rules.CHANGE_RULE_FOR.get(event.category)
         if code is None or event.period_start < floor:
             continue
+        if event.kpi_code not in newest or event.period_start > newest[event.kpi_code].period_start:
+            newest[event.kpi_code] = event
+    for event in newest.values():
+        code = rules.CHANGE_RULE_FOR[event.category]
         enabled, severity, params = settings[code]
         level = (
             rules.change_severity(severity, event.severity, params["min_size"]) if enabled else None
         )
         if level is None:
             continue
+        title = event.summary
+        body = f"{event.kpi_name} needs a look. Open What changed to see why it happened and what to do about it."
+        if getattr(event, "kind", "") == "anomaly":
+            # "248.9 points below your usual 82.6%" is for the page that explains it, not the headline
+            words = explain_change(
+                kpi_code=event.kpi_code, kpi_name=event.kpi_name, unit=event.unit,
+                direction=event.direction, severity=event.severity, effect=event.effect,
+                period_start=event.period_start, value=event.value,
+                reference_value=event.reference_value, change=event.change,
+                change_unit=event.change_unit, explained_by_season=event.explained_by_season,
+                kind=event.kind, data_quality=event.data_quality,
+            )  # fmt: skip
+            title = words.headline  # "Profit margin fell sharply in September 2026."
+            body = f"{words.happened} {words.numbers} Open What changed to see why."
         found.append(
             Candidate(
                 code,
                 event.category,
                 level,
-                event.summary,
-                f"{event.kpi_name} needs a look. Open What changed to see why it happened and what to do about it.",
+                title,
+                body,
                 rules.key_change(event.kpi_code, event.period_start),
                 "changes.html",
                 event.category,
@@ -464,6 +484,18 @@ def evaluate(
         if alert.dedupe_key not in keys:
             alert.status, alert.resolved_at = "resolved", now
             _event(db, alert, "resolved", note="This is no longer the case.", now=now)
+            resolved += 1
+    # A newer month for the same figure replaces an older alert about it: one alert per figure.
+    newest = {c.data["kpi"]: c.data["month"] for c in current if c.rule_code.startswith("change_")}
+    for alert in db.scalars(
+        select(Alert).where(Alert.rule_code.like("change\_%"), Alert.status != "resolved")
+    ):
+        latest_month = newest.get(alert.data.get("kpi"))
+        if latest_month and alert.data.get("month", latest_month) < latest_month:
+            alert.status, alert.resolved_at = "resolved", now
+            _event(
+                db, alert, "resolved", note="A newer month for this figure replaces it.", now=now
+            )
             resolved += 1
     db.commit()
     return EvaluateOut(raised=raised, repeated=repeated, resolved=resolved, notified=notified)

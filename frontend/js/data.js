@@ -125,7 +125,7 @@ export function table(headers, rows, { empty = "Nothing here yet.", className = 
       "table",
       { class: className },
       el("thead", {}, el("tr", {}, ...headers.map((h) => el("th", { scope: "col" }, h)))),
-      el("tbody", {}, ...rows.map((row) => el("tr", {}, ...row.map((cell) => el("td", {}, cell))))),
+      el("tbody", {}, ...rows.map((row) => el("tr", {}, ...row.map((cell, i) => el("td", { "data-label": headers[i] ?? "" }, cell))))),
     ),
   );
 }

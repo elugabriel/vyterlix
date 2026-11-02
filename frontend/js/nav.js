@@ -1,8 +1,8 @@
 // The side menu shown on every page of a business, so there is one way around the app and the same
 // words for every screen. It is built by openBusiness() (business.js), so a page cannot forget it.
 // Who can see what is decided by the server; every person sees every link, and the pages
-// themselves only offer buttons to people who may use them. On a narrow screen it becomes a row
-// of links across the top.
+// themselves only offer buttons to people who may use them. On a narrow screen it opens from a bar along the bottom,
+// next to the four things used every day.
 
 import { api } from "./auth.js";
 import { el } from "./dom.js";
@@ -37,6 +37,14 @@ const BELONGS_TO = {
   "change.html": "changes.html",
 };
 
+// The four things a person on a phone uses every day, plus the full menu behind a button.
+const QUICK = [
+  ["dashboard.html", "Today", "today"],
+  ["alerts.html", "Alerts", "alerts"],
+  ["actions.html", "Actions", "actions"],
+  ["kpis.html", "Key figures", "kpis"],
+];
+
 // Simple line icons (24 by 24, drawn with a stroke)
 const ICONS = {
   today: ["M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"],
@@ -51,6 +59,7 @@ const ICONS = {
   memory: ["M9 18h6", "M10 21h4", "M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"],
   data: ["M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z", "M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6", "M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"],
   settings: ["M4 6h10", "M18 6h2", "M4 12h2", "M10 12h10", "M4 18h12", "M20 18h0", "M14 4v4", "M8 10v4", "M18 16v4"],
+  menu: ["M4 7h16", "M4 12h16", "M4 17h16"],
   account: ["M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z", "M4 21a8 8 0 0 1 16 0"],
   billing: ["M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z", "M3 10h18"],
 };
@@ -93,6 +102,33 @@ export function buildNav(orgId, page = currentPage(), unread = 0, orgName = "") 
   return el("nav", { class: "sidenav", "aria-label": "This business" }, ...parts);
 }
 
+/** The bar along the bottom of a phone: the daily four, and a button that opens the whole menu. */
+function buildBottomBar(orgId, page) {
+  const active = BELONGS_TO[page] ?? page;
+  const menu = el("button", { type: "button", id: "menu-button", "aria-expanded": "false", "aria-controls": "subnav" }, icon("menu"), "Menu");
+  const close = () => {
+    document.body.classList.remove("menu-open");
+    menu.setAttribute("aria-expanded", "false");
+  };
+  menu.addEventListener("click", () => {
+    const open = document.body.classList.toggle("menu-open");
+    menu.setAttribute("aria-expanded", String(open));
+    if (open) document.querySelector("#subnav a")?.focus();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && document.body.classList.contains("menu-open")) {
+      close();
+      menu.focus();
+    }
+  });
+  return el(
+    "nav",
+    { class: "bottombar", "aria-label": "Main" },
+    ...QUICK.map(([file, label, glyph]) => el("a", { href: `${file}?org=${orgId}`, "aria-current": file === active ? "page" : null }, icon(glyph), label)),
+    menu,
+  );
+}
+
 /** Put the menu in the page (once), then fill in how many notifications are waiting. */
 export function mountNav(orgId, orgName = "") {
   if (document.getElementById("subnav")) return;
@@ -102,6 +138,12 @@ export function mountNav(orgId, orgName = "") {
   const top = document.querySelector(".topbar");
   if (top) top.after(bar);
   else document.body.prepend(bar);
+  document.body.append(buildBottomBar(orgId, currentPage()));
+  const main = document.querySelector("main");
+  if (main) {
+    main.id ||= "main";
+    document.body.prepend(el("a", { class: "skip-link", href: `#${main.id}` }, "Skip to content"));
+  }
   api
     .get(`/organizations/${orgId}/notifications?limit=1`)
     .then((box) => {
