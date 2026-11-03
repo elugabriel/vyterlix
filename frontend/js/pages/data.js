@@ -5,6 +5,7 @@ import { openBusiness } from "../business.js";
 import { dataNav, datasetLabel, guard, number, put, scoreBar, severityBadge, table } from "../data.js";
 import { el } from "../dom.js";
 import { ukDate } from "../format.js";
+import { barChart } from "../kpi.js";
 import { showMessage } from "../ui.js";
 
 const message = document.getElementById("message");
@@ -120,11 +121,15 @@ function datasetsCard(report) {
       el("h3", {}, `${d.label} `, el("span", { class: "muted" }, `· ${number(d.records)} records`)),
       scoreBar(d.score, `${d.label} score`),
       el(
-        "ul",
-        { class: "item-list" },
-        ...d.components.map((c) =>
-          el("li", {}, el("span", {}, c.label, el("br"), el("span", { class: "muted" }, c.detail)), el("span", { class: "score-num" }, `${c.score}`)),
-        ),
+        "div",
+        { class: "component-bars" },
+        ...d.components.map((c) => el("div", { class: "component-row", title: c.detail }, el("span", {}, c.label), scoreBar(c.score, c.label))),
+      ),
+      el(
+        "details",
+        {},
+        el("summary", {}, "What each part means"),
+        el("ul", { class: "item-list" }, ...d.components.map((c) => el("li", {}, el("span", {}, c.label, el("br"), el("span", { class: "muted" }, c.detail)), el("span", { class: "score-num" }, `${c.score}`)))),
       ),
     ),
   );
@@ -145,7 +150,14 @@ function monthsCard(report) {
     "section",
     { class: "card" },
     el("h2", { style: "margin-top:0" }, "Month by month"),
-    table(
+    barChart(
+      [...report.months].sort((x, y) => x.month.localeCompare(y.month)).map((m) => ({ period_start: m.month, is_complete: true, status: m.score === null ? "no_data" : "ok", value: m.score === null ? null : String(m.score), band: m.score >= 80 ? "healthy" : m.score >= 60 ? "fair" : m.score >= 40 ? "needs_attention" : "at_risk" })),
+      "count",
+      "Data quality score by month",
+      { tone: (v) => v.band },
+    ),
+    el("p", { class: "legend muted" }, ...[["healthy", "80 and over"], ["fair", "60 to 79"], ["needs_attention", "40 to 59"], ["at_risk", "under 40"]].map(([k, t]) => el("span", { class: "legend-item" }, el("i", { class: `swatch swatch-${k}` }), t))),
+    el("details", {}, el("summary", {}, "See the list"), table(
       ["Month", "Sales", "Expenses", "Sales with a cost", "Expenses with a category", "Score"],
       report.months.map((m) => [
         m.label,
@@ -156,7 +168,7 @@ function monthsCard(report) {
         m.score === null ? "–" : `${m.score}`,
       ]),
       { empty: "No records yet." },
-    ),
+    )),
   );
 }
 
@@ -187,7 +199,7 @@ function originsCard(report) {
     el("h2", { style: "margin-top:0" }, "Where your records came from"),
     table(
       ["Kind of data", "Source", "Records"],
-      report.origins.map((o) => [datasetLabel(o.dataset), SOURCE_LABEL[o.source] ?? o.source, number(o.records)]),
+      report.origins.map((o) => [datasetLabel(o.dataset), SOURCE_LABEL[o.source] ?? o.source, el("span", { class: "share-bar" }, el("span", { class: "share-track", "aria-hidden": "true" }, el("span", { class: "share-fill", style: `width:${Math.max(2, (o.records / Math.max(1, ...report.origins.map((x) => x.records))) * 100)}%` })), number(o.records))]),
       { empty: "No records yet." },
     ),
     el("p", { class: "muted" }, `Worked out on ${ukDate(report.as_of)}.`),

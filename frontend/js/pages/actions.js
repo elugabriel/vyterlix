@@ -10,7 +10,7 @@ import { el } from "../dom.js";
 import { field, input, orNull, select } from "../forms.js";
 import { ukDate, ukDateTime } from "../format.js";
 import { loadPeople, statusBadge } from "../actions.js";
-import { barChart, formatValue, periodLabel } from "../kpi.js";
+import { barChart, formatValue, periodLabel, stackBar } from "../kpi.js";
 
 const message = document.getElementById("message");
 const content = document.getElementById("content");
@@ -53,7 +53,7 @@ let isOwner = false;
 let filter = "open";
 const list = el("div", { class: "stack" });
 const detail = el("div", { class: "stack" });
-const counts = el("p", { class: "muted" });
+const counts = el("div", { class: "stack" });
 const results = el("div", { class: "stack" });
 
 async function start({ user, org }) {
@@ -79,12 +79,17 @@ async function start({ user, org }) {
 async function loadCounts() {
   const c = await guard(message, () => api.get(`${base}/summary`));
   if (!c) return;
-  const parts = [`${c.open} still to do`];
-  if (c.overdue) parts.push(`${c.overdue} overdue`);
-  if (c.due_soon) parts.push(`${c.due_soon} due within a week`);
-  if (c.pending) parts.push(`${c.pending} waiting for approval`);
-  parts.push(`${c.completed} done`, `${c.mine_open} of the open ones are yours`);
-  counts.textContent = parts.join(" · ");
+  const later = Math.max(0, c.open - c.overdue - c.due_soon);
+  counts.replaceChildren(
+    stackBar([
+      [c.overdue, "glance-bad-bar", "overdue"],
+      [c.due_soon, "glance-warn", "due this week"],
+      [later, "glance-grey", "still to do"],
+      [c.pending, "glance-grey", "waiting for approval"],
+      [c.completed, "glance-ok", "done"],
+    ]) ?? el("p", { class: "muted" }, "No actions yet."),
+    c.mine_open ? el("p", { class: "muted" }, `${c.mine_open} of the open ones are yours.`) : null,
+  );
 }
 
 const OUTCOME_CLASS = {
@@ -100,12 +105,16 @@ async function loadResults() {
   const checked = r.successful + r.partially_successful + r.unsuccessful + r.inconclusive;
   results.replaceChildren();
   if (!r.waiting && !checked) return;
-  const parts = [];
-  if (r.waiting) parts.push(`${r.waiting} finished and waiting to be checked${r.due ? ` (${r.due} ready now)` : ""}`);
-  if (checked) parts.push(`${r.successful} worked`, `${r.partially_successful} partly worked`, `${r.unsuccessful} did not work`, `${r.inconclusive} cannot be measured yet`);
   put(
     results,
-    el("p", { class: "muted" }, `Results: ${parts.join(" · ")}`),
+    el("strong", {}, "How your actions turned out"),
+    stackBar([
+      [r.successful, "glance-ok", "worked"],
+      [r.partially_successful, "glance-warn", "partly worked"],
+      [r.unsuccessful, "glance-bad-bar", "did not work"],
+      [r.inconclusive, "glance-grey", "cannot be measured yet"],
+      [r.waiting, "glance-grey", `waiting to be checked${r.due ? ` (${r.due} ready now)` : ""}`],
+    ]),
     r.track_record.length
       ? el(
           "details",

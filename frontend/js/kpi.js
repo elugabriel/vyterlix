@@ -152,6 +152,19 @@ export function barChart(values, unit, label, { marked = null, tone = null } = {
   return el("div", { class: "chart-box" }, el("div", { class: "chart-frame" }, chart, tops), months, el("div", { class: "chart-year muted", "aria-hidden": "true" }, year));
 }
 
+/** One long bar split into coloured parts with the same words beneath: parts are [count, colour, words]. */
+export function stackBar(parts, caption = "") {
+  const shown = parts.filter(([n]) => n > 0);
+  if (!shown.length) return null;
+  const words = shown.map(([n, , w]) => `${n} ${w}`).join(" · ");
+  return el(
+    "div",
+    { class: "outcome-bar-box" },
+    el("div", { class: "outcome-bar", role: "img", "aria-label": words }, ...shown.map(([n, c]) => el("span", { class: c, style: `flex:${n}` }))),
+    el("p", { class: "muted" }, caption ? `${caption} ${words}` : words),
+  );
+}
+
 /** A tiny bar picture of the last few months, for a figure's tile. The newest finished month is orange. */
 export function sparkline(values, label) {
   const shown = values.filter((v) => v.status === "ok").slice(-6);

@@ -25,7 +25,7 @@ let orgId = "";
 let canAct = false;
 let isOwner = false;
 let filters = { status: "", severity: "", category: "" };
-const counts = el("p", { class: "muted" });
+const counts = el("div", { class: "card outcome-bar-box" });
 const list = el("div", { class: "stack" });
 const detail = el("div", { class: "stack" });
 const settings = el("div", { class: "stack" });
@@ -62,7 +62,22 @@ async function start({ org }) {
 
 async function loadCounts() {
   const c = await guard(message, () => api.get(`${base}/summary`));
-  if (c) counts.textContent = `${c.open} open${c.postponed ? ` · ${c.postponed} put off for later` : ""} · ${c.acknowledged} seen · ${c.resolved} closed · ${c.high_or_critical_open} serious ones not yet closed`;
+  if (!c) return;
+  const parts = [
+    [c.open, "glance-bad-bar", "open"],
+    [c.acknowledged, "glance-warn", "seen"],
+    [c.resolved, "glance-ok", "closed"],
+  ].filter(([n]) => n > 0);
+  counts.replaceChildren(
+    parts.length ? el("div", { class: "outcome-bar", role: "img", "aria-label": parts.map(([n, , w]) => `${n} ${w}`).join(", ") }, ...parts.map(([n, k]) => el("span", { class: k, style: `flex:${n}` }))) : null,
+    el(
+      "p",
+      { class: "muted" },
+      parts.map(([n, , w]) => `${n} ${w}`).join(" · "),
+      c.postponed ? ` · ${c.postponed} put off` : "",
+      c.high_or_critical_open ? el("strong", { class: "status-bad" }, ` · ${c.high_or_critical_open} serious not closed`) : null,
+    ),
+  );
 }
 
 async function load() {

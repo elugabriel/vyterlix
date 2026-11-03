@@ -26,7 +26,7 @@ function page(link) {
   return `${file}?org=${orgId}${anchor ? `#${anchor}` : ""}`;
 }
 
-function hero(d) {
+function hero(d, scores = null) {
   const h = d.health;
   const change = !h || h.previous_score === null ? "" : h.score === h.previous_score ? "No change on the month before" : `${h.score > h.previous_score ? "Up" : "Down"} from ${h.previous_score} the month before`;
   return el(
@@ -43,6 +43,7 @@ function hero(d) {
           el("div", { class: "stack" },
             el("span", { class: "badge" }, HEALTH_TEXT[h.status] ?? h.status),
             el("div", { class: "of" }, `${change ? `${change} · ` : ""}${periodLabel(h.period, "month")}`),
+            scores ? sparkline(scores, "Health score over the last months") : null,
             el("a", { href: page("health.html") }, "See the whole picture"),
           ),
         )
@@ -201,11 +202,13 @@ async function start({ org }) {
   content.replaceChildren();
   const first = d.figures[0];
   const history = first ? await guard(message, () => api.get(`/organizations/${org.id}/kpis/${first.code}?limit=12`)) : null;
+  const scoreHistory = d.health ? await api.get(`/organizations/${org.id}/business-health/history?limit=6`).catch(() => null) : null;
+  const scores = scoreHistory ? scoreHistory.points.map((p) => ({ period_start: p.period_start, is_complete: true, status: p.overall_score === null ? "no_data" : "ok", value: p.overall_score === null ? null : String(p.overall_score) })) : null;
   const histories = {};
   await Promise.all(d.figures.map(async (f) => {
     histories[f.code] = f === first ? history : await api.get(`/organizations/${org.id}/kpis/${f.code}?limit=6`).catch(() => null);
   }));
-  put(content, hero(d), setup(d.setup), goingWell(d), attention(d), doFirst(d), waitingFor(d), results(d), trend(first, history), figures(d.figures, histories));
+  put(content, hero(d, scores), setup(d.setup), goingWell(d), attention(d), doFirst(d), waitingFor(d), results(d), trend(first, history), figures(d.figures, histories));
   if (!d.health && !d.figures.length) {
     put(content, el("p", { class: "muted" }, "There are no figures yet. Bring in your sales, costs and customers from "), el("a", { href: page("data.html") }, "Your data"), el("span", { class: "muted" }, " and they will appear here."));
   }

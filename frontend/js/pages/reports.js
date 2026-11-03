@@ -9,6 +9,7 @@ import { guard, put, saveBlob, table } from "../data.js";
 import { el } from "../dom.js";
 import { checkbox, field, input, select } from "../forms.js";
 import { ukDateTime } from "../format.js";
+import { barChart, sparkline } from "../kpi.js";
 
 const message = document.getElementById("message");
 const content = document.getElementById("content");
@@ -147,14 +148,64 @@ async function remove(s) {
 
 // --- reading a report --------------------------------------------------------------------------------------
 
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+/** "£1,766.20" -> 1766.2; "-" or text -> null. */
+function numeric(cell) {
+  const n = Number(String(cell).replace(/[£,%\s]/g, ""));
+  return String(cell).trim() === "" || Number.isNaN(n) ? null : n;
+}
+
+/** "September 2026" -> "2026-09-01"; "Sep 26" -> "2026-09-01"; anything else -> null. */
+function monthStart(text) {
+  const long = /^([A-Za-z]+) (\d{4})$/.exec(text);
+  const short = /^([A-Za-z]{3}) (\d{2})$/.exec(text);
+  const [name, year] = long ? [long[1], long[2]] : short ? [short[1], `20${short[2]}`] : [null, null];
+  const i = name ? MONTH_NAMES.findIndex((m) => m.toLowerCase().startsWith(name.toLowerCase().slice(0, 3))) : -1;
+  return i < 0 ? null : `${year}-${String(i + 1).padStart(2, "0")}-01`;
+}
+
+/** A picture for a report table when it has one: months down the side become bars, an area and its score
+ * become horizontal bars, and figures with a column per month get a small bar picture each. */
+function tableChart(t) {
+  const { columns, rows } = t;
+  if (rows.length < 2) return null;
+  const monthColumns = columns.slice(1).map(monthStart);
+  if (monthColumns.filter(Boolean).length >= 3) {
+    const lines = rows.map((r) => {
+      const values = monthColumns.map((m, i) => (m && numeric(r[i + 1]) !== null ? { period_start: m, is_complete: true, status: "ok", value: String(numeric(r[i + 1])) } : null)).filter(Boolean);
+      return el("div", { class: "report-line" }, el("span", {}, r[0]), el("span", { class: "report-latest" }, r[monthColumns.lastIndexOf(monthColumns.filter(Boolean).at(-1)) + 1]), sparkline(values, `${r[0]} over the months`) ?? el("span", { class: "muted" }, "–"));
+    });
+    return el("div", { class: "report-lines" }, ...lines);
+  }
+  if (rows.every((r) => monthStart(r[0]) && numeric(r[1]) !== null)) {
+    const sorted = [...rows].sort((a, b) => monthStart(a[0]).localeCompare(monthStart(b[0])));
+    const money = String(sorted[0][1]).includes("£");
+    const percent = String(sorted[0][1]).includes("%");
+    return barChart(sorted.map((r) => ({ period_start: monthStart(r[0]), is_complete: true, status: "ok", value: String(numeric(r[1])) })), money ? "gbp" : percent ? "percent" : "count", columns[1]);
+  }
+  const scored = rows.filter((r) => numeric(r[1]) !== null);
+  if (columns[1] && /score/i.test(columns[1]) && scored.length >= 2) {
+    return el(
+      "div",
+      { class: "area-rows" },
+      ...scored.map((r) => el("div", { class: "area-row" }, el("span", { class: "area-name", style: "grid-column: 1 / 3" }, r[0]), el("progress", { max: 100, value: numeric(r[1]), "aria-label": `${r[0]} score`, class: "health-bar" }), el("strong", {}, String(numeric(r[1]))))),
+    );
+  }
+  return null;
+}
+
 function section(s) {
+  const chart = s.table ? tableChart(s.table) : null;
+  const list = s.table ? table(s.table.columns, s.table.rows, { empty: "Nothing here." }) : null;
   return el(
     "div",
     { class: "stack" },
     el("h3", {}, s.heading),
     ...s.paragraphs.map((p) => el("p", {}, p)),
     s.bullets.length ? el("ul", {}, ...s.bullets.map((b) => el("li", {}, b))) : null,
-    s.table ? table(s.table.columns, s.table.rows, { empty: "Nothing here." }) : null,
+    chart ? chart : list,
+    chart ? el("details", {}, el("summary", {}, "See the numbers"), list) : null,
   );
 }
 
