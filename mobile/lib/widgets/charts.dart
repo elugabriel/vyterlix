@@ -11,7 +11,36 @@ double fractionBetween(double value, double low, double high) {
   return ((value - low) / (high - low)).clamp(0.0, 1.0);
 }
 
-/// A bar for each period, finished ones solid and the one in progress faded.
+const _shortMonths = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', //
+];
+
+/// "2026-09-01" becomes "Sep".
+String shortMonth(String isoDate) =>
+    _shortMonths[int.parse(isoDate.split('-')[1]) - 1];
+
+/// A short number for the top of a bar: £1.8k, 55, 22%.
+String shortValue(double value, String unit) {
+  String thousands(double v) =>
+      v.abs() >= 1000 ? '${(v / 1000).toStringAsFixed(1)}k' : '${v.round()}';
+  switch (unit) {
+    case 'gbp':
+      return '${value < 0 ? '-' : ''}£${thousands(value.abs())}';
+    case 'percent':
+      return '${value.round()}%';
+    default:
+      return value.abs() >= 1000
+          ? thousands(value)
+          : (value == value.roundToDouble()
+                ? '${value.round()}'
+                : value.toStringAsFixed(1));
+  }
+}
+
+/// A bar for each period, finished ones solid and the one in progress faded. With [valueLabels] each
+/// bar has its value on top, with [monthLabels] its month underneath, and [colors] can colour single
+/// bars (the health score uses it).
 class BarChart extends StatelessWidget {
   const BarChart({
     super.key,
@@ -19,7 +48,14 @@ class BarChart extends StatelessWidget {
     this.lastIsPartial = false,
     this.height = 140,
     this.markedIndex = -1,
+    this.valueLabels,
+    this.monthLabels,
+    this.colors,
   });
+
+  final List<String?>? valueLabels;
+  final List<String?>? monthLabels;
+  final List<Color?>? colors;
 
   /// Oldest first; null where there is no figure.
   final List<double?> values;
@@ -31,6 +67,7 @@ class BarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: height,
       width: double.infinity,
@@ -38,9 +75,14 @@ class BarChart extends StatelessWidget {
         painter: _BarPainter(
           values,
           lastIsPartial,
-          Theme.of(context).colorScheme.primary,
-          Theme.of(context).colorScheme.outlineVariant,
+          scheme.primary,
+          scheme.outlineVariant,
           markedIndex,
+          valueLabels,
+          monthLabels,
+          colors,
+          scheme.onSurfaceVariant,
+          scheme.onSurface,
         ),
       ),
     );
@@ -54,7 +96,43 @@ class _BarPainter extends CustomPainter {
     this.color,
     this.axis,
     this.markedIndex,
+    this.valueLabels,
+    this.monthLabels,
+    this.colors,
+    this.muted,
+    this.ink,
   );
+
+  final List<String?>? valueLabels;
+  final List<String?>? monthLabels;
+  final List<Color?>? colors;
+  final Color muted;
+  final Color ink;
+
+  void _text(
+    Canvas canvas,
+    String text,
+    double centre,
+    double top,
+    double width, {
+    required bool bold,
+    required Color color,
+  }) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          fontSize: 10.5,
+          color: color,
+          fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+    final x = (centre - painter.width / 2).clamp(0.0, width - painter.width);
+    painter.paint(canvas, Offset(x, top));
+  }
 
   final List<double?> values;
   final bool lastIsPartial;
@@ -66,15 +144,20 @@ class _BarPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final shown = values.whereType<double>().toList();
     if (shown.isEmpty) return;
+    final topPad = valueLabels == null ? 0.0 : 16.0;
+    final bottomPad = monthLabels == null ? 0.0 : 18.0;
+    final plot = size.height - topPad - bottomPad;
     final high = math.max(0.0, shown.reduce(math.max));
     final low = math.min(0.0, shown.reduce(math.min));
-    final zero = size.height * (1 - fractionBetween(0, low, high));
+    double yOf(double v) => topPad + plot * (1 - fractionBetween(v, low, high));
+    final zero = yOf(0);
     final slot = size.width / values.length;
     final bar = slot * 0.62;
+    final thin = values.length > 6;
     for (var i = 0; i < values.length; i++) {
       final value = values[i];
       if (value == null) continue;
-      final top = size.height * (1 - fractionBetween(value, low, high));
+      final top = yOf(value);
       final rect = Rect.fromLTRB(
         i * slot + (slot - bar) / 2,
         math.min(top, zero),
@@ -87,8 +170,41 @@ class _BarPainter extends CustomPainter {
         Paint()
           ..color = i == markedIndex
               ? Palette.warn
-              : color.withValues(alpha: partial ? 0.4 : 1),
+              : (colors != null && i < colors!.length && colors![i] != null
+                        ? colors![i]!
+                        : color)
+                    .withValues(alpha: partial ? 0.4 : 1),
       );
+      final label = valueLabels != null && i < valueLabels!.length
+          ? valueLabels![i]
+          : null;
+      if (label != null &&
+          (!thin || i % 2 == values.length % 2 || i == markedIndex)) {
+        _text(
+          canvas,
+          label,
+          i * slot + slot / 2,
+          value < 0 ? math.max(top, zero) + 2 : top - 14,
+          size.width,
+          bold: i == markedIndex,
+          color: i == markedIndex ? ink : muted,
+        );
+      }
+    }
+    if (monthLabels != null) {
+      for (var i = 0; i < values.length && i < monthLabels!.length; i++) {
+        final name = monthLabels![i];
+        if (name == null) continue;
+        _text(
+          canvas,
+          name,
+          i * slot + slot / 2,
+          size.height - 14,
+          size.width,
+          bold: i == markedIndex,
+          color: i == markedIndex ? ink : muted,
+        );
+      }
     }
     canvas.drawLine(
       Offset(0, zero),
@@ -103,7 +219,10 @@ class _BarPainter extends CustomPainter {
   bool shouldRepaint(_BarPainter old) =>
       old.values != values ||
       old.lastIsPartial != lastIsPartial ||
-      old.markedIndex != markedIndex;
+      old.markedIndex != markedIndex ||
+      old.valueLabels != valueLabels ||
+      old.monthLabels != monthLabels ||
+      old.colors != colors;
 }
 
 /// What happened (a line), and what is expected next (a dashed line with a band around it).

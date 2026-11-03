@@ -48,6 +48,8 @@ class _TodayScreenState extends State<TodayScreen> {
   Dashboard? _dashboard;
   List<double?> _trend = const [];
   int _trendMarked = -1; // the latest finished month
+  List<String?> _trendMonths = const [];
+  List<String?> _trendValues = const [];
   String? _error;
 
   @override
@@ -84,6 +86,14 @@ class _TodayScreenState extends State<TodayScreen> {
         for (final v in rows)
           v['status'] == 'ok' ? double.tryParse('${v['value']}') : null,
       ];
+      final unit = dashboard.figures.first.unit;
+      final months = <String?>[
+        for (final v in rows) shortMonth('${v['period_start']}'),
+      ];
+      final labels = <String?>[
+        for (var i = 0; i < rows.length; i++)
+          values[i] == null ? null : shortValue(values[i]!, unit),
+      ];
       final marked = rows.lastIndexWhere(
         (v) => v['status'] == 'ok' && v['is_complete'] == true,
       );
@@ -91,6 +101,8 @@ class _TodayScreenState extends State<TodayScreen> {
         setState(() {
           _trend = values;
           _trendMarked = marked;
+          _trendMonths = months;
+          _trendValues = labels;
         });
       }
     } on ApiException {
@@ -250,7 +262,13 @@ class _TodayScreenState extends State<TodayScreen> {
             SectionTitle(
               'How ${dashboard.figures.first.name.toLowerCase()} has moved',
             ),
-            BarChart(values: _trend, markedIndex: _trendMarked, height: 110),
+            BarChart(
+              values: _trend,
+              markedIndex: _trendMarked,
+              height: 150,
+              valueLabels: _trendValues,
+              monthLabels: _trendMonths,
+            ),
             if (dashboard.figures.first.plain != null)
               Text(
                 dashboard.figures.first.plain!.says,

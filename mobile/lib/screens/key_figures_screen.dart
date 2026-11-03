@@ -472,6 +472,16 @@ class _KpiDetailScreenState extends State<KpiDetailScreen> {
                 lastIsPartial:
                     history.values.isNotEmpty &&
                     !history.values.last.isComplete,
+                height: 170,
+                valueLabels: [
+                  for (final v in history.values)
+                    v.status == 'ok'
+                        ? shortValue(double.parse(v.value!), history.unit)
+                        : null,
+                ],
+                monthLabels: [
+                  for (final v in history.values) shortMonth(v.periodStart),
+                ],
               ),
             ),
           ),

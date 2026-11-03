@@ -172,10 +172,23 @@ class _HealthScreenState extends State<HealthScreen> {
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Sparkline(
+                child: BarChart(
                   key: const ValueKey('health-history'),
-                  values: scored,
-                  height: 80,
+                  values: [for (final p in _history) p.score?.toDouble()],
+                  height: 170,
+                  valueLabels: [
+                    for (final p in _history)
+                      p.score == null ? null : '${p.score}',
+                  ],
+                  monthLabels: [
+                    for (final p in _history) shortMonth(p.periodStart),
+                  ],
+                  colors: [
+                    for (final p in _history)
+                      p.score == null
+                          ? null
+                          : goodFairPoor(p.score!.toDouble()),
+                  ],
                 ),
               ),
             ),
