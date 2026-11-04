@@ -10,3 +10,7 @@ backend/.demo-logins.local.md
 
 # Documents written for the client, kept on this computer only
 docs/*.docx
+
+# Demo films and their sections are large; share them directly, not through git
+docs/*.mp4
+docs/walkthrough-sections/
