@@ -1,0 +1,22 @@
+[Unit]
+Description=Vyterlix API
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+User=vyterlix
+Group=vyterlix
+WorkingDirectory=/srv/vyterlix/backend
+EnvironmentFile=/etc/vyterlix/vyterlix.env
+ExecStart=/srv/vyterlix/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 2 --proxy-headers --forwarded-allow-ips 127.0.0.1
+Restart=always
+RestartSec=3
+# Lock the service down: it may only write to its own data folder.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/vyterlix
+
+[Install]
+WantedBy=multi-user.target

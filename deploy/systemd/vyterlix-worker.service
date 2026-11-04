@@ -1,0 +1,21 @@
+[Unit]
+Description=Vyterlix background worker (figures, syncs, reports, alerts, emails)
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+User=vyterlix
+Group=vyterlix
+WorkingDirectory=/srv/vyterlix/backend
+EnvironmentFile=/etc/vyterlix/vyterlix.env
+ExecStart=/srv/vyterlix/backend/.venv/bin/python -m app.cli.worker run
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/vyterlix
+
+[Install]
+WantedBy=multi-user.target
