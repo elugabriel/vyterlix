@@ -31,7 +31,7 @@ from app.models.health import (
     HealthRule,
 )
 from app.models.kpi import KpiDefinition, KpiValue
-from app.modules.rules import health_area_counts
+from app.modules.rules import health_area_counts, module_of
 from app.schemas.health import (
     ComponentOut,
     HealthHistoryOut,
@@ -39,6 +39,7 @@ from app.schemas.health import (
     HealthPointOut,
     MetricOut,
 )
+from app.services.module_choices import switched_off
 from app.services.seasons import covers
 
 logger = logging.getLogger("vyterlix.health")
@@ -285,7 +286,8 @@ def calculate(db: Session, tenant, *, today: date | None = None) -> HealthRun:
     answers). Needs the KPI engine to have run; with no KPI values it saves nothing."""
     organization_id = tenant.organization_id
     industry = _industry(db)
-    rules = active_rules(db, industry)
+    hidden = switched_off(db)  # parts of Vyterlix the owner has hidden are not judged either
+    rules = [r for r in active_rules(db, industry) if module_of(r.kpi_code) not in hidden]
     weights = category_weights(db, industry)
     # Only the areas that make sense for what this business sells count towards its score.
     sells = db.scalar(select(BusinessProfile.sells))

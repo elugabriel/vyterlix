@@ -66,6 +66,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   List<Map<String, dynamic>> _prefs = [];
   final Map<String, Map<String, bool>> _changed = {};
 
+  // what Vyterlix shows: the twelve parts and whether each is on
+  List<Map<String, dynamic>> _parts = [];
+
   // team
   List<Map<String, dynamic>> _members = [];
   List<Map<String, dynamic>> _invites = [];
@@ -98,6 +101,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final s = await api.get('$_org/settings') as Map<String, dynamic>;
       final prefs = _maps(await api.get('$_org/notification-preferences'));
       final members = _maps(await api.get('$_org/members'));
+      var parts = <Map<String, dynamic>>[];
+      try {
+        parts = _maps(await api.get('$_org/modules'));
+      } on ApiException {
+        // the list of parts is a convenience: the rest of the settings still work
+      }
       var invites = <Map<String, dynamic>>[];
       if (_isOwner) {
         try {
@@ -118,6 +127,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _footer =
             'Times are UK time (${s['timezone']}); dates show as ${s['date_format']}; money in ${s['currency']}.';
         _prefs = prefs;
+        _parts = parts;
         _changed.clear();
         _members = members;
         _invites = invites;
@@ -283,6 +293,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: Text(_note!),
                     ),
                   _businessCard(muted),
+                  if (_parts.isNotEmpty) _partsCard(muted),
                   _notificationsCard(muted),
                   _teamCard(muted),
                 ],
@@ -361,6 +372,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
               ],
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _setPart(Map<String, dynamic> part, bool on) => _act(
+    (api) async {
+      await api.put('$_org/modules/${part['code']}', body: {'enabled': on});
+    },
+    '${part['name']} is now ${on ? 'shown' : 'hidden'}. Your health score has been worked out again.',
+    reload: true,
+  );
+
+  Widget _partsCard(Color muted) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionTitle('What Vyterlix shows you'),
+        Text(
+          _isOwner
+              ? 'Switch off any part you do not want to look at. It disappears from your key figures, Today and your health score, and comes straight back when you switch it on. Parts that are not for your kind of business, or have nothing to show yet, cannot be switched.'
+              : 'The parts of Vyterlix this business uses. Only the owner can change them.',
+          style: TextStyle(color: muted),
+        ),
+        const SizedBox(height: 8),
+        Card(
+          child: Column(
+            children: [
+              for (final part in _parts)
+                SwitchListTile(
+                  key: ValueKey('part-${part['code']}'),
+                  title: Text('${part['name']}'),
+                  subtitle: Text(
+                    [
+                      '${part['summary']}',
+                      if (part['reason'] != null) '${part['reason']}',
+                    ].join(' '),
+                  ),
+                  value: part['status'] == 'shown',
+                  onChanged: _isOwner && part['can_switch'] == true && !_busy
+                      ? (on) => _setPart(part, on)
+                      : null,
+                ),
+            ],
           ),
         ),
       ],

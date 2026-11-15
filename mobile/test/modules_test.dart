@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'insights_test.dart' show kpisJson, openBusiness, openMore;
+import 'insights_test.dart' show openBusiness, openMore;
 import 'support.dart';
 
 /// The figures as the server sends them once they belong to the parts of Vyterlix a business sees

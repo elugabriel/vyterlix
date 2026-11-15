@@ -51,6 +51,7 @@ from app.schemas.kpi import (
     RunOut,
 )
 from app.services.data_quality import build_report
+from app.services.module_choices import switched_off
 
 logger = logging.getLogger("vyterlix.kpi")
 ZERO = Decimal("0")
@@ -309,7 +310,7 @@ def _sells(db: Session) -> str | None:
     return db.scalar(select(BusinessProfile.sells))
 
 
-def list_kpis(db: Session, granularity: str = "month") -> KpisOut:
+def list_kpis(db: Session, granularity: str = "month", *, respect_choices: bool = True) -> KpisOut:
     definitions = active_definitions(db)
     sells = _sells(db)
     if sells == "services":
@@ -363,6 +364,10 @@ def list_kpis(db: Session, granularity: str = "month") -> KpisOut:
         row = by_key.get((definition.id, period)) if period else None
         return _value_out(row, definition.unit) if row else None
 
+    if respect_choices:
+        # Parts the owner has hidden are left out of everything that shows figures
+        hidden = switched_off(db)
+        definitions = [d for d in definitions if module_of(d.code) not in hidden]
     shown = visible_modules(sells, {d.code for d in definitions})
     return KpisOut(
         granularity=granularity,

@@ -55,6 +55,7 @@ class AuditAction(StrEnum):
     SEASON_CREATED = "season.created"
     SEASON_UPDATED = "season.updated"
     SETTINGS_UPDATED = "business.settings_updated"
+    MODULE_CHOICE_CHANGED = "business.module_choice_changed"
     ONBOARDING_COMPLETED = "business.onboarding_completed"
     # Data imports
     IMPORT_UPLOADED = "import.uploaded"

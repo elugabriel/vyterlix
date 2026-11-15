@@ -197,7 +197,12 @@ Performance, Demand Forecasting.
   counts only the areas that fit the business (no stock for a service, no appointments for a shop), and
   new health rules judge no-shows, cancellations, appointments kept, rebooking, ratings and the website.
   Migration `751ad8f7b840`.
-- [ ] **Step 1b: owner switches** to show or hide a module in Settings (table, API, website, phone).
+- [x] **Step 1b: owner switches** (migration `c4a7e19b3d52`, `/modules`). Settings has a new card, "What Vyterlix
+  shows you" (website and phone), listing the twelve parts. The owner switches a part off and it leaves Key
+  figures, Today and the health score (which is worked out again at once); switching it back on brings it
+  straight back. Nothing is deleted. A part that is for the other kind of business, or has nothing to show yet,
+  cannot be switched and says why. Everyone can see the list; only the owner can change it. Limit: alerts and
+  suggestions about a hidden part's figures are not hidden (they follow the five old areas, not the twelve parts).
 - [x] **Step 2: service-side figures** (migrations `9c3e5a17d2b4`, `a6f5a52f7d19`). Ten new figures:
   *Bookings*: appointments booked. *Operational Performance*: appointments completed, average
   appointment length, appointments that ran over. *Retention*: visits per customer, new clients.

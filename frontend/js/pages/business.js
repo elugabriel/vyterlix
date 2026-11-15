@@ -1,6 +1,7 @@
 import { ApiError } from "../api.js";
 import { api } from "../auth.js";
 import { openBusiness } from "../business.js";
+import { guard } from "../data.js";
 import { el } from "../dom.js";
 import { WEEKDAYS, regionName } from "../format.js";
 import { checkbox, field, input, select } from "../forms.js";
@@ -39,6 +40,7 @@ async function start({ org }) {
   renderSetup(orgId, isOwner, onboarding, profile);
   renderData(orgId, org.role);
   await renderSettings(orgId, isOwner);
+  await renderModules(orgId, isOwner);
   await renderNotifications(orgId);
 }
 
@@ -121,6 +123,54 @@ function renderData(orgId, role) {
       if (box.unread) document.getElementById("notifications-link").textContent = `Notifications (${box.unread} new)`;
     })
     .catch(() => {});
+}
+
+/** What Vyterlix shows you: the twelve parts, each switched on or off by the owner. */
+async function renderModules(orgId, isOwner) {
+  const card = document.getElementById("modules");
+  const states = await api.get(`/organizations/${orgId}/modules`);
+  const box = el("div", { class: "message", role: "alert", hidden: true });
+  const rows = new Map();
+
+  function draw(state) {
+    const switchable = isOwner && state.can_switch;
+    const input = el("input", { type: "checkbox", name: `module-${state.code}` });
+    input.checked = state.status === "shown";
+    input.disabled = !switchable;
+    input.addEventListener("change", async () => {
+      input.disabled = true;
+      const done = await guard(box, () => api.put(`/organizations/${orgId}/modules/${state.code}`, { enabled: input.checked }));
+      if (done) {
+        showMessage(box, "success", `${done.name} is now ${done.status === "shown" ? "shown" : "hidden"}. Your health score has been worked out again.`);
+        rows.get(state.code).replaceWith(draw(done));
+      } else {
+        input.checked = !input.checked;
+        input.disabled = false;
+      }
+    });
+    const row = el(
+      "div",
+      { class: "module-row" },
+      el("label", { class: "check" }, input, " ", el("strong", {}, state.name)),
+      el("div", { class: "muted module-summary" }, state.reason && state.status !== "switched_off" ? `${state.summary} ${state.reason}` : state.summary),
+      state.status === "switched_off" ? el("div", { class: "muted module-summary" }, state.reason) : null,
+    );
+    rows.set(state.code, row);
+    return row;
+  }
+
+  card.replaceChildren(
+    el("h2", {}, "What Vyterlix shows you"),
+    el(
+      "p",
+      { class: "muted" },
+      isOwner
+        ? "Switch off any part you do not want to look at. It disappears from your key figures, Today and your health score, and comes straight back when you switch it on. Parts that are not for your kind of business, or have nothing to show yet, cannot be switched."
+        : "The parts of Vyterlix this business uses. Only the owner can change them.",
+    ),
+    box,
+    ...states.map(draw),
+  );
 }
 
 async function renderSettings(orgId, isOwner) {

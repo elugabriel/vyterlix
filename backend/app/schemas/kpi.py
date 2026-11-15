@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 Granularity = Literal["week", "month", "quarter", "year"]
 
@@ -52,6 +52,26 @@ class ModuleOut(BaseModel):
     code: str
     name: str
     summary: str
+
+
+class ModuleStateOut(BaseModel):
+    """One part of Vyterlix, and whether this business sees it."""
+
+    code: str
+    name: str
+    summary: str
+    enabled: bool  # the owner's choice (shown unless switched off)
+    # shown: on the screen. switched_off: the owner hid it. not_for_you: it is for a different kind
+    # of business. no_figures: nothing to show yet (needs data, or not built yet).
+    status: Literal["shown", "switched_off", "not_for_you", "no_figures"]
+    reason: str | None = None  # in plain words, when it is not shown
+    can_switch: bool  # the owner can only switch a part that could be shown
+
+
+class ModuleChoiceIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool
 
 
 class KpiOut(BaseModel):

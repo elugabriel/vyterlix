@@ -28,6 +28,7 @@ from app.api.v1 import (
     kpis,
     me,
     memory,
+    modules,
     onboarding,
     organizations,
     recommendations,
@@ -53,6 +54,7 @@ api_router.include_router(business_lists.suggestions_router)
 api_router.include_router(business_lists.router)
 api_router.include_router(seasons.router)
 api_router.include_router(settings.router)
+api_router.include_router(modules.router)
 api_router.include_router(benchmarks.router)
 api_router.include_router(onboarding.router)
 api_router.include_router(imports.router)

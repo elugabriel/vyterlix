@@ -200,6 +200,19 @@ class BusinessGoal(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base)
     )
 
 
+class BusinessModule(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base):
+    """The owner's choice to show or hide one part of Vyterlix (a module, app/modules/rules.py).
+    A part with no row is shown, so only choices that differ from the default are stored."""
+
+    __tablename__ = "business_modules"
+    __table_args__ = (
+        UniqueConstraint("organization_id", "module_code", name="uq_business_modules_org_code"),
+    )
+
+    module_code: Mapped[str] = mapped_column(String(20))
+    enabled: Mapped[bool] = mapped_column(Boolean)
+
+
 class BusinessSeason(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base):
     """A yearly recurring busy or quiet period, e.g. "Christmas: +40%" (1 Dec to 5 Jan)."""
 
