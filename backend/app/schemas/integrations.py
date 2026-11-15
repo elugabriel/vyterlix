@@ -15,6 +15,11 @@ class FieldOut(BaseModel):
 class ProviderOut(BaseModel):
     key: str
     label: str
+    group: str = ""  # which kind of system it is, for the list
+    summary: str = ""  # what it brings in, one plain sentence
+    # ready: can be connected now. needs_setup: built, but this installation is not yet registered
+    # with that system. coming_soon: not built yet.
+    status: Literal["ready", "needs_setup", "coming_soon"] = "ready"
     # What we will read, in plain English. Shown before the person connects.
     permissions: list[str]
     read_only: bool = True

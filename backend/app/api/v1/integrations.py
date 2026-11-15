@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, status
 
 from app.api.deps import DB, Meta, Tenant, require_permission
 from app.core.permissions import Perm
-from app.integrations.registry import available_providers
+from app.integrations.registry import listings
 from app.schemas.integrations import (
     CallbackIn,
     ConnectIn,
@@ -40,18 +40,21 @@ IntegrationManager = Annotated[Tenant, Depends(require_permission(Perm.INTEGRATI
 
 @router.get("/providers", response_model=list[ProviderOut])
 def providers(tenant: DataManager):
-    """What can be connected, and what we would read."""
+    """Every system Vyterlix connects to, where it stands, and (when built) what we would read."""
     return [
         ProviderOut(
-            key=p.key,
-            label=p.label,
-            permissions=list(p.permissions),
+            key=item.key,
+            label=item.label,
+            group=item.group,
+            summary=item.summary,
+            status=item.status,
+            permissions=list(item.provider.permissions) if item.provider else [],
             fields=[
                 FieldOut(name=f.name, label=f.label, help=f.help, secret=f.secret)
-                for f in p.connect_fields
+                for f in (item.provider.connect_fields if item.provider else ())
             ],
         )
-        for p in available_providers()
+        for item in listings()
     ]
 
 

@@ -264,32 +264,66 @@ function keyForm(p, integrationId, button, box) {
 
 // --- adding one ----------------------------------------------------------------------------------
 
+const BADGE = {
+  ready: ["Ready to connect", "status-imported"],
+  needs_setup: ["Not set up yet", "status-undone"],
+  coming_soon: ["Coming soon", "status-undone"],
+};
+
+/** Every system Vyterlix connects to, in groups, each saying where it stands. */
 function addCard(providers, connections) {
-  const card = el("section", { class: "card" }, el("h2", { style: "margin-top:0" }, "Add a connection"));
+  const card = el("section", { class: "card" }, el("h2", { style: "margin-top:0" }, "Systems you can connect"));
   const live = new Set(connections.filter((c) => c.status !== "disconnected").map((c) => c.provider));
-  if (!providers.length) {
-    card.append(el("p", { class: "muted" }, "No other systems can be connected yet."));
-    return card;
-  }
-  for (const p of providers) {
-    const box = el("div", { class: "message", role: "alert", hidden: true });
-    const button = el("button", { type: "button" }, live.has(p.key) ? "Connect another account" : "Connect");
-    button.addEventListener("click", () => connect(p.key, null, button, box));
-    put(
-      card,
-      el(
-        "div",
-        { class: "connection" },
-        el("h3", {}, p.label),
-        el("p", { class: "muted" }, "If you connect, Vyterlix will be able to:"),
-        el("ul", {}, ...p.permissions.map((text) => el("li", {}, text))),
-        el("p", { class: "muted" }, "Read only. You can disconnect at any time."),
-        box,
-        el("div", { class: "actions", style: "margin:8px 0 0" }, button),
-      ),
-    );
+  const real = providers.filter((p) => p.key !== "sandbox");
+  const built = real.filter((p) => p.status !== "coming_soon").length;
+  card.append(
+    el(
+      "p",
+      { class: "muted" },
+      `${real.length} systems: ${built} built and ${real.length - built} on the way. Vyterlix only ever reads from them; it never changes anything.`,
+    ),
+  );
+  const groups = [...new Set(providers.map((p) => p.group))];
+  for (const group of groups) {
+    put(card, el("h3", { class: "connection-group" }, group));
+    for (const p of providers.filter((x) => x.group === group)) put(card, providerBlock(p, live));
   }
   return card;
+}
+
+function providerBlock(p, live) {
+  const [badgeText, badgeClass] = BADGE[p.status];
+  const box = el("div", { class: "message", role: "alert", hidden: true });
+  const head = el("h3", {}, p.label, " ", el("span", { class: `badge ${badgeClass}` }, badgeText));
+  if (p.status === "coming_soon") {
+    return el("div", { class: "connection" }, head, el("p", { class: "muted" }, `It will bring in: ${p.summary.charAt(0).toLowerCase()}${p.summary.slice(1)}`));
+  }
+  if (p.status === "needs_setup") {
+    return el(
+      "div",
+      { class: "connection" },
+      head,
+      el("p", { class: "muted" }, p.summary),
+      el("p", { class: "muted" }, "This connection is built. It switches on once Vyterlix has been registered with that system, which the Vyterlix team does."),
+    );
+  }
+  const button = el("button", { type: "button" }, live.has(p.key) ? "Connect another account" : "Connect");
+  button.addEventListener("click", () => connect(p.key, null, button, box));
+  return el(
+    "div",
+    { class: "connection" },
+    head,
+    el("p", { class: "muted" }, p.summary),
+    el(
+      "details",
+      {},
+      el("summary", {}, "What we would read"),
+      el("ul", {}, ...p.permissions.map((text) => el("li", {}, text))),
+      el("p", { class: "muted" }, "Read only. You can disconnect at any time."),
+    ),
+    box,
+    el("div", { class: "actions", style: "margin:8px 0 0" }, button),
+  );
 }
 
 // Start last, so every const above has been set up before the page first runs.

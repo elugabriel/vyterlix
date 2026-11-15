@@ -213,10 +213,10 @@ Performance, Demand Forecasting.
 - [ ] **Step 4: phone app** follows the website for everything above.
 - [~] **Two of the twelve modules have no figures yet** (Supplier Performance, Demand Forecasting) and so
   are not shown to anyone yet. Workforce & Productivity and Operational Performance have figures (step 2).
-- [ ] **Integrations page shows all 11** with an honest status each (Connected, Ready to connect, Needs
-  setup, Coming soon). Built: Xero, QuickBooks, Zoho, WooCommerce, Square, Google Analytics, TrueLayer.
-  Not built: Shopify, HubSpot, Meta (Facebook and Instagram), WhatsApp.
-
+- [x] **Integrations page shows all 11** (website): every system in groups, each with a status: Ready to
+  connect, Not set up yet (built, but this installation is not registered with that system), or Coming
+  soon. Built: Xero, QuickBooks, Zoho, WooCommerce, Square, Google Analytics, TrueLayer. Not built:
+  Shopify, HubSpot, Meta (Facebook and Instagram), WhatsApp. The phone app has no Connections screen.
 - [x] **A demo salon that shows every part** (`python -m app.cli.demo salon`; `unsalon` removes it). "Glow Hair &
   Beauty (demo data)": a made-up hair and beauty salon that also sells products, with a year of trading
   (1 November 2025 to 31 October 2026): about 3,800 appointments (times taken, ratings, cancellations,

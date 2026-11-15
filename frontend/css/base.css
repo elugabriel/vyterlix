@@ -864,3 +864,4 @@ progress.health-at_risk::-moz-progress-bar { background: var(--bad); }
 .report-latest { font-weight: 650; text-align: right; font-variant-numeric: tabular-nums; }
 .report-line .spark { margin: 0; max-width: 150px; height: 30px; }
 @media (max-width: 640px) { .component-row { grid-template-columns: 1fr; gap: 4px; } .report-line { grid-template-columns: 1fr auto; } .report-line .spark { grid-column: 1 / 3; } }
+.connection-group { margin: 22px 0 6px; font-size: 0.95rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
