@@ -213,15 +213,18 @@ Performance, Demand Forecasting.
   long it took (website and phone), and a new "Hours worked" entry takes who worked, which day and for how
   long (website tab, phone screen; API `/staff-hours`). The figures that need these only appear once some
   have been typed in. Not done: importing hours or times from a file, and a booking system to read them from.
-- [ ] **Step 3: Marketing ROI and cost per customer** (needs ad spend: the Meta connector or typed in),
-  **Supplier Performance**, **Demand Forecasting** for services (booking demand).
+- [~] **Step 3: Marketing ROI and cost per customer** are done through the Meta connector (see CHECKLIST: seven
+  figures under Marketing & Acquisition, with the demo salon showing them). Advert spend cannot yet be typed
+  in by hand (only Meta, or demo data, supplies it). **Supplier Performance** and **Demand Forecasting** for
+  services are not started.
 - [ ] **Step 4: phone app** follows the website for everything above.
 - [~] **Two of the twelve modules have no figures yet** (Supplier Performance, Demand Forecasting) and so
   are not shown to anyone yet. Workforce & Productivity and Operational Performance have figures (step 2).
 - [x] **Integrations page shows all 11** (website): every system in groups, each with a status: Ready to
   connect, Not set up yet (built, but this installation is not registered with that system), or Coming
-  soon. Built: Xero, QuickBooks, Zoho, WooCommerce, Square, Google Analytics, TrueLayer. Not built:
-  Shopify, HubSpot, Meta (Facebook and Instagram), WhatsApp. The phone app has no Connections screen.
+  soon. Built (8): Xero, QuickBooks, Zoho, WooCommerce, Square, Google Analytics, Meta (Facebook and
+  Instagram adverts), TrueLayer. Not built (3): Shopify, HubSpot, WhatsApp. The phone app has no Connections
+  screen.
 - [x] **A demo salon that shows every part** (`python -m app.cli.demo salon`; `unsalon` removes it). "Glow Hair &
   Beauty (demo data)": a made-up hair and beauty salon that also sells products, with a year of trading
   (1 November 2025 to 31 October 2026): about 3,800 appointments (times taken, ratings, cancellations,

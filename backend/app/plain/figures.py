@@ -670,6 +670,76 @@ WORDS: dict[str, Words] = {
             "Look for gaps in the diary, or appointments taking longer than planned.",
         ),
     ),
+    "ad_spend": Words(
+        Say(
+            "You spent more on adverts than {before}.",
+            "Check the extra money is bringing more customers, not only more clicks.",
+        ),
+        Say(
+            "You spent less on adverts than {before}.",
+            "Spending less is fine if your enquiries and sales have held up.",
+        ),
+    ),
+    "ad_clicks": Words(
+        Say(
+            "More people clicked on your adverts than {before}.",
+            "More clicks only help if they turn into enquiries and sales.",
+        ),
+        Say(
+            "Fewer people clicked on your adverts than {before}.",
+            "Check whether you spent less. If not, the adverts may be getting tired, and a fresh picture or message can help.",
+        ),
+    ),
+    "ad_cost_per_click": Words(
+        Say(
+            "Each click on your adverts cost more than {before}.",
+            "Clicks are getting dearer. A clearer message or a tighter group of people to show it to can bring the price down.",
+        ),
+        Say(
+            "Each click on your adverts cost less than {before}.",
+            "That is a good sign: your money is going further.",
+        ),
+    ),
+    "ad_results": Words(
+        Say(
+            "Your adverts brought more enquiries and orders than {before}.",
+            "That is a good sign that they are reaching the right people.",
+        ),
+        Say(
+            "Your adverts brought fewer enquiries and orders than {before}.",
+            "Look at which adverts are working and which are not, and put your money behind the better ones.",
+        ),
+    ),
+    "ad_cost_per_result": Words(
+        Say(
+            "Each enquiry or order from your adverts cost more than {before}.",
+            "You are paying more for the same result. It is worth looking at which adverts cost the most.",
+        ),
+        Say(
+            "Each enquiry or order from your adverts cost less than {before}.",
+            "That is a good sign: your adverts are working harder for the same money.",
+        ),
+    ),
+    "cost_per_new_customer": Words(
+        Say(
+            "Winning each new customer cost you more than {before}.",
+            "You spent more on adverts for each new customer. Remember that some new customers find you without an advert.",
+        ),
+        Say(
+            "Winning each new customer cost you less than {before}.",
+            "That is a good sign: each pound on adverts is going further.",
+        ),
+    ),
+    "sales_per_ad_pound": Words(
+        Say(
+            "You sold more for each £1 spent on adverts than {before}.",
+            "That is a good sign. It counts all your sales, not only those that came from an advert.",
+        ),
+        Say(
+            "You sold less for each £1 spent on adverts than {before}.",
+            "Either you spent more or you sold less. It counts all your sales, not only those that came from an advert.",
+        ),
+    ),
 }
 
 # When a profit figure is below zero the business is losing money, which "less profit than last

@@ -51,6 +51,7 @@ DATA_SOURCES = (
     "shopify",
     "woocommerce",
     "google_analytics",
+    "meta",
 )
 UK_VAT_RATES = ("0", "5", "20")  # %, as NUMERIC text; NULL = exempt / outside the scope of VAT
 SALE_KINDS = ("sale", "refund")
@@ -446,6 +447,29 @@ class WebVisit(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigi
     users: Mapped[int] = mapped_column(Integer, server_default="0")  # people who visited that day
     new_users: Mapped[int] = mapped_column(Integer, server_default="0")  # first-time visitors
     key_events: Mapped[int] = mapped_column(Integer, server_default="0")  # enquiries, orders...
+
+
+class AdSpend(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOriginMixin, Base):
+    """One day of advertising on one platform (Facebook, Instagram...): what was spent, how many
+    people saw it and clicked, and how many enquiries or orders it brought. What the money spent on
+    adverts, the cost of a click and the cost of a new customer are worked out from."""
+
+    __tablename__ = "ad_spend"
+    __table_args__ = (
+        *_origin_rules("ad_spend"),
+        CheckConstraint(
+            "spend >= 0 AND impressions >= 0 AND clicks >= 0 AND results >= 0",
+            name="amounts_not_negative",
+        ),
+        Index("ix_ad_spend_org_day", "organization_id", "day"),
+    )
+
+    day: Mapped[date] = mapped_column(Date)
+    platform: Mapped[str] = mapped_column(String(40))  # e.g. "Facebook", "Instagram"
+    spend: Mapped[Decimal] = mapped_column(Money)  # pounds
+    impressions: Mapped[int] = mapped_column(Integer, server_default="0")  # times it was shown
+    clicks: Mapped[int] = mapped_column(Integer, server_default="0")
+    results: Mapped[int] = mapped_column(Integer, server_default="0")  # enquiries, orders, messages
 
 
 class BankTransaction(

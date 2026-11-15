@@ -92,7 +92,11 @@ MODULES: tuple[Module, ...] = (
         "marketing",
         "Marketing & Acquisition",
         "How many people find you, and what they do next.",
-        ("website_visits", "website_new_visitors", "website_actions"),
+        (
+            "website_visits", "website_new_visitors", "website_actions", "ad_spend", "ad_clicks",
+            "ad_cost_per_click", "ad_results", "ad_cost_per_result", "cost_per_new_customer",
+            "sales_per_ad_pound",
+        ),
     ),
     # Figures for these are not worked out yet, so they stay out of sight until they are.
     Module(

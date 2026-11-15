@@ -34,6 +34,7 @@ from sqlalchemy.orm import Session
 from app.kpi import periods
 from app.models.business import BusinessListItem
 from app.models.data import (
+    AdSpend,
     BankTransaction,
     Booking,
     Expense,
@@ -60,6 +61,7 @@ PRESENCE = {
     "ratings": select(Booking.id).where(Booking.rating.is_not(None)),
     "timed": select(Booking.id).where(Booking.minutes_taken.is_not(None)),
     "staff_hours": select(StaffHours.id),
+    "ads": select(AdSpend.id),
     "web": select(WebVisit.id),
     "bank": select(BankTransaction.id),
 }
@@ -393,6 +395,21 @@ def _timed(*conditions, total=None) -> Compute:
                 Booking.minutes_taken.is_not(None),
                 *conditions,
             )
+            .group_by(bucket)
+        )
+        return _decimals(db.execute(query))
+
+    return compute
+
+
+def _ads(column) -> Compute:
+    """What the adverts cost, how many clicks and how many results they brought, day by day."""
+
+    def compute(db: Session, granularity: str, start: date, end: date) -> Series:
+        bucket = _bucket(AdSpend.day, granularity)
+        query = (
+            select(bucket, func.coalesce(func.sum(column), 0))
+            .where(AdSpend.day >= start, AdSpend.day <= end)
             .group_by(bucket)
         )
         return _decimals(db.execute(query))
@@ -778,6 +795,9 @@ MEASURES: dict[str, Measure] = {
             ),
         ),
         Measure("hours_worked", "Hours staff worked", "staff_hours", _staff_hours),
+        Measure("ad_spend", "Spent on adverts", "ads", _ads(AdSpend.spend)),
+        Measure("ad_clicks", "Clicks on adverts", "ads", _ads(AdSpend.clicks)),
+        Measure("ad_results", "Enquiries and orders from adverts", "ads", _ads(AdSpend.results)),
         Measure("late_cancellations", "Late cancellations", "bookings", _late_cancellations),
         Measure("customers_kept", "Customers who kept an appointment", "bookings", _kept_customers),
         Measure(

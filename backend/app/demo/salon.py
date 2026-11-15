@@ -29,6 +29,7 @@ from app.demo import showcase
 from app.main import create_app
 from app.models.business import BusinessListItem
 from app.models.data import (
+    AdSpend,
     BankTransaction,
     Booking,
     Customer,
@@ -614,6 +615,26 @@ def _website(db: Session, rng: random.Random) -> None:
     db.flush()
 
 
+def _adverts(db: Session, rng: random.Random) -> None:
+    """What was spent on Facebook and Instagram adverts each day, with the clicks and enquiries
+    they brought. Spending rises in September and October, which the marketing figures show."""
+    day = START
+    while day <= END:
+        step = 1.0 + (0.45 if day >= date(2026, 9, 1) else 0.0)
+        for platform, base, per_click in (("Facebook", 7.5, 0.62), ("Instagram", 6.0, 0.48)):
+            spend = _money(max(1, rng.gauss(base * step, base * 0.1)))
+            clicks = round(float(spend) / per_click * rng.uniform(0.9, 1.1))
+            results = round(clicks * rng.uniform(0.03, 0.06))
+            db.add(
+                AdSpend(
+                    day=day, platform=platform, spend=spend, impressions=clicks * rng.randint(38, 55),
+                    clicks=clicks, results=results,
+                )
+            )  # fmt: skip
+        day += timedelta(days=1)
+    db.flush()
+
+
 def _bank(db: Session, rng: random.Random) -> None:
     """Card takings paid in each open day, and the usual payments out."""
     takings: dict[date, D] = {}
@@ -728,11 +749,14 @@ def run(say: Callable[[str], None] = print) -> uuid.UUID:
         with tenant_scope(db, org_id):
             ids = _lists(db)
             trading = _trading(db, ids, rng, say)
-            say("  invoices, costs, the team's hours, website visits, bank movements and leads")
+            say(
+                "  invoices, costs, the team's hours, website visits, adverts, bank movements and leads"
+            )
             _invoices(db, trading["people"], rng)
             _costs(db, ids, trading["suppliers"], rng)
             _hours(db, rng)
             _website(db, rng)
+            _adverts(db, rng)
             _bank(db, rng)
             _leads(db, trading["people"], rng)
             db.commit()

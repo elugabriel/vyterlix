@@ -322,6 +322,9 @@ def list_kpis(db: Session, granularity: str = "month", *, respect_choices: bool 
     if not has_records(db, "pipeline"):
         # Leads and win rates are for a business that quotes for work
         definitions = [d for d in definitions if "pipeline" not in d.requires]
+    if not has_records(db, "ads"):
+        # Advert figures are for a business whose adverts have been connected or typed in
+        definitions = [d for d in definitions if "ads" not in d.requires]
     if not has_records(db, "timed"):
         # How long appointments took is for a business that types the times in
         definitions = [d for d in definitions if "timed" not in d.requires]

@@ -8,6 +8,7 @@ from app.core.config import get_settings
 from app.core.errors import AppError
 from app.integrations.base import Provider
 from app.integrations.google_analytics import GoogleAnalyticsProvider
+from app.integrations.meta import MetaProvider
 from app.integrations.quickbooks import QuickBooksProvider
 from app.integrations.sandbox import SandboxProvider
 from app.integrations.square import SquareProvider
@@ -22,6 +23,7 @@ PROVIDERS: dict[str, Provider] = {
         SandboxProvider(),
         XeroProvider(),
         GoogleAnalyticsProvider(),
+        MetaProvider(),
         QuickBooksProvider(),
         SquareProvider(),
         TrueLayerProvider(),
@@ -67,7 +69,6 @@ SYSTEMS: tuple[tuple[str, str, str], ...] = (
 )  # fmt: skip
 NOT_BUILT = {
     "shopify": "Shopify",
-    "meta": "Facebook and Instagram (Meta)",
     "hubspot": "HubSpot",
     "whatsapp": "WhatsApp Business",
 }

@@ -92,6 +92,10 @@ class Settings(BaseSettings):
     # Google Analytics (Google Cloud console).
     google_client_id: str | None = None
     google_client_secret: SecretStr | None = None
+    # Meta, for Facebook and Instagram adverts (developers.facebook.com).
+    meta_app_id: str | None = None
+    meta_app_secret: SecretStr | None = None
+    meta_graph_version: str = "v21.0"
     # TrueLayer (console.truelayer.com). "sandbox" is the practice bank, "live" real banks, which
     # TrueLayer only allows after it has approved the app.
     truelayer_client_id: str | None = None

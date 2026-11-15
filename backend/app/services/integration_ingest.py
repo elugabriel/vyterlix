@@ -16,7 +16,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.data import BankTransaction, Expense, Sale, WebVisit
+from app.models.data import AdSpend, BankTransaction, Expense, Sale, WebVisit
 from app.services import import_records
 from app.services.import_rows import RowOutcome
 
@@ -76,6 +76,44 @@ def _ingest_web_visits(
     return made
 
 
+def _ingest_ad_spend(
+    db: Session, organization_id: uuid.UUID, source: str, rows: list[dict[str, Any]]
+) -> int:
+    """One row per day and platform. Meta revises recent days, so what is stored is brought up to
+    date. Returns how many days were new."""
+    refs = [r["reference"] for r in rows]
+    existing = {
+        a.source_ref: a
+        for a in db.scalars(
+            select(AdSpend).where(AdSpend.source == source, AdSpend.source_ref.in_(refs))
+        )
+    }
+    made = 0
+    for row in rows:
+        found = existing.get(row["reference"])
+        if found is None:
+            db.add(
+                AdSpend(
+                    organization_id=organization_id,
+                    source=source,
+                    source_ref=row["reference"],
+                    day=row["day"],
+                    platform=row["platform"],
+                    spend=row["spend"],
+                    impressions=row["impressions"],
+                    clicks=row["clicks"],
+                    results=row["results"],
+                )
+            )
+            made += 1
+        else:
+            found.spend = row["spend"]
+            found.impressions, found.clicks, found.results = (
+                row["impressions"], row["clicks"], row["results"],
+            )  # fmt: skip
+    return made
+
+
 def _ingest_bank_transactions(
     db: Session, organization_id: uuid.UUID, source: str, rows: list[dict[str, Any]]
 ) -> int:
@@ -118,6 +156,9 @@ def ingest(
     for dataset, rows in datasets.items():
         if dataset == "web_visits" and rows:
             created["web_visits"] += _ingest_web_visits(db, organization_id, source, rows)
+            continue
+        if dataset == "ad_spend" and rows:
+            created["ad_spend"] += _ingest_ad_spend(db, organization_id, source, rows)
             continue
         if dataset == "bank_transactions" and rows:
             created["bank_transactions"] += _ingest_bank_transactions(

@@ -493,7 +493,11 @@ def run_sync(ctx: JobContext) -> dict[str, Any]:
                 db, ctx.tenant.organization_id, provider_key, outcome.datasets
             )
             created_count = (
-                made["sales"] + made["expenses"] + made["web_visits"] + made["bank_transactions"]
+                made["sales"]
+                + made["expenses"]
+                + made["web_visits"]
+                + made["bank_transactions"]
+                + made["ad_spend"]
             )
     except ReauthRequired as exc:
         db.rollback()
