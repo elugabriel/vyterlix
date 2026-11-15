@@ -176,3 +176,35 @@ Her figures are illustrations, not real results.
 5. Business type at onboarding and a "no empty stock section" rule (section 6, first part).
 6. The missing recommendations (section 4).
 7. Service-business data and figures (section 6, last item): its own phase, once the client agrees scope.
+
+---
+
+# Second round of feedback (15/11/2026)
+
+The client said the demo is still centred on product businesses, and asked for twelve analytics
+modules that adapt to the type of business, with the health score reflecting the relevant ones; and
+for the integrations to be shown as 11 (only 6 or 7 were visible).
+
+The twelve: Operational Performance, Customer Retention & Loyalty, Service & Product Profitability,
+Marketing ROI & Customer Acquisition, Financial Intelligence & Forecasting, Sales & Revenue, Customer
+Intelligence, Stock & Inventory, Workforce & Productivity, Booking & Appointment, Supplier
+Performance, Demand Forecasting.
+
+- [~] **Step 1: the module layer** (`app/modules/rules.py`). Each figure now belongs to one module and the
+  Key figures page (website and phone) is grouped by module, each with a one-line summary. Which modules a
+  business sees follows what it sells (a service business has no Stock module, a product business no
+  Bookings module, "both" sees both) and a module stays hidden until it has figures. The health score
+  counts only the areas that fit the business (no stock for a service, no appointments for a shop), and
+  new health rules judge no-shows, cancellations, appointments kept, rebooking, ratings and the website.
+  Migration `751ad8f7b840`.
+- [ ] **Step 1b: owner switches** to show or hide a module in Settings (table, API, website, phone).
+- [ ] **Step 2: service-side figures** for Booking, Retention, Workforce and Operational Performance, from
+  data already held, plus what needs typing in or importing (hours worked, job times).
+- [ ] **Step 3: Marketing ROI and cost per customer** (needs ad spend: the Meta connector or typed in),
+  **Supplier Performance**, **Demand Forecasting** for services (booking demand).
+- [ ] **Step 4: phone app** follows the website for everything above.
+- [~] **Four of the twelve modules have no figures yet** (Workforce & Productivity, Operational
+  Performance, Supplier Performance, Demand Forecasting) and so are not shown to anyone yet.
+- [ ] **Integrations page shows all 11** with an honest status each (Connected, Ready to connect, Needs
+  setup, Coming soon). Built: Xero, QuickBooks, Zoho, WooCommerce, Square, Google Analytics, TrueLayer.
+  Not built: Shopify, HubSpot, Meta (Facebook and Instagram), WhatsApp.

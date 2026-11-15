@@ -51,6 +51,7 @@ class Kpi {
     required this.latest,
     required this.current,
     this.plain,
+    this.module,
   });
 
   factory Kpi.fromJson(Map<String, dynamic> json) => Kpi(
@@ -58,6 +59,7 @@ class Kpi {
     name: '${json['name']}',
     description: '${json['description']}',
     category: '${json['category']}',
+    module: json['module'] as String?,
     unit: '${json['unit']}',
     direction: '${json['direction']}',
     requires: [for (final r in (json['requires'] as List? ?? const [])) '$r'],
@@ -79,6 +81,9 @@ class Kpi {
 
   /// financial, sales, customer or inventory
   final String category;
+
+  /// The part of Vyterlix the figure is shown in (sales, bookings, inventory...), if it has one.
+  final String? module;
   final String unit;
 
   /// up_good, down_good or neutral

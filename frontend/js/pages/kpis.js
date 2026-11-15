@@ -36,14 +36,15 @@ async function load() {
   const data = await guard(message, () => api.get(`${base}?granularity=${GRANULARITY}`));
   if (!data) return;
   const header = headerCard(data);
+  // The figures are grouped into the parts of Vyterlix this business sees (Sales & Revenue, Bookings &
+  // Appointments...). Older answers without modules fall back to the five plain groups.
+  const parts = data.modules?.length
+    ? data.modules.map((m) => ({ code: m.code, name: m.name, summary: m.summary }))
+    : CATEGORY_ORDER.map((c) => ({ code: c, name: CATEGORY_TITLE[c], summary: null }));
   const groups = {};
-  for (const kpi of data.kpis) (groups[kpi.category] ??= []).push(kpi);
+  for (const kpi of data.kpis) (groups[data.modules?.length ? kpi.module : kpi.category] ??= []).push(kpi);
   const slots = el("div", { class: "stack" });
-  content.replaceChildren(
-    header,
-    ...CATEGORY_ORDER.filter((c) => groups[c]).map((c) => groupCard(c, groups[c])),
-    slots,
-  );
+  content.replaceChildren(header, ...parts.filter((p) => groups[p.code]).map((p) => groupCard(p, groups[p.code])), slots);
   drawSparks();
   await loadBreakdowns(slots);
 }
@@ -225,11 +226,12 @@ function headerCard(data) {
 
 // --- the figures ---------------------------------------------------------------------------------------------
 
-function groupCard(category, kpis) {
+function groupCard(part, kpis) {
   return el(
     "section",
-    { class: "card" },
-    el("h2", { style: "margin-top:0" }, CATEGORY_TITLE[category] ?? category),
+    { class: "card", id: `module-${part.code}` },
+    el("h2", { style: "margin-top:0" }, part.name ?? part.code),
+    part.summary ? el("p", { class: "muted", style: "margin-top:-8px" }, part.summary) : null,
     el("div", { class: "kpi-grid" }, ...kpis.map(kpiTile)),
   );
 }

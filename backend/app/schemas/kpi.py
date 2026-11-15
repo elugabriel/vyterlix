@@ -46,11 +46,20 @@ class RunOut(BaseModel):
     error_message: str | None
 
 
+class ModuleOut(BaseModel):
+    """A part of Vyterlix a business sees ("Bookings & Appointments") and what it is about."""
+
+    code: str
+    name: str
+    summary: str
+
+
 class KpiOut(BaseModel):
     code: str
     name: str
     description: str
     category: str
+    module: str | None = None  # the part of Vyterlix this figure is shown in
     unit: Literal["gbp", "percent", "count", "ratio"]
     direction: Literal["up_good", "down_good", "neutral"]
     requires: list[str]  # kinds of record it needs: sales, expenses, customer_sales, stock
@@ -61,6 +70,7 @@ class KpiOut(BaseModel):
 
 class KpisOut(BaseModel):
     granularity: Granularity
+    modules: list[ModuleOut] = []  # the parts this business sees, in order, each with figures
     kpis: list[KpiOut]
     last_run: RunOut | None  # None until the engine has run for this business
 

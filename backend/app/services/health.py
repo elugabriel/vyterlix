@@ -22,6 +22,7 @@ from app.core.errors import NotFoundError
 from app.health import scoring
 from app.integrations.base import utcnow
 from app.kpi import periods
+from app.kpi.measures import has_records
 from app.models.business import BusinessProfile, BusinessSeason
 from app.models.health import (
     BusinessHealth,
@@ -30,6 +31,7 @@ from app.models.health import (
     HealthRule,
 )
 from app.models.kpi import KpiDefinition, KpiValue
+from app.modules.rules import health_area_counts
 from app.schemas.health import (
     ComponentOut,
     HealthHistoryOut,
@@ -285,6 +287,10 @@ def calculate(db: Session, tenant, *, today: date | None = None) -> HealthRun:
     industry = _industry(db)
     rules = active_rules(db, industry)
     weights = category_weights(db, industry)
+    # Only the areas that make sense for what this business sells count towards its score.
+    sells = db.scalar(select(BusinessProfile.sells))
+    has_bookings = has_records(db, "bookings")
+    weights = {a: w for a, w in weights.items() if health_area_counts(a, sells, has_bookings)}
     series, info = _series(db, {r.kpi_code for r in rules})
     seasons = confirmed_seasons(db)
     months = sorted({p for per in series.values() for p in per})

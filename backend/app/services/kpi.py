@@ -39,8 +39,17 @@ from app.models.data import (
     WebVisit,
 )
 from app.models.kpi import KpiCalculationRun, KpiDefinition, KpiValue
+from app.modules.rules import module_of, visible_modules
 from app.plain.figures import explain_figure
-from app.schemas.kpi import KpiHistoryOut, KpiOut, KpisOut, KpiValueOut, PlainOut, RunOut
+from app.schemas.kpi import (
+    KpiHistoryOut,
+    KpiOut,
+    KpisOut,
+    KpiValueOut,
+    ModuleOut,
+    PlainOut,
+    RunOut,
+)
 from app.services.data_quality import build_report
 
 logger = logging.getLogger("vyterlix.kpi")
@@ -348,14 +357,17 @@ def list_kpis(db: Session, granularity: str = "month") -> KpisOut:
         row = by_key.get((definition.id, period)) if period else None
         return _value_out(row, definition.unit) if row else None
 
+    shown = visible_modules(sells, {d.code for d in definitions})
     return KpisOut(
         granularity=granularity,
+        modules=[ModuleOut(code=m.code, name=m.name, summary=m.summary) for m in shown],
         kpis=[
             KpiOut(
                 code=d.code,
                 name=d.name,
                 description=d.description,
                 category=d.category,
+                module=module_of(d.code),
                 unit=d.unit,
                 direction=d.direction,
                 requires=list(d.requires),

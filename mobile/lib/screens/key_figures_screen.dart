@@ -10,6 +10,15 @@ import '../widgets/charts.dart';
 import '../widgets/common.dart';
 import '../widgets/plain.dart';
 
+/// A part of Vyterlix the business sees, as the server describes it.
+class _Part {
+  const _Part(this.code, this.name, this.summary);
+
+  final String code;
+  final String name;
+  final String summary;
+}
+
 const _categoryTitle = {
   'financial': 'Financial Health',
   'sales': 'Sales',
@@ -45,6 +54,7 @@ class KeyFiguresScreen extends StatefulWidget {
 
 class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
   List<Kpi>? _kpis;
+  List<_Part> _parts = const [];
   QuietCustomers? _followUp;
   ServicesBooked? _services;
   TeamWorkload? _team;
@@ -68,6 +78,14 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
       if (!mounted) return;
       final run = data['last_run'];
       setState(() {
+        _parts = [
+          for (final m in (data['modules'] as List? ?? const []))
+            _Part(
+              '${(m as Map<String, dynamic>)['code']}',
+              '${m['name']}',
+              '${m['summary']}',
+            ),
+        ];
         _kpis = [
           for (final k in (data['kpis'] as List))
             Kpi.fromJson(k as Map<String, dynamic>),
@@ -136,9 +154,15 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
     final kpis = _kpis;
     if (kpis == null) return const Center(child: CircularProgressIndicator());
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    // The figures are grouped into the parts of Vyterlix this business sees (Sales & Revenue,
+    // Bookings & Appointments...). Without any, fall back to the five plain groups.
+    final parts = _parts.isNotEmpty
+        ? _parts
+        : [for (final c in _categoryOrder) _Part(c, _categoryTitle[c]!, '')];
     final groups = <String, List<Kpi>>{};
     for (final k in kpis) {
-      groups.putIfAbsent(k.category, () => []).add(k);
+      final key = _parts.isNotEmpty ? (k.module ?? k.category) : k.category;
+      groups.putIfAbsent(key, () => []).add(k);
     }
     return RefreshIndicator(
       onRefresh: _load,
@@ -151,9 +175,14 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
                 : 'Worked out on ${ukDateTime(_workedOut!)}. They update by themselves after an import.',
             style: TextStyle(color: muted),
           ),
-          for (final category in _categoryOrder)
-            if (groups.containsKey(category)) ...[
-              SectionTitle(_categoryTitle[category]!),
+          for (final part in parts)
+            if (groups.containsKey(part.code)) ...[
+              SectionTitle(part.name),
+              if (part.summary.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(part.summary, style: TextStyle(color: muted)),
+                ),
               LayoutBuilder(
                 builder: (context, constraints) {
                   final columns = constraints.maxWidth > 620 ? 3 : 2;
@@ -163,7 +192,7 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
                     spacing: 12,
                     runSpacing: 12,
                     children: [
-                      for (final k in groups[category]!)
+                      for (final k in groups[part.code]!)
                         SizedBox(
                           width: width,
                           child: _KpiCard(
