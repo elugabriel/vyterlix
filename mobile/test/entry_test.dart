@@ -104,6 +104,87 @@ void main() {
     expect(find.text('Appointment saved.'), findsOneWidget);
   });
 
+  testWidgets('an appointment can say how long it was meant to take and took', (
+    tester,
+  ) async {
+    final server = entryServer();
+    await open(tester, server);
+    await tester.tap(find.text('Type in an appointment'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Service'), 'Cut');
+    await tester.enterText(
+      find.widgetWithText(
+        TextField,
+        'How long is it meant to take? (minutes, optional)',
+      ),
+      '60',
+    );
+    await tester.enterText(
+      find.widgetWithText(
+        TextField,
+        'How long did it take? (minutes, optional)',
+      ),
+      '75',
+    );
+    await tester.tap(find.text('Save appointment'));
+    await tester.pumpAndSettle();
+    final body = server.bodyOf(
+      server.to('POST /organizations/b1/bookings').single,
+    );
+    expect(body['minutes_planned'], 60);
+    expect(body['minutes_taken'], 75);
+  });
+
+  testWidgets('hours worked are sent with who worked and for how long', (
+    tester,
+  ) async {
+    final server = entryServer()
+      ..json('POST /organizations/b1/staff-hours', {'id': 'h1'}, 201);
+    await open(tester, server);
+    await tester.tap(find.text('Type in hours worked'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Who worked? (a name)'),
+      ' Mia ',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Hours worked'),
+      '7.5',
+    );
+    await tester.tap(find.text('Save hours'));
+    await tester.pumpAndSettle();
+    final body = server.bodyOf(
+      server.to('POST /organizations/b1/staff-hours').single,
+    );
+    expect(body['staff'], 'Mia');
+    expect(body['hours'], '7.5');
+    expect(find.text('Hours saved.'), findsOneWidget);
+  });
+
+  testWidgets('hours worked are refused when they are too many', (
+    tester,
+  ) async {
+    final server = entryServer();
+    await open(tester, server);
+    await tester.tap(find.text('Type in hours worked'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Who worked? (a name)'),
+      'Mia',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Hours worked'),
+      '30',
+    );
+    await tester.tap(find.text('Save hours'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Hours must be more than 0 and no more than 24.'),
+      findsOneWidget,
+    );
+    expect(server.to('POST /organizations/b1/staff-hours'), isEmpty);
+  });
+
   testWidgets('a lead or proposal is sent with where it is up to', (
     tester,
   ) async {

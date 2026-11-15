@@ -36,6 +36,7 @@ from app.models.data import (
     Project,
     Sale,
     SaleLine,
+    StaffHours,
     StockMovement,
     Supplier,
 )
@@ -70,6 +71,10 @@ from app.schemas.trading import (
     SaleOut,
     SalePatch,
     SalesPage,
+    StaffHoursCreate,
+    StaffHoursOut,
+    StaffHoursPage,
+    StaffHoursPatch,
     StockLevelOut,
     StockMovementCreate,
     StockMovementOut,
@@ -857,11 +862,19 @@ def update_booking(
     booking = _get(db, Booking, booking_id, "Booking")
     if "customer_id" in body.model_fields_set:
         _must_exist(db, Customer, body.customer_id, "customer_id", "customer")
-    _apply(booking, body, nullable={"customer_id", "staff", "cancelled_on", "rating", "notes"})
+    _apply(
+        booking,
+        body,
+        nullable={
+            "customer_id", "staff", "cancelled_on", "rating", "minutes_planned", "minutes_taken",
+            "notes",
+        },
+    )  # fmt: skip
     if booking.status != "cancelled":
         booking.cancelled_on = None  # no longer cancelled, so there is no day to keep
     if booking.status != "completed":
         booking.rating = None  # it did not go ahead, so there is nothing to rate
+        booking.minutes_taken = None  # nor a time it took
     try:
         check_cancellation(booking.status, booking.cancelled_on, booking.booked_for)
     except ValueError as exc:
@@ -903,6 +916,63 @@ def list_bookings(
         query = query.where(Booking.service.ilike(f"%{_like(q)}%", escape="\\"))
     total, rows = _page(db, query, (Booking.booked_for.desc(), Booking.id), limit, offset)
     return BookingsPage(total=total, items=[BookingOut.model_validate(r) for r in rows])
+
+
+# --- hours staff worked -----------------------------------------------------------
+
+
+@_atomic
+def create_staff_hours(
+    db: Session, tenant, body: StaffHoursCreate, meta: RequestMeta
+) -> StaffHoursOut:
+    row = StaffHours(**body.model_dump())
+    db.add(row)
+    db.flush()
+    _audit(db, tenant, meta, AuditAction.RECORD_CREATED, "staff_hours", row.id)
+    return StaffHoursOut.model_validate(row)
+
+
+def get_staff_hours(db: Session, row_id: uuid.UUID) -> StaffHoursOut:
+    return StaffHoursOut.model_validate(_get(db, StaffHours, row_id, "Hours"))
+
+
+@_atomic
+def update_staff_hours(
+    db: Session, tenant, row_id: uuid.UUID, body: StaffHoursPatch, meta: RequestMeta
+) -> StaffHoursOut:
+    row = _get(db, StaffHours, row_id, "Hours")
+    _apply(row, body, nullable={"notes"})
+    db.flush()
+    _audit(
+        db, tenant, meta, AuditAction.RECORD_UPDATED, "staff_hours", row.id,
+        fields=sorted(body.model_fields_set),
+    )  # fmt: skip
+    db.refresh(row)
+    return StaffHoursOut.model_validate(row)
+
+
+def delete_staff_hours(db: Session, tenant, row_id: uuid.UUID, meta: RequestMeta) -> None:
+    _delete(db, tenant, meta, StaffHours, row_id, "staff_hours", "hours", archivable=False)
+
+
+def list_staff_hours(
+    db: Session,
+    *,
+    date_from: date | None,
+    date_to: date | None,
+    staff: str | None,
+    limit: int,
+    offset: int,
+) -> StaffHoursPage:
+    query = select(StaffHours)
+    if date_from:
+        query = query.where(StaffHours.worked_on >= date_from)
+    if date_to:
+        query = query.where(StaffHours.worked_on <= date_to)
+    if staff:
+        query = query.where(StaffHours.staff.ilike(f"%{_like(staff)}%", escape="\\"))
+    total, rows = _page(db, query, (StaffHours.worked_on.desc(), StaffHours.id), limit, offset)
+    return StaffHoursPage(total=total, items=[StaffHoursOut.model_validate(r) for r in rows])
 
 
 # --- leads, proposals and renewals ------------------------------------------------

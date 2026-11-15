@@ -22,6 +22,7 @@ const TABS = [
   ["stock", "Stock"],
   ["project", "Project"],
   ["booking", "Appointment"],
+  ["hours", "Hours worked"],
   ["opportunity", "Lead or proposal"],
 ];
 const STAGES = [
@@ -114,14 +115,14 @@ async function render() {
       return button;
     }),
   );
-  const builder = { sale, expense, customer, supplier, product, stock, project, booking, opportunity }[tab];
+  const builder = { sale, expense, customer, supplier, product, stock, project, booking, hours, opportunity }[tab];
   const { form, recent } = builder();
   const box = el("div", { class: "message", role: "alert", hidden: true });
   const listBox = el("div", {});
   const label = TABS.find(([key]) => key === tab)[1];
   content.replaceChildren(
     tabs,
-    el("section", { class: "card" }, el("h2", { style: "margin-top:0" }, `Add ${tab === "booking" ? "an" : "a"} ${label.toLowerCase()}`), box, form.node),
+    el("section", { class: "card" }, el("h2", { style: "margin-top:0" }, tab === "hours" ? "Add hours worked" : `Add ${tab === "booking" ? "an" : "a"} ${label.toLowerCase()}`), box, form.node),
     el("section", { class: "card" }, el("h2", { style: "margin-top:0" }, recent.title), listBox),
   );
   bindForm(form.node, box, async (values) => {
@@ -201,12 +202,14 @@ function deleteControl(url, onDone) {
 async function showRecent(recent, into) {
   const page = await api.get(path(`${recent.path}?limit=8`));
   into.replaceChildren(
-    table(
-      recent.headers,
-      page.items.map((item) => [...recent.cells(item), deleteControl(path(`${recent.path}/${item.id}`), render)]),
-      { empty: "Nothing added yet." },
-    ),
-    page.total > 8 ? el("p", { class: "muted" }, `Showing the first 8 of ${number(page.total)}.`) : null,
+    ...[
+      table(
+        recent.headers,
+        page.items.map((item) => [...recent.cells(item), deleteControl(path(`${recent.path}/${item.id}`), render)]),
+        { empty: "Nothing added yet." },
+      ),
+      page.total > 8 ? el("p", { class: "muted" }, `Showing the first 8 of ${number(page.total)}.`) : null,
+    ].filter(Boolean),
   );
 }
 
@@ -533,18 +536,25 @@ function booking() {
     cancelledField.hidden = status.value !== "cancelled";
     ratingField.hidden = status.value !== "completed";
   };
-  status.addEventListener("change", sync);
+  const takenField = field("How long did it take? (minutes, optional)", input("minutes_taken", { type: "number", min: "1", max: "1440", step: "1" }), "With the planned time, this shows how often appointments run over.");
+  const sync2 = () => (takenField.hidden = status.value !== "completed");
+  status.addEventListener("change", () => {
+    sync();
+    sync2();
+  });
   const node = el(
     "form",
     { novalidate: true },
     el("div", { class: "row" }, field("Service", picker("service", choices.usedServices, { maxlength: 200, required: true }), "Pick one you have used, or type a new one. For example: haircut, boiler service, consultation."), dateField("booked_for", "Day of the appointment")),
     el("div", { class: "row" }, field("What happened?", status), cancelledField, ratingField),
     el("div", { class: "row" }, field("Customer (optional)", select("customer_id", choices.customers, { placeholder: "Not recorded" }), "Choose one to see who books again."), field("Who was doing it? (optional)", picker("staff", choices.usedStaff, { maxlength: 100 }))),
+    el("div", { class: "row" }, field("How long is it meant to take? (minutes, optional)", input("minutes_planned", { type: "number", min: "1", max: "1440", step: "1" })), takenField),
     el("div", { class: "row" }, field("Notes (optional)", input("notes", { maxlength: 300 }))),
     choices.customers.length ? null : el("p", { class: "hint" }, "To see who books again, add your customers first (the Customer tab)."),
     el("button", { type: "submit" }, "Save appointment"),
   );
   sync();
+  sync2();
   return {
     form: {
       node,
@@ -557,6 +567,8 @@ function booking() {
           staff: orNull(v.staff),
           cancelled_on: v.status === "cancelled" ? orNull(v.cancelled_on) : null,
           rating: v.status === "completed" && v.rating ? Number(v.rating) : null,
+          minutes_planned: v.minutes_planned ? Number(v.minutes_planned) : null,
+          minutes_taken: v.status === "completed" && v.minutes_taken ? Number(v.minutes_taken) : null,
           notes: orNull(v.notes),
         }),
     },
@@ -567,9 +579,34 @@ function booking() {
       cells: (b) => [
         ukDate(b.booked_for),
         b.service,
-        `${BOOKING_STATUSES.find(([k]) => k === b.status)?.[1] ?? b.status}${b.rating ? ` (rated ${b.rating}/5)` : ""}`,
+        `${BOOKING_STATUSES.find(([k]) => k === b.status)?.[1] ?? b.status}${b.rating ? ` (rated ${b.rating}/5)` : ""}${b.minutes_taken ? `, took ${b.minutes_taken} min` : ""}`,
         b.customer_id ? (customerName(b.customer_id) ?? "Unknown customer") : "Not recorded",
       ],
+    },
+  };
+}
+
+// --- hours worked ----------------------------------------------------------------------------------------------------------
+
+function hours() {
+  const node = el(
+    "form",
+    { novalidate: true },
+    el("div", { class: "row" }, dateField("worked_on", "Day worked"), field("Who worked? (a name)", picker("staff", choices.usedStaff, { maxlength: 100, required: true }), "Use the same name you use on appointments.")),
+    el("div", { class: "row" }, field("Hours worked", input("hours", { type: "number", min: "0.25", max: "24", step: "0.25", required: true }), "For example: 7.5."), field("Notes (optional)", input("notes", { maxlength: 300 }))),
+    el("p", { class: "hint" }, "These hours let Vyterlix show your sales for each hour worked, and how much of your team's time went on appointments."),
+    el("button", { type: "submit" }, "Save hours"),
+  );
+  return {
+    form: {
+      node,
+      submit: (v) => api.post(path("staff-hours"), { worked_on: v.worked_on, staff: v.staff, hours: v.hours, notes: orNull(v.notes) }),
+    },
+    recent: {
+      path: "staff-hours",
+      title: "Latest hours worked (newest first)",
+      headers: ["Day", "Who", "Hours", ""],
+      cells: (h) => [ukDate(h.worked_on), h.staff, `${Number(h.hours)}`],
     },
   };
 }

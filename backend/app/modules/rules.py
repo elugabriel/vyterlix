@@ -56,20 +56,26 @@ MODULES: tuple[Module, ...] = (
         (
             "customer_retention_pct", "customer_churn_pct", "repeat_customer_rate_pct",
             "returning_customers", "rebooking_rate_pct", "regular_clients", "renewal_rate_pct",
-            "happy_ratings_pct", "unhappy_ratings_pct",
+            "happy_ratings_pct", "unhappy_ratings_pct", "visits_per_customer",
         ),
     ),  # fmt: skip
     Module(
         "customers",
         "Customer Insight",
         "Who your customers are and what each is worth.",
-        ("active_customers", "new_customers", "average_customer_value", "customers_identified_pct"),
+        (
+            "active_customers", "new_customers", "new_clients", "average_customer_value",
+            "customers_identified_pct",
+        ),
     ),
     Module(
         "bookings",
         "Bookings & Appointments",
         "Appointments kept, cancelled and missed.",
-        ("appointments_kept", "cancellation_rate_pct", "no_show_rate_pct", "late_cancellations"),
+        (
+            "appointments_booked", "appointments_kept", "cancellation_rate_pct", "no_show_rate_pct",
+            "late_cancellations",
+        ),
         needs="services",
     ),
     Module(
@@ -88,9 +94,19 @@ MODULES: tuple[Module, ...] = (
         "How many people find you, and what they do next.",
         ("website_visits", "website_new_visitors", "website_actions"),
     ),
-    # Figures for these four are not worked out yet, so they stay out of sight until they are.
-    Module("workforce", "Workforce & Productivity", "How your team's time is used.", ()),
-    Module("operations", "Operational Performance", "How well the work gets done.", ()),
+    # Figures for these are not worked out yet, so they stay out of sight until they are.
+    Module(
+        "workforce",
+        "Workforce & Productivity",
+        "How your team's time is used.",
+        ("hours_worked", "revenue_per_hour", "utilisation_pct", "appointments_per_hour"),
+    ),
+    Module(
+        "operations",
+        "Operational Performance",
+        "How well the work gets done.",
+        ("completion_rate_pct", "average_appointment_minutes", "overrun_pct"),
+    ),
     Module("suppliers", "Supplier Performance", "How reliable and fair your suppliers are.", ()),
     Module("demand", "Demand Forecasting", "What to expect next, so you can be ready.", ()),
 )  # fmt: skip

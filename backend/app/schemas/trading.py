@@ -509,6 +509,14 @@ def check_rating(status: str, rating: int | None) -> None:
         raise ValueError("Only an appointment that went ahead can be rated")
 
 
+Minutes = Annotated[int, Field(ge=1, le=1440)]  # up to a day
+
+
+def check_time_taken(status: str, minutes_taken: int | None) -> None:
+    if minutes_taken is not None and status != "completed":
+        raise ValueError("Only an appointment that went ahead has a time taken")
+
+
 def check_cancellation(status: str, cancelled_on: date | None, booked_for: date | None) -> None:
     if cancelled_on is None:
         return
@@ -528,12 +536,15 @@ class BookingCreate(BaseModel):
     staff: Staff | None = None
     cancelled_on: date | None = None
     rating: Annotated[int, Field(ge=1, le=5)] | None = None  # how the customer rated it
+    minutes_planned: Minutes | None = None  # how long it was meant to take
+    minutes_taken: Minutes | None = None  # how long it took, once it went ahead
     notes: BookingNote | None = None
 
     @model_validator(mode="after")
     def _cancellation(self) -> "BookingCreate":
         check_cancellation(self.status, self.cancelled_on, self.booked_for)
         check_rating(self.status, self.rating)
+        check_time_taken(self.status, self.minutes_taken)
         return self
 
 
@@ -547,6 +558,8 @@ class BookingPatch(BaseModel):
     staff: Staff | None = None
     cancelled_on: date | None = None
     rating: Annotated[int, Field(ge=1, le=5)] | None = None
+    minutes_planned: Minutes | None = None
+    minutes_taken: Minutes | None = None
     notes: BookingNote | None = None
 
 
@@ -561,6 +574,8 @@ class BookingOut(BaseModel):
     staff: str | None
     cancelled_on: date | None
     rating: int | None = None
+    minutes_planned: int | None = None
+    minutes_taken: int | None = None
     notes: str | None
     source: str
     import_id: uuid.UUID | None
@@ -570,6 +585,45 @@ class BookingOut(BaseModel):
 class BookingsPage(BaseModel):
     total: int
     items: list[BookingOut]
+
+
+# --- hours staff worked ------------------------------------------------------------------------
+
+Hours = Annotated[Decimal, Field(gt=0, le=24, max_digits=4, decimal_places=2)]
+
+
+class StaffHoursCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    worked_on: TradingDate
+    staff: Staff
+    hours: Hours
+    notes: BookingNote | None = None
+
+
+class StaffHoursPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    worked_on: TradingDate | None = None
+    staff: Staff | None = None
+    hours: Hours | None = None
+    notes: BookingNote | None = None
+
+
+class StaffHoursOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    worked_on: date
+    staff: str
+    hours: Decimal
+    notes: str | None
+    created_at: datetime
+
+
+class StaffHoursPage(BaseModel):
+    total: int
+    items: list[StaffHoursOut]
 
 
 # --- leads, proposals and renewals ---------------------------------------------------------------

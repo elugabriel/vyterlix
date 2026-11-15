@@ -321,6 +321,12 @@ def list_kpis(db: Session, granularity: str = "month") -> KpisOut:
     if not has_records(db, "pipeline"):
         # Leads and win rates are for a business that quotes for work
         definitions = [d for d in definitions if "pipeline" not in d.requires]
+    if not has_records(db, "timed"):
+        # How long appointments took is for a business that types the times in
+        definitions = [d for d in definitions if "timed" not in d.requires]
+    if not has_records(db, "staff_hours"):
+        # Hours worked are for a business that types them in
+        definitions = [d for d in definitions if "staff_hours" not in d.requires]
     if not has_records(db, "bank"):
         # Bank figures are for a business whose bank account has been connected
         definitions = [d for d in definitions if "bank" not in d.requires]

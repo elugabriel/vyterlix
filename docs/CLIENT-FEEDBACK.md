@@ -198,13 +198,21 @@ Performance, Demand Forecasting.
   new health rules judge no-shows, cancellations, appointments kept, rebooking, ratings and the website.
   Migration `751ad8f7b840`.
 - [ ] **Step 1b: owner switches** to show or hide a module in Settings (table, API, website, phone).
-- [ ] **Step 2: service-side figures** for Booking, Retention, Workforce and Operational Performance, from
-  data already held, plus what needs typing in or importing (hours worked, job times).
+- [x] **Step 2: service-side figures** (migrations `9c3e5a17d2b4`, `a6f5a52f7d19`). Ten new figures:
+  *Bookings*: appointments booked. *Operational Performance*: appointments completed, average
+  appointment length, appointments that ran over. *Retention*: visits per customer, new clients.
+  *Workforce & Productivity*: hours worked, sales per hour worked, time spent on appointments,
+  appointments per hour. Each has plain words (website and phone) and the three that say how well the
+  work goes (completed, ran over, time on appointments) count towards the health score's operations
+  area. **Typed in** (decided 15/11/2026): an appointment can now say how long it was meant to take and how
+  long it took (website and phone), and a new "Hours worked" entry takes who worked, which day and for how
+  long (website tab, phone screen; API `/staff-hours`). The figures that need these only appear once some
+  have been typed in. Not done: importing hours or times from a file, and a booking system to read them from.
 - [ ] **Step 3: Marketing ROI and cost per customer** (needs ad spend: the Meta connector or typed in),
   **Supplier Performance**, **Demand Forecasting** for services (booking demand).
 - [ ] **Step 4: phone app** follows the website for everything above.
-- [~] **Four of the twelve modules have no figures yet** (Workforce & Productivity, Operational
-  Performance, Supplier Performance, Demand Forecasting) and so are not shown to anyone yet.
+- [~] **Two of the twelve modules have no figures yet** (Supplier Performance, Demand Forecasting) and so
+  are not shown to anyone yet. Workforce & Productivity and Operational Performance have figures (step 2).
 - [ ] **Integrations page shows all 11** with an honest status each (Connected, Ready to connect, Needs
   setup, Coming soon). Built: Xero, QuickBooks, Zoho, WooCommerce, Square, Google Analytics, TrueLayer.
   Not built: Shopify, HubSpot, Meta (Facebook and Instagram), WhatsApp.

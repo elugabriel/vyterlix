@@ -81,7 +81,7 @@ def test_a_module_with_no_figures_stays_out_of_sight():
     every_figure = {code for m in MODULES for code in m.kpis}
     shown = {m.code for m in visible_modules("both", every_figure)}
     assert shown == {m.code for m in MODULES if m.kpis}
-    assert not {"workforce", "operations", "suppliers", "demand"} & shown
+    assert not {"suppliers", "demand"} & shown  # nothing to show for these yet
 
 
 def test_a_salon_sees_bookings_not_stock_and_a_shop_the_other_way_round():

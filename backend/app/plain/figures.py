@@ -570,6 +570,106 @@ WORDS: dict[str, Words] = {
             "Comparing with the same time last year takes out the usual busy and quiet seasons, so this is worth a closer look.",
         ),
     ),
+    "appointments_booked": Words(
+        Say(
+            "More appointments were booked than {before}.",
+            "More booked time is good for the business. Check you have the people to deliver it.",
+        ),
+        Say(
+            "Fewer appointments were booked than {before}.",
+            "Quiet spells happen. A reminder to regular customers, or a small offer for the quiet days, can help fill the diary.",
+        ),
+    ),
+    "completion_rate_pct": Words(
+        Say(
+            "A bigger share of appointments went ahead than {before}.",
+            "That is a good sign: less time lost to cancellations and no-shows.",
+        ),
+        Say(
+            "A smaller share of appointments went ahead than {before}.",
+            "Cancellations and no-shows are taking up your time. A reminder a day or two before often helps.",
+        ),
+    ),
+    "visits_per_customer": Words(
+        Say(
+            "Customers came in more often than {before}.",
+            "That is a good sign of loyalty: regular visits are the most reliable income.",
+        ),
+        Say(
+            "Customers came in less often than {before}.",
+            "Offering the next appointment before they leave, or a reminder at their usual interval, can bring them back sooner.",
+        ),
+    ),
+    "new_clients": Words(
+        Say(
+            "More new clients came in than {before}.",
+            "That is good: new people are finding you. Make sure each is asked to book again.",
+        ),
+        Say(
+            "Fewer new clients came in than {before}.",
+            "Look at how people find you. A word from a happy customer is often the cheapest way to bring in new clients.",
+        ),
+    ),
+    "average_appointment_minutes": Words(
+        Say(
+            "Appointments took longer on average than {before}.",
+            "Longer appointments are fine if you charge for the time. If not, you may be doing more for the same money.",
+        ),
+        Say(
+            "Appointments took less time on average than {before}.",
+            "Shorter appointments free up time for more customers, as long as quality does not slip.",
+        ),
+    ),
+    "overrun_pct": Words(
+        Say(
+            "More appointments ran over their planned time than {before}.",
+            "Running over pushes the rest of the day back and keeps customers waiting. Check you are planning enough time.",
+        ),
+        Say(
+            "Fewer appointments ran over their planned time than {before}.",
+            "That is a good sign: your day is running closer to plan.",
+        ),
+    ),
+    "hours_worked": Words(
+        Say(
+            "Your team worked more hours than {before}.",
+            "More hours cost more. Check the extra time is earning its keep.",
+        ),
+        Say(
+            "Your team worked fewer hours than {before}.",
+            "Fewer hours cost less. Check you still have enough cover for your busy times.",
+        ),
+    ),
+    "revenue_per_hour": Words(
+        Say(
+            "Your team brought in more for each hour worked than {before}.",
+            "That is a good sign: the time is being used well.",
+        ),
+        Say(
+            "Your team brought in less for each hour worked than {before}.",
+            "Quiet hours still cost wages. Look at when the diary is empty, and whether your prices cover the time.",
+        ),
+    ),
+    "utilisation_pct": Words(
+        Say(
+            "A bigger share of your team's time went on appointments than {before}.",
+            "That is a good sign: less time spent waiting for customers.",
+        ),
+        Say(
+            "A smaller share of your team's time went on appointments than {before}.",
+            "Gaps in the diary are paid time with no income. Reminders and offers for quiet times can help fill them.",
+        ),
+    ),
+    "appointments_per_hour": Words(
+        Say(
+            "Your team saw more customers for each hour worked than {before}.",
+            "That is good, as long as nobody is being rushed.",
+        ),
+        Say(
+            "Your team saw fewer customers for each hour worked than {before}.",
+            "Look for gaps in the diary, or appointments taking longer than planned.",
+        ),
+    ),
 }
 
 # When a profit figure is below zero the business is losing money, which "less profit than last

@@ -41,6 +41,10 @@ from app.schemas.trading import (
     SaleOut,
     SalePatch,
     SalesPage,
+    StaffHoursCreate,
+    StaffHoursOut,
+    StaffHoursPage,
+    StaffHoursPatch,
     StockLevelOut,
     StockMovementCreate,
     StockMovementOut,
@@ -74,6 +78,7 @@ stock_router = _router("stock-movements")
 bookings_router = _router("bookings")
 opportunities_router = _router("opportunities")
 projects_router = _router("projects")
+staff_hours_router = _router("staff-hours")
 
 
 # --- sales -------------------------------------------------------------------------------------
@@ -390,6 +395,48 @@ def update_booking(
 @bookings_router.delete("/{booking_id}", status_code=NoContent)
 def delete_booking(booking_id: uuid.UUID, tenant: DataManager, db: DB, meta: Meta):
     svc.delete_booking(db, tenant, booking_id, meta)
+    return Response(status_code=NoContent)
+
+
+# --- hours staff worked --------------------------------------------------------------------------
+
+
+@staff_hours_router.post("", status_code=status.HTTP_201_CREATED, response_model=StaffHoursOut)
+def create_staff_hours(body: StaffHoursCreate, tenant: DataManager, db: DB, meta: Meta):
+    return svc.create_staff_hours(db, tenant, body, meta)
+
+
+@staff_hours_router.get("", response_model=StaffHoursPage)
+def list_staff_hours(
+    tenant: DataManager,
+    db: DB,
+    date_from: date | None = None,
+    date_to: date | None = None,
+    staff: Search = None,
+    limit: Limit = 50,
+    offset: Offset = 0,
+):
+    """Newest day first. `staff` searches the name."""
+    return svc.list_staff_hours(
+        db, date_from=date_from, date_to=date_to, staff=staff, limit=limit, offset=offset
+    )
+
+
+@staff_hours_router.get("/{row_id}", response_model=StaffHoursOut)
+def get_staff_hours(row_id: uuid.UUID, tenant: DataManager, db: DB):
+    return svc.get_staff_hours(db, row_id)
+
+
+@staff_hours_router.patch("/{row_id}", response_model=StaffHoursOut)
+def update_staff_hours(
+    row_id: uuid.UUID, body: StaffHoursPatch, tenant: DataManager, db: DB, meta: Meta
+):
+    return svc.update_staff_hours(db, tenant, row_id, body, meta)
+
+
+@staff_hours_router.delete("/{row_id}", status_code=NoContent)
+def delete_staff_hours(row_id: uuid.UUID, tenant: DataManager, db: DB, meta: Meta):
+    svc.delete_staff_hours(db, tenant, row_id, meta)
     return Response(status_code=NoContent)
 
 

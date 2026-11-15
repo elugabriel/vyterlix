@@ -41,6 +41,7 @@ from app.models.data import (
     Product,
     Sale,
     SaleLine,
+    StaffHours,
     StockMovement,
     WebVisit,
 )
@@ -57,6 +58,8 @@ PRESENCE = {
     "invoices": select(Sale.id).where(Sale.due_on.is_not(None)),
     "pipeline": select(Opportunity.id),
     "ratings": select(Booking.id).where(Booking.rating.is_not(None)),
+    "timed": select(Booking.id).where(Booking.minutes_taken.is_not(None)),
+    "staff_hours": select(StaffHours.id),
     "web": select(WebVisit.id),
     "bank": select(BankTransaction.id),
 }
@@ -352,6 +355,59 @@ def _late_cancellations(db: Session, granularity: str, start: date, end: date) -
         Booking.cancelled_on.is_not(None),
         Booking.cancelled_on >= Booking.booked_for - LATE_CANCEL_DAYS,
     )(db, granularity, start, end)
+
+
+def _new_clients(db: Session, granularity: str, start: date, end: date) -> Series:
+    """Customers whose first kept appointment falls in the period."""
+    first = (
+        select(Booking.customer_id.label("customer_id"), func.min(Booking.booked_for).label("day"))
+        .where(Booking.status == "completed", Booking.customer_id.is_not(None))
+        .group_by(Booking.customer_id)
+        .subquery()
+    )
+    bucket = _bucket(first.c.day, granularity)
+    query = (
+        select(bucket, func.count())
+        .where(first.c.day >= start, first.c.day <= end)
+        .group_by(bucket)
+    )
+    return _decimals(db.execute(query))
+
+
+# --- how long appointments took, and the hours staff worked -------------------------------------
+# Typed in by the owner. Only an appointment that went ahead has a time taken. "Ran over" means it
+# took longer than planned, among the appointments that have both. Hours worked are the hours typed
+# in for the days in the period.
+
+
+def _timed(*conditions, total=None) -> Compute:
+    def compute(db: Session, granularity: str, start: date, end: date) -> Series:
+        bucket = _bucket(Booking.booked_for, granularity)
+        value = func.count() if total is None else func.coalesce(func.sum(total), 0)
+        query = (
+            select(bucket, value)
+            .where(
+                Booking.booked_for >= start,
+                Booking.booked_for <= end,
+                Booking.status == "completed",
+                Booking.minutes_taken.is_not(None),
+                *conditions,
+            )
+            .group_by(bucket)
+        )
+        return _decimals(db.execute(query))
+
+    return compute
+
+
+def _staff_hours(db: Session, granularity: str, start: date, end: date) -> Series:
+    bucket = _bucket(StaffHours.worked_on, granularity)
+    query = (
+        select(bucket, func.coalesce(func.sum(StaffHours.hours), 0))
+        .where(StaffHours.worked_on >= start, StaffHours.worked_on <= end)
+        .group_by(bucket)
+    )
+    return _decimals(db.execute(query))
 
 
 # --- how customers rated the appointments -------------------------------------------------------
@@ -689,6 +745,39 @@ MEASURES: dict[str, Measure] = {
             "bookings",
             _bookings(Booking.status != "booked"),
         ),
+        Measure("bookings_all", "Appointments booked", "bookings", _bookings()),
+        Measure(
+            "bookings_kept_known",
+            "Appointments kept by a named customer",
+            "bookings",
+            _bookings(Booking.status == "completed", Booking.customer_id.is_not(None)),
+        ),
+        Measure(
+            "new_clients", "Customers on their first kept appointment", "bookings", _new_clients
+        ),
+        Measure(
+            "minutes_taken",
+            "Minutes appointments took",
+            "timed",
+            _timed(total=Booking.minutes_taken),
+        ),
+        Measure("timed_kept", "Appointments with a time taken", "timed", _timed()),
+        Measure(
+            "timed_both",
+            "Appointments with a planned and a taken time",
+            "timed",
+            _timed(Booking.minutes_planned.is_not(None)),
+        ),
+        Measure(
+            "timed_over",
+            "Appointments that took longer than planned",
+            "timed",
+            _timed(
+                Booking.minutes_planned.is_not(None),
+                Booking.minutes_taken > Booking.minutes_planned,
+            ),
+        ),
+        Measure("hours_worked", "Hours staff worked", "staff_hours", _staff_hours),
         Measure("late_cancellations", "Late cancellations", "bookings", _late_cancellations),
         Measure("customers_kept", "Customers who kept an appointment", "bookings", _kept_customers),
         Measure(

@@ -29,6 +29,8 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   final _service = TextEditingController();
   final _staff = TextEditingController();
   final _notes = TextEditingController();
+  final _planned = TextEditingController(); // minutes it was meant to take
+  final _taken = TextEditingController(); // minutes it took, once it went ahead
   String _day = _isoDay(DateTime.now());
   String _status = 'completed';
   String? _cancelledOn;
@@ -54,6 +56,8 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
     _service.dispose();
     _staff.dispose();
     _notes.dispose();
+    _planned.dispose();
+    _taken.dispose();
     super.dispose();
   }
 
@@ -124,12 +128,18 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
           'staff': _staff.text.trim().isEmpty ? null : _staff.text.trim(),
           'cancelled_on': _status == 'cancelled' ? _cancelledOn : null,
           'rating': _status == 'completed' ? _rating : null,
+          'minutes_planned': int.tryParse(_planned.text.trim()),
+          'minutes_taken': _status == 'completed'
+              ? int.tryParse(_taken.text.trim())
+              : null,
           'notes': _notes.text.trim().isEmpty ? null : _notes.text.trim(),
         },
       );
       if (!mounted) return;
       _service.clear();
       _notes.clear();
+      _planned.clear();
+      _taken.clear();
       setState(() {
         _saved = 'Appointment saved.';
         _rating = null;
@@ -285,6 +295,26 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                   ],
                   const SizedBox(height: 12),
                   _suggest(_staff, _usedStaff, 'Who was doing it? (optional)'),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _planned,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText:
+                          'How long is it meant to take? (minutes, optional)',
+                    ),
+                  ),
+                  if (_status == 'completed') ...[
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _taken,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'How long did it take? (minutes, optional)',
+                        helperText: 'With the planned time, this shows how often appointments run over.',
+                      ),
+                    ),
+                  ],
                   TextField(
                     controller: _notes,
                     maxLength: 300,

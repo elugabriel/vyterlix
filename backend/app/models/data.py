@@ -329,6 +329,14 @@ class Booking(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigin
             "rating IS NULL OR (status = 'completed' AND rating BETWEEN 1 AND 5)",
             name="rating_fits",
         ),
+        CheckConstraint(
+            "minutes_planned IS NULL OR minutes_planned BETWEEN 1 AND 1440",
+            name="minutes_planned_fit",
+        ),
+        CheckConstraint(
+            "minutes_taken IS NULL OR (status = 'completed' AND minutes_taken BETWEEN 1 AND 1440)",
+            name="minutes_taken_fit",
+        ),
         Index("ix_bookings_org_date", "organization_id", "booked_for"),
         Index("ix_bookings_org_customer", "organization_id", "customer_id"),
     )
@@ -340,6 +348,28 @@ class Booking(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigin
     staff: Mapped[str | None] = mapped_column(String(100))  # who was to do it
     cancelled_on: Mapped[date | None] = mapped_column(Date)  # the day they cancelled
     rating: Mapped[int | None] = mapped_column(SmallInteger)  # how the customer rated it, 1 to 5
+    # How long it was meant to take and how long it did, in minutes: what operational performance
+    # (how long jobs take, how often they run over) and staff use of time are worked out from.
+    minutes_planned: Mapped[int | None] = mapped_column(SmallInteger)
+    minutes_taken: Mapped[int | None] = mapped_column(SmallInteger)  # only once it went ahead
+    notes: Mapped[str | None] = mapped_column(String(300))
+
+
+class StaffHours(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base):
+    """Hours a person worked on one day, typed in. What workforce figures (hours worked, sales per
+    hour, how much of the time was booked) are worked out from. Not imported from anywhere, so it
+    has no source."""
+
+    __tablename__ = "staff_hours"
+    __table_args__ = (
+        CheckConstraint("hours > 0 AND hours <= 24", name="hours_fit"),
+        CheckConstraint("length(trim(staff)) > 0", name="staff_not_blank"),
+        Index("ix_staff_hours_org_day", "organization_id", "worked_on"),
+    )
+
+    worked_on: Mapped[date] = mapped_column(Date)
+    staff: Mapped[str] = mapped_column(String(100))  # a name, as used on appointments
+    hours: Mapped[Decimal] = mapped_column(Numeric(5, 2))
     notes: Mapped[str | None] = mapped_column(String(300))
 
 
