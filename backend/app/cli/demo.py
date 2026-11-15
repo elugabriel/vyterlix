@@ -6,6 +6,8 @@ business whose name ends with "(demo data)", so it can't be mixed into a real bu
     python -m app.cli.demo clear --org <business id>  # take it all out again (undoes the imports)
     python -m app.cli.demo showcase --org <id> [--org <id>]  # fill every screen with demos
     python -m app.cli.demo unshowcase                 # remove the demo benchmarks again
+    python -m app.cli.demo salon                      # a demo hair and beauty salon with every part
+    python -m app.cli.demo unsalon                    # remove the demo salon again
 
 The year is a small invented UK bakery, 1 October 2025 to 30 September 2026 (see
 app/demo/milestone.py). `load` uses the same import pipeline as the Upload page.
@@ -156,12 +158,22 @@ def main(argv: list[str] | None = None) -> int:
         "--also-owner", action="append", default=[], help="an email to make an owner too"
     )
     commands.add_parser("unshowcase", help="remove the demo benchmarks")
+    commands.add_parser("salon", help="build a demo hair and beauty salon that shows every part")
+    commands.add_parser("unsalon", help="remove the demo salon again")
     args = parser.parse_args(argv)
     try:
         if args.command == "showcase":
             from app.demo import showcase as showcase_module
 
             showcase_module.run(args.org, also_owners=args.also_owner)
+        elif args.command == "salon":
+            from app.demo import salon as salon_module
+
+            salon_module.run()
+        elif args.command == "unsalon":
+            from app.demo import salon as salon_module
+
+            salon_module.remove()
         elif args.command == "unshowcase":
             from app.demo import showcase as showcase_module
 

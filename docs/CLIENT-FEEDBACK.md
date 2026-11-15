@@ -216,3 +216,11 @@ Performance, Demand Forecasting.
 - [ ] **Integrations page shows all 11** with an honest status each (Connected, Ready to connect, Needs
   setup, Coming soon). Built: Xero, QuickBooks, Zoho, WooCommerce, Square, Google Analytics, TrueLayer.
   Not built: Shopify, HubSpot, Meta (Facebook and Instagram), WhatsApp.
+
+- [x] **A demo salon that shows every part** (`python -m app.cli.demo salon`; `unsalon` removes it). "Glow Hair &
+  Beauty (demo data)": a made-up hair and beauty salon that also sells products, with a year of trading
+  (1 November 2025 to 31 October 2026): about 3,800 appointments (times taken, ratings, cancellations,
+  no-shows), 4 staff and their hours, sales, invoices, costs, stock, website visits, bank movements and
+  leads, plus the figures, health score, changes, actions, alerts and reports built from them. It shows
+  ten of the twelve modules (Supplier Performance and Demand Forecasting have no figures yet). Development
+  only, like the other demos: delete it before the system is hosted.
