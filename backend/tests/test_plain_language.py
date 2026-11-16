@@ -84,8 +84,9 @@ def test_the_words_never_state_a_cause(code):
         assert not causal.search(say_.says + " " + say_.why), (code, say_)
 
 
-def test_the_two_comparison_figures_are_judged_by_their_own_sign_not_their_movement():
-    assert VALUE_FIGURES == {"revenue_growth_pct", "revenue_vs_last_year_pct"}
+def test_the_comparison_figures_are_judged_by_their_own_sign_not_their_movement():
+    assert {"revenue_growth_pct", "revenue_vs_last_year_pct"} <= VALUE_FIGURES
+    assert all(code.endswith(("_growth_pct", "_vs_last_year_pct")) for code in VALUE_FIGURES)
     grew = say("revenue_growth_pct", "-3.0", unit="percent", value="4.2")  # growing, if more slowly
     shrank = say("revenue_growth_pct", "2.0", unit="percent", value="-1.5")
     assert (grew.says, grew.tone) == ("Your sales grew compared with last month.", "good")

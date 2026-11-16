@@ -35,11 +35,11 @@ def test_every_part_is_listed_and_shown_unless_there_is_a_reason(api, salon):
     assert len(states) == 12
     assert states["bookings"]["status"] == "shown" and states["bookings"]["enabled"] is True
     assert states["workforce"]["status"] == "shown"
-    # nothing to show for these yet, and the owner is told why
+    # nothing to show for this one yet (no costs name a supplier), and the owner is told why
     assert (
         states["suppliers"]["status"] == "no_figures" and states["suppliers"]["can_switch"] is False
     )
-    assert "still being built" in states["suppliers"]["reason"]
+    assert "who you bought from" in states["suppliers"]["reason"]
 
 
 def test_a_part_for_a_different_kind_of_business_says_so(api, salon):

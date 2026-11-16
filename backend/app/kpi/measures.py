@@ -62,6 +62,7 @@ PRESENCE = {
     "timed": select(Booking.id).where(Booking.minutes_taken.is_not(None)),
     "staff_hours": select(StaffHours.id),
     "ads": select(AdSpend.id),
+    "suppliers": select(Expense.id).where(Expense.supplier_id.is_not(None)),
     "web": select(WebVisit.id),
     "bank": select(BankTransaction.id),
 }
@@ -400,6 +401,68 @@ def _timed(*conditions, total=None) -> Compute:
         return _decimals(db.execute(query))
 
     return compute
+
+
+# --- suppliers ----------------------------------------------------------------------------------
+# Read from the costs that name a supplier. "Bought" is what was spent (credit notes left out);
+# credits are what suppliers gave back for goods that were wrong or returned.
+
+
+def _supplier_money(sign: int, kind: str) -> Compute:
+    def compute(db: Session, granularity: str, start: date, end: date) -> Series:
+        bucket = _bucket(Expense.spent_on, granularity)
+        query = (
+            select(bucket, func.coalesce(func.sum(sign * Expense.net_amount), 0))
+            .where(
+                Expense.spent_on >= start,
+                Expense.spent_on <= end,
+                Expense.supplier_id.is_not(None),
+                Expense.kind == kind,
+            )
+            .group_by(bucket)
+        )
+        return _decimals(db.execute(query))
+
+    return compute
+
+
+_BOUGHT = _supplier_money(1, "expense")
+_CREDITS = _supplier_money(-1, "credit")
+
+
+def _suppliers_used(db: Session, granularity: str, start: date, end: date) -> Series:
+    bucket = _bucket(Expense.spent_on, granularity)
+    query = (
+        select(bucket, func.count(func.distinct(Expense.supplier_id)))
+        .where(
+            Expense.spent_on >= start,
+            Expense.spent_on <= end,
+            Expense.supplier_id.is_not(None),
+            Expense.kind == "expense",
+        )
+        .group_by(bucket)
+    )
+    return _decimals(db.execute(query))
+
+
+def _top_supplier(db: Session, granularity: str, start: date, end: date) -> Series:
+    """What was spent with the one supplier you spent most with, in each period."""
+    bucket = _bucket(Expense.spent_on, granularity).label("period")
+    per_supplier = (
+        select(bucket, func.sum(Expense.net_amount).label("spent"))
+        .where(
+            Expense.spent_on >= start,
+            Expense.spent_on <= end,
+            Expense.supplier_id.is_not(None),
+            Expense.kind == "expense",
+        )
+        .group_by(bucket, Expense.supplier_id)
+        .subquery()
+    )
+    query = select(per_supplier.c.period, func.max(per_supplier.c.spent)).group_by(
+        per_supplier.c.period
+    )
+    return _decimals(db.execute(query))
 
 
 def _ads(column) -> Compute:
@@ -795,6 +858,12 @@ MEASURES: dict[str, Measure] = {
             ),
         ),
         Measure("hours_worked", "Hours staff worked", "staff_hours", _staff_hours),
+        Measure("supplier_bought", "Bought from suppliers", "suppliers", _BOUGHT),
+        Measure("supplier_credits", "Credited by suppliers", "suppliers", _CREDITS),
+        Measure("suppliers_used", "Suppliers bought from", "suppliers", _suppliers_used),
+        Measure(
+            "top_supplier_spend", "Spent with the biggest supplier", "suppliers", _top_supplier
+        ),
         Measure("ad_spend", "Spent on adverts", "ads", _ads(AdSpend.spend)),
         Measure("ad_clicks", "Clicks on adverts", "ads", _ads(AdSpend.clicks)),
         Measure("ad_results", "Enquiries and orders from adverts", "ads", _ads(AdSpend.results)),

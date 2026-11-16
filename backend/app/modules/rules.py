@@ -111,8 +111,24 @@ MODULES: tuple[Module, ...] = (
         "How well the work gets done.",
         ("completion_rate_pct", "average_appointment_minutes", "overrun_pct"),
     ),
-    Module("suppliers", "Supplier Performance", "How reliable and fair your suppliers are.", ()),
-    Module("demand", "Demand Forecasting", "What to expect next, so you can be ready.", ()),
+    Module(
+        "suppliers",
+        "Supplier Performance",
+        "What you buy, who from, and whether it arrives right.",
+        (
+            "supplier_bought", "suppliers_used", "top_supplier_share_pct",
+            "supplier_credit_rate_pct",
+        ),
+    ),  # fmt: skip
+    Module(
+        "demand",
+        "Demand Forecasting",
+        "Whether more or fewer people are buying, and where it is heading.",
+        (
+            "sales_count_growth_pct", "sales_count_vs_last_year_pct", "units_growth_pct",
+            "bookings_growth_pct", "bookings_vs_last_year_pct",
+        ),
+    ),  # fmt: skip
 )  # fmt: skip
 
 BY_CODE = {m.code: m for m in MODULES}

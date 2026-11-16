@@ -514,6 +514,7 @@ def _spend(db, ids, suppliers, month, day, category, net, vat_rate, description,
             spent_on=date(month.year, month.month, min(day, last)),
             cost_category_id=ids[category],
             supplier_id=suppliers[supplier].id if supplier else None,
+            kind="credit" if net_d < 0 else "expense",
             description=description, net_amount=net_d, vat_amount=vat, gross_amount=net_d + vat,
         )
     )  # fmt: skip
@@ -550,6 +551,15 @@ def _costs(
                 350 * quiet + rng.randint(-40, 60),
                 20,
                 "Colour and care products",
+                "Brighton Beauty Wholesale",
+            )
+        if month.month in (5, 9):  # a delivery arrived damaged and the supplier gave money back
+            spend(
+                20,
+                "Salon supplies",
+                -85,
+                20,
+                "Credit for damaged bottles",
                 "Brighton Beauty Wholesale",
             )
         if month.month in (12, 3):

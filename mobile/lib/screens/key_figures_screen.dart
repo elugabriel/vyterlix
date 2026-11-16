@@ -9,6 +9,7 @@ import '../theme.dart';
 import '../widgets/charts.dart';
 import '../widgets/common.dart';
 import '../widgets/plain.dart';
+import 'forecast_screen.dart';
 
 /// A part of Vyterlix the business sees, as the server describes it.
 class _Part {
@@ -211,6 +212,19 @@ class _KeyFiguresScreenState extends State<KeyFiguresScreen> {
                   );
                 },
               ),
+              if (part.code == 'demand')
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            ForecastScreen(business: widget.business),
+                      ),
+                    ),
+                    child: const Text('See what we expect in the coming months'),
+                  ),
+                ),
             ],
           if (_projects != null && _projects!.rows.isNotEmpty)
             ..._projectsView(_projects!, muted),

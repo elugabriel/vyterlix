@@ -233,6 +233,9 @@ function groupCard(part, kpis) {
     el("h2", { style: "margin-top:0" }, part.name ?? part.code),
     part.summary ? el("p", { class: "muted", style: "margin-top:-8px" }, part.summary) : null,
     el("div", { class: "kpi-grid" }, ...kpis.map(kpiTile)),
+    part.code === "demand"
+      ? el("p", { style: "margin:12px 0 0" }, el("a", { href: `forecast.html?org=${orgId}` }, "See what we expect in the coming months →"))
+      : null,
   );
 }
 

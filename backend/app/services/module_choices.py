@@ -17,6 +17,15 @@ from app.modules.rules import BY_CODE, MODULES, applies
 from app.schemas.kpi import ModuleStateOut
 from app.services.audit import AuditAction, record_audit
 
+# What a part waits for, when it is for this business but has nothing to show yet.
+NEEDS = {
+    "suppliers": "It needs costs that say who you bought from, typed in or imported.",
+    "demand": "It needs a few months of sales or appointments to compare.",
+}
+
+
+NEEDS_DEFAULT = "It needs information you have not added yet, such as appointments or hours worked."
+
 
 def switched_off(db: Session) -> set[str]:
     """The modules the owner has hidden."""
@@ -33,7 +42,7 @@ def _reason(code: str, status: str, sells: str | None) -> str | None:
     if status == "no_figures":
         if not module.kpis:
             return "The figures for this are still being built."
-        return "It needs information you have not added yet, such as appointments or hours worked."
+        return NEEDS.get(code, NEEDS_DEFAULT)
     if status == "switched_off":
         return "You have hidden this. Switch it on to see it again."
     return None

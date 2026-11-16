@@ -740,6 +740,96 @@ WORDS: dict[str, Words] = {
             "Either you spent more or you sold less. It counts all your sales, not only those that came from an advert.",
         ),
     ),
+    "supplier_bought": Words(
+        Say(
+            "You spent more with suppliers than {before}.",
+            "Check the extra buying matches what you sold, so stock or supplies are not piling up.",
+        ),
+        Say(
+            "You spent less with suppliers than {before}.",
+            "That is fine if you are selling less or using up what you already hold.",
+        ),
+    ),
+    "suppliers_used": Words(
+        Say(
+            "You bought from more suppliers than {before}.",
+            "More suppliers can mean better choice, but it is more to keep track of.",
+        ),
+        Say(
+            "You bought from fewer suppliers than {before}.",
+            "Fewer suppliers is simpler, but make sure you are not relying on one of them too much.",
+        ),
+    ),
+    "top_supplier_share_pct": Words(
+        Say(
+            "More of your buying went to your biggest supplier than {before}.",
+            "If that one supplier let you down, you would feel it. It is worth knowing who else could supply you.",
+        ),
+        Say(
+            "Less of your buying went to your biggest supplier than {before}.",
+            "Spreading your buying is safer. Keep an eye on the prices you are getting.",
+        ),
+    ),
+    "supplier_credit_rate_pct": Words(
+        Say(
+            "Suppliers gave you back more money for problem goods than {before}.",
+            "Credit notes usually mean something arrived wrong or was sent back. Look at which supplier it was.",
+        ),
+        Say(
+            "Suppliers gave you back less money for problem goods than {before}.",
+            "That is a good sign: fewer things are coming back.",
+        ),
+    ),
+    "sales_count_growth_pct": Words(
+        Say(
+            "You made more sales than {before}.",
+            "More sales means more people are buying. Check you can serve them all.",
+        ),
+        Say(
+            "You made fewer sales than {before}.",
+            "Fewer people bought. Check whether this is a normal quiet spell for your business.",
+        ),
+    ),
+    "sales_count_vs_last_year_pct": Words(
+        Say(
+            "You made more sales than at the same time last year.",
+            "Comparing with the same time last year takes out the usual busy and quiet seasons.",
+        ),
+        Say(
+            "You made fewer sales than at the same time last year.",
+            "Comparing with the same time last year takes out the usual busy and quiet seasons, so this is worth a closer look.",
+        ),
+    ),
+    "units_growth_pct": Words(
+        Say(
+            "You sold more items than {before}.",
+            "More items going out means demand is up. Check you have enough to cover it.",
+        ),
+        Say(
+            "You sold fewer items than {before}.",
+            "Less is going out. Check whether this is a normal quiet spell before you reorder.",
+        ),
+    ),
+    "bookings_growth_pct": Words(
+        Say(
+            "More appointments were booked than {before}.",
+            "More booked time is good for the business. Check you have the people to deliver it.",
+        ),
+        Say(
+            "Fewer appointments were booked than {before}.",
+            "Quiet spells happen. A reminder to regular customers can help fill the diary.",
+        ),
+    ),
+    "bookings_vs_last_year_pct": Words(
+        Say(
+            "More appointments were booked than at the same time last year.",
+            "Comparing with the same time last year takes out the usual busy and quiet seasons.",
+        ),
+        Say(
+            "Fewer appointments were booked than at the same time last year.",
+            "Comparing with the same time last year takes out the usual busy and quiet seasons, so this is worth a closer look.",
+        ),
+    ),
 }
 
 # When a profit figure is below zero the business is losing money, which "less profit than last
@@ -762,7 +852,13 @@ LOSS: dict[str, Say] = {
 }
 
 # Figures that are already a comparison: judge them by whether the figure is above or below zero.
-VALUE_FIGURES = frozenset({"revenue_growth_pct", "revenue_vs_last_year_pct"})
+VALUE_FIGURES = frozenset(
+    {
+        "revenue_growth_pct", "revenue_vs_last_year_pct", "sales_count_growth_pct",
+        "sales_count_vs_last_year_pct", "units_growth_pct", "bookings_growth_pct",
+        "bookings_vs_last_year_pct",
+    }
+)  # fmt: skip
 
 
 @dataclass(frozen=True)

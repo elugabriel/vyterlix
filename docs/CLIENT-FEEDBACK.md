@@ -215,11 +215,16 @@ Performance, Demand Forecasting.
   have been typed in. Not done: importing hours or times from a file, and a booking system to read them from.
 - [~] **Step 3: Marketing ROI and cost per customer** are done through the Meta connector (see CHECKLIST: seven
   figures under Marketing & Acquisition, with the demo salon showing them). Advert spend cannot yet be typed
-  in by hand (only Meta, or demo data, supplies it). **Supplier Performance** and **Demand Forecasting** for
-  services are not started.
+  in by hand (only Meta, or demo data, supplies it).
+- [x] **Step 3b: Supplier Performance and Demand Forecasting** (migration `b37d90e1f4a6`). *Suppliers*, read from
+  the costs that name a supplier: bought from suppliers, how many suppliers, the share that went to the biggest
+  one, and the money given back as credit. They only appear once costs name a supplier. *Demand*: the number of
+  sales, items sold and appointments booked, each compared with the period before and (sales, appointments) with
+  the same time last year, with a link to the Forecast page for what to expect. Honest limits: there is no
+  delivery-time data, so "reliability" is judged by credit notes only; there are no health rules for either part
+  (no fair starting value); the "compared with last year" figures need a year of history.
 - [ ] **Step 4: phone app** follows the website for everything above.
-- [~] **Two of the twelve modules have no figures yet** (Supplier Performance, Demand Forecasting) and so
-  are not shown to anyone yet. Workforce & Productivity and Operational Performance have figures (step 2).
+- [x] **All twelve modules have figures** (Supplier Performance and Demand Forecasting came with step 3b).
 - [x] **Integrations page shows all 11** (website): every system in groups, each with a status: Ready to
   connect, Not set up yet (built, but this installation is not registered with that system), or Coming
   soon. Built (8): Xero, QuickBooks, Zoho, WooCommerce, Square, Google Analytics, Meta (Facebook and
@@ -230,5 +235,5 @@ Performance, Demand Forecasting.
   (1 November 2025 to 31 October 2026): about 3,800 appointments (times taken, ratings, cancellations,
   no-shows), 4 staff and their hours, sales, invoices, costs, stock, website visits, bank movements and
   leads, plus the figures, health score, changes, actions, alerts and reports built from them. It shows
-  ten of the twelve modules (Supplier Performance and Demand Forecasting have no figures yet). Development
+  all twelve modules. Development
   only, like the other demos: delete it before the system is hosted.
