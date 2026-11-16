@@ -8,6 +8,7 @@ from app.core.config import get_settings
 from app.core.errors import AppError
 from app.integrations.base import Provider
 from app.integrations.google_analytics import GoogleAnalyticsProvider
+from app.integrations.hubspot import HubSpotProvider
 from app.integrations.meta import MetaProvider
 from app.integrations.quickbooks import QuickBooksProvider
 from app.integrations.sandbox import SandboxProvider
@@ -24,6 +25,7 @@ PROVIDERS: dict[str, Provider] = {
         SandboxProvider(),
         XeroProvider(),
         GoogleAnalyticsProvider(),
+        HubSpotProvider(),
         MetaProvider(),
         QuickBooksProvider(),
         ShopifyProvider(),
@@ -70,7 +72,6 @@ SYSTEMS: tuple[tuple[str, str, str], ...] = (
     ("truelayer", "Your bank", "The money going into and out of your business bank account."),
 )  # fmt: skip
 NOT_BUILT = {
-    "hubspot": "HubSpot",
     "whatsapp": "WhatsApp Business",
 }
 

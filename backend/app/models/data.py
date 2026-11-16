@@ -52,6 +52,7 @@ DATA_SOURCES = (
     "woocommerce",
     "google_analytics",
     "meta",
+    "hubspot",
 )
 UK_VAT_RATES = ("0", "5", "20")  # %, as NUMERIC text; NULL = exempt / outside the scope of VAT
 SALE_KINDS = ("sale", "refund")

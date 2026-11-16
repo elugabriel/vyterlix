@@ -1,0 +1,74 @@
+VYTERLIX WEBSITE WALKTHROUGH: VOICE-OVER SCRIPT
+Full film length 9:27
+
+[0:00] Vyterlix
+This is Vyterlix: a simple way for a small business to understand its own figures, see what has changed and why, know what to do next, and check whether it worked. This film walks through the website from sign-in to settings. The phone app follows the same pattern and is shown in its own recording.
+
+[0:24] 1. Signing in
+Everyone signs in with their own email and password. Repeated wrong guesses are blocked for a while, and each phone or browser you sign in on is remembered, so you can see it later and sign it out.
+
+[0:45] 2. Your businesses
+One login can look after more than one business, and each business is kept completely apart from the others. We will open the demo bakery. Everything you see from here is practice data, not a real business.
+
+[1:05] 3. Today
+This is Today, the page you open each morning. The green card gives the health of the business as one number out of one hundred, and says what is pulling it down. Below are five plain questions: what is going well, what needs my attention, what should I do first, what am I waiting for, and did my actions help. A chart shows how sales have moved, with every month labelled, and each key figure has a small picture of the last six months.
+
+[1:44] 4. Key figures
+Key figures are the numbers that matter, grouped by money, sales, customers and stock. Each tile shows the figure, whether it went up or down on last month, and a small picture of the last six months. Open any one for a full chart, a plain explanation of what it means, and how it was worked out.
+
+[2:13] 5. Business health
+Business health brings everything into one score. The two bars show the strongest and the weakest part of the business. Each area has its own score, coloured green, amber or red, and opens to show why. The chart underneath shows the score month by month, so you can see whether things are improving.
+
+[2:39] 6. Reports
+Reports are written for you in plain English. Choose one, such as the monthly report or the health report, and Vyterlix writes it from your own figures. Each report is kept exactly as it was written, and can be downloaded as a PDF or a spreadsheet, or sent to your team by email every week or month.
+
+[3:07] 7. What changed
+What changed lists the figures that moved by more than usual, good news as well as bad. Each one shows last month against this month as two bars, so the size of the move is clear at a glance. Choose Why did this happen, and Vyterlix lists the evidence from your records, and says honestly when it cannot tell.
+
+[3:37] 8. The whole story of one change
+Every change has its own page that tells the whole story in six steps: what happened, why it happened, what we suggest, your decision, getting it done, and how it went. It is the heart of Vyterlix: not just telling you a number moved, but helping you decide what to do and checking whether it worked.
+
+[4:04] 9. Ask Vyterlix
+Ask Vyterlix like you would ask an accountant. Ask how the business is doing, or why sales fell. The answers come only from your own figures and records, they say where they came from, and if something cannot be answered from your data, you are told so rather than given a guess.
+
+[4:31] 10. Forecast
+The forecast shows where the business is heading. The line is the best estimate, and the shaded band is the likely range. When there is only a little history, it says so plainly and tells you how much to trust it.
+
+[4:52] 11. Alerts
+Alerts tell you when something needs a decision. There is one alert for each figure, written in a single plain sentence, and the most serious are listed first. Open one and you can accept the suggestion, put it off for a few days, or say no. Vyterlix remembers what you decided.
+
+[5:18] 12. Actions
+Actions are everything you decided to do: who is doing it, by when, and how far it has got. When an action is finished, Vyterlix waits for the next month's figures and then checks them, with a before-and-after picture, to tell you honestly whether it worked, partly worked, or did not.
+
+[5:44] 13. What we know
+What we know is what Vyterlix has learned from what you have tried, along with the limits you have set. Later advice respects both, so the suggestions get more useful the longer you use it.
+
+[6:03] 14. Your data
+Your data shows how complete and trustworthy your information is, and what to fix first. Each kind of data has a score, and the chart shows which months are missing information. Better data means better advice.
+
+[6:22] 15. Upload a file
+To bring in information, upload a spreadsheet from any system. Vyterlix matches the columns, and checks every row before anything is saved, so a mistake in the file never ends up in your figures.
+
+[6:41] 16. Import history
+Every import is recorded here. If one turns out to be wrong, it can be undone cleanly.
+
+[6:53] 17. Type in data
+You can also type things in by hand: sales, costs, customers, stock, projects, appointments and leads. That suits a business that has no spreadsheet at all.
+
+[7:08] 18. Connections
+Connections link Vyterlix to the systems you already use: Xero, QuickBooks, Zoho, WooCommerce, Square, Google Analytics, and your bank through TrueLayer. Vyterlix only ever reads. It can never change anything in those systems. These have been built and tested against practice services, and trying each one with a real account is the last step.
+
+[7:35] 19. Settings and your team
+In Settings you describe the business, such as what it sells and its busy and quiet seasons. You can also invite your team as an owner, a manager or a viewer, and each person sees only what their role allows.
+
+[7:56] 20. Billing
+Billing shows your plan, what you have used, and what you have been charged. Live payments are not switched on yet, because that depends on the payment account being set up.
+
+[8:14] 21. Your account
+Your account lists every browser and phone you are signed in on. You can name them, and sign any of them out with one click.
+
+[8:37] 22. Notifications
+Each person chooses what they hear about, and how: in the app, or by email. Quiet hours hold the emails until they end, but anything about your account security always gets through.
+
+[8:54] Where the work stands
+That is the whole website. Everything you have seen works with practice data. The connections to Xero, QuickBooks, Zoho, Google Analytics and the bank are built and tested against practice services, and a live check with real accounts is the last step. Still to come, and waiting on accounts: the hosting and the vyterlix dot com website, the app stores, push notifications and live payments. Thank you for watching.

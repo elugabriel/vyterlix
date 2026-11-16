@@ -498,6 +498,8 @@ def run_sync(ctx: JobContext) -> dict[str, Any]:
                 + made["web_visits"]
                 + made["bank_transactions"]
                 + made["ad_spend"]
+                + made["opportunities"]
+                + made["contacts"]
             )
     except ReauthRequired as exc:
         db.rollback()

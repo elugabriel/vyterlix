@@ -146,6 +146,10 @@ class Resolver:
         key = _customer_key(values)
         return self.customers.get(key) if key else None
 
+    def ensure_customers(self, rows: list[dict[str, Any]]) -> None:
+        """Find, or create, the customers these rows name (`customer_name`, `customer_email`)."""
+        self._customers(rows)
+
     def product_id(self, sku: str | None, name: str | None) -> uuid.UUID | None:
         key = _product_key(sku, name)
         return self.products.get(key) if key else None

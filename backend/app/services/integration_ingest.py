@@ -16,11 +16,11 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.data import AdSpend, BankTransaction, Expense, Sale, WebVisit
+from app.models.data import AdSpend, BankTransaction, Expense, Opportunity, Sale, WebVisit
 from app.services import import_records
 from app.services.import_rows import RowOutcome
 
-TABLES = {"sales": Sale, "expenses": Expense}
+TABLES = {"sales": Sale, "expenses": Expense, "opportunities": Opportunity}
 # What can change on a record after it was first fetched, per dataset.
 CHANGEABLE = {
     "sales": (
@@ -36,6 +36,15 @@ CHANGEABLE = {
         ("net_amount", "net_amount"),
         ("vat_amount", "vat_amount"),
         ("gross_amount", "gross_amount"),
+    ),
+    # A deal moves on in the other system: it is won, lost, or worth something different.
+    "opportunities": (
+        ("name", "name"),
+        ("stage", "stage"),
+        ("kind", "kind"),
+        ("value", "value"),
+        ("proposal_on", "proposal_on"),
+        ("closed_on", "closed_on"),
     ),
 }
 
@@ -164,6 +173,13 @@ def ingest(
             created["bank_transactions"] += _ingest_bank_transactions(
                 db, organization_id, source, rows
             )
+            continue
+        if dataset == "customers" and rows:
+            # Customers a system knows about (its contacts). Anyone already here, by email or
+            # name, is left as they are; only people we have not met are added.
+            before = resolver.created["customers"]
+            resolver.ensure_customers(rows)
+            created["contacts"] += resolver.created["customers"] - before
             continue
         model = TABLES.get(dataset)
         if model is None or not rows:

@@ -62,6 +62,7 @@ SOURCE_KINDS = (
     "woocommerce",
     "google_analytics",
     "meta",
+    "hubspot",
 )
 FILE_SUFFIXES = {"csv": ".csv", "excel": ".xlsx"}
 IMPORT_STATUSES = (

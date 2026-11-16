@@ -234,8 +234,12 @@ Performance, Demand Forecasting.
 - [x] **All twelve modules have figures** (Supplier Performance and Demand Forecasting came with step 3b).
 - [x] **Integrations page shows all 11** (website): every system in groups, each with a status: Ready to
   connect, Not set up yet (built, but this installation is not registered with that system), or Coming
-  soon. Built (9): Xero, QuickBooks, Zoho, Shopify, WooCommerce, Square, Google Analytics, Meta (Facebook and
-  Instagram adverts), TrueLayer. Not built (2): HubSpot, WhatsApp. Shopify connects with a read-only token from
+  soon. Built (10): Xero, QuickBooks, Zoho, Shopify, WooCommerce, Square, Google Analytics, Meta (Facebook and
+  Instagram adverts), HubSpot, TrueLayer. Not built (1): WhatsApp. HubSpot connects with a read-only private-app
+  token (deals and contacts only, no Vyterlix registration needed): its deals become leads, proposals, wins and
+  losses with what they are worth and who they are for (a deal that moves on in HubSpot is updated on the next
+  sync); contacts HubSpot calls customers are added unless already known by email or name; bare leads are not
+  made customers. A deal in another currency keeps its place but not its worth. Shopify connects with a read-only token from
   a small private app in the owner's shop (no Vyterlix registration needed) and brings in orders and refunds as
   sales; a plain read-orders app only sees 60 days, so the page tells the owner to add "read all orders" for more.
   Like the others it is tested against a pretend shop and still needs a try on a real development shop. The phone
