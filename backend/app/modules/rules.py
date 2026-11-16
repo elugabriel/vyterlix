@@ -47,7 +47,10 @@ MODULES: tuple[Module, ...] = (
         "profitability",
         "Service & Product Profitability",
         "How much you keep from each sale after what it costs you to deliver.",
-        ("gross_profit", "gross_margin_pct", "cost_of_goods_sold"),
+        (
+            "gross_profit", "gross_margin_pct", "cost_of_goods_sold", "sales_per_appointment",
+            "cost_per_appointment", "profit_per_appointment",
+        ),
     ),
     Module(
         "retention",
@@ -65,7 +68,7 @@ MODULES: tuple[Module, ...] = (
         "Who your customers are and what each is worth.",
         (
             "active_customers", "new_customers", "new_clients", "average_customer_value",
-            "customers_identified_pct",
+            "customers_identified_pct", "clients_seen", "lapsed_clients",
         ),
     ),
     Module(

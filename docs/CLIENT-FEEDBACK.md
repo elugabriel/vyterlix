@@ -212,7 +212,14 @@ Performance, Demand Forecasting.
   area. **Typed in** (decided 15/11/2026): an appointment can now say how long it was meant to take and how
   long it took (website and phone), and a new "Hours worked" entry takes who worked, which day and for how
   long (website tab, phone screen; API `/staff-hours`). The figures that need these only appear once some
-  have been typed in. Not done: importing hours or times from a file, and a booking system to read them from.
+  have been typed in. Not done: a booking system to read them from (see step 2b for importing them from a file).
+- [x] **Step 2b: the thin service figures** (migrations `c52e81f0a7d3`, `d63f92b1e8a4`). *Customer Insight*: clients
+  seen, and clients who have gone quiet (came in the past year, not for the last three months). *Profitability*:
+  what each appointment brings in, costs and leaves (product sales and goods cost are included, and the words
+  say so). **Importing from a file**: an appointments file can now carry the minutes planned and the minutes it
+  took (`75`, `45 min`, `1h 30`), and a new file type, **Hours worked** (day, who, hours such as `7.5`, `7h 30`,
+  `7:30`), can be imported and undone like the others, on the website and phone. Names typed in with hours now
+  also appear as suggestions when typing in an appointment (and the other way round).
 - [~] **Step 3: Marketing ROI and cost per customer** are done through the Meta connector (see CHECKLIST: seven
   figures under Marketing & Acquisition, with the demo salon showing them). Advert spend cannot yet be typed
   in by hand (only Meta, or demo data, supplies it).

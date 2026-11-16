@@ -34,6 +34,7 @@ from app.models.data import (
     Opportunity,
     Product,
     Sale,
+    StaffHours,
     StockMovement,
     Supplier,
 )
@@ -58,6 +59,7 @@ _REFERENCE_MODELS = {
     "customers": Customer,
     "bookings": Booking,
     "opportunities": Opportunity,
+    "staff_hours": StaffHours,
 }
 _DATE_FIELDS = {"sales": "sold_on", "expenses": "spent_on"}
 # Rows recognised by name or email have no ID that could disagree: a second "Flour Co" is just

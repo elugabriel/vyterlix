@@ -356,13 +356,13 @@ class Booking(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigin
     notes: Mapped[str | None] = mapped_column(String(300))
 
 
-class StaffHours(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, Base):
-    """Hours a person worked on one day, typed in. What workforce figures (hours worked, sales per
-    hour, how much of the time was booked) are worked out from. Not imported from anywhere, so it
-    has no source."""
+class StaffHours(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOriginMixin, Base):
+    """Hours a person worked on one day, typed in or imported from a file. What workforce figures
+    (hours worked, sales per hour, how much of the time was booked) are worked out from."""
 
     __tablename__ = "staff_hours"
     __table_args__ = (
+        *_origin_rules("staff_hours"),
         CheckConstraint("hours > 0 AND hours <= 24", name="hours_fit"),
         CheckConstraint("length(trim(staff)) > 0", name="staff_not_blank"),
         Index("ix_staff_hours_org_day", "organization_id", "worked_on"),

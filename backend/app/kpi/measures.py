@@ -321,6 +321,37 @@ def _regular_clients(db: Session, granularity: str, start: date, end: date) -> S
     return out
 
 
+LAPSED_DAYS = 90  # a client who has not been seen for this long has drifted away...
+LAPSED_WITHIN_DAYS = 365  # ...if they were last seen within this long ago
+
+
+def _lapsed_clients(db: Session, granularity: str, start: date, end: date) -> Series:
+    """Clients whose last kept appointment, as at the end of each period, was between a year and
+    three months before: they came, and have not been back. Someone not seen for over a year is
+    not counted (they are long gone, not lately lost)."""
+    first = periods.start_of(start, granularity)
+    out: Series = {}
+    for period in periods.series(first, periods.start_of(end, granularity), granularity):
+        last = periods.end_of(period, granularity)
+        latest = func.max(Booking.booked_for)
+        seen = (
+            select(Booking.customer_id)
+            .where(
+                Booking.status == "completed",
+                Booking.customer_id.is_not(None),
+                Booking.booked_for <= last,
+            )
+            .group_by(Booking.customer_id)
+            .having(
+                latest <= last - timedelta(days=LAPSED_DAYS),
+                latest > last - timedelta(days=LAPSED_WITHIN_DAYS),
+            )
+            .subquery()
+        )
+        out[period] = Decimal(db.scalar(select(func.count()).select_from(seen)) or 0)
+    return out
+
+
 def _rebooked_customers(db: Session, granularity: str, start: date, end: date) -> Series:
     """Customers who kept an appointment in the period and have another one after their last."""
     bucket = _bucket(Booking.booked_for, granularity)
@@ -864,6 +895,7 @@ MEASURES: dict[str, Measure] = {
         Measure(
             "top_supplier_spend", "Spent with the biggest supplier", "suppliers", _top_supplier
         ),
+        Measure("lapsed_clients", "Clients not seen for three months", "bookings", _lapsed_clients),
         Measure("ad_spend", "Spent on adverts", "ads", _ads(AdSpend.spend)),
         Measure("ad_clicks", "Clicks on adverts", "ads", _ads(AdSpend.clicks)),
         Measure("ad_results", "Enquiries and orders from adverts", "ads", _ads(AdSpend.results)),

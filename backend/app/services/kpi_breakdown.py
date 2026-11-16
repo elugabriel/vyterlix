@@ -11,7 +11,7 @@ import uuid
 from datetime import date, timedelta
 from decimal import Decimal
 
-from sqlalchemy import case, func, select
+from sqlalchemy import case, func, select, union_all
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError
@@ -27,6 +27,7 @@ from app.models.data import (
     Project,
     Sale,
     SaleLine,
+    StaffHours,
     StockMovement,
 )
 from app.schemas.kpi import (
@@ -429,7 +430,18 @@ def booking_choices(db: Session) -> BookingChoicesOut:
         )
         return [value for (value,) in rows]
 
-    return BookingChoicesOut(services=used(Booking.service), staff=used(Booking.staff))
+    # A name typed in with someone's hours is as good a suggestion as one typed in with an appointment
+    names = union_all(
+        select(Booking.staff.label("name")).where(Booking.staff.is_not(None)),
+        select(StaffHours.staff.label("name")).where(StaffHours.staff.is_not(None)),
+    ).subquery()
+    staff = [
+        name
+        for (name,) in db.execute(
+            select(names.c.name).group_by(names.c.name).order_by(func.count().desc(), names.c.name)
+        )
+    ]
+    return BookingChoicesOut(services=used(Booking.service), staff=staff)
 
 
 # --- the team (appointments) -----------------------------------------------------------------------

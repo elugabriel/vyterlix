@@ -240,3 +240,70 @@ def test_one_business_cannot_see_anothers_hours(api, db, signup):
     b = api.post(ORGS, json={"name": "Acme Shop"}, headers=owner).json()["id"]
     api.post(f"{ORGS}/{a}/staff-hours", json=HOURS, headers=owner)
     assert api.get(f"{ORGS}/{b}/staff-hours", headers=owner).json()["total"] == 0
+
+
+# --- clients, and what each appointment brings in and costs -------------------------------------
+
+
+def test_the_clients_who_have_gone_quiet_are_counted_by_hand(api, db, business):
+    """Judged at the end of September 2026: Jo was last seen in March and Ana in October 2025, both
+    between a year and three months ago, so both have gone quiet. Sam was seen in August, so has not.
+    Ola was last seen in August 2024, over a year ago, so is long gone and not counted."""
+    jo, sam, ana, ola = (customer(db, business, n) for n in ("Jo", "Sam", "Ana", "Ola"))
+    book(db, business, date(2026, 3, 10), jo)
+    book(db, business, date(2026, 8, 15), sam)
+    book(db, business, date(2025, 10, 5), ana)
+    book(db, business, date(2024, 8, 1), ola)
+    run(db, business, first=date(2026, 9, 1), today=date(2026, 11, 15))
+    assert value(api, business, "lapsed_clients", "2026-09-01") == "2"
+    assert value(api, business, "clients_seen", "2026-09-01") == "0"
+
+
+def test_what_each_appointment_brings_in_costs_and_leaves_matches_the_hand_worked_numbers(
+    api, db, business
+):
+    """Five appointments kept in September, sales of 600 and running costs of 100: 120 brought in,
+    20 spent and 100 left for each appointment."""
+    from tests.shops import _expense
+
+    jo, sam, ola = (customer(db, business, n) for n in ("Jo", "Sam", "Ola"))
+    for who, day in ((jo, 1), (jo, 8), (sam, 9), (ola, 15), (sam, 22)):
+        book(db, business, date(2026, 9, day), who)
+    _sale(db, business, date(2026, 9, 3), 400)
+    _sale(db, business, date(2026, 9, 20), 200)
+    _expense(db, business, date(2026, 9, 5), 100)
+    run(db, business, first=date(2026, 9, 1), today=date(2026, 11, 15))
+    assert value(api, business, "clients_seen", "2026-09-01") == "3"
+    assert value(api, business, "sales_per_appointment", "2026-09-01") == "120.00"
+    assert value(api, business, "cost_per_appointment", "2026-09-01") == "20.00"
+    assert value(api, business, "profit_per_appointment", "2026-09-01") == "100.00"
+
+
+def test_a_shop_is_not_shown_the_per_appointment_or_client_figures(api, db, business):
+    say(api, business, "products")
+    _sale(db, business, date(2026, 9, 3), 100)
+    codes = kpi_codes(api, business)
+    assert not {"clients_seen", "lapsed_clients", "sales_per_appointment"} & codes
+
+
+def test_the_new_service_figures_have_plain_words_and_no_cause_is_claimed():
+    for code in (
+        "clients_seen", "lapsed_clients", "sales_per_appointment", "cost_per_appointment",
+        "profit_per_appointment",
+    ):  # fmt: skip
+        for say_ in (WORDS[code].up, WORDS[code].down):
+            assert say_.says.strip() and say_.why.strip()
+            assert "because" not in (say_.says + say_.why).lower()
+
+
+def test_a_name_typed_in_with_hours_is_suggested_for_appointments_and_the_other_way_round(
+    api, db, business
+):
+    work(db, business, date(2026, 9, 1), "Mia", "8")
+    work(db, business, date(2026, 9, 2), "Mia", "8")
+    book(db, business, date(2026, 9, 1), None)
+    with scoped(db, business):
+        db.add(Booking(booked_for=date(2026, 9, 3), service="Cut", status="completed", staff="Ben"))
+        db.flush()
+    res = api.get(f"{ORGS}/{business[0]}/bookings/choices", headers=business[2]["owner"])
+    assert res.json()["staff"] == ["Mia", "Ben"]  # Mia is used most

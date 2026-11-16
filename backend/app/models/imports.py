@@ -47,6 +47,7 @@ DATASETS = (
     "stock_movements",
     "bookings",
     "opportunities",
+    "staff_hours",
 )
 FILE_SOURCES = ("csv", "excel")  # .csv and .xlsx uploads
 SOURCE_KINDS = (

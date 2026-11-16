@@ -830,6 +830,56 @@ WORDS: dict[str, Words] = {
             "Comparing with the same time last year takes out the usual busy and quiet seasons, so this is worth a closer look.",
         ),
     ),
+    "clients_seen": Words(
+        Say(
+            "You saw more clients than {before}.",
+            "More people through the door is good. Make sure each one is asked to book again.",
+        ),
+        Say(
+            "You saw fewer clients than {before}.",
+            "Fewer people came in. A message to clients who have not been for a while can help.",
+        ),
+    ),
+    "lapsed_clients": Words(
+        Say(
+            "More clients have gone quiet than {before}.",
+            "These people came before and have not been back for three months. A friendly message can bring some back.",
+        ),
+        Say(
+            "Fewer clients have gone quiet than {before}.",
+            "That is a good sign: more of your clients are coming back.",
+        ),
+    ),
+    "sales_per_appointment": Words(
+        Say(
+            "Each appointment brought in more than {before}.",
+            "That includes product sales. Offering the right extra at the end of an appointment helps.",
+        ),
+        Say(
+            "Each appointment brought in less than {before}.",
+            "That includes product sales. Look at your prices and whether extras are being offered.",
+        ),
+    ),
+    "cost_per_appointment": Words(
+        Say(
+            "Each appointment cost you more to deliver than {before}.",
+            "That is all your running costs and the cost of goods spread over the appointments you kept. More appointments spread them thinner.",
+        ),
+        Say(
+            "Each appointment cost you less to deliver than {before}.",
+            "That is a good sign: your costs are spread over more appointments, or you are spending less.",
+        ),
+    ),
+    "profit_per_appointment": Words(
+        Say(
+            "You kept more from each appointment than {before}.",
+            "That is what is left after all your costs, divided by the appointments you kept.",
+        ),
+        Say(
+            "You kept less from each appointment than {before}.",
+            "That is what is left after all your costs, divided by the appointments you kept. Look at your prices and your biggest costs.",
+        ),
+    ),
 }
 
 # When a profit figure is below zero the business is losing money, which "less profit than last

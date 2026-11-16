@@ -26,6 +26,7 @@ from app.models.data import (
     Project,
     Sale,
     SaleLine,
+    StaffHours,
     StockMovement,
     Supplier,
 )
@@ -43,6 +44,7 @@ BATCH = 1000
 UNDO_ORDER = (
     Opportunity,
     Booking,
+    StaffHours,
     StockMovement,
     Sale,
     Expense,
@@ -64,6 +66,7 @@ DATA_TABLES = (
     "bookings",
     "opportunities",
     "projects",
+    "staff_hours",
 )
 
 

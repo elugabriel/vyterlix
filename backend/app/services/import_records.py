@@ -32,6 +32,7 @@ from app.models.data import (
     Project,
     Sale,
     SaleLine,
+    StaffHours,
     StockMovement,
     Supplier,
 )
@@ -48,6 +49,7 @@ MODELS = {
     "bookings": Booking,
     "opportunities": Opportunity,
     "projects": Project,
+    "staff_hours": StaffHours,
 }
 # Where each kind of file's own records go (the table a row points at).
 MAIN_TABLE = {
@@ -60,6 +62,7 @@ MAIN_TABLE = {
     "bookings": "bookings",
     "opportunities": "opportunities",
     "projects": "projects",
+    "staff_hours": "staff_hours",
 }
 # Insert order (parents before children) and the reverse for undo.
 INSERT_ORDER = (
@@ -72,6 +75,7 @@ INSERT_ORDER = (
     "products",
     "bookings",
     "opportunities",
+    "staff_hours",
 )
 UNIT_PRICE_PLACES = Decimal("0.0001")
 
@@ -437,6 +441,22 @@ def _booking(r: Resolver, v: dict[str, Any], booking_id: uuid.UUID, tables: dict
             "staff": v.get("staff"),
             "cancelled_on": v.get("cancelled_on"),
             "rating": v.get("rating"),
+            "minutes_planned": v.get("minutes_planned"),
+            "minutes_taken": v.get("minutes_taken"),
+            "notes": v.get("notes"),
+            "source_ref": v.get("reference"),
+            **r.common,
+        }
+    )
+
+
+def _staff_hours(r: Resolver, v: dict[str, Any], row_id: uuid.UUID, tables: dict) -> None:
+    tables["staff_hours"].append(
+        {
+            "id": row_id,
+            "worked_on": v["worked_on"],
+            "staff": v["staff"],
+            "hours": v["hours"],
             "notes": v.get("notes"),
             "source_ref": v.get("reference"),
             **r.common,
@@ -471,6 +491,7 @@ _BUILDERS = {
     "products": _product,
     "stock_movements": _stock_movement,
     "bookings": _booking,
+    "staff_hours": _staff_hours,
     "opportunities": _opportunity,
 }
 

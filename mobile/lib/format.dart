@@ -92,6 +92,10 @@ const _needs = {
   'customer_sales': 'sales that say which customer bought',
   'stock': 'stock records',
   'bookings': 'appointments',
+  'suppliers': 'costs that say who you bought from',
+  'ads': 'your adverts',
+  'timed': 'appointment times',
+  'staff_hours': 'hours worked',
 };
 
 /// Why a figure shows no number, in plain words.

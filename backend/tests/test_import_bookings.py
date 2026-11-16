@@ -172,3 +172,54 @@ def test_appointments_made_by_hand_are_left_when_an_import_is_undone(api, db, bu
     undo(api, business, import_id)
     with scoped(db, business):
         assert count(db, Booking) == 1
+
+
+# --- how long it was meant to take and how long it took --------------------------------------------
+
+TIMED_MAP = {**MAP, "minutes_planned": "Planned", "minutes_taken": "Took"}
+TIMED_HEADER = HEADER + ",Planned,Took"
+
+
+def timed(row):
+    raw = dict(zip(TIMED_HEADER.split(","), row.split(","), strict=False))
+    return parse_row("bookings", raw, TIMED_MAP, {}, today=date(2026, 10, 1))
+
+
+def test_times_are_read_as_whole_minutes_however_they_are_written():
+    for written, minutes in {
+        "60": 60, "45 min": 45, "45 mins": 45, "1h 30": 90, "1h30m": 90, "1.5 hours": 90,
+        "2 hrs": 120, "75 minutes": 75,
+    }.items():  # fmt: skip
+        out = timed(f"10/09/2026,Cut,completed,,,,,,{written},{written}")
+        assert out.ok, (written, out.errors)
+        assert out.values["minutes_planned"] == minutes == out.values["minutes_taken"], written
+
+
+def test_a_time_that_makes_no_sense_is_refused_in_plain_words():
+    for bad in ("soon", "0", "-5", "1500", "12.5"):
+        out = timed(f"10/09/2026,Cut,completed,,,,,,{bad},")
+        assert not out.ok, bad
+        assert "minutes" in out.errors[0]["message"], bad
+
+
+def test_only_an_appointment_that_went_ahead_has_a_time_taken():
+    out = timed("10/09/2026,Cut,cancelled,,,,,,60,50")
+    assert not out.ok and "went ahead" in out.errors[0]["message"]
+    assert timed("10/09/2026,Cut,cancelled,,,,,,60,").ok  # a plan is fine
+
+
+def test_times_are_optional_and_the_headings_are_matched():
+    assert parse("10/09/2026,Cut,completed,,,,,").values["minutes_taken"] is None
+    found = suggest_mapping("bookings", ["Date", "Service", "Planned minutes", "Actual duration"])
+    assert found["minutes_planned"] == "Planned minutes"
+    assert found["minutes_taken"] == "Actual duration"
+
+
+def test_imported_times_are_kept_on_the_appointments(api, db, business):
+    rows = ("10/09/2026,Cut,completed,Jo Baker,,Ola,,T1,60,75", "11/09/2026,Cut,no show,,,,,T2,30,")
+    body = ("\n".join([TIMED_HEADER, *rows]) + "\n").encode()
+    res = run(api, business, checked(api, business, body, TIMED_MAP, {}, "bookings"))
+    assert res.status_code == 200, res.text
+    with scoped(db, business):
+        got = db.scalars(select(Booking).order_by(Booking.booked_for)).all()
+        assert [(b.minutes_planned, b.minutes_taken) for b in got] == [(60, 75), (30, None)]

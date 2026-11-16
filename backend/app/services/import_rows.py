@@ -10,10 +10,11 @@ comes from a VAT column, else a rate column, else the rate they chose for the wh
 Negative amounts are refunds (sales) or credits (expenses).
 """
 
+import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from app.models.data import (
@@ -377,6 +378,80 @@ def _rating(text: str) -> int:
     return int(number)
 
 
+_HOURS_AND_MINUTES = re.compile(
+    r"^(?:(?P<h>\d+(?:\.\d+)?)\s*(?:h|hr|hrs|hour|hours)\s*(?:(?P<hm>\d+)\s*(?:m|min|mins|minutes?)?)?"
+    r"|(?P<m>\d+(?:\.\d+)?)\s*(?:m|min|mins|minutes?)?)$"
+)
+
+
+def _minutes(text: str) -> int:
+    """A length of time as whole minutes, from 1 to a day: 75, 75 min, 1h 15 or 1.25 hours."""
+    word = text.strip().lower()
+    found = _HOURS_AND_MINUTES.match(word)
+    if found is None:
+        raise CellError("invalid_minutes", f"'{text.strip()}' isn't a number of minutes.")
+    if found.group("m") is not None:
+        total = float(found.group("m"))
+    else:
+        total = float(found.group("h")) * 60 + int(found.group("hm") or 0)
+    if total != int(total) or not 1 <= total <= 24 * 60:
+        raise CellError(
+            "invalid_minutes",
+            f"'{text.strip()}' isn't a whole number of minutes between 1 and 1,440 (a day).",
+        )
+    return int(total)
+
+
+_CLOCK = re.compile(r"^(\d{1,2}):(\d{2})$")
+
+
+def _hours(text: str) -> Decimal:
+    """A length of time in hours, more than nothing and at most a day: 7.5, 7h 30, 7:30 or 450 min.
+    A bare number is hours (unlike a time of an appointment, where it is minutes)."""
+    word = text.strip().lower()
+    wrong = CellError(
+        "invalid_hours", f"'{text.strip()}' isn't a number of hours between 0 and 24."
+    )
+    clock = _CLOCK.match(word)
+    found = _HOURS_AND_MINUTES.match(word)
+    total: Decimal | None = None
+    if clock:
+        total = Decimal(int(clock.group(1))) + Decimal(int(clock.group(2))) / 60
+    elif found and found.group("h") is not None:  # 7h 30, 7.5 hours
+        total = Decimal(found.group("h")) + Decimal(int(found.group("hm") or 0)) / 60
+    elif found and found.group("m") is not None and not word.replace(".", "").isdigit():
+        total = Decimal(found.group("m")) / 60  # 450 min
+    else:
+        try:
+            total = Decimal(word.replace(",", "."))  # a bare number is hours
+        except InvalidOperation:
+            raise wrong from None
+    if not 0 < total <= 24:
+        raise wrong
+    return total.quantize(Decimal("0.01"))
+
+
+def _staff_hours(row: _Row, options: dict, today: date | None) -> None:
+    day = row.read("worked_on", lambda t: vp.parse_date(t, today=today), required=True)
+    staff = row.text("staff", 100, required=True)
+    hours = row.read("hours", _hours, required=True)
+    reference = row.text("reference", 200)
+    if reference is None and day is not None and staff and hours is not None:
+        # nothing to tell two rows apart, so the same person, day and hours are one row
+        reference = f"{staff.casefold()}|{day.isoformat()}|{hours}"[:200]
+    row.out.values.update(
+        {
+            "worked_on": day,
+            "staff": staff,
+            "hours": hours,
+            "notes": row.text("notes", 300),
+            "reference": reference,
+        }
+    )
+    row.out.reference = reference
+    row.out.key = ("ref", reference) if reference else None
+
+
 def _booking(row: _Row, options: dict, today: date | None) -> None:
     # an appointment can be booked up to a year ahead
     day = row.read(
@@ -402,11 +477,21 @@ def _booking(row: _Row, options: dict, today: date | None) -> None:
     rating = row.read("rating", _rating)
     if rating is not None and status != "completed":
         row.error("rating", "not_completed", "Only an appointment that went ahead can be rated.")
+    planned = row.read("minutes_planned", _minutes)
+    taken = row.read("minutes_taken", _minutes)
+    if taken is not None and status != "completed":
+        row.error(
+            "minutes_taken",
+            "not_completed",
+            "Only an appointment that went ahead has a time taken.",
+        )
     email = row.read("customer_email", vp.parse_email)
     reference = row.text("reference", 200)
     row.out.values.update(
         {
             "rating": rating,
+            "minutes_planned": planned,
+            "minutes_taken": taken,
             "booked_for": day,
             "service": service,
             "status": status,
@@ -513,5 +598,6 @@ _PARSERS: dict[str, Callable[[_Row, dict, date | None], None]] = {
     "products": _product,
     "stock_movements": _stock_movement,
     "bookings": _booking,
+    "staff_hours": _staff_hours,
     "opportunities": _opportunity,
 }

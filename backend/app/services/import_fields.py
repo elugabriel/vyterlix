@@ -686,6 +686,33 @@ BOOKINGS = (
         "satisfaction",
         "review",
     ),
+    _f(
+        "minutes_planned",
+        "Minutes planned",
+        "How long it was meant to take, for example 60, 45 min or 1h 30.",
+        "quantity",
+        "planned",
+        "planned minutes",
+        "minutes planned",
+        "booked length",
+        "booked duration",
+        "scheduled duration",
+        "expected duration",
+    ),
+    _f(
+        "minutes_taken",
+        "Minutes it took",
+        "How long it really took, for example 75, 50 min or 1h 15. "
+        "Only for appointments that went ahead.",
+        "quantity",
+        "minutes taken",
+        "actual minutes",
+        "actual duration",
+        "duration",
+        "time taken",
+        "length",
+        "minutes",
+    ),
     _f("notes", "Notes", "Anything else worth keeping.", "text", "notes", "note", "comment"),
     _f(
         "reference",
@@ -696,6 +723,53 @@ BOOKINGS = (
         "ref",
         "booking id",
         "booking number",
+        "id",
+    ),
+)
+
+STAFF_HOURS = (
+    _f(
+        "worked_on",
+        "Day worked",
+        "The day the hours were worked (UK format).",
+        "date",
+        "date",
+        "day",
+        "worked on",
+        "shift date",
+        "work date",
+    ),
+    _f(
+        "staff",
+        "Who worked",
+        "The person's name, as you use it on appointments.",
+        "text",
+        "staff",
+        "name",
+        "employee",
+        "stylist",
+        "team member",
+        "worker",
+    ),
+    _f(
+        "hours",
+        "Hours worked",
+        "How long they worked that day, for example 7.5, 7h 30 or 7:30.",
+        "quantity",
+        "hours",
+        "hours worked",
+        "time worked",
+        "duration",
+        "length",
+    ),
+    _f("notes", "Notes", "Anything else worth keeping.", "text", "notes", "note", "comment"),
+    _f(
+        "reference",
+        "Reference",
+        _REFERENCE_HELP + " Without one, the same person, day and hours are taken as the same row.",
+        "text",
+        "reference",
+        "ref",
         "id",
     ),
 )
@@ -824,6 +898,7 @@ DATASET_FIELDS: dict[str, tuple[ImportField, ...]] = {
     "stock_movements": STOCK_MOVEMENTS,
     "bookings": BOOKINGS,
     "opportunities": OPPORTUNITIES,
+    "staff_hours": STAFF_HOURS,
 }
 
 # Fields that must be mapped, and groups where at least one of them must be.
@@ -836,6 +911,7 @@ REQUIRED: dict[str, tuple[str, ...]] = {
     "stock_movements": ("moved_on", "quantity"),
     "bookings": ("booked_for", "service"),
     "opportunities": ("name",),
+    "staff_hours": ("worked_on", "staff", "hours"),
 }
 ONE_OF: dict[str, tuple[tuple[str, ...], ...]] = {
     "customers": (("name", "email"),),
