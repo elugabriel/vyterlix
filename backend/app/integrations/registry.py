@@ -107,4 +107,9 @@ def listings() -> list[Listing]:
         else:
             status: Status = "ready" if provider.is_configured(settings) else "needs_setup"
             out.append(Listing(key, provider.label, group, summary, status, provider))
+    shown = {listing.key for listing in out}
+    for key, provider in PROVIDERS.items():  # anything else registered is still listed
+        if key not in shown:
+            status = "ready" if provider.is_configured(settings) else "needs_setup"
+            out.append(Listing(key, provider.label, "Other", "", status, provider))
     return out
