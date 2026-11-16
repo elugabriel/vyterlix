@@ -1,0 +1,52 @@
+VYTERLIX WALKTHROUGH OF THE DEMO SALON: VOICE-OVER SCRIPT
+
+[0:00] intro
+This is Vyterlix. It helps a small business understand its own figures, see what has changed and why, know what to do next, and check whether it worked. In this film we look at a made-up hair and beauty salon called Glow, which also sells products. Everything you see is practice data, not a real business.
+
+[0:20] today
+This is Today, the page the owner opens each morning. The card at the top gives the health of the business as one number out of a hundred, and says what is pulling it down.
+
+[0:32] today-questions
+Below it are plain questions. What is going well. What needs my attention. What should I do first. What am I waiting for. And did my actions help.
+
+[0:44] figures
+Key figures are the numbers that matter. They are grouped into parts, and Vyterlix only shows the parts that fit the business. A salon sees appointments and stock, because it takes bookings and sells products. A shop that only sells things would not see appointments, and a business that only sells services would not see stock.
+
+[1:06] money
+Sales and revenue. Financial figures, such as profit and cash. And the profitability of each service and product, including what each appointment brings in, costs, and leaves.
+
+[1:19] clients
+Customer retention and loyalty shows how many clients come back, and how many have gone quiet. Customer insight shows how many clients were seen, and who is new.
+
+[1:31] bookings
+Bookings and appointments cover what was kept, cancelled or missed. Workforce and productivity covers the hours the team worked, and how much of that time was spent on appointments.
+
+[1:43] stock
+Stock and inventory is for businesses that sell products. Marketing covers visits to the website and what is spent on Facebook and Instagram adverts, including the cost of winning each new customer.
+
+[1:56] operations
+Operational performance covers how well the work gets done: appointments that run over, and how fast customers are answered on WhatsApp. These figures come from the times that messages were sent. Vyterlix never keeps what a message says, and never keeps a phone number.
+
+[2:14] suppliers
+Supplier performance shows who the business buys from, and how much it leans on one supplier. Demand shows whether the number of sales and appointments is rising or falling, with a link to the forecast.
+
+[2:27] health
+Business health brings all of it into one score. Finance, sales, customers, stock, marketing and operations each have their own score, and open to say why. Only the parts that apply to this business count towards the score.
+
+[2:44] switches
+On the business page, the owner can switch any part on or off. When a part is switched off, it disappears from the screen, and the health score is worked out again straight away without it.
+
+[2:56] changes
+What changed lists the figures that moved by more than usual, good news as well as bad, and can explain why from the business's own records.
+
+[3:05] forecast
+The forecast shows where the business is heading. The shaded band is the likely range, and Vyterlix says plainly how far to trust it.
+
+[3:15] connections
+Connections link Vyterlix to the systems a business already uses. There are eleven. Xero, QuickBooks and Zoho for accounts. Shopify, WooCommerce and Square for sales. Google Analytics for the website. Meta for advert spending. HubSpot for customers and deals. WhatsApp for customer messages. And the bank, through TrueLayer.
+
+[3:42] connections-read
+Vyterlix only ever reads from these systems. It can never change anything in them. All eleven are built, and tested against practice services. Trying each one with a real account is the next step.
+
+[3:57] close
+That is Vyterlix. Your figures in plain English, what changed and why, what to do next, and whether it worked. The phone app shows the same figures. Thank you for watching.

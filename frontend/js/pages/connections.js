@@ -284,7 +284,7 @@ const BADGE = {
 
 /** Every system Vyterlix connects to, in groups, each saying where it stands. */
 function addCard(providers, connections) {
-  const card = el("section", { class: "card" }, el("h2", { style: "margin-top:0" }, "Systems you can connect"));
+  const card = el("section", { class: "card", id: "systems" }, el("h2", { style: "margin-top:0" }, "Systems you can connect"));
   const live = new Set(connections.filter((c) => c.status !== "disconnected").map((c) => c.provider));
   const real = providers.filter((p) => p.key !== "sandbox");
   const built = real.filter((p) => p.status !== "coming_soon").length;
