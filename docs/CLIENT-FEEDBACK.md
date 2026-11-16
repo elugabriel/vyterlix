@@ -234,8 +234,17 @@ Performance, Demand Forecasting.
 - [x] **All twelve modules have figures** (Supplier Performance and Demand Forecasting came with step 3b).
 - [x] **Integrations page shows all 11** (website): every system in groups, each with a status: Ready to
   connect, Not set up yet (built, but this installation is not registered with that system), or Coming
-  soon. Built (10): Xero, QuickBooks, Zoho, Shopify, WooCommerce, Square, Google Analytics, Meta (Facebook and
-  Instagram adverts), HubSpot, TrueLayer. Not built (1): WhatsApp. HubSpot connects with a read-only private-app
+  soon. Built (11, all of them): Xero, QuickBooks, Zoho, Shopify, WooCommerce, Square, Google Analytics, Meta
+  (Facebook and Instagram adverts), HubSpot, WhatsApp, TrueLayer. WhatsApp is different: it has no list of past
+  messages to fetch, it only tells us about messages as they happen. So the owner types in three things from their
+  own Meta app (phone number ID, access token, app secret), then the connection shows the web address and check
+  word to paste into that Meta app (Configuration, Webhook). Notices are accepted only with a genuine signature
+  (made with the owner's app secret). Only when a message was sent, which way it went and a one-way code for the
+  customer are kept, never the words or the phone number. They feed five figures in Operational Performance:
+  messages from customers, new conversations (after a quiet day), replied to within an hour, wait for a first
+  reply, and conversations with no reply. WhatsApp cannot give past messages, so figures start from when it is
+  set up; the live set-up needs a real WhatsApp Business number (Meta approves that for the business), so it is
+  tested against pretend notices only. HubSpot connects with a read-only private-app
   token (deals and contacts only, no Vyterlix registration needed): its deals become leads, proposals, wins and
   losses with what they are worth and who they are for (a deal that moves on in HubSpot is updated on the next
   sync); contacts HubSpot calls customers are added unless already known by email or name; bare leads are not

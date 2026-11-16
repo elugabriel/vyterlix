@@ -19,6 +19,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
+from uuid import UUID
 
 from app.core.config import Settings
 
@@ -130,6 +131,11 @@ class Provider(ABC):
     def connect_with_keys(self, values: dict[str, str]) -> TokenSet:
         """Check the keys the person typed in and return them as tokens (kept encrypted)."""
         raise ProviderRejected("This connection does not use keys.")
+
+    def setup_notes(self, integration_id: UUID, settings: dict[str, Any]) -> list[str]:
+        """Plain steps still to do after connecting, shown on the connection (WhatsApp: the address
+        and check word to put into the owner's Meta app). Most providers have none."""
+        return []
 
     @abstractmethod
     def account(self, tokens: TokenSet) -> AccountInfo:

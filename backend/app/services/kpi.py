@@ -18,7 +18,7 @@ import uuid
 from datetime import date
 from decimal import Decimal
 
-from sqlalchemy import func, select
+from sqlalchemy import Date, cast, func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
@@ -32,6 +32,7 @@ from app.models.business import BusinessProfile
 from app.models.data import (
     BankTransaction,
     Booking,
+    CustomerMessage,
     Expense,
     Opportunity,
     Sale,
@@ -95,7 +96,8 @@ def active_definitions(db: Session) -> list[KpiDefinition]:
 
 
 def _data_bounds(db: Session) -> tuple[date, date] | None:
-    """The first and last date the business has any sales, costs, stock, bookings or leads on."""
+    """The first and last date the business has any sales, costs, stock, bookings, leads, website
+    visits, bank movements or customer messages on."""
     lows, highs = [], []
     for column in (
         Sale.sold_on,
@@ -105,6 +107,7 @@ def _data_bounds(db: Session) -> tuple[date, date] | None:
         Opportunity.created_on,
         WebVisit.day,
         BankTransaction.day,
+        cast(CustomerMessage.sent_at, Date),
     ):
         low, high = db.execute(select(func.min(column), func.max(column))).one()
         if low is not None:
@@ -334,6 +337,9 @@ def list_kpis(db: Session, granularity: str = "month", *, respect_choices: bool 
     if not has_records(db, "staff_hours"):
         # Hours worked are for a business that types them in
         definitions = [d for d in definitions if "staff_hours" not in d.requires]
+    if not has_records(db, "messages"):
+        # Message figures are for a business whose WhatsApp has been connected
+        definitions = [d for d in definitions if "messages" not in d.requires]
     if not has_records(db, "bank"):
         # Bank figures are for a business whose bank account has been connected
         definitions = [d for d in definitions if "bank" not in d.requires]

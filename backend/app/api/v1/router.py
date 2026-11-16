@@ -37,6 +37,7 @@ from app.api.v1 import (
     segments,
     settings,
     trading,
+    whatsapp_webhook,
 )
 
 api_router = APIRouter(prefix="/api/v1")
@@ -91,3 +92,4 @@ api_router.include_router(admin.router)
 api_router.include_router(app_config.router)
 api_router.include_router(features.router)
 api_router.include_router(billing.webhook_router)
+api_router.include_router(whatsapp_webhook.router)

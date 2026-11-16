@@ -10,7 +10,7 @@ ELEVEN = [
     "xero", "quickbooks", "zoho", "shopify", "woocommerce", "square", "google_analytics", "meta",
     "hubspot", "whatsapp", "truelayer",
 ]  # fmt: skip
-NOT_BUILT = {"whatsapp"}
+NOT_BUILT: set[str] = set()  # all eleven are built
 
 
 def bare(monkeypatch, **credentials):
@@ -26,7 +26,7 @@ def test_all_eleven_systems_are_listed_in_order(monkeypatch):
     assert keys == ELEVEN
 
 
-def test_the_one_not_built_yet_says_coming_soon_and_have_nothing_to_connect(monkeypatch):
+def test_any_system_not_built_yet_says_coming_soon_and_has_nothing_to_connect(monkeypatch):
     bare(monkeypatch)
     soon = {i.key: i for i in registry.listings() if i.status == "coming_soon"}
     assert set(soon) == NOT_BUILT
@@ -54,6 +54,7 @@ def test_systems_that_connect_with_keys_need_no_registration(monkeypatch):
     assert by_key["woocommerce"].status == "ready"  # the shop owner types in their own keys
     assert by_key["shopify"].status == "ready"  # ...and their own Shopify token
     assert by_key["hubspot"].status == "ready"  # ...and their own HubSpot token
+    assert by_key["whatsapp"].status == "ready"  # ...and the details from their own Meta app
 
 
 def test_every_system_has_a_group_and_one_plain_sentence(monkeypatch):
@@ -66,7 +67,7 @@ def test_a_not_ready_system_cannot_be_connected(api, business, monkeypatch):
     bare(monkeypatch)
     res = api.post(url(business, "/connect"), json={"provider": "xero"}, headers=auth(business))
     assert res.status_code == 422 and res.json()["error"]["code"] == "unknown_provider"
-    res = api.post(url(business, "/connect"), json={"provider": "whatsapp"}, headers=auth(business))
+    res = api.post(url(business, "/connect"), json={"provider": "nonsense"}, headers=auth(business))
     assert res.status_code == 422
 
 

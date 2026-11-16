@@ -25,8 +25,9 @@ Conventions (they matter for the numbers, so they are written down here):
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import Date, case, cast, func, literal_column, select, text
 from sqlalchemy.orm import Session
@@ -37,6 +38,7 @@ from app.models.data import (
     AdSpend,
     BankTransaction,
     Booking,
+    CustomerMessage,
     Expense,
     Opportunity,
     Product,
@@ -62,6 +64,7 @@ PRESENCE = {
     "timed": select(Booking.id).where(Booking.minutes_taken.is_not(None)),
     "staff_hours": select(StaffHours.id),
     "ads": select(AdSpend.id),
+    "messages": select(CustomerMessage.id),
     "suppliers": select(Expense.id).where(Expense.supplier_id.is_not(None)),
     "web": select(WebVisit.id),
     "bank": select(BankTransaction.id),
@@ -511,6 +514,93 @@ def _ads(column) -> Compute:
     return compute
 
 
+# --- customer messages: how many, and how fast they are answered -------------------------------
+# A conversation starts when a customer writes after at least a day of quiet (or the first time).
+# The reply is your first message to them after that, if it comes within a day. Whether a
+# conversation has had long enough to be called "unanswered" is judged against the latest message
+# on record, so the figures never depend on what day they are looked at.
+
+LONDON = ZoneInfo("Europe/London")
+QUIET = timedelta(hours=24)  # a gap this long makes the next message a new conversation
+QUICK = timedelta(hours=1)  # "replied quickly"
+
+
+@dataclass(frozen=True)
+class _Start:
+    day: date  # the UK day it began
+    began: datetime
+    minutes: Decimal | None  # to your first reply, if there was one within a day
+
+
+def _conversation_starts(db: Session, start: date, end: date) -> list[_Start]:
+    low = datetime.combine(start, time.min, LONDON) - QUIET
+    high = datetime.combine(end, time.max, LONDON) + QUIET
+    rows = db.execute(
+        select(CustomerMessage.contact_ref, CustomerMessage.sent_at, CustomerMessage.direction)
+        .where(CustomerMessage.sent_at >= low, CustomerMessage.sent_at <= high)
+        .order_by(CustomerMessage.contact_ref, CustomerMessage.sent_at)
+    ).all()
+    starts: list[_Start] = []
+    thread: list = []
+
+    def finish() -> None:
+        previous = None
+        for index, (_, sent, direction) in enumerate(thread):
+            if direction == "in" and (previous is None or sent - previous > QUIET):
+                day = sent.astimezone(LONDON).date()
+                reply = next(
+                    (s for _, s, d in thread[index + 1 :] if d == "out" and s - sent <= QUIET),
+                    None,
+                )
+                minutes = None
+                if reply is not None:
+                    minutes = Decimal((reply - sent).total_seconds() / 60).quantize(Decimal("0.01"))
+                if start <= day <= end:
+                    starts.append(_Start(day, sent, minutes))
+            previous = sent
+
+    current = None
+    for row in rows:
+        if row[0] != current:
+            finish()
+            thread, current = [], row[0]
+        thread.append(row)
+    finish()
+    return starts
+
+
+def _starts(
+    keep: Callable[[_Start, datetime], bool], amount: Callable[[_Start], Decimal]
+) -> Compute:
+    def compute(db: Session, granularity: str, start: date, end: date) -> Series:
+        latest = db.scalar(select(func.max(CustomerMessage.sent_at)))
+        out: Series = {}
+        if latest is None:
+            return out
+        for found in _conversation_starts(db, start, end):
+            if keep(found, latest):
+                period = periods.start_of(found.day, granularity)
+                out[period] = out.get(period, ZERO) + amount(found)
+        return out
+
+    return compute
+
+
+def _messages_in(db: Session, granularity: str, start: date, end: date) -> Series:
+    local = func.timezone("Europe/London", CustomerMessage.sent_at)
+    bucket = cast(func.date_trunc(granularity, local), Date)
+    query = (
+        select(bucket, func.count())
+        .where(
+            CustomerMessage.direction == "in",
+            cast(local, Date) >= start,
+            cast(local, Date) <= end,
+        )
+        .group_by(bucket)
+    )
+    return _decimals(db.execute(query))
+
+
 def _staff_hours(db: Session, granularity: str, start: date, end: date) -> Series:
     bucket = _bucket(StaffHours.worked_on, granularity)
     query = (
@@ -896,6 +986,55 @@ MEASURES: dict[str, Measure] = {
             "top_supplier_spend", "Spent with the biggest supplier", "suppliers", _top_supplier
         ),
         Measure("lapsed_clients", "Clients not seen for three months", "bookings", _lapsed_clients),
+        Measure("messages_received", "Messages from customers", "messages", _messages_in),
+        Measure(
+            "conversations_started",
+            "New conversations",
+            "messages",
+            _starts(lambda s, latest: True, lambda s: Decimal(1)),
+        ),
+        Measure(
+            "answerable_starts",
+            "New conversations old enough to have been answered",
+            "messages",
+            _starts(
+                lambda s, latest: (
+                    s.began <= latest - QUICK
+                    or (s.minutes is not None and s.minutes <= Decimal(60))
+                ),
+                lambda s: Decimal(1),
+            ),
+        ),
+        Measure(
+            "replied_within_hour",
+            "New conversations answered within an hour",
+            "messages",
+            _starts(
+                lambda s, latest: s.minutes is not None and s.minutes <= Decimal(60),
+                lambda s: Decimal(1),
+            ),
+        ),
+        Measure(
+            "replied_starts",
+            "New conversations that got a reply",
+            "messages",
+            _starts(lambda s, latest: s.minutes is not None, lambda s: Decimal(1)),
+        ),
+        Measure(
+            "reply_minutes",
+            "Minutes customers waited for a first reply",
+            "messages",
+            _starts(lambda s, latest: s.minutes is not None, lambda s: s.minutes or ZERO),
+        ),
+        Measure(
+            "unanswered_starts",
+            "New conversations never answered",
+            "messages",
+            _starts(
+                lambda s, latest: s.minutes is None and s.began <= latest - QUIET,
+                lambda s: Decimal(1),
+            ),
+        ),
         Measure("ad_spend", "Spent on adverts", "ads", _ads(AdSpend.spend)),
         Measure("ad_clicks", "Clicks on adverts", "ads", _ads(AdSpend.clicks)),
         Measure("ad_results", "Enquiries and orders from adverts", "ads", _ads(AdSpend.results)),

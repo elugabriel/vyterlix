@@ -100,6 +100,9 @@ def integration_out(i: Integration) -> IntegrationOut:
         status=i.status,
         account_name=i.external_account_name,
         permissions=list(provider.permissions) if provider else [],
+        setup_notes=provider.setup_notes(i.id, dict(i.settings or {}))
+        if provider and i.status == "connected"
+        else [],
         connected_at=i.connected_at,
         disconnected_at=i.disconnected_at,
         last_sync_at=i.last_sync_at,
@@ -197,6 +200,11 @@ def _tokens_of(integration: Integration) -> TokenSet:
         scopes=tuple(data.get("scopes", ())),
         extra=data.get("extra", {}),
     )
+
+
+def stored_tokens(integration: Integration) -> TokenSet:
+    """The keys of a connection, decrypted. Only for work done on the connection's behalf."""
+    return _tokens_of(integration)
 
 
 def _store_tokens(integration: Integration, tokens: TokenSet) -> None:

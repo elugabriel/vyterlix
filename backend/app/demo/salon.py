@@ -11,11 +11,12 @@ service-and-products business sees has something to show.
     python -m app.cli.demo unsalon   # takes the business out again
 """
 
+import hashlib
 import random
 import uuid
 from calendar import monthrange
 from collections.abc import Callable
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
 from fastapi.testclient import TestClient
@@ -33,6 +34,7 @@ from app.models.data import (
     BankTransaction,
     Booking,
     Customer,
+    CustomerMessage,
     Expense,
     Opportunity,
     Product,
@@ -645,6 +647,50 @@ def _adverts(db: Session, rng: random.Random) -> None:
     db.flush()
 
 
+def _messages(db: Session, rng: random.Random) -> None:
+    """Clients messaging the salon on WhatsApp, most days it is open. Replies were slow and some
+    messages went unanswered until September, when replies got much quicker, which the reply-speed
+    figures show. Only times and a one-way code for each client, like the real thing."""
+    contacts = [hashlib.sha256(f"glow-client-{i}".encode()).hexdigest() for i in range(70)]
+    last: dict[str, datetime] = {}
+    rows: list[CustomerMessage] = []
+
+    def add(who: str, when: datetime, direction: str) -> None:
+        rows.append(
+            CustomerMessage(
+                sent_at=when, direction=direction, contact_ref=who, source="whatsapp",
+                source_ref=f"demo-{len(rows)}",
+            )
+        )  # fmt: skip
+        last[who] = when
+
+    day = START
+    while day <= END:
+        if day.weekday() != 6:  # closed on Sundays
+            quicker = day >= date(2026, 9, 1)
+            for _ in range(rng.choice((0, 1, 1, 2, 3))):
+                when = datetime(
+                    day.year, day.month, day.day, rng.randint(8, 17), rng.randint(0, 59), tzinfo=UTC
+                )
+                free = [
+                    c for c in contacts if c not in last or when - last[c] > timedelta(hours=36)
+                ]
+                if not free:
+                    continue
+                who = rng.choice(free)
+                add(who, when, "in")
+                if rng.random() < (0.02 if quicker else 0.07):
+                    continue  # never answered
+                minutes = rng.uniform(4, 40) if quicker else rng.uniform(20, 260)
+                reply = when + timedelta(minutes=minutes)
+                add(who, reply, "out")
+                if rng.random() < 0.5:  # they write back the same day: still the same conversation
+                    add(who, reply + timedelta(minutes=rng.randint(3, 90)), "in")
+        day += timedelta(days=1)
+    db.add_all(rows)
+    db.flush()
+
+
 def _bank(db: Session, rng: random.Random) -> None:
     """Card takings paid in each open day, and the usual payments out."""
     takings: dict[date, D] = {}
@@ -760,13 +806,14 @@ def run(say: Callable[[str], None] = print) -> uuid.UUID:
             ids = _lists(db)
             trading = _trading(db, ids, rng, say)
             say(
-                "  invoices, costs, the team's hours, website visits, adverts, bank movements and leads"
+                "  invoices, costs, the team's hours, website visits, adverts, messages, bank movements and leads"
             )
             _invoices(db, trading["people"], rng)
             _costs(db, ids, trading["suppliers"], rng)
             _hours(db, rng)
             _website(db, rng)
             _adverts(db, rng)
+            _messages(db, rng)
             _bank(db, rng)
             _leads(db, trading["people"], rng)
             db.commit()

@@ -15,6 +15,7 @@ from app.integrations.sandbox import SandboxProvider
 from app.integrations.shopify import ShopifyProvider
 from app.integrations.square import SquareProvider
 from app.integrations.truelayer import TrueLayerProvider
+from app.integrations.whatsapp import WhatsAppProvider
 from app.integrations.woocommerce import WooCommerceProvider
 from app.integrations.xero import XeroProvider
 from app.integrations.zoho import ZohoProvider
@@ -31,6 +32,7 @@ PROVIDERS: dict[str, Provider] = {
         ShopifyProvider(),
         SquareProvider(),
         TrueLayerProvider(),
+        WhatsAppProvider(),
         WooCommerceProvider(),
         ZohoProvider(),
     )
@@ -71,9 +73,7 @@ SYSTEMS: tuple[tuple[str, str, str], ...] = (
     ("whatsapp", "Customers and messages", "Customer messages, and how fast you reply."),
     ("truelayer", "Your bank", "The money going into and out of your business bank account."),
 )  # fmt: skip
-NOT_BUILT = {
-    "whatsapp": "WhatsApp Business",
-}
+NOT_BUILT: dict[str, str] = {}  # every system on the list is built
 
 
 @dataclass(frozen=True)

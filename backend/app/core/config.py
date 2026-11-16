@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:5500", "http://127.0.0.1:5500"]
     # Where links in emails point (verify email, reset password, accept invite).
     frontend_base_url: str = "http://localhost:5500"
+    # Where this API is reached from outside. Systems that send us messages (WhatsApp) are told this
+    # address, so in production it must be the public one, e.g. https://api.vyterlix.com.
+    public_api_url: str = "http://localhost:8000"
 
     # "console" writes emails to the log instead of sending them. Dev/test only.
     # "smtp": any provider that offers SMTP (Amazon SES, Postmark, Mailgun, Microsoft...).

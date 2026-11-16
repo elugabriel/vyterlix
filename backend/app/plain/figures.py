@@ -880,6 +880,56 @@ WORDS: dict[str, Words] = {
             "That is what is left after all your costs, divided by the appointments you kept. Look at your prices and your biggest costs.",
         ),
     ),
+    "messages_received": Words(
+        Say(
+            "Customers sent you more messages than {before}.",
+            "More people are getting in touch. Make sure every message gets an answer.",
+        ),
+        Say(
+            "Customers sent you fewer messages than {before}.",
+            "Fewer people got in touch. Letting customers know they can message you can help.",
+        ),
+    ),
+    "conversations_started": Words(
+        Say(
+            "More customers got in touch than {before}.",
+            "These are people who wrote after a quiet spell, or for the first time.",
+        ),
+        Say(
+            "Fewer customers got in touch than {before}.",
+            "Fewer people started a conversation with you. Check your number is easy to find.",
+        ),
+    ),
+    "replied_within_hour_pct": Words(
+        Say(
+            "You replied quickly to more of your new conversations than {before}.",
+            "Customers who hear back within the hour are much more likely to go ahead.",
+        ),
+        Say(
+            "You replied quickly to fewer of your new conversations than {before}.",
+            "Customers who wait longer often go elsewhere. A quick first reply, even a short one, helps.",
+        ),
+    ),
+    "average_reply_minutes": Words(
+        Say(
+            "Customers waited longer for a first reply than {before}.",
+            "A short message saying you will get back to them soon keeps people waiting happily.",
+        ),
+        Say(
+            "Customers waited less time for a first reply than {before}.",
+            "That is a good sign: people hear back sooner.",
+        ),
+    ),
+    "unanswered_conversations": Words(
+        Say(
+            "More conversations went without a reply than {before}.",
+            "Every one is a customer who may have gone elsewhere. Check who is waiting to hear from you.",
+        ),
+        Say(
+            "Fewer conversations went without a reply than {before}.",
+            "That is a good sign: more customers are hearing back.",
+        ),
+    ),
 }
 
 # When a profit figure is below zero the business is losing money, which "less profit than last

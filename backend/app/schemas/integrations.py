@@ -62,6 +62,8 @@ class IntegrationOut(BaseModel):
     status: Literal["connected", "needs_reauth", "disconnected"]
     account_name: str | None
     permissions: list[str]
+    # Steps still to do in the other system after connecting (empty for most).
+    setup_notes: list[str] = []
     connected_at: datetime
     disconnected_at: datetime | None
     last_sync_at: datetime | None

@@ -112,7 +112,11 @@ MODULES: tuple[Module, ...] = (
         "operations",
         "Operational Performance",
         "How well the work gets done.",
-        ("completion_rate_pct", "average_appointment_minutes", "overrun_pct"),
+        (
+            "completion_rate_pct", "average_appointment_minutes", "overrun_pct",
+            "messages_received", "conversations_started", "replied_within_hour_pct",
+            "average_reply_minutes", "unanswered_conversations",
+        ),
     ),
     Module(
         "suppliers",

@@ -63,6 +63,7 @@ SOURCE_KINDS = (
     "google_analytics",
     "meta",
     "hubspot",
+    "whatsapp",
 )
 FILE_SUFFIXES = {"csv": ".csv", "excel": ".xlsx"}
 IMPORT_STATUSES = (

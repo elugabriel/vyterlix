@@ -15,13 +15,14 @@ Rules, enforced by the database:
 """
 
 import uuid
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
     Date,
+    DateTime,
     ForeignKeyConstraint,
     Index,
     Integer,
@@ -53,6 +54,7 @@ DATA_SOURCES = (
     "google_analytics",
     "meta",
     "hubspot",
+    "whatsapp",
 )
 UK_VAT_RATES = ("0", "5", "20")  # %, as NUMERIC text; NULL = exempt / outside the scope of VAT
 SALE_KINDS = ("sale", "refund")
@@ -63,6 +65,8 @@ BOOKING_STATUSES = ("booked", "completed", "cancelled", "no_show")
 # A piece of work you are trying to win: a lead, a proposal sent, then won or lost.
 OPPORTUNITY_STAGES = ("lead", "proposal", "won", "lost")
 OPPORTUNITY_KINDS = ("new", "renewal")
+# Which way a customer message went: "in" from the customer, "out" from the business.
+MESSAGE_DIRECTIONS = ("in", "out")
 # A piece of work whose money in and money out are followed together.
 PROJECT_STATUSES = ("active", "finished")
 
@@ -471,6 +475,28 @@ class AdSpend(UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOrigin
     impressions: Mapped[int] = mapped_column(Integer, server_default="0")  # times it was shown
     clicks: Mapped[int] = mapped_column(Integer, server_default="0")
     results: Mapped[int] = mapped_column(Integer, server_default="0")  # enquiries, orders, messages
+
+
+class CustomerMessage(
+    UUIDPrimaryKeyMixin, TenantScopedMixin, TimestampMixin, DataOriginMixin, Base
+):
+    """One message between a customer and the business (WhatsApp). Only WHEN it was sent, which way
+    it went and who it was with are kept, never what it said. The person is kept as a one-way code,
+    never their phone number, so the figures (messages, how fast you reply) can be worked out
+    without keeping anything private (UK GDPR: keep only what is needed)."""
+
+    __tablename__ = "customer_messages"
+    __table_args__ = (
+        *_origin_rules("customer_messages"),
+        CheckConstraint(_one_of("direction", MESSAGE_DIRECTIONS), name="direction_valid"),
+        Index("ix_customer_messages_org_sent", "organization_id", "sent_at"),
+        Index("ix_customer_messages_org_contact", "organization_id", "contact_ref", "sent_at"),
+    )
+
+    sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    direction: Mapped[str] = mapped_column(String(3))  # "in" from the customer, "out" from you
+    contact_ref: Mapped[str] = mapped_column(String(64))  # a one-way code for the customer
+    channel: Mapped[str] = mapped_column(String(20), server_default="whatsapp")
 
 
 class BankTransaction(

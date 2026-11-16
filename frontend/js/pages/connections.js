@@ -98,11 +98,23 @@ function connectionBlock(c) {
     c.needs_attention && c.last_error_message
       ? el("div", { class: "message message-error" }, c.last_error_message)
       : null,
+    setupSteps(c.setup_notes),
     permissionsList(c.permissions),
     box,
     progress.node,
     actions,
     syncHistory(c),
+  );
+}
+
+// Steps still to do in the other system (WhatsApp: the address and check word for their Meta app).
+function setupSteps(notes) {
+  if (!notes?.length) return null;
+  return el(
+    "div",
+    { class: "message" },
+    el("strong", {}, "One more step"),
+    el("ul", {}, ...notes.map((n) => el("li", { style: "overflow-wrap:anywhere" }, n))),
   );
 }
 
