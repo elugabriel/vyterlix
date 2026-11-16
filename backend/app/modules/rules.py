@@ -165,11 +165,15 @@ def visible_modules(sells: str | None, kpi_codes: set[str]) -> list[Module]:
 # stock, and a shop is not marked for having no bookings.
 
 
-def health_area_counts(area: str, sells: str | None, has_bookings: bool) -> bool:
+def health_area_counts(
+    area: str, sells: str | None, has_bookings: bool, has_messages: bool = False
+) -> bool:
     """Does this area count towards this business's health score?"""
     if area == "inventory":
         return sells != "services"
-    if area == "operational":  # appointments and bookings
+    if area == "operational":  # appointments and bookings, and how fast messages are answered
+        if has_messages:  # any business can be judged on how quickly it answers its customers
+            return True
         if sells == "products":
             return False
         return sells in ("services", "both") or has_bookings

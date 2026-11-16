@@ -228,8 +228,17 @@ Performance, Demand Forecasting.
   one, and the money given back as credit. They only appear once costs name a supplier. *Demand*: the number of
   sales, items sold and appointments booked, each compared with the period before and (sales, appointments) with
   the same time last year, with a link to the Forecast page for what to expect. Honest limits: there is no
-  delivery-time data, so "reliability" is judged by credit notes only; there are no health rules for either part
-  (no fair starting value); the "compared with last year" figures need a year of history.
+  delivery-time data, so "reliability" is judged by credit notes only; the "compared with last year" figures need
+  a year of history.
+- [x] **Step 3c: health rules for the newer figures** (migration `a96c25e0f3b7`). The Business Health Score now also
+  judges: how many new conversations were answered within an hour, the wait for a first reply, and conversations
+  with no reply (operations); how much is bought from the one biggest supplier, and how much suppliers give back
+  as credit (finance); sales and appointments against the same time last year (sales); and clients who have gone
+  quiet (customers). Not judged, on purpose: counts that are neither good nor bad alone (messages, new
+  conversations, amount bought, number of suppliers, clients seen) and month-on-month growth, which swings with
+  the seasons. The starting values are Vyterlix's own, flagged as such, to be replaced with sector benchmarks. A
+  business with WhatsApp messages is judged on reply speed even if it only sells products. A figure with no data,
+  or in a part the owner switched off, is never judged.
 - [ ] **Step 4: phone app** follows the website for everything above.
 - [x] **All twelve modules have figures** (Supplier Performance and Demand Forecasting came with step 3b).
 - [x] **Integrations page shows all 11** (website): every system in groups, each with a status: Ready to

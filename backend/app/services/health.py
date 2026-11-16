@@ -291,8 +291,10 @@ def calculate(db: Session, tenant, *, today: date | None = None) -> HealthRun:
     weights = category_weights(db, industry)
     # Only the areas that make sense for what this business sells count towards its score.
     sells = db.scalar(select(BusinessProfile.sells))
-    has_bookings = has_records(db, "bookings")
-    weights = {a: w for a, w in weights.items() if health_area_counts(a, sells, has_bookings)}
+    has_bookings, has_messages = has_records(db, "bookings"), has_records(db, "messages")
+    weights = {
+        a: w for a, w in weights.items() if health_area_counts(a, sells, has_bookings, has_messages)
+    }
     series, info = _series(db, {r.kpi_code for r in rules})
     seasons = confirmed_seasons(db)
     months = sorted({p for per in series.values() for p in per})
