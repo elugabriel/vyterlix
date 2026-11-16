@@ -11,6 +11,7 @@ from app.integrations.google_analytics import GoogleAnalyticsProvider
 from app.integrations.meta import MetaProvider
 from app.integrations.quickbooks import QuickBooksProvider
 from app.integrations.sandbox import SandboxProvider
+from app.integrations.shopify import ShopifyProvider
 from app.integrations.square import SquareProvider
 from app.integrations.truelayer import TrueLayerProvider
 from app.integrations.woocommerce import WooCommerceProvider
@@ -25,6 +26,7 @@ PROVIDERS: dict[str, Provider] = {
         GoogleAnalyticsProvider(),
         MetaProvider(),
         QuickBooksProvider(),
+        ShopifyProvider(),
         SquareProvider(),
         TrueLayerProvider(),
         WooCommerceProvider(),
@@ -68,7 +70,6 @@ SYSTEMS: tuple[tuple[str, str, str], ...] = (
     ("truelayer", "Your bank", "The money going into and out of your business bank account."),
 )  # fmt: skip
 NOT_BUILT = {
-    "shopify": "Shopify",
     "hubspot": "HubSpot",
     "whatsapp": "WhatsApp Business",
 }
