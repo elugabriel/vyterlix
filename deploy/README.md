@@ -10,6 +10,20 @@ Everything on one server: nginx (the website and HTTPS) -> the API (localhost:80
 Status: **prepared, not yet run on a real server.** Every command below is untested until the VPS
 exists; do the first run as a rehearsal and fix this file where it is wrong.
 
+## Try it on your own computer first (an empty site)
+Proves the first-admin step on a site with nothing in it. Needs the PostgreSQL superuser password once:
+```powershell
+psql -U postgres -c "CREATE DATABASE vyterlix_rehearsal OWNER vyterlix;"
+$env:VYTERLIX_DATABASE_URL = "postgresql+psycopg://vyterlix:YOUR-DB-PASSWORD@localhost:5432/vyterlix_rehearsal"
+cd backend
+.venv\Scripts\python.exe -m alembic upgrade head
+.venv\Scripts\python.exe -m app.cli.staff create falusidorcas@gmail.com --name "Dorcas Falusi" --role admin
+.venv\Scripts\python.exe -m uvicorn app.main:app --port 8000      # then open the website and sign in
+```
+Afterwards: `psql -U postgres -c "DROP DATABASE vyterlix_rehearsal;"` and close that window, so the setting does not
+carry over. (On 22 Nov 2026 this was rehearsed against an emptied copy: all 75 migrations built the tables, the
+admin signed in to an empty site, saw "You don't belong to any business yet", created a business, and opened Admin.)
+
 ## What you need before starting
 - [ ] Hostinger VPS (KVM 2 or bigger is comfortable: 2 CPUs, 8 GB) with Ubuntu 24.04, London.
 - [ ] `vyterlix.com` pointed at the VPS: an **A record** for `@` and `www` to the server's IP.
@@ -58,6 +72,18 @@ connections to Xero, Google and the rest cannot be read again.
 cd /srv/vyterlix/backend
 sudo -u vyterlix bash -c 'set -a; . /etc/vyterlix/vyterlix.env; set +a; .venv/bin/alembic upgrade head'
 ```
+
+## 5b. The first admin (your client)
+A new site has no accounts, so there is nobody who could grant the first admin. This makes the account,
+already verified, and gives it admin rights in one step. It asks for the password without showing it,
+and never puts it on the command line or in a file:
+```bash
+cd /srv/vyterlix/backend
+sudo -u vyterlix bash -c 'set -a; . /etc/vyterlix/vyterlix.env; set +a; .venv/bin/python -m app.cli.staff create falusidorcas@gmail.com --name "Dorcas Falusi" --role admin'
+```
+She signs in at the ordinary login page, sees an **Admin** link in the top bar, and can create her
+business (Dolaris Limited) from "Your businesses". She should change the password in **Your account**
+after her first sign-in. Use `--role support` for someone who may look but not change.
 
 ## 6. Start the app and the worker
 ```bash

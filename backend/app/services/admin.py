@@ -566,6 +566,40 @@ def grant_staff(db: Session, email: str, role: str) -> PlatformStaff:
     return row
 
 
+def create_staff_account(
+    db: Session, *, email: str, full_name: str, password: str, role: str
+) -> User:
+    """Make a brand-new account that is already verified and already platform staff, for the very
+    first sign-in to a site that has no accounts yet (there is nobody to grant the first admin).
+    Whoever runs this on the server vouches for the email address, so no email is sent."""
+    from app.schemas.auth import PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, password_matches_email
+    from app.services.auth import RequestMeta, register_user
+
+    email = email.strip().lower()
+    if "@" not in email or " " in email:
+        raise AppError(
+            "That does not look like an email address.", code="bad_email", status_code=422
+        )
+    if not full_name.strip():
+        raise AppError("Please give the person's name.", code="name_needed", status_code=422)
+    if not PASSWORD_MIN_LENGTH <= len(password) <= PASSWORD_MAX_LENGTH or password_matches_email(
+        password, email
+    ):
+        raise AppError(
+            f"The password must be {PASSWORD_MIN_LENGTH} to {PASSWORD_MAX_LENGTH} characters and "
+            "must not be the email address.",
+            code="weak_password",
+            status_code=422,
+        )
+    user = register_user(
+        db, email=email, password=password, full_name=full_name.strip(), meta=RequestMeta()
+    )
+    user.email_verified_at = utcnow()
+    db.commit()
+    grant_staff(db, email, role)
+    return user
+
+
 def revoke_staff(db: Session, email: str) -> None:
     user = db.scalars(select(User).where(User.email == email.strip().lower())).first()
     row = (
