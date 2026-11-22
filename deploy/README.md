@@ -13,7 +13,7 @@ exists; do the first run as a rehearsal and fix this file where it is wrong.
 ## What you need before starting
 - [ ] Hostinger VPS (KVM 2 or bigger is comfortable: 2 CPUs, 8 GB) with Ubuntu 24.04, London.
 - [ ] `vyterlix.com` pointed at the VPS: an **A record** for `@` and `www` to the server's IP.
-- [ ] An SMTP email service and a sending address on `vyterlix.com` (SPF, DKIM set up).
+- [ ] An SMTP email service, and the mailbox `admin@vyterlix.com` (the address Vyterlix sends from) created on `vyterlix.com` with SPF and DKIM set up.
 - [ ] Fresh secrets (see `env.production.example`). Do not reuse any secret that has been pasted in chat.
 - [ ] Your SSH key added in Hostinger's panel, so there is no password login.
 
