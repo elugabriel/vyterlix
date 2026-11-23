@@ -1,6 +1,6 @@
 # Putting Vyterlix on Hostinger
 
-Written for one **Hostinger VPS** (Linux, Ubuntu 24.04), no Docker. Hostinger's ordinary web hosting
+Written for one **Hostinger VPS** (Linux, Ubuntu 24.04 or 26.04: the first live server ran 26.04, with Python 3.14 and PostgreSQL 18), no Docker. Hostinger's ordinary web hosting
 cannot run this (it needs a database server, a background worker and a Python app), so it must be a
 **VPS plan**. At checkout choose the **United Kingdom (London)** data centre if it is offered.
 
@@ -25,7 +25,7 @@ carry over. (On 22 Nov 2026 this was rehearsed against an emptied copy: all 75 m
 admin signed in to an empty site, saw "You don't belong to any business yet", created a business, and opened Admin.)
 
 ## What you need before starting
-- [ ] Hostinger VPS (KVM 2 or bigger is comfortable: 2 CPUs, 8 GB) with Ubuntu 24.04, London.
+- [ ] Hostinger VPS (KVM 2 or bigger is comfortable: 2 CPUs, 8 GB) with Ubuntu 24.04 or 26.04, UK location.
 - [ ] `vyterlix.com` pointed at the VPS: an **A record** for `@` and `www` to the server's IP.
 - [ ] An SMTP email service, and the mailbox `admin@vyterlix.com` (the address Vyterlix sends from) created on `vyterlix.com` with SPF and DKIM set up.
 - [ ] Fresh secrets (see `env.production.example`). Do not reuse any secret that has been pasted in chat.
@@ -97,7 +97,6 @@ console email backend. That is deliberate: a start-up error naming one of those 
 
 ## 7. The website and HTTPS
 ```bash
-cp /srv/vyterlix/deploy/frontend-config.js /srv/vyterlix/frontend/js/config.js
 cp /srv/vyterlix/deploy/nginx/vyterlix-proxy.conf /etc/nginx/vyterlix-proxy.conf
 cp /srv/vyterlix/deploy/nginx/vyterlix.conf /etc/nginx/sites-available/vyterlix
 ln -s /etc/nginx/sites-available/vyterlix /etc/nginx/sites-enabled/vyterlix
@@ -106,7 +105,7 @@ nginx -t && systemctl reload nginx
 certbot --nginx -d vyterlix.com -d www.vyterlix.com --redirect -m YOUR-EMAIL --agree-tos
 ```
 Certbot renews by itself (`systemctl list-timers | grep certbot`).
-`git pull` would overwrite `config.js`, so the update script (step 9) copies it back each time.
+nginx serves `deploy/frontend-config.js` in place of the development `js/config.js`, so a `git pull` never fights with it.
 
 ## 8. Backups (do this on day one)
 ```bash
@@ -124,7 +123,6 @@ A backup kept only on the server is lost with the server: set up the off-server 
 cd /srv/vyterlix && sudo -u vyterlix git pull
 sudo -u vyterlix /srv/vyterlix/backend/.venv/bin/pip install -e backend
 sudo -u vyterlix bash -c 'cd backend && set -a; . /etc/vyterlix/vyterlix.env; set +a; .venv/bin/alembic upgrade head'
-cp deploy/frontend-config.js frontend/js/config.js
 systemctl restart vyterlix-api vyterlix-worker
 ```
 Take a backup first (`vyterlix-backup`) whenever a release changes the database.
