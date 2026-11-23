@@ -9,6 +9,7 @@ import 'files.dart';
 import 'lock.dart';
 import 'screens/businesses_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/welcome_screen.dart';
 import 'theme.dart';
 import 'widgets/common.dart';
 import 'widgets/lock_layer.dart';
@@ -23,6 +24,7 @@ class VyterlixApp extends StatelessWidget {
     required this.lock,
     required this.offline,
     this.files = const PhoneFileChooser(),
+    this.showWelcome = false,
   });
 
   final AuthController auth;
@@ -33,6 +35,9 @@ class VyterlixApp extends StatelessWidget {
 
   /// How a spreadsheet is chosen on this phone (tests give it a made-up one).
   final FileChooser files;
+
+  /// Whether someone who is signed out first sees the welcome screen (the real app does; tests go straight to login).
+  final bool showWelcome;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +57,7 @@ class VyterlixApp extends StatelessWidget {
         darkTheme: buildTheme(Brightness.dark),
         builder: (context, child) =>
             LockLayer(child: OfflineBanner(child: child ?? const SizedBox())),
-        home: const _Gate(),
+        home: _Gate(showWelcome: showWelcome),
       ),
     );
   }
@@ -60,7 +65,9 @@ class VyterlixApp extends StatelessWidget {
 
 /// Shows the screen that fits whether someone is signed in.
 class _Gate extends StatelessWidget {
-  const _Gate();
+  const _Gate({required this.showWelcome});
+
+  final bool showWelcome;
 
   @override
   Widget build(BuildContext context) {
@@ -82,9 +89,27 @@ class _Gate extends StatelessWidget {
             Navigator.of(context).popUntil((route) => route.isFirst);
           }
         });
-        return const LoginScreen();
+        return showWelcome ? const _SignedOut() : const LoginScreen();
       case AuthStatus.signedIn:
         return const BusinessesScreen();
     }
+  }
+}
+
+/// The welcome screen once per launch of the app, then the login screen (also after the server ends a sign-in).
+class _SignedOut extends StatefulWidget {
+  const _SignedOut();
+
+  @override
+  State<_SignedOut> createState() => _SignedOutState();
+}
+
+class _SignedOutState extends State<_SignedOut> {
+  static bool _welcomed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_welcomed) return const LoginScreen();
+    return WelcomeScreen(onContinue: () => setState(() => _welcomed = true));
   }
 }

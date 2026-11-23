@@ -10,5 +10,5 @@ class AppConfig {
   );
 
   /// The version this build of the app says it is. Keep it equal to `version:` in pubspec.yaml.
-  static const appVersion = '1.0.0';
+  static const appVersion = '1.0.1';
 }

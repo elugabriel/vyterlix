@@ -43,6 +43,7 @@ void main() {
       store: store,
       lock: lock,
       offline: offline,
+      showWelcome: true,
     ),
   );
   lock.load();
