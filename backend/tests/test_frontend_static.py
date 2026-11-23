@@ -191,3 +191,73 @@ def test_the_list_of_businesses_opens_the_front_screen():
     assert "dashboard.html?org=" in (FRONTEND / "js" / "pages" / "app.js").read_text(
         encoding="utf-8"
     )
+
+
+# --- forms must never put what someone typed into the web address ---------------------------------
+
+
+def _forms():
+    for page in PAGES:
+        html = page.read_text(encoding="utf-8")
+        for tag in re.findall(r"<form\b[^>]*>", html):
+            yield page, tag
+
+
+def test_there_are_forms_to_check():
+    assert len(list(_forms())) >= 6
+
+
+@pytest.mark.parametrize(
+    ("page", "tag"), list(_forms()), ids=lambda v: v.name if hasattr(v, "name") else v[:40]
+)
+def test_a_form_is_sent_with_post_and_is_guarded(page, tag):
+    """A form with no method is sent as a web address (GET): an email and password typed before the
+    page's script took over would end up in the address bar, the history and the server's logs."""
+    assert 'method="post"' in tag, f"{page.name}: {tag}"
+    assert "data-guard" in tag, f"{page.name}: {tag}"
+
+
+def test_every_page_with_a_guarded_form_loads_the_guard_first():
+    for page in PAGES:
+        html = page.read_text(encoding="utf-8")
+        if "data-guard" not in html:
+            continue
+        guard = html.find('<script src="js/formguard.js"></script>')
+        first_other = min(
+            i
+            for i in (html.find('<script src="js/config.js"'), html.find('<script type="module"'))
+            if i >= 0
+        )
+        assert 0 <= guard < first_other, (
+            f"{page.name}: formguard.js must come before every other script"
+        )
+
+
+def test_the_guard_refuses_to_let_a_guarded_form_go_until_the_page_has_taken_it_over():
+    code = (FRONTEND / "js" / "formguard.js").read_text(encoding="utf-8")
+    assert (
+        'addEventListener(\n    "submit"' in code
+        and "preventDefault()" in code
+        and "data-guard" in code
+    )
+    assert "dataset.ready" in code and "dataset.pending" in code
+    ui = (FRONTEND / "js" / "ui.js").read_text(encoding="utf-8")
+    assert 'form.dataset.ready = "1"' in ui and "form.requestSubmit()" in ui
+
+
+def test_the_login_page_takes_over_its_form_before_it_waits_for_anything():
+    code = (FRONTEND / "js" / "pages" / "login.js").read_text(encoding="utf-8")
+    assert "await" not in code.split("bindForm(")[0], (
+        "nothing may be awaited before the form is taken over"
+    )
+
+
+def test_each_page_lists_the_scripts_it_needs_so_they_are_fetched_at_once():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "preload_hints", FRONTEND / "tools" / "preload_hints.py"
+    )
+    tool = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(tool)
+    assert tool.main(check=True) == [], "run: python frontend/tools/preload_hints.py"
