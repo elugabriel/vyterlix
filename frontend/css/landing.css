@@ -69,13 +69,6 @@ html { scroll-behavior: smooth; scroll-padding-top: 76px; }
 .dot { flex: none; width: 9px; height: 9px; border-radius: 50%; }
 .dot.ok { background: var(--ok); } .dot.warn { background: var(--warn); } .dot.bad { background: var(--bad); }
 
-/* --- strip --- */
-.l-strip { background: var(--bg); border-bottom: 1px solid var(--border); }
-.l-facts { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin: 0 auto; padding-top: 26px; padding-bottom: 26px; }
-.l-facts li { display: flex; align-items: center; gap: 14px; }
-.l-facts svg { flex: none; width: 44px; height: 44px; padding: 10px; border-radius: 12px; background: var(--tea); fill: none; stroke: #123222; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.l-facts b { display: block; font-size: 0.98rem; line-height: 1.3; }
-.l-facts span { display: block; font-size: 0.85rem; line-height: 1.4; color: var(--muted); }
 
 /* --- sections --- */
 .l-section { padding: 84px 0; }
@@ -133,7 +126,6 @@ html { scroll-behavior: smooth; scroll-padding-top: 76px; }
   .l-hero-grid { grid-template-columns: 1fr; gap: 40px; }
   .l-steps { grid-template-columns: repeat(2, 1fr); }
   .l-chips, .l-who, .l-four { grid-template-columns: repeat(2, 1fr); }
-  .l-facts { grid-template-columns: repeat(2, 1fr); }
   .l-three { grid-template-columns: 1fr; }
 }
 @media (max-width: 1040px) {
@@ -153,7 +145,6 @@ html { scroll-behavior: smooth; scroll-padding-top: 76px; }
   .l-cta-row .l-btn { flex: 1 1 100%; }
   .l-pv-figs { grid-template-columns: 1fr; }
   .l-preview { padding: 16px; }
-  .l-facts { grid-template-columns: 1fr; gap: 18px; }
 }
 .landing [hidden] { display: none !important; }
 .l-nav > a, .l-btn { white-space: nowrap; }
