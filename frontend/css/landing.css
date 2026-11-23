@@ -1,0 +1,154 @@
+/* The public front page (index.html). Uses the app's colours from base.css, so the two feel like one product. */
+
+body.landing { background: var(--surface); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.l-wrap { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.l-narrow { max-width: 760px; text-align: center; }
+
+/* --- header --- */
+.l-header { position: sticky; top: 0; z-index: 60; background: color-mix(in srgb, var(--side-1) 94%, transparent); backdrop-filter: saturate(160%) blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.l-header .brand { color: #fff; }
+.l-header-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; }
+.l-nav { display: flex; align-items: center; gap: 22px; }
+.l-nav > a { color: #cfe3d6; text-decoration: none; font-weight: 550; font-size: 0.95rem; }
+.l-nav > a:hover { color: #fff; }
+.l-nav-actions { display: flex; align-items: center; gap: 10px; margin-left: 8px; }
+.l-burger { display: none; width: 44px; height: 44px; padding: 0; background: none; border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 10px; box-shadow: none; position: relative; }
+.l-burger-bars, .l-burger-bars::before, .l-burger-bars::after { content: ""; position: absolute; left: 12px; right: 12px; height: 2px; background: #fff; border-radius: 2px; transition: transform 0.2s, opacity 0.2s; }
+.l-burger-bars { top: 21px; }
+.l-burger-bars::before { left: 0; right: 0; top: -7px; }
+.l-burger-bars::after { left: 0; right: 0; top: 7px; }
+.l-burger[aria-expanded="true"] .l-burger-bars { background: transparent; }
+.l-burger[aria-expanded="true"] .l-burger-bars::before { transform: translateY(7px) rotate(45deg); }
+.l-burger[aria-expanded="true"] .l-burger-bars::after { transform: translateY(-7px) rotate(-45deg); }
+
+/* --- buttons (links that look like buttons) --- */
+.l-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border-radius: 12px; font-weight: 650; font-size: 0.95rem; text-decoration: none; border: 1px solid transparent; transition: transform 0.15s, background 0.15s, border-color 0.15s; }
+.l-btn:hover { transform: translateY(-1px); }
+.l-btn-solid { background: var(--tea); color: #123222; box-shadow: 0 10px 24px -10px rgba(208, 240, 192, 0.6); }
+.l-btn-solid:hover { background: #e2f8d6; color: #123222; }
+.l-btn-quiet { color: #fff; }
+.l-btn-quiet:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.l-btn-ghost { color: #fff; border-color: rgba(255, 255, 255, 0.35); }
+.l-btn-ghost:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.l-btn-big { min-height: 52px; padding: 0 26px; font-size: 1.02rem; }
+.l-cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.l-center { justify-content: center; }
+
+/* --- hero --- */
+.l-hero { color: #fff; background: radial-gradient(900px 420px at 85% -10%, rgba(63, 165, 117, 0.45), transparent 60%), linear-gradient(160deg, var(--side-1), var(--side-2)); padding: 72px 0 88px; }
+.l-hero-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center; }
+.l-eyebrow { margin: 0 0 14px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--tea); }
+.l-eyebrow-dark { color: var(--accent-2); }
+.l-hero h1 { margin: 0; font-size: clamp(2rem, 4.6vw, 3.3rem); line-height: 1.1; font-weight: 750; letter-spacing: -0.03em; }
+.l-lead { margin-top: 20px; max-width: 34em; font-size: 1.12rem; line-height: 1.6; color: #cfe3d6; }
+.l-fine { margin-top: 16px; font-size: 0.85rem; color: #93aa9c; }
+
+/* the example "Today" card (drawn in CSS, not a screenshot, so it stays sharp and light) */
+.l-preview { padding: 22px; color: var(--text); background: var(--surface); border-radius: 20px; box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.4); }
+.l-pv-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.l-pv-title { font-weight: 700; }
+.l-pv-title em { font-style: normal; font-weight: 500; color: var(--muted); font-size: 0.85rem; }
+.l-pv-pill { padding: 3px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; color: var(--ok-text); background: color-mix(in srgb, var(--ok) 14%, transparent); }
+.l-pv-score { display: flex; gap: 16px; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.l-pv-score p { font-size: 0.92rem; color: var(--muted); }
+.l-pv-ring { flex: none; width: 84px; height: 84px; border-radius: 50%; display: grid; place-content: center; text-align: center; background: radial-gradient(closest-side, var(--surface) 72%, transparent 74%), conic-gradient(var(--accent) 78%, var(--border) 0); }
+.l-pv-ring b { font-size: 1.5rem; line-height: 1; }
+.l-pv-ring small { font-size: 0.62rem; color: var(--muted); }
+.l-pv-figs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px 0; }
+.l-pv-figs > div { padding: 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+.l-pv-figs small { display: block; font-size: 0.72rem; color: var(--muted); }
+.l-pv-figs b { display: block; font-size: 1.35rem; letter-spacing: -0.02em; }
+.l-pv-figs i { font-style: normal; font-size: 0.75rem; font-weight: 600; }
+.l-pv-figs i.up { color: var(--ok-text); }
+.l-pv-head { margin-bottom: 8px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.l-pv-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; margin-top: 6px; border-radius: 10px; font-size: 0.88rem; background: var(--surface-2); border: 1px solid var(--border); }
+.dot { flex: none; width: 9px; height: 9px; border-radius: 50%; }
+.dot.ok { background: var(--ok); } .dot.warn { background: var(--warn); } .dot.bad { background: var(--bad); }
+
+/* --- strip --- */
+.l-strip { background: var(--bg); border-bottom: 1px solid var(--border); }
+.l-strip-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 36px; padding-top: 18px; padding-bottom: 18px; font-size: 0.9rem; font-weight: 600; color: var(--accent-2); }
+.l-strip-row span::before { content: "\2713"; margin-right: 8px; color: var(--ok); }
+
+/* --- sections --- */
+.l-section { padding: 84px 0; }
+.l-tint { background: var(--bg); }
+.l-section h2 { margin: 0 0 14px; font-size: clamp(1.6rem, 3.2vw, 2.3rem); line-height: 1.18; font-weight: 750; letter-spacing: -0.025em; }
+.l-sub { font-size: 1.06rem; color: var(--muted); }
+.l-section .l-narrow { margin-bottom: 40px; }
+.l-card { padding: 26px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+.l-card h3, .l-step h3, .l-how-item h3 { margin: 0 0 8px; font-size: 1.1rem; }
+.l-card p, .l-step p, .l-how-item p { color: var(--muted); }
+.l-three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.l-who { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+
+.l-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+.l-step { padding: 22px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+.l-step-no, .l-how-no { display: inline-grid; place-content: center; width: 34px; height: 34px; margin-bottom: 12px; border-radius: 50%; font-weight: 750; color: #123222; background: var(--tea); }
+.l-step p { font-size: 0.93rem; }
+.l-step strong { color: var(--text); font-weight: 650; }
+
+.l-how { display: grid; gap: 16px; max-width: 760px; }
+.l-how-item { display: flex; gap: 18px; align-items: flex-start; padding: 22px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.l-how-no { flex: none; margin: 2px 0 0; }
+
+.l-dark { color: #fff; background: linear-gradient(160deg, var(--side-1), var(--side-2)); }
+.l-dark .l-sub { color: #b4cbbd; }
+.l-chips { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.l-chips li { padding: 18px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); font-weight: 600; line-height: 1.6; }
+.l-chips b { display: block; margin-bottom: 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tea); }
+
+.l-four { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+.l-four b { display: block; margin-bottom: 6px; font-size: 1.1rem; color: var(--accent-2); }
+.l-four p { color: var(--muted); }
+
+.l-faq { max-width: 760px; display: grid; gap: 10px; }
+.l-faq details { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.l-faq summary { cursor: pointer; padding: 16px 20px; font-weight: 650; min-height: 52px; list-style-position: inside; }
+.l-faq details[open] summary { color: var(--accent-2); }
+.l-faq details p { padding: 0 20px 18px; color: var(--muted); }
+
+.l-final { padding: 84px 0; text-align: center; color: #fff; background: radial-gradient(700px 300px at 50% 120%, rgba(63, 165, 117, 0.45), transparent 70%), linear-gradient(160deg, var(--side-1), var(--side-2)); }
+.l-final h2 { margin: 0 0 12px; font-size: clamp(1.6rem, 3.2vw, 2.3rem); font-weight: 750; letter-spacing: -0.025em; }
+.l-final .l-sub { color: #b4cbbd; }
+.l-final .l-narrow { margin-bottom: 0; }
+
+.l-footer { padding: 36px 0; color: #93aa9c; background: #07140d; font-size: 0.9rem; }
+.l-footer .brand { color: #fff; }
+.l-footer p { margin-top: 10px; max-width: 28em; }
+.l-footer-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; }
+.l-footer nav { display: flex; flex-wrap: wrap; gap: 8px 22px; align-content: flex-start; }
+.l-footer nav a { color: #cfe3d6; text-decoration: none; }
+.l-footer nav a:hover { color: #fff; text-decoration: underline; }
+
+/* --- tablets and phones --- */
+@media (max-width: 960px) {
+  .l-hero-grid { grid-template-columns: 1fr; gap: 40px; }
+  .l-steps { grid-template-columns: repeat(2, 1fr); }
+  .l-chips, .l-who, .l-four { grid-template-columns: repeat(2, 1fr); }
+  .l-three { grid-template-columns: 1fr; }
+}
+@media (max-width: 820px) {
+  .l-burger { display: block; }
+  /* The menu drops down under the header. It is its own scrolling box, never a lock on the page. */
+  .l-nav { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 0; padding: 8px 16px 16px; max-height: calc(100vh - 64px); max-height: calc(100dvh - 64px); overflow-y: auto; overscroll-behavior: contain; background: var(--side-1); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+  .l-header.open .l-nav { display: flex; }
+  .l-nav > a { padding: 14px 8px; min-height: 48px; border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
+  .l-nav-actions { flex-direction: column; align-items: stretch; margin: 12px 0 0; }
+  .l-nav-actions .l-btn { min-height: 48px; }
+}
+@media (max-width: 560px) {
+  .l-wrap { padding: 0 16px; }
+  .l-hero { padding: 44px 0 56px; }
+  .l-section, .l-final { padding: 56px 0; }
+  .l-steps, .l-chips, .l-who, .l-four { grid-template-columns: 1fr; }
+  .l-cta-row .l-btn { flex: 1 1 100%; }
+  .l-pv-figs { grid-template-columns: 1fr; }
+  .l-preview { padding: 16px; }
+  .l-strip-row { justify-content: flex-start; }
+}
+.landing [hidden] { display: none !important; }

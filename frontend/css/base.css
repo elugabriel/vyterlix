@@ -222,20 +222,34 @@ body.shell .topbar { justify-content: flex-end; }
   body.shell .topbar .brand { display: inline-flex; }
   body.shell .topbar { justify-content: space-between; padding: 10px 16px; }
   /* The full menu, grouped as on a computer, opens from the bottom bar. */
+  /* It must be exactly the height between the top of the screen and the bar, and scroll inside that:
+     a menu taller than the screen, with the page behind it locked, cannot be scrolled at all. */
   .sidenav {
     position: fixed;
-    inset: 0 0 64px 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 64px;
+    height: calc(100vh - 64px);
+    height: calc(100dvh - 64px);
+    max-height: calc(100vh - 64px);
+    max-height: calc(100dvh - 64px);
+    align-self: auto;
     z-index: 40;
-    height: auto;
     display: none;
     flex-direction: column;
     flex-wrap: nowrap;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
     gap: 2px;
     padding: 16px;
   }
+  .sidenav > * { flex-shrink: 0; }
   body.menu-open .sidenav { display: flex; }
   body.menu-open { overflow: hidden; }
+  html:has(body.menu-open) { overflow: hidden; }
   .sidenav a.nav-link { padding: 12px 14px; min-height: 48px; }
   .container { padding: 20px 16px 48px; }
 }
