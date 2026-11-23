@@ -105,6 +105,12 @@ nginx -t && systemctl reload nginx
 certbot --nginx -d vyterlix.com -d www.vyterlix.com --redirect -m YOUR-EMAIL --agree-tos
 ```
 Certbot renews by itself (`systemctl list-timers | grep certbot`).
+Then switch on the faster HTTP/2 connection type (certbot does not): in `/etc/nginx/sites-available/vyterlix`, add a line
+`    http2 on;` directly under `listen 443 ssl; # managed by Certbot`, then `nginx -t && systemctl reload nginx`.
+**After this point never copy `vyterlix.conf` over the live file again** (it would remove the HTTPS settings): edit the
+live file in place. A copy of the live file is in `deploy/nginx/vyterlix-live-https.conf` for reference.
+Use `--register-unsafely-without-email` in place of `-m YOUR-EMAIL` if you prefer no email on the certificate: Let's
+Encrypt stopped sending expiry-warning emails in 2025, so an address gives nothing useful.
 nginx serves `deploy/frontend-config.js` in place of the development `js/config.js`, so a `git pull` never fights with it.
 
 ## 8. Backups (do this on day one)
