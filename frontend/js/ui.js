@@ -74,6 +74,13 @@ export function bindForm(form, messageBox, handler) {
       button.disabled = false;
     }
   });
+  // The page's code now owns this form: release the guard (formguard.js), and send it if the button
+  // was pressed before the page was ready.
+  form.dataset.ready = "1";
+  if (form.dataset.pending) {
+    delete form.dataset.pending;
+    form.requestSubmit();
+  }
 }
 
 /**

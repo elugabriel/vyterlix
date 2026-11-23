@@ -128,7 +128,7 @@ main > h1 .muted { font-weight: 500; }
   width: 34px;
   height: 34px;
   border-radius: 9px;
-  background: url("../img/logo.png") center / cover no-repeat;
+  background: url("../img/logo-160.png") center / cover no-repeat;
   box-shadow: 0 6px 14px -6px rgba(4, 16, 64, 0.55);
 }
 .topbar-user { display: flex; align-items: center; gap: 14px; }
@@ -296,7 +296,7 @@ body.shell .topbar { justify-content: flex-end; }
   height: 76px;
   margin: 0 auto 18px;
   border-radius: 18px;
-  background: url("../img/logo.png") center / cover no-repeat;
+  background: url("../img/logo-160.png") center / cover no-repeat;
   box-shadow: 0 10px 22px -10px rgba(4, 16, 64, 0.6);
 }
 .auth-links { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.93rem; }

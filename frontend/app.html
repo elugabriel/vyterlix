@@ -10,8 +10,15 @@
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
   <meta name="theme-color" content="#1f6b4a">
   <link rel="stylesheet" href="css/base.css">
+  <script src="js/formguard.js"></script>
   <script src="js/config.js"></script>
   <script type="module" src="js/pages/app.js"></script>
+  <!-- preload:start (written by frontend/tools/preload_hints.py; do not edit by hand) -->
+  <link rel="modulepreload" href="js/api.js">
+  <link rel="modulepreload" href="js/auth.js">
+  <link rel="modulepreload" href="js/dom.js">
+  <link rel="modulepreload" href="js/ui.js">
+  <!-- preload:end -->
 </head>
 <body>
   <header class="topbar">
@@ -38,7 +45,7 @@
 
     <section class="card">
       <h2 style="margin-top:0">Create a business</h2>
-      <form id="create-form" novalidate>
+      <form id="create-form" method="post" data-guard novalidate>
         <div class="field">
           <label for="name">Business name</label>
           <input id="name" name="name" type="text" required>
