@@ -20,7 +20,7 @@ class WelcomeScreen extends StatelessWidget {
     (
       Icons.chat_bubble_outline,
       'Know what changed, and why',
-      'Plain English explanations. Or just ask a question about your business.',
+      'Clear explanations. Or simply ask a question about your business.',
     ),
     (
       Icons.task_alt_outlined,
@@ -98,7 +98,7 @@ class WelcomeScreen extends StatelessWidget {
                     const BrandMark(size: 56),
                     const SizedBox(height: 28),
                     const Text(
-                      'FOR UK SMALL BUSINESSES',
+                      'BUSINESS INTELLIGENCE FOR GROWING ORGANISATIONS',
                       style: TextStyle(
                         color: Palette.tea,
                         fontSize: 12,
@@ -119,7 +119,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'Vyterlix connects the tools you already use, explains what changed in plain English, and turns it into a short list of things to do.',
+                      'Vyterlix connects the tools you already use, explains what has changed in clear language, and turns it into a short list of actions.',
                       style: TextStyle(
                         color: onDark,
                         fontSize: 16,

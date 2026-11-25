@@ -80,7 +80,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 76px; }
 .l-card h3, .l-step h3, .l-how-item h3 { margin: 0 0 8px; font-size: 1.1rem; }
 .l-card p, .l-step p, .l-how-item p { color: var(--muted); }
 .l-three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.l-who { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.l-who { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; }
 
 .l-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
 .l-step { padding: 22px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
@@ -110,19 +110,34 @@ html { scroll-behavior: smooth; scroll-padding-top: 76px; }
 .l-final .l-narrow { max-width: 880px; padding: 56px 32px; border-radius: 24px; background: var(--bg); border: 1px solid var(--border); }
 .l-final h2 { margin: 0 0 12px; font-size: clamp(1.6rem, 3.2vw, 2.3rem); font-weight: 750; letter-spacing: -0.025em; }
 
-.l-footer { padding: 36px 0; color: var(--muted); border-top: 1px solid var(--border); font-size: 0.9rem; }
+.l-footer { padding: 56px 0 28px; color: var(--muted); border-top: 1px solid var(--border); font-size: 0.92rem; background: var(--surface); }
 .l-footer .brand { color: var(--text); }
 .l-footer p { margin-top: 10px; max-width: 28em; }
-.l-footer-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px; }
-.l-footer nav { display: flex; flex-wrap: wrap; gap: 8px 22px; align-content: flex-start; }
-.l-footer nav a { color: var(--muted); text-decoration: none; }
-.l-footer nav a:hover { color: var(--text); text-decoration: underline; }
+.l-footer-grid { display: grid; grid-template-columns: 1.6fr 1.2fr 1fr 1fr; gap: 32px; }
+.l-footer h3 { margin: 0 0 12px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); }
+.l-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.l-footer a { color: var(--muted); text-decoration: none; overflow-wrap: anywhere; }
+.l-footer a:hover { color: var(--text); text-decoration: underline; }
+.l-footer-base { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 0.85rem; }
+.l-footer-base p { margin: 0; max-width: none; }
+
+/* --- privacy policy and terms (plain reading pages) --- */
+.l-doc { max-width: 760px; margin: 0 auto; padding: 56px 24px 72px; }
+.l-doc h1 { margin: 0 0 6px; font-size: clamp(1.8rem, 4vw, 2.4rem); letter-spacing: -0.02em; }
+.l-doc .l-updated { margin-bottom: 28px; color: var(--muted); }
+.l-doc h2 { margin: 32px 0 10px; font-size: 1.2rem; }
+.l-doc p, .l-doc li { color: var(--text); line-height: 1.7; }
+.l-doc p { margin: 0 0 12px; }
+.l-doc ul { margin: 0 0 12px; padding-left: 22px; }
+.l-doc li { margin-bottom: 6px; }
+.l-doc .l-note { padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--muted); }
 
 /* --- tablets and phones --- */
 @media (max-width: 960px) {
   .l-hero-grid { grid-template-columns: 1fr; gap: 40px; }
   .l-steps { grid-template-columns: repeat(2, 1fr); }
-  .l-chips, .l-who, .l-four { grid-template-columns: repeat(2, 1fr); }
+  .l-chips, .l-four { grid-template-columns: repeat(2, 1fr); }
+  .l-footer-grid { grid-template-columns: 1fr 1fr; }
   .l-three { grid-template-columns: 1fr; }
 }
 @media (max-width: 1040px) {
@@ -139,10 +154,12 @@ html { scroll-behavior: smooth; scroll-padding-top: 76px; }
   .l-hero { padding: 44px 0 56px; }
   .l-final .l-narrow { padding: 40px 20px; }
   .l-section, .l-final { padding: 56px 0; }
-  .l-steps, .l-chips, .l-who, .l-four { grid-template-columns: 1fr; }
+  .l-steps, .l-chips, .l-who, .l-four, .l-footer-grid { grid-template-columns: 1fr; }
   .l-cta-row .l-btn { flex: 1 1 100%; }
   .l-pv-figs { grid-template-columns: 1fr; }
   .l-preview { padding: 16px; }
 }
 .landing [hidden] { display: none !important; }
 .l-nav > a, .l-btn { white-space: nowrap; }
+.l-who .l-card:last-child { grid-column: 1 / -1; background: var(--bg); text-align: center; }
+.l-who .l-card:last-child p { max-width: 40em; margin: 0 auto; }

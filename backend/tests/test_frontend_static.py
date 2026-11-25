@@ -34,8 +34,10 @@ def test_page_references_files_that_exist(page):
 def test_config_loads_before_page_scripts_and_no_referrer_is_set(page):
     html = page.read_text(encoding="utf-8")
     assert '<meta name="referrer" content="no-referrer">' in html
-    config = html.find('src="js/config.js"')
     module = html.find('type="module"')
+    if module < 0:
+        return  # a plain document (privacy policy, terms) runs no script, so needs no config
+    config = html.find('src="js/config.js"')
     assert 0 <= config < module, f"{page.name}: config.js must load before the page module"
 
 
@@ -142,7 +144,8 @@ def test_the_connection_callback_page_runs_last_and_clears_the_address_bar():
 BUSINESS_PAGES = sorted(
     p
     for p in PAGES
-    if "openBusiness" in (FRONTEND / "js" / "pages" / f"{p.stem}.js").read_text(encoding="utf-8")
+    if (FRONTEND / "js" / "pages" / f"{p.stem}.js").is_file()  # privacy.html and terms.html are plain documents
+    and "openBusiness" in (FRONTEND / "js" / "pages" / f"{p.stem}.js").read_text(encoding="utf-8")
 )
 
 
