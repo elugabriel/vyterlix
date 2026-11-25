@@ -12,11 +12,11 @@ void main() {
     );
 
     expect(
-      find.textContaining('Know how your business is really doing'),
+      find.textContaining('Your business data. Clearer insights'),
       findsOneWidget,
     );
-    expect(find.text('See where you stand'), findsOneWidget);
-    expect(find.text('Get warned early'), findsOneWidget);
+    expect(find.text('Understand your performance'), findsOneWidget);
+    expect(find.text('Act before problems escalate'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
     expect(tapped, 1);

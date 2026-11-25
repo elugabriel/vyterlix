@@ -163,3 +163,12 @@ html { scroll-behavior: smooth; scroll-padding-top: 76px; }
 .l-nav > a, .l-btn { white-space: nowrap; }
 .l-who .l-card:last-child { grid-column: 1 / -1; background: var(--bg); text-align: center; }
 .l-who .l-card:last-child p { max-width: 40em; margin: 0 auto; }
+
+/* icon tiles, "Step 01" labels and the second hero paragraph */
+.l-ico { display: inline-grid; place-content: center; width: 46px; height: 46px; margin-bottom: 16px; border-radius: 12px; background: var(--tea); }
+.l-ico svg { width: 24px; height: 24px; fill: none; stroke: #123222; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.l-step-label { display: block; margin-bottom: 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-2); }
+.l-step h3 { line-height: 1.3; }
+.l-lead-2 { margin-top: 12px; }
+.l-who .l-card:last-child { display: grid; justify-items: center; }
+.l-who .l-card:last-child .l-ico { margin-bottom: 12px; }

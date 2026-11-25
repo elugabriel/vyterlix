@@ -14,18 +14,18 @@ class WelcomeScreen extends StatelessWidget {
   static const _points = <(IconData, String, String)>[
     (
       Icons.insights_outlined,
-      'See where you stand',
-      'Sales, cash and customers on one page, with a health score out of 100.',
+      'Understand your performance',
+      'A unified view of your key metrics and overall business health, in one place.',
     ),
     (
       Icons.chat_bubble_outline,
-      'Know why it moved',
-      'Each shift explained in a sentence or two. Or ask a question and get an answer from your own data.',
+      'Discover what drives your results',
+      'Understand why performance is changing, and ask questions in plain language.',
     ),
     (
       Icons.task_alt_outlined,
-      'Get warned early',
-      'Alerts flag trouble while it is cheap to fix, each with suggested steps.',
+      'Act before problems escalate',
+      'Proactive alerts and practical recommendations based on your performance.',
     ),
   ];
 
@@ -98,7 +98,7 @@ class WelcomeScreen extends StatelessWidget {
                     const BrandMark(size: 56),
                     const SizedBox(height: 28),
                     const Text(
-                      'BUSINESS INTELLIGENCE FOR SMES',
+                      'INTELLIGENT BUSINESS DECISIONS',
                       style: TextStyle(
                         color: Palette.tea,
                         fontSize: 12,
@@ -108,7 +108,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     const Text(
-                      'Know how your business is really doing. And what to do next.',
+                      'Your business data. Clearer insights. Smarter decisions.',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 30,
@@ -119,7 +119,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'Vyterlix pulls your sales, money and customer data into one place, shows what changed and why, and hands you a short list of things to do about it.',
+                      'Vyterlix brings your business systems together, analyses your performance, identifies emerging risks and opportunities, and recommends what to do next.',
                       style: TextStyle(
                         color: onDark,
                         fontSize: 16,
