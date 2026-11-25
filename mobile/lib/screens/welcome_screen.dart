@@ -14,18 +14,18 @@ class WelcomeScreen extends StatelessWidget {
   static const _points = <(IconData, String, String)>[
     (
       Icons.insights_outlined,
-      'See how you are doing',
-      'Sales, customers and money on one page, with a simple health score.',
+      'See where you stand',
+      'Sales, cash and customers on one page, with a health score out of 100.',
     ),
     (
       Icons.chat_bubble_outline,
-      'Know what changed, and why',
-      'Clear explanations. Or simply ask a question about your business.',
+      'Know why it moved',
+      'Each shift explained in a sentence or two. Or ask a question and get an answer from your own data.',
     ),
     (
       Icons.task_alt_outlined,
-      'Get clear next steps',
-      'Early warnings, each with what you could do about it, and a list to follow up.',
+      'Get warned early',
+      'Alerts flag trouble while it is cheap to fix, each with suggested steps.',
     ),
   ];
 
@@ -98,7 +98,7 @@ class WelcomeScreen extends StatelessWidget {
                     const BrandMark(size: 56),
                     const SizedBox(height: 28),
                     const Text(
-                      'BUSINESS INTELLIGENCE FOR GROWING ORGANISATIONS',
+                      'BUSINESS INTELLIGENCE FOR SMES',
                       style: TextStyle(
                         color: Palette.tea,
                         fontSize: 12,
@@ -119,7 +119,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'Vyterlix connects the tools you already use, explains what has changed in clear language, and turns it into a short list of actions.',
+                      'Vyterlix pulls your sales, money and customer data into one place, shows what changed and why, and hands you a short list of things to do about it.',
                       style: TextStyle(
                         color: onDark,
                         fontSize: 16,

@@ -15,8 +15,8 @@ void main() {
       find.textContaining('Know how your business is really doing'),
       findsOneWidget,
     );
-    expect(find.text('See how you are doing'), findsOneWidget);
-    expect(find.text('Get clear next steps'), findsOneWidget);
+    expect(find.text('See where you stand'), findsOneWidget);
+    expect(find.text('Get warned early'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(FilledButton, 'Log in'));
     expect(tapped, 1);
