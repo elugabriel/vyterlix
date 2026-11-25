@@ -20,6 +20,7 @@ let base = "";
 let canManage = false;
 let interval = "month";
 let sandboxToken = null;
+const welcomeBox = el("div", { class: "stack" });
 const current = el("div", { class: "stack" });
 const plansBox = el("div", { class: "stack" });
 const invoicesBox = el("div", { class: "stack" });
@@ -27,9 +28,11 @@ const invoicesBox = el("div", { class: "stack" });
 async function start({ org }) {
   base = `/organizations/${org.id}/billing`;
   document.getElementById("org-name").textContent = org.name;
-  content.replaceChildren(current, el("div", { class: "section-title" }, el("h2", {}, "Plans")), plansBox, el("div", { class: "section-title" }, el("h2", {}, "What you have been charged")), invoicesBox);
+  content.replaceChildren(welcomeBox, current, el("div", { class: "section-title" }, el("h2", {}, "Plans")), plansBox, el("div", { class: "section-title" }, el("h2", {}, "What you have been charged")), invoicesBox);
   readReturn(org.id);
+  const justCreated = new URLSearchParams(location.search).get("welcome") === "1";
   await refresh();
+  if (justCreated) showWelcome(org);
 }
 
 /** Coming back from paying: a test payment still has to be finished; a real one is on its way. */
@@ -59,6 +62,20 @@ async function refresh() {
   showCurrent(billing);
   showPlans(plans, billing);
   showInvoices(invoices);
+}
+
+/** Shown once, straight after a business is created: the free trial has started, plans are below, and
+    nothing has to be paid now. The way on to setting the business up is the main button. */
+function showWelcome(org) {
+  const go = el("a", { class: "button", href: `onboarding.html?org=${org.id}` }, "Continue to set up my business");
+  welcomeBox.replaceChildren(
+    el("div", { class: "kpi stack" },
+      el("div", { class: "kpi-name" }, "Welcome to Vyterlix"),
+      el("h2", {}, `${org.name} is ready`),
+      el("p", {}, "Your free trial has started, and nothing needs to be paid now. Look through the plans below, choose one whenever you are ready, or carry on and set up your business first."),
+      el("div", { class: "actions" }, go),
+    ),
+  );
 }
 
 function usage(f) {

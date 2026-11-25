@@ -83,6 +83,6 @@ if (user.email_verified) {
 
 bindForm(createForm, message, async ({ name }) => {
   const org = await api.post("/organizations", { name });
-  // Straight into setting it up.
-  location.assign(`onboarding.html?org=${org.id}`);
+  // First the plan page (the free trial has just started), then setting it up.
+  location.assign(`billing.html?org=${org.id}&welcome=1`);
 });
