@@ -50,6 +50,14 @@ if name == "zoho":
     if region not in regions:
         sys.exit("Type one of: " + ", ".join(regions) + ". Nothing was changed.")
     settings["ZOHO_REGION"] = region
+if name == "truelayer":
+    # TrueLayer's practice keys (their client ID starts "sandbox-") only reach the practice bank
+    kind = input("Are these sandbox (practice bank) or live (real banks) keys? Type sandbox or live: ").strip().lower()
+    if kind not in ("sandbox", "live"):
+        sys.exit("Type sandbox or live. Nothing was changed.")
+    if client_id.startswith("sandbox-") != (kind == "sandbox"):
+        sys.exit("A client ID starting 'sandbox-' goes with sandbox, and any other with live. Nothing was changed.")
+    settings["TRUELAYER_ENVIRONMENT"] = kind
 
 text = ENV.read_text()
 for setting, value in settings.items():
