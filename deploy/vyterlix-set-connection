@@ -35,8 +35,16 @@ for value, what in ((client_id, "client ID"), (secret, "client secret")):
     if not value or any(c in value for c in "'\\ \t"):
         sys.exit(f"The {what} is empty or contains a space, quote or backslash. Nothing was changed.")
 
+settings = dict(zip(PROVIDERS[name], (client_id, secret)))
+if name == "quickbooks":
+    # Intuit gives two pairs of keys: Development ones only reach sandbox companies
+    kind = input("Are these Development (sandbox) or Production keys? Type sandbox or production: ").strip().lower()
+    if kind not in ("sandbox", "production"):
+        sys.exit("Type sandbox or production. Nothing was changed.")
+    settings["QUICKBOOKS_ENVIRONMENT"] = kind
+
 text = ENV.read_text()
-for setting, value in zip(PROVIDERS[name], (client_id, secret)):
+for setting, value in settings.items():
     key = "VYTERLIX_" + setting
     line = f"{key}='{value}'"
     # replace the line if it is there, even commented out; otherwise add it
