@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""Asks for the two keys a provider gave Vyterlix (Xero, QuickBooks and so on), stores them in the
+server's settings file, and restarts the app and worker so they use them. The secret is typed unseen:
+it is never printed and never goes on a command line.
+
+    vyterlix-set-connection xero
+"""
+
+import getpass
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+ENV = Path("/etc/vyterlix/vyterlix.env")
+# name on the command line -> (id setting, secret setting)
+PROVIDERS = {
+    "xero": ("XERO_CLIENT_ID", "XERO_CLIENT_SECRET"),
+    "quickbooks": ("QUICKBOOKS_CLIENT_ID", "QUICKBOOKS_CLIENT_SECRET"),
+    "zoho": ("ZOHO_CLIENT_ID", "ZOHO_CLIENT_SECRET"),
+    "google": ("GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"),
+    "truelayer": ("TRUELAYER_CLIENT_ID", "TRUELAYER_CLIENT_SECRET"),
+    "meta": ("META_APP_ID", "META_APP_SECRET"),
+}
+
+if len(sys.argv) != 2 or sys.argv[1] not in PROVIDERS:
+    sys.exit("Say which one: vyterlix-set-connection " + " | ".join(PROVIDERS))
+if os.geteuid() != 0:
+    sys.exit("Run this as root.")
+name = sys.argv[1]
+client_id = input(f"{name} client ID: ").strip()
+secret = getpass.getpass(f"{name} client secret (not shown, paste it and press Enter): ").strip()
+for value, what in ((client_id, "client ID"), (secret, "client secret")):
+    if not value or any(c in value for c in "'\\ \t"):
+        sys.exit(f"The {what} is empty or contains a space, quote or backslash. Nothing was changed.")
+
+text = ENV.read_text()
+for setting, value in zip(PROVIDERS[name], (client_id, secret)):
+    key = "VYTERLIX_" + setting
+    line = f"{key}='{value}'"
+    # replace the line if it is there, even commented out; otherwise add it
+    pattern = rf"(?m)^#?\s*{key}=.*$"
+    if re.search(pattern, text):
+        text = re.sub(pattern, lambda m: line, text, count=1)
+    else:
+        text = text.rstrip("\n") + "\n" + line + "\n"
+ENV.write_text(text)  # writing in place keeps the file's owner and permissions
+subprocess.run(["systemctl", "restart", "vyterlix-api", "vyterlix-worker"], check=True)
+print(f"Saved ({len(secret)} characters for the secret). The app and the worker were restarted.")
