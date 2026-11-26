@@ -59,6 +59,10 @@ if name == "truelayer":
         sys.exit("A client ID starting 'sandbox-' goes with sandbox, and any other with live. Nothing was changed.")
     settings["TRUELAYER_ENVIRONMENT"] = kind
 
+if name == "meta":
+    # Meta retires old versions of its API; this is the one Vyterlix asks for
+    settings["META_GRAPH_VERSION"] = "v26.0"
+
 text = ENV.read_text()
 for setting, value in settings.items():
     key = "VYTERLIX_" + setting
