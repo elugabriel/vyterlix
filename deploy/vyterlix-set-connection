@@ -42,6 +42,14 @@ if name == "quickbooks":
     if kind not in ("sandbox", "production"):
         sys.exit("Type sandbox or production. Nothing was changed.")
     settings["QUICKBOOKS_ENVIRONMENT"] = kind
+if name == "zoho":
+    # Zoho keeps each account in one region: the ending of the address you sign in at
+    regions = ("com", "eu", "uk", "in", "com.au", "jp", "ca", "sa")
+    region = input("Which Zoho address do you sign in at? Type the ending after zoho. (uk, eu or com): ").strip().lower().lstrip(".")
+    region = region.removeprefix("zoho.")
+    if region not in regions:
+        sys.exit("Type one of: " + ", ".join(regions) + ". Nothing was changed.")
+    settings["ZOHO_REGION"] = region
 
 text = ENV.read_text()
 for setting, value in settings.items():
