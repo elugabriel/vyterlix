@@ -731,6 +731,15 @@ def test_the_real_providers_exist_only_when_their_keys_are_set_and_the_sandbox_n
 
 
 @pytest.fixture
+def vat_registered(monkeypatch):
+    """The seller is registered for VAT (it is not by default)."""
+    from app.core.config import get_settings
+
+    changed = get_settings().model_copy(update={"vat_registered": True})
+    monkeypatch.setattr(service, "get_settings", lambda: changed)
+
+
+@pytest.fixture
 def pay_with_sandbox(app):
     app.dependency_overrides[get_payment_providers] = lambda: {"sandbox": SANDBOX}
     yield
@@ -852,8 +861,20 @@ def test_anyone_in_the_business_can_see_the_plan_but_only_the_owner_can_change_i
     assert api.get(base(org)).status_code == 401
 
 
+def test_while_not_vat_registered_no_vat_is_added_or_mentioned(api, db, business, pay_with_sandbox):
+    from app.core.config import Settings
+
+    assert Settings.model_fields["vat_registered"].default is False
+    headers = business[2]["owner"]
+    plans = api.get(f"{base(business[0])}/plans", headers=headers).json()
+    starter = next(p for p in plans if p["code"] == "starter")
+    assert starter["vat_note"] == "" and starter["price_month"] == "£99.00"
+    assert api.get(base(business[0]), headers=headers).json()["vat_registered"] is False
+    assert service._vat(19900) == 0
+
+
 def test_the_plans_are_listed_with_prices_before_vat_and_what_each_includes(
-    api, business, pay_with_sandbox
+    api, business, pay_with_sandbox, vat_registered
 ):
     res = api.get(f"{base(business[0])}/plans", headers=business[2]["owner"])
     plans = {p["code"]: p for p in res.json()}
@@ -1507,7 +1528,11 @@ def test_an_invoices_net_never_goes_above_its_total(api, db, business, pay_with_
 
 
 def test_a_sandbox_plan_renews_when_its_period_ends_with_an_invoice_and_keeps_renewing(
-    api, db, business, pay_with_sandbox
+    api,
+    db,
+    business,
+    pay_with_sandbox,
+    vat_registered,
 ):
     pay(api, business, "growth")
     org = uuid.UUID(business[0])
@@ -2079,7 +2104,11 @@ def test_what_a_plan_includes_can_be_changed_and_it_changes_what_a_business_can_
 
 
 def test_a_demo_business_can_be_given_a_paid_sandbox_plan_so_every_feature_is_on(
-    api, db, business, pay_with_sandbox
+    api,
+    db,
+    business,
+    pay_with_sandbox,
+    vat_registered,
 ):
     org = uuid.UUID(business[0])
     with scoped(db, business):

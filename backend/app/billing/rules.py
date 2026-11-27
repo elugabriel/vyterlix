@@ -6,7 +6,7 @@ Pure rules, no database and no payment provider (services/billing.py applies the
 A business with no paid subscription is on a free trial that gives the top self-serve plan for a number
 of days. When the trial (or a payment) runs out, the few gated features switch off, but nothing a
 business has already put in is ever held back: its figures, reports and downloads stay readable.
-Prices exclude VAT; UK VAT is added to what is charged.
+When the seller is VAT registered (a setting), prices exclude VAT and UK VAT is added to what is charged.
 """
 
 import calendar

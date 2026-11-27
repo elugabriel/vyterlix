@@ -23,7 +23,7 @@ class PlanOut(BaseModel):
     name: str
     description: str
     self_serve: bool  # can be bought here (Corporate is by talking to us)
-    price_month: str | None  # excluding VAT, ready to show: "£99.00"
+    price_month: str | None  # ready to show: "£99.00" (before VAT, if the seller adds it)
     price_year: str | None
     price_month_pence: int | None
     price_year_pence: int | None
@@ -55,6 +55,7 @@ class BillingOut(BaseModel):
     features: list[FeatureOut]  # what the business has now, with what it uses
     providers: list[ProviderKey]  # the ways it can pay here
     can_manage: bool  # the owner can change the plan
+    vat_registered: bool  # whether VAT is added to our prices (and so worth showing)
 
 
 class CheckoutIn(BaseModel):

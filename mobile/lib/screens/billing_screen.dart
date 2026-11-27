@@ -30,6 +30,7 @@ class _BillingScreenState extends State<BillingScreen> {
   Map<String, dynamic>? _billing;
   List<Map<String, dynamic>> _plans = [];
   List<Map<String, dynamic>>? _invoices; // null when not allowed to see them
+  bool _vatRegistered = false; // only then are VAT amounts worth showing
   String? _error;
   String? _problem;
   String? _note;
@@ -65,6 +66,7 @@ class _BillingScreenState extends State<BillingScreen> {
         _billing = billing;
         _plans = plans;
         _invoices = invoices;
+        _vatRegistered = billing['vat_registered'] == true;
       });
     } on ApiException catch (error) {
       if (mounted) setState(() => _error = error.message);
@@ -175,10 +177,11 @@ class _BillingScreenState extends State<BillingScreen> {
                   ),
                   const SizedBox(height: 12),
                   for (final p in _plans) _plan(p, b, muted),
-                  Text(
-                    'Prices exclude VAT (20%), which is added when you pay.',
-                    style: TextStyle(color: muted, fontSize: 13),
-                  ),
+                  if (b['vat_registered'] == true)
+                    Text(
+                      'Prices exclude VAT (20%), which is added when you pay.',
+                      style: TextStyle(color: muted, fontSize: 13),
+                    ),
                   const SectionTitle('What you have been charged'),
                   ..._invoiceList(muted),
                 ],
@@ -399,7 +402,7 @@ class _BillingScreenState extends State<BillingScreen> {
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
             subtitle: Text(
-              '${ukDate('${i['issued_at']}'.substring(0, 10))} · ${_maps(i['lines']).map((l) => l['description']).join('; ')}\nNet ${i['net']} · VAT ${i['vat']} · ${i['status_label']}',
+              '${ukDate('${i['issued_at']}'.substring(0, 10))} · ${_maps(i['lines']).map((l) => l['description']).join('; ')}\n${_vatRegistered ? 'Net ${i['net']} · VAT ${i['vat']} · ' : ''}${i['status_label']}',
             ),
             isThreeLine: true,
           ),

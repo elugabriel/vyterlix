@@ -12,6 +12,7 @@ Map<String, dynamic> billingJson({
   String? scheduled,
 }) => {
   'can_manage': canManage,
+  'vat_registered': true,
   'providers': ['sandbox'],
   'subscription': {
     'plan_code': 'grow',

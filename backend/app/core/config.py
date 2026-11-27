@@ -75,6 +75,9 @@ class Settings(BaseSettings):
     # Billing. The sandbox (no money moves) exists in dev and test only. A real provider is used
     # only when its keys are set; every key comes from the environment, never stored or shown.
     trial_days: int = 14
+    # Whether the company selling Vyterlix is VAT registered. While it is not, no VAT is added to
+    # its plans and none is mentioned. (VAT inside a customer's own figures is unaffected.)
+    vat_registered: bool = False
     stripe_secret_key: SecretStr | None = None
     stripe_webhook_secret: SecretStr | None = None
     paystack_secret_key: SecretStr | None = None

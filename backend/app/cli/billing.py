@@ -2,7 +2,7 @@
 """Look after the plans (staff only, until the admin portal can do it).
 
     python -m app.cli.billing plans                                  # what is for sale and what each includes
-    python -m app.cli.billing price growth --month 19900 --year 199000   # prices in pence, excluding VAT
+    python -m app.cli.billing price growth --month 19900 --year 199000   # prices in pence
     python -m app.cli.billing provider-price growth stripe month price_123   # the provider's own price id
     python -m app.cli.billing include growth members --limit 10      # what a plan includes
     python -m app.cli.billing include starter ai_assistant --off
@@ -28,7 +28,7 @@ def _show(db) -> None:
     for plan in db.scalars(select(Plan).order_by(Plan.sort_order)):
         month, year = rules.money(plan.price_month_pence), rules.money(plan.price_year_pence)
         print(
-            f"{plan.code:<10} {plan.name:<10} {month:>10} a month  {year:>12} a year  (excluding VAT)"
+            f"{plan.code:<10} {plan.name:<10} {month:>10} a month  {year:>12} a year"
         )
         print(f"           for sale: {'yes' if plan.self_serve else 'no, by arrangement'}")
         print(f"           provider prices: {plan.provider_prices or 'none set'}")

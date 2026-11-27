@@ -140,6 +140,19 @@ def _feature_out(
     )
 
 
+def _vat(net_pence: int) -> int:
+    """The VAT to add to one of our own charges: none while the seller is not VAT registered."""
+    return rules.vat(net_pence) if get_settings().vat_registered else 0
+
+
+def _plan_note(plan: Plan) -> str:
+    if not plan.self_serve:
+        return "Talk to us about a plan to suit your organisation."
+    if not get_settings().vat_registered:
+        return ""
+    return f"Prices exclude VAT ({int(rules.VAT_RATE * 100)}%), which is added at checkout."
+
+
 def plan_out(db: Session, plan: Plan, current_code: str | None) -> PlanOut:
     rows = _rows(db, plan.id)
     saving = rules.year_saving(plan)
@@ -149,7 +162,7 @@ def plan_out(db: Session, plan: Plan, current_code: str | None) -> PlanOut:
         price_year=None if plan.price_year_pence is None else rules.money(plan.price_year_pence, plan.currency),
         price_month_pence=plan.price_month_pence, price_year_pence=plan.price_year_pence,
         year_saving=None if saving is None or saving <= 0 else rules.money(saving, plan.currency),
-        vat_note=f"Prices exclude VAT ({int(rules.VAT_RATE * 100)}%), which is added at checkout." if plan.self_serve else "Talk to us about a plan to suit your organisation.",
+        vat_note=_plan_note(plan),
         features=[_feature_out(f, rows.get(f), rules.Allowance(bool(rows.get(f) and rows[f].enabled), rows[f].limit if rows.get(f) else 0), None) for f in rules.FEATURE_NOUN],
         current=plan.code == current_code,
     )  # fmt: skip
@@ -324,6 +337,7 @@ def summary(
             message=_message(sub, st.plan, st.effective, now),
         ),
         features=features, providers=list(providers), can_manage=tenant.has(Perm.BILLING_MANAGE),
+        vat_registered=get_settings().vat_registered,
     )  # fmt: skip
 
 
@@ -961,7 +975,7 @@ def roll_sandbox(db: Session, org_id: uuid.UUID, now: datetime) -> int:
         _upsert_invoice(
             db, org_id, "sandbox", sub,
             {"id": f"sandbox_inv_{sub.id.hex[:8]}_{start:%Y%m%d}", "number": f"SBX-{start:%Y%m%d}", "status": "paid", "currency": plan.currency, "net_pence": net,
-             "total_pence": net + rules.vat(net), "period_start": start.timestamp(), "period_end": sub.current_period_end.timestamp(), "paid_at": start.timestamp(),
+             "total_pence": net + _vat(net), "period_start": start.timestamp(), "period_end": sub.current_period_end.timestamp(), "paid_at": start.timestamp(),
              "lines": [{"description": f"{plan.name} plan, billed {'yearly' if sub.interval == 'year' else 'monthly'}", "amount_pence": net}]},
             now,
         )  # fmt: skip
@@ -1049,7 +1063,7 @@ def grant_demo_plan(db: Session, org_id: uuid.UUID, plan_code: str, now: datetim
     net = rules.price(plan, "year") or 0
     _upsert_invoice(
         db, org_id, "sandbox", sub,
-        {"id": f"sandbox_inv_demo_{org_id.hex[:8]}", "number": f"DEMO-{now:%Y%m%d}", "status": "paid", "currency": plan.currency, "net_pence": net, "total_pence": net + rules.vat(net),
+        {"id": f"sandbox_inv_demo_{org_id.hex[:8]}", "number": f"DEMO-{now:%Y%m%d}", "status": "paid", "currency": plan.currency, "net_pence": net, "total_pence": net + _vat(net),
          "period_start": now.timestamp(), "period_end": sub.current_period_end.timestamp(), "paid_at": now.timestamp(),
          "lines": [{"description": f"{plan.name} plan, billed yearly (demo)", "amount_pence": net}]},
         now,

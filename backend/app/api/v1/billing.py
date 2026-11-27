@@ -36,7 +36,7 @@ Providers = Annotated[dict[str, PaymentProvider], Depends(get_payment_providers)
 
 @router.get("/plans", response_model=list[PlanOut])
 def plans(tenant: Viewer, db: DB):
-    """What can be bought and what each plan includes (prices exclude VAT)."""
+    """What can be bought and what each plan includes."""
     return service.list_plans(db, tenant.organization_id)
 
 

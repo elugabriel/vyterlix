@@ -1,6 +1,6 @@
 // Plan and billing: what your business is on, what that lets you do and how much of it you use,
 // the plans you can move to, and what you have been charged. Anyone in the business can look; only
-// the owner can choose, change or cancel a plan. Prices exclude VAT, which is added when you pay.
+// the owner can choose, change or cancel a plan.
 // Paying happens on the payment provider's own page: we never see or keep card details.
 
 import { ApiError } from "../api.js";
@@ -61,7 +61,7 @@ async function refresh() {
   canManage = billing.can_manage;
   showCurrent(billing);
   showPlans(plans, billing);
-  showInvoices(invoices);
+  showInvoices(invoices, billing.vat_registered);
 }
 
 /** Shown once, straight after a business is created: the free trial has started, plans are below, and
@@ -169,7 +169,7 @@ function showPlans(plans, billing) {
   plansBox.replaceChildren(
     el("div", { class: "actions" }, toggle, chooser),
     el("div", { class: "kpi-grid" }, ...plans.map((p) => planCard(p, billing, chooser))),
-    el("p", { class: "muted" }, "Prices exclude VAT (20%), which is added when you pay."),
+    billing.vat_registered ? el("p", { class: "muted" }, "Prices exclude VAT (20%), which is added when you pay.") : "",
   );
 }
 
@@ -220,20 +220,19 @@ function goToPayment(url) {
   else showMessage(message, "error", "That payment page could not be opened safely.");
 }
 
-function showInvoices(invoices) {
+function showInvoices(invoices, withVat) {
   if (!invoices) {
     invoicesBox.replaceChildren(el("p", { class: "muted" }, "Only the owner can see what has been charged."));
     return;
   }
   invoicesBox.replaceChildren(
     table(
-      ["Invoice", "Date", "For", "Net", "VAT", "Total", "Status", ""],
+      ["Invoice", "Date", "For", ...(withVat ? ["Net", "VAT"] : []), "Total", "Status", ""],
       invoices.map((i) => [
         i.number ?? "-",
         ukDate(i.issued_at),
         i.lines.map((l) => l.description).join("; ") || "-",
-        i.net,
-        i.vat,
+        ...(withVat ? [i.net, i.vat] : []),
         i.total,
         i.status_label,
         i.hosted_url ? el("a", { href: i.hosted_url, target: "_blank", rel: "noopener noreferrer" }, "View") : "",

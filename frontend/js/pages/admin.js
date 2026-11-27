@@ -282,7 +282,7 @@ async function showPlans() {
   if (!plans) return;
   const reload = showPlans;
   panel.replaceChildren(
-    el("p", { class: "muted" }, "Prices are before VAT. A change to a price applies to businesses choosing a plan from now on; nobody already paying is charged differently. Every price and limit here began as a placeholder to confirm."),
+    el("p", { class: "muted" }, "A change to a price applies to businesses choosing a plan from now on; nobody already paying is charged differently. Every price and limit here began as a placeholder to confirm."),
     el("div", { class: "kpi-grid" }, ...plans.map((p) => planCard(p, reload))),
   );
 }
