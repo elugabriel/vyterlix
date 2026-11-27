@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+"""Asks for Stripe's secret key and the webhook signing secret (neither is shown), checks the key with
+Stripe, stores both in the server's settings file and restarts the app and worker. Nothing is printed
+or put on a command line that would reveal them.
+
+    vyterlix-set-stripe
+"""
+
+import base64
+import getpass
+import os
+import re
+import subprocess
+import sys
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+ENV = Path("/etc/vyterlix/vyterlix.env")
+
+if os.geteuid() != 0:
+    sys.exit("Run this as root.")
+key = getpass.getpass("Stripe secret key, starts sk_ (not shown, paste it and press Enter): ").strip()
+hook = getpass.getpass("Webhook signing secret, starts whsec_ (not shown, paste it and press Enter): ").strip()
+if not re.fullmatch(r"(sk|rk)_(test|live)_[A-Za-z0-9]+", key):
+    sys.exit("That does not look like a Stripe secret key (sk_test_... or sk_live_...). "
+             "A key starting pk_ is the publishable one, which is not needed. Nothing was changed.")
+if not re.fullmatch(r"whsec_[A-Za-z0-9]+", hook):
+    sys.exit("That does not look like a webhook signing secret (whsec_...). Nothing was changed.")
+live = "_live_" in key
+if live and input("This is a LIVE key: real cards would be charged. Type live to carry on: ").strip() != "live":
+    sys.exit("Nothing was changed.")
+
+request = urllib.request.Request("https://api.stripe.com/v1/prices?limit=1")
+request.add_header("Authorization", "Basic " + base64.b64encode((key + ":").encode()).decode())
+try:
+    urllib.request.urlopen(request, timeout=25).read()
+except urllib.error.HTTPError as error:
+    sys.exit(f"Stripe refused the key (answer {error.code}). Nothing was changed.")
+except OSError:
+    sys.exit("Could not reach Stripe to check the key. Nothing was changed; try again.")
+
+text = ENV.read_text()
+for name, value in (("VYTERLIX_STRIPE_SECRET_KEY", key), ("VYTERLIX_STRIPE_WEBHOOK_SECRET", hook)):
+    line = f"{name}='{value}'"
+    pattern = rf"(?m)^#?\s*{name}=.*$"
+    if re.search(pattern, text):
+        text = re.sub(pattern, lambda m: line, text, count=1)
+    else:
+        text = text.rstrip("\n") + "\n" + line + "\n"
+ENV.write_text(text)  # writing in place keeps the file's owner and permissions
+subprocess.run(["systemctl", "restart", "vyterlix-api", "vyterlix-worker"], check=True)
+print(f"Saved ({'LIVE' if live else 'test'} mode). Stripe accepted the key. The app and the worker were restarted.")
