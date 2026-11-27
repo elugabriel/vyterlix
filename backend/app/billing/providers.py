@@ -397,12 +397,21 @@ class StripeProvider:
             if kind == "invoice.payment_failed":
                 invoice["status"] = "open"
             kind_out = "invoice_failed" if kind == "invoice.payment_failed" else "invoice_updated"
+            # Newer Stripe versions keep the subscription, and the ids we sent with it, under "parent".
+            # Reading our own id from there means an invoice finds its business even when it arrives
+            # before the "checkout completed" message that links the two.
+            about = (
+                (obj.get("parent") or {}).get("subscription_details")
+                or obj.get("subscription_details")
+                or {}
+            )
             return [
                 ProviderEvent(
                     id=eid,
                     type=kind_out,
+                    organization_id=_org((about.get("metadata") or {}).get("organization_id")),
                     customer_id=obj.get("customer"),
-                    subscription_id=obj.get("subscription"),
+                    subscription_id=obj.get("subscription") or about.get("subscription"),
                     invoice=invoice,
                 )
             ]

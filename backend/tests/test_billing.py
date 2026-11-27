@@ -405,6 +405,41 @@ def test_stripe_invoices_carry_the_net_the_vat_and_the_total():
     assert stripe_event(stripe_provider(), odd_status)[0].invoice["status"] == "open"
 
 
+def test_a_stripe_invoice_names_its_business_in_the_newer_shape_too():
+    org = uuid.uuid4()
+    payload = {
+        "id": "e10",
+        "type": "invoice.paid",
+        "data": {
+            "object": {
+                "id": "in_2",
+                "status": "paid",
+                "total": 9900,
+                "customer": "cus_2",
+                "parent": {
+                    "subscription_details": {
+                        "subscription": "sub_2",
+                        "metadata": {"organization_id": str(org)},
+                    }
+                },
+            }
+        },
+    }
+    event = stripe_event(stripe_provider(), payload)[0]
+    assert (event.organization_id, event.subscription_id) == (org, "sub_2")
+
+
+def test_a_late_unpaid_copy_of_an_invoice_does_not_undo_its_payment(db, business):
+    org = uuid.UUID(business[0])
+    data = {"id": "in_late", "status": "paid", "net_pence": 9900, "total_pence": 9900}
+    with scoped(db, business):
+        service._upsert_invoice(db, org, "stripe", None, data, UTC_NOW)
+        row = service._upsert_invoice(
+            db, org, "stripe", None, {**data, "status": "open"}, UTC_NOW
+        )
+        assert row.status == "paid"
+
+
 def test_a_stripe_message_without_a_genuine_signature_is_refused():
     body = b'{"id":"e","type":"x"}'
     with pytest.raises(SignatureError):

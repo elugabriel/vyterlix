@@ -692,7 +692,10 @@ def _upsert_invoice(
         )
         db.add(row)
     row.subscription_id = sub.id if sub is not None else row.subscription_id
-    row.number, row.status = data.get("number"), data.get("status", "open")
+    status = data.get("status", "open")
+    if row.status == "paid" and status in ("draft", "open"):
+        status = "paid"  # messages can arrive out of order; a paid invoice does not become unpaid
+    row.number, row.status = data.get("number"), status
     row.currency = data.get("currency", "GBP")
     row.net_pence, row.vat_pence, row.total_pence = net, total - net, total
     row.period_start, row.period_end = (
